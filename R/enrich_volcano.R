@@ -21,7 +21,8 @@
 #' @param p_threshold,logfc_threshold Volcano significance cutoffs.
 #' @param enrich_mode `c("fgsea", "ora")` - either or both.
 #' @param enrich_padj Pathway significance cutoff (default 0.05).
-#' @param dedup List with `method`, `cutoff`, `scope`, `collapse_fgsea`.
+#' @param dedup List with `method` (`"jaccard"`, `"collapse_fgsea"`, or
+#'   `"both"`), `cutoff`, and `scope`. See [ev_collapse()].
 #' @param ring List with `max_terms`, `order_by`, `magnitude`, `color`.
 #' @param volcano List with `label_n`, `label_by`.
 #' @param facet List with `nrow`, `ncol` for patchwork outer layout.
@@ -41,8 +42,7 @@ enrich_volcano <- function(data, contrast,
                            enrich_mode = c("fgsea", "ora"),
                            enrich_padj = 0.05,
                            dedup = list(method = "jaccard", cutoff = 0.5,
-                                        scope = "within_db",
-                                        collapse_fgsea = TRUE),
+                                        scope = "within_db"),
                            ring = list(max_terms = 10, order_by = "padj",
                                        magnitude = "neg_log_padj",
                                        color = "nes"),

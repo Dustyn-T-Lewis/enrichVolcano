@@ -100,7 +100,7 @@ server <- function(input, output, session) {
         databases = input$databases, p_method = input$p_method,
         enrich_mode = "fgsea", enrich_padj = input$enrich_padj,
         dedup = list(method = "jaccard", cutoff = input$dedup_cutoff,
-                     scope = "within_db", collapse_fgsea = FALSE),
+                     scope = "within_db"),
         ring = list(max_terms = input$max_terms, order_by = "padj",
                     magnitude = "neg_log_padj", color = "nes")
       )

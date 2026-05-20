@@ -19,8 +19,7 @@ enrich_volcano(
   logfc_threshold = log2(1.5),
   enrich_mode = c("fgsea", "ora"),
   enrich_padj = 0.05,
-  dedup = list(method = "jaccard", cutoff = 0.5, scope = "within_db", collapse_fgsea =
-    TRUE),
+  dedup = list(method = "jaccard", cutoff = 0.5, scope = "within_db"),
   ring = list(max_terms = 10, order_by = "padj", magnitude = "neg_log_padj", color =
     "nes"),
   volcano = list(label_n = 10, label_by = NULL),
@@ -57,7 +56,8 @@ if NULL).}
 
 \item{enrich_padj}{Pathway significance cutoff (default 0.05).}
 
-\item{dedup}{List with \code{method}, \code{cutoff}, \code{scope}, \code{collapse_fgsea}.}
+\item{dedup}{List with \code{method} (\code{"jaccard"}, \code{"collapse_fgsea"}, or
+\code{"both"}), \code{cutoff}, and \code{scope}. See \code{\link[=ev_collapse]{ev_collapse()}}.}
 
 \item{ring}{List with \code{max_terms}, \code{order_by}, \code{magnitude}, \code{color}.}
 

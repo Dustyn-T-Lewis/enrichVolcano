@@ -38,7 +38,7 @@ test_that("ev_collapse cross_db scope merges across DBs", {
   expect_equal(sum(result$dedup_kept), 1)
 })
 
-test_that("ev_collapse method='both' runs without error (collapse_fgsea is no-op v1)", {
+test_that("ev_collapse method='both' applies jaccard then collapsePathways", {
   data <- make_ranked_input()
   paths <- make_mini_pathways()
   enrich <- suppressWarnings(ev_enrich(
