@@ -8,8 +8,8 @@ Description: Builds composite volcano and enrichment ring plots from
     limma, DESeq2, edgeR, MSstats, proDA, DEqMS, MaxQuant, and Perseus
     inputs. Supports pi-score variants (Xiao 2014), several p-value
     adjustment methods, and fgsea or ORA enrichment against MSigDB,
-    Reactome, KEGG, Gene Ontology, MitoCarta, HPA, and UniProt subcellular
-    gene sets across seven species.
+    Reactome, KEGG, Gene Ontology, MitoCarta, CORUM, and GO Slim gene
+    sets across seven species.
 License: MIT + file LICENSE
 Depends: R (>= 4.2)
 URL: https://github.com/Dustyn-T-Lewis/enrichVolcano
@@ -46,7 +46,8 @@ Suggests:
     pkgdown,
     qvalue,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    vdiffr
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0
 VignetteBuilder: knitr

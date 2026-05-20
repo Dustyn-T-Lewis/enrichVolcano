@@ -132,8 +132,8 @@ Four checks.
 * The default `exclude_terms = "DISEASE|CANCER|TUMOR"` regex inside
   `ev_enrich()` strips disease-named KEGG entries out of pathway
   databases. KEGG includes hundreds of disease-named entries; the
-  default filters them so they do not double-count against
-  `disgenet` results. To keep them, call `ev_enrich()` directly:
+  default filters them so a disease label does not stand in for a
+  mechanism. To keep them, call `ev_enrich()` directly:
 
 ```{r kegg-disease, eval = FALSE}
 enr <- ev_enrich(
@@ -174,8 +174,8 @@ p <- enrich_volcano(
 )
 ```
 
-A direct `custom_gmt = "path/to/sets.gmt"` argument is planned for
-v0.2.
+Reading the file yourself and passing the list keeps the gene-set
+source explicit and under your control.
 
 ## My data is rat (or mouse / fly / zebrafish / yeast / pig). What do I pass?
 
@@ -192,8 +192,8 @@ p <- enrich_volcano(
 
 Supported species strings: `"human"`, `"mouse"`, `"rat"`,
 `"zebrafish"`, `"fly"`, `"yeast"`, `"pig"`. msigdbr handles
-ortholog mapping for fetched collections; bundled GMTs (MitoCarta,
-HPA, UniProt) ship per-species files where the species is supported.
+ortholog mapping for fetched collections; bundled GMTs (MitoCarta3,
+CORUM, GO Slim) ship per-species files where the species is supported.
 
 Input gene symbols must match the species namespace. Rat symbols for
 a rat study, mouse symbols for a mouse study. Mixing namespaces
