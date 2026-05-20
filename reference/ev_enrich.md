@@ -11,7 +11,7 @@ ev_enrich(
   databases,
   species = "human",
   enrich_mode = c("fgsea", "ora"),
-  rank_by = "pi_eq2",
+  rank_by = "signed_p",
   min_size = 10,
   max_size = 500,
   background = NULL,
@@ -85,6 +85,7 @@ gene-level ranking vectors as `attr(., "ev_stats")`, both required by
 ## Details
 
 Each entry in `databases` (or each registered name) produces fgsea
-and/or ORA results. fgsea ranks genes by `rank_by` (default `pi_eq2`).
-ORA uses significant genes (`pi_eq2 < 0.05` if present, else
-`adj.P.Val < 0.05`) against the supplied or inferred background.
+and/or ORA results. fgsea ranks genes by `rank_by` (default `"signed_p"`
+= sign(logFC) \* -log10(P), a signed statistic). ORA uses significant
+genes (`pi_eq2 < 0.05` if present, else `adj.P.Val < 0.05`) against the
+supplied or inferred background.

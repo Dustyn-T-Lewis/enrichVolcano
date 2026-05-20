@@ -87,9 +87,6 @@ fig <- enrich_volcano(
                 magnitude = "neg_log_padj", color = "nes"),
   volcano = list(label_n = 8, label_by = NULL)
 )
-#> Warning in prepareStats(stats, scoreType, gseaParam): All values in the stats
-#> vector are greater than zero and scoreType is "std", maybe you should switch to
-#> scoreType = "pos".
 fig
 #> 
 #> ── enrichVolcano ──
