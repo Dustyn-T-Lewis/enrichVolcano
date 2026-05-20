@@ -1,14 +1,10 @@
 #' Package-level imports
 #'
 #' @importFrom rlang .data
+#' @importFrom rlang %||%
 #' @keywords internal
 #' @name enrichVolcano-imports
 NULL
-
-#' Null-coalescing operator
-#' @keywords internal
-#' @noRd
-`%||%` <- function(x, y) if (is.null(x)) y else x
 
 #' Abort with a classed cli error
 #'

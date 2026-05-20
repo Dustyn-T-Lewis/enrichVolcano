@@ -12,7 +12,7 @@ test_that("database_info prints details for a registered DB", {
 })
 
 test_that("bundled GMT files are valid when present", {
-  for (db in c("mitocarta3")) {
+  for (db in c("mitocarta3", "corum")) {
     for (sp in c("human", "mouse", "rat")) {
       fn <- paste0(db, "_", sp, ".gmt")
       path <- system.file("extdata", "gmt", fn, package = "enrichVolcano")

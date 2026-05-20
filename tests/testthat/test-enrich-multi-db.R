@@ -7,16 +7,16 @@ test_that("enrich_volcano accepts multiple databases and binds results", {
   # produced only 9 unique ranked entries after deduplication, which is below
   # the default min_size = 10, causing fgsea to return zero rows.
   gene_pool <- c(
-    "CDKN1A", "IL6",    "MYC",    "SERPINE1", "BTG2",  "CA2",    "CD44",   "IDH1",
-    "IRF1",   "PLAUR",  "RETSAT", "ATF3",     "BHLHE40","BMP2",  "CCND1",  "CCND2",
-    "CXCL10", "ELOVL5", "FAS",    "SOD1",     "TAP1",  "TGFB1",  "TIMP1",  "VEGFA",
-    "ALDOA",  "AURKA",  "B4GALT1","CAT",      "CCND3", "CD36",   "CDK1",   "CDKN1B",
-    "CSF1",   "ECH1",   "EGFR",   "ENO2",     "F3",    "FOS",    "GCH1",   "GPX4",
-    "HMOX1",  "ICAM1",  "ID2",    "IDI1",     "IL1B",  "IL4R",   "ISG20",  "JUN",
-    "LDHA",   "LIF",    "PPP1R15A","SOD2",    "TNFAIP3","TOP2A", "ABCA1",  "ALDH9A1",
-    "APP",    "BTG1",   "CASP1",  "CASP3",    "CCL2",  "CCL5",   "CD9",    "CDK4",
-    "CFB",    "CLU",    "CRAT",   "CXCL11",   "CXCR4", "DDIT3",  "DDIT4",  "DHCR24",
-    "DHCR7",  "ERO1A",  "GADD45A","GADD45B",  "GCLC",  "GLRX",   "GPX3",   "GSR"
+    "CDKN1A", "IL6", "MYC", "SERPINE1", "BTG2", "CA2", "CD44", "IDH1",
+    "IRF1", "PLAUR", "RETSAT", "ATF3", "BHLHE40", "BMP2", "CCND1", "CCND2",
+    "CXCL10", "ELOVL5", "FAS", "SOD1", "TAP1", "TGFB1", "TIMP1", "VEGFA",
+    "ALDOA", "AURKA", "B4GALT1", "CAT", "CCND3", "CD36", "CDK1", "CDKN1B",
+    "CSF1", "ECH1", "EGFR", "ENO2", "F3", "FOS", "GCH1", "GPX4",
+    "HMOX1", "ICAM1", "ID2", "IDI1", "IL1B", "IL4R", "ISG20", "JUN",
+    "LDHA", "LIF", "PPP1R15A", "SOD2", "TNFAIP3", "TOP2A", "ABCA1", "ALDH9A1",
+    "APP", "BTG1", "CASP1", "CASP3", "CCL2", "CCL5", "CD9", "CDK4",
+    "CFB", "CLU", "CRAT", "CXCL11", "CXCR4", "DDIT3", "DDIT4", "DHCR24",
+    "DHCR7", "ERO1A", "GADD45A", "GADD45B", "GCLC", "GLRX", "GPX3", "GSR"
   )
 
   set.seed(2)

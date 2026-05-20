@@ -1,8 +1,13 @@
 test_that("adjust_p qvalue path runs when qvalue is installed", {
   skip_if_not_installed("qvalue")
-  d <- tibble::tibble(gene = paste0("g", 1:100),
-                       contrast = "ctr",
-                       P.Value = c(runif(20, 0, 0.001), runif(80, 0, 1)))
+  # Use a large, well-behaved p-value distribution so qvalue's pi0 smoother
+  # (smooth.spline) has enough spread to estimate without erroring.
+  set.seed(7)
+  d <- tibble::tibble(
+    gene = paste0("g", seq_len(1000)),
+    contrast = "ctr",
+    P.Value = c(runif(150, 0, 0.01), runif(850, 0, 1))
+  )
   result <- adjust_p(d, method = "qvalue", by_contrast = FALSE)
   expect_true("adj.P.Val" %in% colnames(result))
   expect_true(all(result$adj.P.Val >= 0 & result$adj.P.Val <= 1))
