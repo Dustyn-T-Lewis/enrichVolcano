@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v0.1.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/inst/CITATION)
 
 Tubbs D (2026). *enrichVolcano: Composite Volcano and Enrichment Ring
 Plots for Proteomics*. R package version 0.1.0,
