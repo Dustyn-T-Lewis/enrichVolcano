@@ -19,11 +19,13 @@ enrich_volcano(
   logfc_threshold = log2(1.5),
   enrich_mode = c("fgsea", "ora"),
   enrich_padj = 0.05,
+  rank_by = "signed_p",
   dedup = list(method = "jaccard", cutoff = 0.5, scope = "within_db"),
   ring = list(max_terms = 10, order_by = "padj", magnitude = "neg_log_padj", color =
     "nes"),
   volcano = list(label_n = 10, label_by = NULL),
   facet = list(nrow = NULL, ncol = NULL),
+  disc_color = NULL,
   theme = ev_theme()
 )
 }
@@ -56,19 +58,31 @@ if NULL).}
 
 \item{enrich_padj}{Pathway significance cutoff (default 0.05).}
 
+\item{rank_by}{Signed statistic fgsea ranks genes by. \code{"signed_p"}
+(default, \code{sign(logFC) * -log10(P)}), \code{"t"}, \code{"logFC"}, or any signed
+column. Unsigned pi-score columns are rejected.}
+
 \item{dedup}{List with \code{method} (\code{"jaccard"}, \code{"collapse_fgsea"}, or
 \code{"both"}), \code{cutoff}, and \code{scope}. See \code{\link[=ev_collapse]{ev_collapse()}}.}
 
-\item{ring}{List controlling the ring. The composite honours \code{max_terms}
-(cap on pathways drawn); arc height is fixed to \code{-log10(padj)} and fill to
-NES by the canonical layout. For tunable \code{order_by}/\code{magnitude}/\code{color}
-encodings use the standalone \code{\link[=ring_plot]{ring_plot()}}.}
+\item{ring}{List controlling the ring. Honoured fields: \code{max_terms} (cap on
+pathways drawn in the ring); \code{show_databases} (default NULL = all enriched
+databases; pass a character vector to restrict the ring to those named
+databases); \code{direction_balance} (default FALSE = global top-N by padj;
+TRUE = balanced selection of top up-NES + top down-NES terms; rows without
+a signed NES, such as ORA results, are excluded from balanced selection).
+Arc height
+is fixed to \code{-log10(padj)} and fill to NES by the canonical layout. For
+tunable \code{order_by}/\code{magnitude}/\code{color} encodings use the standalone
+\code{\link[=ring_plot]{ring_plot()}}.}
 
 \item{volcano}{Reserved. The composite volcano shows up/down significant
 counts rather than per-gene labels; for a labelled volcano use the
 standalone \code{\link[=ev_volcano]{ev_volcano()}} (\code{label_n}, \code{label_by}, \code{label_genes}).}
 
 \item{facet}{List with \code{nrow}, \code{ncol} for patchwork outer layout.}
+
+\item{disc_color}{Optional contrast-tint for the ring's central disc.}
 
 \item{theme}{Output of \code{ev_theme()}.}
 }

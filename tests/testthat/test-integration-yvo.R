@@ -1,3 +1,20 @@
+test_that("YvO reproduction config runs with rank_by=t and balanced ring", {
+  skip_on_cran()
+  skip_if_not_installed("msigdbr")
+  fixture <- testthat::test_path("fixtures", "yvo_tidy.rds")
+  yvo <- readRDS(fixture)
+  yvo <- yvo[!is.na(yvo$gene) & !is.na(yvo$contrast), ]
+  rk <- if ("t" %in% colnames(yvo)) "t" else "signed_p"
+  p <- suppressWarnings(enrich_volcano(
+    yvo, contrast = "Aging", rank_by = rk,
+    databases = "hallmark",
+    ring = list(max_terms = 12, direction_balance = TRUE),
+    disc_color = "#1B9E77", enrich_padj = 0.25
+  ))
+  expect_s3_class(p, "enrichVolcano")
+  expect_true(is.list(attr(p, "ev_data")))
+})
+
 test_that("YvO end-to-end: enrich_volcano runs and returns patchwork", {
   skip_on_cran()
   fx <- file.path(test_path("fixtures"), "yvo_tidy.rds")

@@ -1,3 +1,23 @@
+# Choose which enrichment rows the ring displays for one contrast.
+ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
+                                  direction_balance = FALSE) {
+  if (!is.null(show_databases)) {
+    enr <- enr[enr$database %in% show_databases, , drop = FALSE]
+  }
+  if (nrow(enr) == 0) return(enr)
+  enr <- enr[order(enr$padj), , drop = FALSE]
+  if (!direction_balance) {
+    return(utils::head(enr, max_terms))
+  }
+  up <- enr[!is.na(enr$NES) & enr$NES > 0, , drop = FALSE]
+  dn <- enr[!is.na(enr$NES) & enr$NES < 0, , drop = FALSE]
+  n_up <- min(nrow(up), ceiling(max_terms / 2))
+  n_dn <- min(nrow(dn), max_terms - n_up)
+  n_up <- min(nrow(up), max_terms - n_dn)  # let one side fill remainder
+  out <- rbind(utils::head(up, n_up), utils::head(dn, n_dn))
+  out[order(out$padj), , drop = FALSE]
+}
+
 #' Build a composite volcano + enrichment ring plot
 #'
 #' Hero function for `enrichVolcano`. Runs the full pipeline:
@@ -17,20 +37,30 @@
 #' @param custom_gmt Reserved for v0.2 (GMT path input).
 #' @param p_method Y-axis transform: `"pi_eq2"` (default), `"pi_eq1"`,
 #'   `"raw_p"`, `"adj_p"`.
+#' @param rank_by Signed statistic fgsea ranks genes by. `"signed_p"`
+#'   (default, `sign(logFC) * -log10(P)`), `"t"`, `"logFC"`, or any signed
+#'   column. Unsigned pi-score columns are rejected.
 #' @param p_adjust Method: `"BH"` (default), `"bonferroni"`, `"qvalue"`, `"IHW"`.
 #' @param p_threshold,logfc_threshold Volcano significance cutoffs.
 #' @param enrich_mode `c("fgsea", "ora")` - either or both.
 #' @param enrich_padj Pathway significance cutoff (default 0.05).
 #' @param dedup List with `method` (`"jaccard"`, `"collapse_fgsea"`, or
 #'   `"both"`), `cutoff`, and `scope`. See [ev_collapse()].
-#' @param ring List controlling the ring. The composite honours `max_terms`
-#'   (cap on pathways drawn); arc height is fixed to `-log10(padj)` and fill to
-#'   NES by the canonical layout. For tunable `order_by`/`magnitude`/`color`
-#'   encodings use the standalone [ring_plot()].
+#' @param ring List controlling the ring. Honoured fields: `max_terms` (cap on
+#'   pathways drawn in the ring); `show_databases` (default NULL = all enriched
+#'   databases; pass a character vector to restrict the ring to those named
+#'   databases); `direction_balance` (default FALSE = global top-N by padj;
+#'   TRUE = balanced selection of top up-NES + top down-NES terms; rows without
+#'   a signed NES, such as ORA results, are excluded from balanced selection).
+#'   Arc height
+#'   is fixed to `-log10(padj)` and fill to NES by the canonical layout. For
+#'   tunable `order_by`/`magnitude`/`color` encodings use the standalone
+#'   [ring_plot()].
 #' @param volcano Reserved. The composite volcano shows up/down significant
 #'   counts rather than per-gene labels; for a labelled volcano use the
 #'   standalone [ev_volcano()] (`label_n`, `label_by`, `label_genes`).
 #' @param facet List with `nrow`, `ncol` for patchwork outer layout.
+#' @param disc_color Optional contrast-tint for the ring's central disc.
 #' @param theme Output of `ev_theme()`.
 #' @return Object of class `c("enrichVolcano", "patchwork")` with
 #'   `attr(., "ev_data")` and `attr(., "ev_call")`.
@@ -46,6 +76,7 @@ enrich_volcano <- function(data, contrast,
                            logfc_threshold = log2(1.5),
                            enrich_mode = c("fgsea", "ora"),
                            enrich_padj = 0.05,
+                           rank_by = "signed_p",
                            dedup = list(method = "jaccard", cutoff = 0.5,
                                         scope = "within_db"),
                            ring = list(max_terms = 10, order_by = "padj",
@@ -53,6 +84,7 @@ enrich_volcano <- function(data, contrast,
                                        color = "nes"),
                            volcano = list(label_n = 10, label_by = NULL),
                            facet = list(nrow = NULL, ncol = NULL),
+                           disc_color = NULL,
                            theme = ev_theme()) {
   call <- match.call()
   p_method <- match.arg(p_method)
@@ -67,10 +99,8 @@ enrich_volcano <- function(data, contrast,
 
   with_padj <- adjust_p(with_pi, method = p_adjust)
 
-  # fgsea is ranked by a signed statistic (sign(logFC) * -log10(P)), NOT the
-  # pi-score, so up/down genes sit at opposite ends of the ranked list.
-  rank_by <- "signed_p"
-
+  # fgsea needs a SIGNED ranking statistic (default sign(logFC) * -log10(P)).
+  # ev_enrich() rejects unsigned pi-score columns.
   enrich <- ev_enrich(
     with_padj, contrast = contrast, databases = databases,
     species = species, enrich_mode = enrich_mode,
@@ -99,12 +129,15 @@ enrich_volcano <- function(data, contrast,
       if ("dedup_kept" %in% colnames(enr_sub)) {
         enr_sub <- enr_sub[enr_sub$dedup_kept, , drop = FALSE]
       }
-      if (nrow(enr_sub) > ring$max_terms) {
-        enr_sub <- enr_sub[order(enr_sub$padj), , drop = FALSE]
-        enr_sub <- utils::head(enr_sub, ring$max_terms)
-      }
+      enr_sub <- ev_select_ring_terms(
+        enr_sub,
+        max_terms         = ring$max_terms,
+        show_databases    = ring$show_databases,
+        direction_balance = isTRUE(ring$direction_balance)
+      )
       ev_volcano_ring(volc_sub, enr_sub, title = ctr,
-                      p_threshold = p_threshold, theme = theme)
+                      p_threshold = p_threshold, disc_color = disc_color,
+                      theme = theme)
     }),
     contrast
   )
