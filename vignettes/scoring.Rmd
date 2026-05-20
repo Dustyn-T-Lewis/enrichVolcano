@@ -1,0 +1,241 @@
+---
+title: "Pi-score and p-value adjustment"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Pi-score and p-value adjustment}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+```{r setup}
+library(enrichVolcano)
+```
+
+## The problem with ranking by p-value alone
+
+A p-value answers a single question: how surprising is this effect
+under the null. It says nothing about how big the effect is. In
+proteomics this matters because two proteins can carry the same
+p-value while telling different biological stories.
+
+Consider two rows from a hypothetical limma output:
+
+| gene | logFC | P.Value | -log10(P) |
+|------|-------|---------|-----------|
+| A    | 0.10  | 1e-6    | 6.0       |
+| B    | 2.50  | 1e-3    | 3.0       |
+
+By raw p-value, A wins by three orders of magnitude. A 10% change in
+abundance, however, is rarely the headline story in a muscle biopsy.
+B has 5.6-fold higher absolute log fold change and a p-value that
+would still pass most cut-offs. Ranking by `-log10(p)` alone puts A on
+top; ranking by `|logFC|` alone puts B on top. Neither ranking is
+right on its own.
+
+Xiao Y et al. (2014, *Bioinformatics* 30(6):801) proposed combining
+the two into a single ranking score. They called it pi-score and gave
+two equivalent forms. This package implements both.
+
+## Pi-score: two variants
+
+### Equation 2 (default)
+
+$$
+\pi_{\text{Eq2}} = P^{|\log_2 \text{FC}|}
+$$
+
+Range: $[0, 1]$. Smaller pi means stronger evidence (p is small *and*
+logFC is large). The convention threshold is 0.05, mirroring the
+familiar p-value threshold.
+
+This is the form used in the YvO, CvH, HRvLR, and Mito pipelines that
+ship as fixtures with this package. `pi_score()` defaults to it
+because the [0, 1] range plays well with downstream cut-offs that
+already expect a probability-like quantity.
+
+```{r show-eq2}
+example <- tibble::tibble(
+  gene    = c("A", "B"),
+  logFC   = c(0.10, 2.50),
+  P.Value = c(1e-6, 1e-3)
+)
+pi_score(example, variant = "eq2")
+```
+
+By Eq.2, B has the smaller pi (better) even though its raw p is
+larger. The exponentiation by `|logFC|` shrinks A's tiny p when the
+effect is small.
+
+### Equation 1 (alternative)
+
+$$
+\pi_{\text{Eq1}} = |\log_2 \text{FC}| \times -\log_{10} P
+$$
+
+Range: $[0, \infty)$. Larger pi means stronger evidence. Same paper,
+same authors, just the other equation in the original text.
+
+```{r show-eq1}
+pi_score(example, variant = "eq1")
+```
+
+Eq.1 gives `0.10 * 6 = 0.6` for A and `2.50 * 3 = 7.5` for B. B again
+beats A, by a wider margin than Eq.2 gives.
+
+### Worked numerical example
+
+Drop the formula into a calculator with logFC = 2 and P = 0.01:
+
+* Eq.2: $0.01^{|2|} = 0.0001$
+* Eq.1: $|2| \times -\log_{10}(0.01) = 2 \times 2 = 4$
+
+Now nudge the effect down to logFC = 0.5 with the same p:
+
+* Eq.2: $0.01^{|0.5|} = 0.1$
+* Eq.1: $|0.5| \times -\log_{10}(0.01) = 0.5 \times 2 = 1$
+
+Cutting the effect in half multiplies Eq.2 by 1000 and divides Eq.1
+by 4. Both penalise small effects, but Eq.2 is more aggressive.
+
+## Choosing a variant
+
+Use Eq.2 when downstream code expects a [0, 1] scale (significance
+flags, FDR-like cut-offs, sortable as a p-value). Use Eq.1 when you
+need to compare against a paper that reports unbounded pi values. For
+fgsea ranking, the two variants rank-order genes the same way as long
+as every raw p is below 1 (which is always true in practice). For
+ORA, only the [0, 1] form has a natural significance threshold.
+
+Both ignore the *sign* of logFC, so they collapse up- and
+down-regulation onto the same axis. If you need direction-aware
+ranking (the standard input to fgsea), pass `rank_by = "logFC"` to
+`ev_enrich()`. The pi-score is for filtering and labelling, not for
+GSEA pre-ranking.
+
+## Multiple-testing correction overview
+
+`adjust_p()` accepts four methods. They differ in what they
+control and how much power you keep.
+
+### Benjamini-Hochberg (default)
+
+BH controls the false discovery rate: the expected proportion of
+false positives among rejected hypotheses. It is the proteomics
+field default because it gives more power than Bonferroni at a
+biologically defensible error rate. `stats::p.adjust(p, "BH")` is the
+implementation.
+
+### Bonferroni
+
+Bonferroni controls the family-wise error rate: the probability of
+*any* false positive. Multiplies each p by the number of tests. With
+3000 proteins this is severe; a raw p of 1e-5 ends up at 0.03. Use
+this when you need to confirm a small set of pre-selected biomarkers,
+not for screening.
+
+### Storey q-value
+
+The q-value method (Storey 2003, *JRSS-B* 64:479) estimates the
+proportion of true null hypotheses ($\pi_0$) and weights BH by it.
+When most proteins are truly null, $\hat\pi_0$ is close to 1 and the
+result matches BH. When many proteins really do change (a strong
+treatment), $\hat\pi_0$ is below 1 and the q-value beats BH on power.
+Requires the `qvalue` package from Bioconductor.
+
+### IHW
+
+Independent Hypothesis Weighting (Ignatiadis et al. 2016, *Nature
+Methods* 13:577) is BH with informative weights. You supply a
+covariate that is independent of the p-value under the null but
+correlated with power under the alternative. In proteomics, peptide
+count per protein is a good covariate: more peptides means a more
+precise estimate, so a small p with high peptide count is more
+trustworthy than a small p with one peptide. `adjust_p()` accepts
+`covariate = "peptides"` (or any numeric column) and calls
+`IHW::ihw()`.
+
+### Choosing in practice
+
+Most proteomics papers report BH. q-value is a free-lunch upgrade
+when you have a treatment with global effects. IHW is the best choice
+when you have a per-protein covariate that predicts power; otherwise
+it reduces to BH.
+
+## Worked example with the YvO subsample
+
+```{r yvo-load}
+fixture <- system.file(
+  "extdata", "examples", "yvo_tidy.rds",
+  package = "enrichVolcano"
+)
+if (!nzchar(fixture)) {
+  fixture <- "../tests/testthat/fixtures/yvo_tidy.rds"
+}
+yvo <- readRDS(fixture)
+yvo <- yvo[!is.na(yvo$gene) & !is.na(yvo$contrast), ]
+nrow(yvo)
+```
+
+Compute pi-scores both ways and look at the rank correlation within
+the Aging contrast:
+
+```{r yvo-pi}
+yvo <- pi_score(yvo, variant = "eq2")
+yvo <- pi_score(yvo, variant = "eq1")
+aging <- yvo[yvo$contrast == "Aging", ]
+cor(rank(aging$pi_eq2), rank(-aging$pi_eq1))
+```
+
+The correlation is essentially 1: -pi_eq1 and pi_eq2 rank rows
+identically. The two are interchangeable for ordering; they differ
+only in scale.
+
+Now compare BH and Bonferroni at $\alpha = 0.05$:
+
+```{r yvo-adjust}
+yvo_bh   <- adjust_p(yvo, method = "BH")
+yvo_bonf <- adjust_p(yvo, method = "bonferroni")
+sig_bh   <- sum(yvo_bh$adj.P.Val   < 0.05, na.rm = TRUE)
+sig_bonf <- sum(yvo_bonf$adj.P.Val < 0.05, na.rm = TRUE)
+c(BH = sig_bh, Bonferroni = sig_bonf)
+```
+
+BH calls roughly an order of magnitude more proteins significant than
+Bonferroni, at the cost of allowing a few false positives among the
+rejected nulls. For a screening workflow that feeds into pathway
+enrichment, that trade-off is the right one.
+
+`adjust_p()` adjusts within each contrast by default
+(`by_contrast = TRUE`). This matches the proteoDA convention: a
+training response and an aging effect are independent families and
+should not share an error budget.
+
+Next: how to deduplicate redundant enrichment hits. See
+`vignette("pathway-dedup")`.
+
+## References
+
+Xiao Y, Hsiao TH, Suresh U, Chen HIH, Wu X, Wolf SE, Chen Y. A novel
+significance score for gene identification from RNA-seq data.
+*Bioinformatics* 30(6):801-807 (2014).
+
+Benjamini Y, Hochberg Y. Controlling the false discovery rate: a
+practical and powerful approach to multiple testing. *JRSS-B*
+57(1):289-300 (1995).
+
+Storey JD. The positive false discovery rate: a Bayesian
+interpretation and the q-value. *Annals of Statistics* 31(6):2013-2035
+(2003).
+
+Ignatiadis N, Klaus B, Zaugg JB, Huber W. Data-driven hypothesis
+weighting increases detection power in genome-scale multiple testing.
+*Nature Methods* 13(7):577-580 (2016).
