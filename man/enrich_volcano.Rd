@@ -12,7 +12,6 @@ enrich_volcano(
   x = NULL,
   y = NULL,
   lab = NULL,
-  custom_gmt = NULL,
   p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
   p_adjust = "BH",
   p_threshold = 0.05,
@@ -21,9 +20,7 @@ enrich_volcano(
   enrich_padj = 0.05,
   rank_by = "signed_p",
   dedup = list(method = "jaccard", cutoff = 0.5, scope = "within_db"),
-  ring = list(max_terms = 10, order_by = "padj", magnitude = "neg_log_padj", color =
-    "nes"),
-  volcano = list(label_n = 10, label_by = NULL),
+  ring = list(max_terms = 10),
   facet = list(nrow = NULL, ncol = NULL),
   disc_color = NULL,
   theme = ev_theme()
@@ -45,14 +42,14 @@ or Perseus formats - \code{ev_validate()} auto-detects.}
 \item{x, y, lab}{Column names for logFC, p-value, gene label (auto-detected
 if NULL).}
 
-\item{custom_gmt}{Reserved for v0.2 (GMT path input).}
-
 \item{p_method}{Y-axis transform: \code{"pi_eq2"} (default), \code{"pi_eq1"},
 \code{"raw_p"}, \code{"adj_p"}.}
 
 \item{p_adjust}{Method: \code{"BH"} (default), \code{"bonferroni"}, \code{"qvalue"}, \code{"IHW"}.}
 
-\item{p_threshold, logfc_threshold}{Volcano significance cutoffs.}
+\item{p_threshold, logfc_threshold}{Volcano significance cutoffs. A point is
+coloured up/down only when it clears both \code{p_threshold} and
+\code{abs(logFC) >= logfc_threshold}.}
 
 \item{enrich_mode}{\code{c("fgsea", "ora")} - either or both.}
 
@@ -75,10 +72,6 @@ Arc height
 is fixed to \code{-log10(padj)} and fill to NES by the canonical layout. For
 tunable \code{order_by}/\code{magnitude}/\code{color} encodings use the standalone
 \code{\link[=ring_plot]{ring_plot()}}.}
-
-\item{volcano}{Reserved. The composite volcano shows up/down significant
-counts rather than per-gene labels; for a labelled volcano use the
-standalone \code{\link[=ev_volcano]{ev_volcano()}} (\code{label_n}, \code{label_by}, \code{label_genes}).}
 
 \item{facet}{List with \code{nrow}, \code{ncol} for patchwork outer layout.}
 

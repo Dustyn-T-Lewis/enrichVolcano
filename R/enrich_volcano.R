@@ -34,14 +34,15 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #'   `list_databases()`), or a named list of pathway lists.
 #' @param x,y,lab Column names for logFC, p-value, gene label (auto-detected
 #'   if NULL).
-#' @param custom_gmt Reserved for v0.2 (GMT path input).
 #' @param p_method Y-axis transform: `"pi_eq2"` (default), `"pi_eq1"`,
 #'   `"raw_p"`, `"adj_p"`.
 #' @param rank_by Signed statistic fgsea ranks genes by. `"signed_p"`
 #'   (default, `sign(logFC) * -log10(P)`), `"t"`, `"logFC"`, or any signed
 #'   column. Unsigned pi-score columns are rejected.
 #' @param p_adjust Method: `"BH"` (default), `"bonferroni"`, `"qvalue"`, `"IHW"`.
-#' @param p_threshold,logfc_threshold Volcano significance cutoffs.
+#' @param p_threshold,logfc_threshold Volcano significance cutoffs. A point is
+#'   coloured up/down only when it clears both `p_threshold` and
+#'   `abs(logFC) >= logfc_threshold`.
 #' @param enrich_mode `c("fgsea", "ora")` - either or both.
 #' @param enrich_padj Pathway significance cutoff (default 0.05).
 #' @param dedup List with `method` (`"jaccard"`, `"collapse_fgsea"`, or
@@ -56,9 +57,6 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #'   is fixed to `-log10(padj)` and fill to NES by the canonical layout. For
 #'   tunable `order_by`/`magnitude`/`color` encodings use the standalone
 #'   [ring_plot()].
-#' @param volcano Reserved. The composite volcano shows up/down significant
-#'   counts rather than per-gene labels; for a labelled volcano use the
-#'   standalone [ev_volcano()] (`label_n`, `label_by`, `label_genes`).
 #' @param facet List with `nrow`, `ncol` for patchwork outer layout.
 #' @param disc_color Optional contrast-tint for the ring's central disc.
 #' @param theme Output of `ev_theme()`.
@@ -69,7 +67,6 @@ enrich_volcano <- function(data, contrast,
                            species = "human",
                            databases = c("hallmark", "reactome", "go_bp"),
                            x = NULL, y = NULL, lab = NULL,
-                           custom_gmt = NULL,
                            p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
                            p_adjust = "BH",
                            p_threshold = 0.05,
@@ -79,10 +76,7 @@ enrich_volcano <- function(data, contrast,
                            rank_by = "signed_p",
                            dedup = list(method = "jaccard", cutoff = 0.5,
                                         scope = "within_db"),
-                           ring = list(max_terms = 10, order_by = "padj",
-                                       magnitude = "neg_log_padj",
-                                       color = "nes"),
-                           volcano = list(label_n = 10, label_by = NULL),
+                           ring = list(max_terms = 10),
                            facet = list(nrow = NULL, ncol = NULL),
                            disc_color = NULL,
                            theme = ev_theme()) {
@@ -136,8 +130,9 @@ enrich_volcano <- function(data, contrast,
         direction_balance = isTRUE(ring$direction_balance)
       )
       ev_volcano_ring(volc_sub, enr_sub, title = ctr,
-                      p_threshold = p_threshold, disc_color = disc_color,
-                      theme = theme)
+                      p_threshold = p_threshold,
+                      logfc_threshold = logfc_threshold,
+                      disc_color = disc_color, theme = theme)
     }),
     contrast
   )

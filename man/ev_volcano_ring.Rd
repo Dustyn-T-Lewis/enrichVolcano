@@ -10,6 +10,7 @@ ev_volcano_ring(
   title = NULL,
   volcano_radius = 3.5,
   p_threshold = 0.05,
+  logfc_threshold = 0,
   disc_color = NULL,
   point_size = 0.9,
   point_alpha = 0.6,
@@ -29,6 +30,10 @@ ev_volcano_ring(
 \item{volcano_radius}{Inner volcano radius.}
 
 \item{p_threshold}{Significance cutoff applied to \code{pi_eq2} for up/down calls.}
+
+\item{logfc_threshold}{Effect-size cutoff; a point is called up/down only when
+\code{abs(logFC) >= logfc_threshold} as well as significant. Default \code{0} keeps
+every significant point; \code{enrich_volcano()} passes its own default.}
 
 \item{disc_color}{Optional fill for a tinted central disc (default NULL = none).}
 
