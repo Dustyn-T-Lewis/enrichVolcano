@@ -1,0 +1,688 @@
+CORUM_Aqp4_Dag1_Dmd_Snta1_complex	CORUM_5.0	Aqp4	Dag1	Dmd	Snta1
+CORUM_Cask_Mint_Veli_tripartite_complex	CORUM_5.0	Apba1	Cask	Lin7a
+CORUM_Gbeta5_rgs7_complex	CORUM_5.0	Gnb5	Rgs7
+CORUM_Elongin_SIII_complex	CORUM_5.0	Eloa	Elob	Eloc
+CORUM_Multiprotein_trafficking_complex	CORUM_5.0	Apba1	Cask	Dlg1	Kcnj12	Lin7c
+CORUM_ApoB_mRNA_editing_enzyme_complex	CORUM_5.0	A1cf	Apobec1	Khsrp
+CORUM_CLIC4_complex	CORUM_5.0	Actb	Ckb	Clic4	Dnm2	Tuba1a	Ywhae	Ywhaz
+CORUM_Dynein_complex	CORUM_5.0	Dnaja1	Dync1h1	Dync1i1	Dync1i2	Dync1li1	Dync2h1	Dynll1	Dynlrb1	Dynlt1
+CORUM_nNos_Capon_Dexras1_complex	CORUM_5.0	Nos1	Nos1ap	Rasd1
+CORUM_nNos_Capon_Syn1_complex	CORUM_5.0	Nos1	Nos1ap	Syn1
+CORUM_Ubiquitin_E3_ligase_Vhl_Tceb1_Tceb2_Cul2_Rbx1_	CORUM_5.0	Cul2	Elob	Eloc	Rbx1	Vhl
+CORUM_Nucleic_acid_channel_complex	CORUM_5.0	Mdh1	Nup58
+CORUM_SNARE_complex_Bet1_Gosr1_Gosr2_Scfd1_Sec22b_Stx5_	CORUM_5.0	Bet1	Gosr1	Gosr2	Scfd1	Sec22b	Stx5
+CORUM_SDH_mABC1_PIC_ANT_ATPase_complex	CORUM_5.0	Abcb8	Atp5f1a	Sdha	Sdhb	Slc25a3	Slc25a4
+CORUM_Src_dynamin_synapsin_complex	CORUM_5.0	Dnm1	Src	Syn1
+CORUM_Src_dynamin_synapsin_alpha_adaptin_complex	CORUM_5.0	Ap2a2	Dnm1	Src	Syn1
+CORUM_ATP_synthasome	CORUM_5.0	Atp5f1a	Atp5f1b	Atp5f1c	Atp5f1d	Atp5f1e	Atp5mc1	Atp5mc2	Atp5mc3	Atp5me	Atp5pb	Atp5pd	Atp5pf	Atp5po	Mt-atp6	Mt-atp8	Slc25a3	Slc25a5
+CORUM_Ric_8A_G_i_alpha_2_subunit_complex	CORUM_5.0	Gnai2	Ric8a
+CORUM_Ric_8A_G_i_alpha_1_subunit_complex	CORUM_5.0	Gnai1	Ric8a
+CORUM_Ric_8A_G_q_alpha_subunit_complex	CORUM_5.0	Gnaq	Ric8a
+CORUM_Ric_8A_G_alpha_13_complex	CORUM_5.0	Gna13	Ric8a
+CORUM_OGT_TRAK1_TRAK2_complex	CORUM_5.0	Ogt	Trak1	Trak2
+CORUM_Nephrin_multiprotein_complex	CORUM_5.0	Actn1	Cask	Iqgap1	Magi2	Nphs1	Sptan1	Sptbn1
+CORUM_Synaptotagmin_sodium_channel_complex_Syt1_Scn1a_Scn1b_	CORUM_5.0	Scn1a	Scn1b	Syt1
+CORUM_Synaptotagmin_sodium_channel_complex_Syt2_Scn1a_Scn1b_	CORUM_5.0	Scn1a	Scn1b	Syt2
+CORUM_Synaptotagmin_sodium_channel_complex_Syt1_Scn2a_Scn1b_	CORUM_5.0	Scn1b	Scn2a	Syt1
+CORUM_Synaptotagmin_sodium_channel_complex_Syt2_Scn2a_Scn1b_	CORUM_5.0	Scn1b	Scn2a	Syt2
+CORUM_Ubiquitin_E3_ligase_Lrrc41_Tceb1_Tceb2_Cul5_Rbx1_	CORUM_5.0	Cul5	Elob	Eloc	Lrrc41	Rbx1
+CORUM_Ubiquitin_E3_ligase_Vhl_Tceb1_Tceb2_Cul5_Rbx1_	CORUM_5.0	Cul5	Elob	Eloc	Rbx1	Vhl
+CORUM_Ubiquitin_E3_ligase_Tceb1_Tceb2_Tceb3_Cul5_Rbx1_	CORUM_5.0	Cul5	Eloa	Elob	Eloc	Rbx1
+CORUM_Ubiquitin_E3_ligase_Socs1_Tceb1_Tceb2_Cul5_Rbx1_	CORUM_5.0	Cul5	Elob	Eloc	Rbx1	Socs1
+CORUM_Ubiquitin_E3_ligase_Wsb1_Tceb1_Tceb2_Cul5_Rbx1_	CORUM_5.0	Cul5	Elob	Eloc	Rbx1	Wsb1
+CORUM_Ubiquitin_E3_ligase_Med8_Tceb1_Tceb2_Cul2_Rbx1_	CORUM_5.0	Cul2	Elob	Eloc	Med8	Rbx1
+CORUM_Ubiquitin_E3_ligase_Asb2_Tceb1_Tceb2_Cul5_Rbx1_	CORUM_5.0	Asb2	Cul5	Elob	Eloc	Rbx1
+CORUM_Gnai3_Gpsm1_Stk11_complex	CORUM_5.0	Gnai3	Gpsm1	Stk11
+CORUM_Dystrophin_associated_complex_DPC_Dmd_Dtnb_brain_derived	CORUM_5.0	Dmd	Dtnb
+CORUM_F0F1_ATP_synthase_mitochondrial	CORUM_5.0	Atp5f1a	Atp5f1b	Atp5f1c	Atp5f1d	Atp5f1e	Atp5if1	Atp5mc1	Atp5me	Atp5mf	Atp5mg	Atp5pb	Atp5pd	Atp5pf	Mt-atp6	Mt-atp8
+CORUM_Succinyl_CoA_synthetase_ADP_forming	CORUM_5.0	Suclg1	Suclg2
+CORUM_Glucosidase_2	CORUM_5.0	Ganab	Prkcsh
+CORUM_Glutamate_cysteine_ligase	CORUM_5.0	Gclc	Gclm
+CORUM_Cav3_Ptgs2_complex	CORUM_5.0	Cav3	Ptgs2
+CORUM_H_ACA_ribonucleoprotein_complex	CORUM_5.0	Dkc1	Gar1	Nhp2	Nop10
+CORUM_Dlg1_Cav3_Kcna5_complex	CORUM_5.0	Cav3	Dlg1	Kcna5
+CORUM_AQP2_binding_multiprotein_force_generator_complex	CORUM_5.0	Actb	Actg1	Actn4	Aif1l	Anxa2	Anxa6	Aqp2	Gsn	Myh9	Myl12b	Rlc-a	Scin	Sipa1	Sptan1	Tpm3
+CORUM_Kir4_1_dystrophin_complex_retinal_Mueller_cells	CORUM_5.0	Dmd	Kcnj10
+CORUM_Kir4_1_alpha_1_syntrophin_complex	CORUM_5.0	Kcnj10	Snta1
+CORUM_Kir4_1_beta_dystroglycan_complex	CORUM_5.0	Dag1	Kcnj10
+CORUM_Kir4_1_Aqp4_complex_retinal_Mueller_cells	CORUM_5.0	Aqp4	Kcnj10
+CORUM_Kir4_1_dystrobrevin_complex_retinal_Mueller_cells	CORUM_5.0	Dtnb	Kcnj10
+CORUM_Aqp4_alpha_syntrophin_complex_retinal_Mueller_cells	CORUM_5.0	Aqp4	Snta1
+CORUM_Aqp4_beta_dystroglycan_complex_retinal_Mueller_cells	CORUM_5.0	Aqp4	Dag1
+CORUM_Dystrophin_associated_glycoprotein_complex_DGC_Dag1_Dp71f_Sgcd_Snta1_retinal_glia_cells	CORUM_5.0	Dag1	Dmd	Sgcd	Snta1
+CORUM_Dystrophin_associated_glycoprotein_complex_DGC_Dag1_Dp71f_Utrn_retinal_glia_cells	CORUM_5.0	Dag1	Dmd	Utrn
+CORUM_InsP3R1_HAP1A_Htt_complex	CORUM_5.0	Hap1	Htt	Itpr1
+CORUM_Camk2_Dlg4_Mpdz_Syngap1_complex	CORUM_5.0	Camk2a	Camk2b	Dlg4	Mpdz	Syngap1
+CORUM_AQP_1_regulatory_complex	CORUM_5.0	Aqp1	Clcn2	Gnai3	Kcnj8	Pla2g2a
+CORUM_Inner_medullary_AKAP_signaling_complex	CORUM_5.0	Akap2	Ppp3ca	Prkar2a	Prkcz
+CORUM_Cytochrome_bc1_complex_mitochondrial	CORUM_5.0	Cyc1	Mt-cyb	Uqcr10	Uqcr11	Uqcrb	Uqcrc1	Uqcrc2	Uqcrfs1	Uqcrh	Uqcrq
+CORUM_Grin1_Prkar2a_Prkar2b_yotiao_complex	CORUM_5.0	Grin1	Prkar2a	Prkar2b	yotiao
+CORUM_M1_mAChR_TRPC6_complex	CORUM_5.0	Calm1	Chrm1	Fkbp1a	Ppp3ca	Prkca	Trpc6
+CORUM_M1_mAChR_TRPC6_PKC_complex	CORUM_5.0	Chrm1	Prkca	Trpc6
+CORUM_Cytochrome_c_oxidase_liver_mitochondrial	CORUM_5.0	Cox4i1	Cox5a	Cox5b	Cox6a1	Cox6b1	Cox6c1	Cox7a2	Cox7b	Cox7c	Cox8a	Mt-co1	Mt-co2	Mt-co3
+CORUM_Clathrin_CAP_1A_Na_v_1_8_channel_complex	CORUM_5.0	Cltc	Sclt1	Scn10a
+CORUM_Nuclear_pore_complex	CORUM_5.0	Aaas	Nup107	Nup133	Nup153	Nup155	Nup160	Nup188	Nup205	Nup210	Nup214	Nup35	Nup37	Nup42	Nup43	Nup50	Nup54	Nup58	Nup62	Nup85	Nup88	Nup93	Nup98	Pom121	Rae1	Ranbp2	Sec13	Seh1l	Tpr
+CORUM_Dlg4_Grin2b_Nos1_complex	CORUM_5.0	Dlg4	Grin2b	Nos1
+CORUM_Akap6_Ppp3cb_RATRYR2_complex	CORUM_5.0	Akap6	Ppp3cb	RATRYR2
+CORUM_Ccnb1_Cdk1_Itpr1_complex	CORUM_5.0	Ccnb1	Cdk1	Itpr1
+CORUM_Kv4_2_KChIP3_Dpp10_channel_complex	CORUM_5.0	Dpp10	Kcnd2	Kcnip3
+CORUM_Kv4_2_Dpp10_channel_complex	CORUM_5.0	Dpp10	Kcnd2
+CORUM_Kv4_2_Dpp6_channel_complex	CORUM_5.0	Dpp6	Kcnd2
+CORUM_Gja1_Hsp90_Tomm20_complex	CORUM_5.0	Gja1	Hsp90aa1	Tomm20
+CORUM_Kv4_3_Dpp10_channel_complex	CORUM_5.0	Dpp10	Kcnd3
+CORUM_Kv4_3_Dpp6_channel_complex	CORUM_5.0	Dpp6	Kcnd3
+CORUM_Kcnd1_Dpp6_channel_complex	CORUM_5.0	Dpp6	Kcnd1
+CORUM_Kcnd1_Dpp10_complex	CORUM_5.0	Dpp10	Kcnd1
+CORUM_Kv4_2_DPPX_KChIP_channel_complex	CORUM_5.0	Dpp6	Kcnd2	Kcnip1
+CORUM_Kcnip1_Kcnd2_complex	CORUM_5.0	Kcnd2	Kcnip1
+CORUM_Kcnd2_Kcnip2_complex	CORUM_5.0	Kcnd2	Kcnip2
+CORUM_Kcnip3_Kcnd2_complex	CORUM_5.0	Kcnd2	Kcnip3
+CORUM_Kcnd2_Kcnd3_complex	CORUM_5.0	Kcnd2	Kcnd3
+CORUM_Exocyst_complex	CORUM_5.0	Exoc1	Exoc2	Exoc3	Exoc4	Exoc5	Exoc6	Exoc7	Exoc8
+CORUM_Tim23_subcomplex_Hspa9_Timm17A_Timm23_Timm44_mitochondrial	CORUM_5.0	Hspa9	Timm17a	Timm23	Timm44
+CORUM_SNARE_complex_Vti1b_Stx7_Stx8_Vamp8_	CORUM_5.0	Stx7	Stx8	Vamp8	Vti1b
+CORUM_RyR2_macromolecular_complex	CORUM_5.0	Fkbp1b	Ppp1ca	Ppp2ca	Prkaca	Prkar2a	RATRYR2
+CORUM_SNARE_complex_Snap47_Stx1a_Vamp2_	CORUM_5.0	Snap47	Stx1a	Vamp2
+CORUM_SNARE_complex_Ykt6_Stx5_Gosr2_Bet1_	CORUM_5.0	Bet1	Gosr2	Stx5	Ykt6
+CORUM_Kpna1_Kpnb1_Pth1r_complex	CORUM_5.0	Kpna1	Kpnb1	Pth1r
+CORUM_SNARE_complex_Stx5_Ykt6_Gosr1_Bet1_	CORUM_5.0	Bet1l	Gosr1	Stx5	Ykt6
+CORUM_SNARE_complex_Stx5_Gosr2_Sec22b_Bet1_	CORUM_5.0	Bet1	Gosr2	Sec22b	Stx5
+CORUM_BKCA_alpha_Cav1_2_channel_complex	CORUM_5.0	Cacna1c	Kcnma1
+CORUM_BKCA_alpha_Cav2_1_channel_complex	CORUM_5.0	Cacna1a	Kcnma1
+CORUM_BKCA_alpha_Cav2_2_channel_complex	CORUM_5.0	Cacna1b	Kcnma1
+CORUM_Adrb2_Akap5_complex	CORUM_5.0	Adrb2	Akap5
+CORUM_Akap5_Kcnma1_complex	CORUM_5.0	Akap5	Kcnma1
+CORUM_Adrb2_Kcnma1_complex	CORUM_5.0	Adrb2	Kcnma1
+CORUM_SNARE_complex_Stx5_p97_Nsfl1c_	CORUM_5.0	Nsfl1c	Stx5	Vcp
+CORUM_LysRS_Hint_Mitf_complex	CORUM_5.0	Hint1	Kars1	Mitf
+CORUM_TOM_subcomplex_Tomm20_Tomm22_Tomm70_mitochondrial	CORUM_5.0	Tomm20	Tomm22	Tomm70
+CORUM_Snap25_caveolin_complex	CORUM_5.0	Cav1	Snap25
+CORUM_HuR_Tia1_Tiar_Hrnpu_complex	CORUM_5.0	Elavl1	Hnrnpu	Tia1	Tial1
+CORUM_SNARE_complex_Bet1_Stx5_Vamp7_Vti1a_	CORUM_5.0	Bet1	Stx5	Vamp7	Vti1a
+CORUM_Akap6_Ppp2ca_Prkaca_Ryr2_complex	CORUM_5.0	Akap6	Ppp2ca	Prkaca	Ryr2
+CORUM_MeCP2_Sin3a_Hdac_complex	CORUM_5.0	Hdac1	Mecp2	Sin3a
+CORUM_Anos1_Fgfr1_complex	CORUM_5.0	ANOS1	Fgfr1
+CORUM_Ahnak1_dysferlin_complex	CORUM_5.0	Ahnak	Dysf
+CORUM_SNARE_complex_Snap29_Stx6_	CORUM_5.0	Snap29	Stx6
+CORUM_Cask_Grip1_Prkce_Rgs4_Gria2_complex	CORUM_5.0	Cask	Gria2	Grip1	Prkce	Rgs4
+CORUM_Cask_Grip1_Gria2_Mint1_complex	CORUM_5.0	Apba1	Cask	Gria2	Grip1
+CORUM_Nme1_Prkaa1_complex	CORUM_5.0	Nme1	Prkaa1
+CORUM_Calr_Itgav_Plp1_complex	CORUM_5.0	Calr	Itgav	Plp1
+CORUM_K_ATP_macromolecular_complex_Kir6_2_Pkm2_Gapdh_Tpi1_	CORUM_5.0	Gapdh	Kcnj11	Pkm	Tpi1
+CORUM_Itch_Usp9x_complex	CORUM_5.0	Itch	Usp9x
+CORUM_SNARE_complex_Cplx1_Snap25_Stx1a_Vamp2_	CORUM_5.0	Cplx1	Snap25	Stx1a	Vamp2
+CORUM_SNARE_complex_Cplx2_Snap25_Stx1a_Vamp2_	CORUM_5.0	Cplx2	Snap25	Stx1a	Vamp2
+CORUM_Trpc1_Stim1_Orai1_complex	CORUM_5.0	Orai1	Stim1	Trpc1
+CORUM_Disc1_Grb2_Kif5a_complex	CORUM_5.0	Disc1	Grb2	Kif5a
+CORUM_SNARE_complex_Snap25_Stx1a_Vamp8_	CORUM_5.0	Snap25	Stx1a	Vamp8
+CORUM_SNARE_complex_Snap25_Stx2_Vamp8_	CORUM_5.0	Snap25	Stx2	Vamp8
+CORUM_SNARE_complex_Snap25_Stx3_Vamp8_	CORUM_5.0	Snap25	Stx3	Vamp8
+CORUM_SNARE_complex_Snap25_Stx4_Vamp8_	CORUM_5.0	Snap25	Stx4	Vamp8
+CORUM_Srf_Myocd_Msx1_complex	CORUM_5.0	Msx1	Myocd	Srf
+CORUM_Srf_Myocd_Msx2_complex	CORUM_5.0	Msx2	Myocd	Srf
+CORUM_SNARE_complex_Snap29_Stx1a_	CORUM_5.0	Snap29	Stx1a
+CORUM_SNARE_complex_Stx6_Stx16_Vamp4_Vti1b_	CORUM_5.0	Stx16	Stx6	Vamp4	Vti1b
+CORUM_SNARE_complex_Stx6_Stx16_Vamp4_Vti1a_	CORUM_5.0	Stx16	Stx6	Vamp4	Vti1a
+CORUM_GluR1_cadherin_catenin_complex	CORUM_5.0	Cdh2	Ctnnb1	Gria1
+CORUM_Cdh2_Ctnnb1_Gria4_complex	CORUM_5.0	Cdh2	Ctnnb1	Gria4
+CORUM_Glur2_Glur4_Plp_Itgav_complex	CORUM_5.0	Gria2	Gria4	Itgav	Plp1
+CORUM_PAR_3_PKCz_Tiam2_complex	CORUM_5.0	Pard3	Prkcz	Tiam2
+CORUM_Par3_Prkcz_Tiam1_complex	CORUM_5.0	Pard3	Prkcz	Tiam1
+CORUM_PAR_3_aPKC_Tiam2_complex	CORUM_5.0	Pard3	Prkci	Tiam2
+CORUM_PAR_3_aPKC_Tiam1_complex	CORUM_5.0	Pard3	Prkci	Tiam1
+CORUM_Tiam2_PAR_3_aPKC_PAR_6_Cdc42_GTP_complex	CORUM_5.0	Cdc42	Pard3	Pard6a	Tiam2
+CORUM_Par_3_KIF3A_PKC_zeta_complex	CORUM_5.0	Kif3a	Pard3	Prkcz
+CORUM_Kif3a_Pard3_Prkci_complex	CORUM_5.0	Kif3a	Pard3	Prkci
+CORUM_SNARE_complex_Gosr1_GS15_Stx5_	CORUM_5.0	Bet1l	Gosr1	Stx5
+CORUM_SNARE_complex_Bet1_Gef2_Gosr1_Stx5_	CORUM_5.0	Bet1	Gabarapl2	Gosr1	Stx5
+CORUM_Par3_Apc_Kif3a_complex	CORUM_5.0	Apc	Kif3a	Pard3
+CORUM_Chd9_Ppara_Rxra_complex	CORUM_5.0	Chd9	Ppara	Rxra
+CORUM_Dysferlin_Dhpr_complex	CORUM_5.0	Cacna1s	Dysf
+CORUM_Anxa6_Fyn_Pyk2_Rasa1_complex	CORUM_5.0	Anxa6	Fyn	Ptk2b	Rasa1
+CORUM_Ap1b1_Ap1g1_Arf1_complex	CORUM_5.0	Ap1b1	Ap1g1	Arf1
+CORUM_Cd44_Ots8_complex	CORUM_5.0	Cd44	Pdpn
+CORUM_SNARE_complex_Stx1a_Snap25_Stxbp5_	CORUM_5.0	Snap25	Stx1a	Stxbp5
+CORUM_Vcp_Ufd1_Npl4_IP3_receptor_complex	CORUM_5.0	Itpr1	Nploc4	Ufd1	Vcp
+CORUM_p97_Ufd1_Npl4_complex	CORUM_5.0	Nploc4	Ufd1	Vcp
+CORUM_Ufd1_Npl4_complex	CORUM_5.0	Nploc4	Ufd1
+CORUM_p47_Vcp_complex	CORUM_5.0	Nsfl1c	Vcp
+CORUM_Tamalin_mGluR1a_cytohesin_complex	CORUM_5.0	Cyth2	Grm1	Tamalin
+CORUM_Tamalin_mGluR1a_complex	CORUM_5.0	Grm1	Tamalin
+CORUM_Grik1_Tamalin_complex	CORUM_5.0	Grik1	Tamalin
+CORUM_SNARE_complex_Snap25_Stx1a_Vamp2_	CORUM_5.0	Snap25	Stx1a	Vamp2
+CORUM_SNARE_complex_Snap25_Stx2_Vamp2_	CORUM_5.0	Snap25	Stx2	Vamp2
+CORUM_SNARE_complex_Snap25_Stx3_Vamp2_	CORUM_5.0	Snap25	Stx3	Vamp2
+CORUM_SNARE_complex_Snap25_Stx4_Vamp2_	CORUM_5.0	Snap25	Stx4	Vamp2
+CORUM_SNARE_complex_Snap25_Stx4_Syt1_Vamp2_	CORUM_5.0	Snap25	Stx4	Syt1	Vamp2
+CORUM_SNARE_complex_Snap25_Stx3_Syt1_Vamp2_	CORUM_5.0	Snap25	Stx3	Syt1	Vamp2
+CORUM_SNARE_complex_Snap25_Stx2_Syt1_Vamp2_	CORUM_5.0	Snap25	Stx2	Syt1	Vamp2
+CORUM_SNARE_complex_Snap25_Stx1a_Syt1_Vamp2_	CORUM_5.0	Snap25	Stx1a	Syt1	Vamp2
+CORUM_SNARE_complex_Cplx1_Snap25_Stx2_Vamp2_	CORUM_5.0	Cplx1	Snap25	Stx2	Vamp2
+CORUM_SNARE_complex_Cplx2_Snap25_Stx2_Vamp2_	CORUM_5.0	Cplx2	Snap25	Stx2	Vamp2
+CORUM_SNARE_complex_Cplx2_Snap25_Stx3_Vamp2_	CORUM_5.0	Cplx2	Snap25	Stx3	Vamp2
+CORUM_SNARE_complex_Cplx1_Snap25_Stx3_Vamp2_	CORUM_5.0	Cplx1	Snap25	Stx3	Vamp2
+CORUM_Kif5a_Dtnb_Dtna_complex	CORUM_5.0	Dtna	Dtnb	Kif5a
+CORUM_Caveolin_complex	CORUM_5.0	Actb	Actg1	Cav1	Cav2	Cyb5r3	Flot2
+CORUM_SNARE_complex_Rtn1_Stx1a_Stx1b_Stx7_Stx13_Vamp2_	CORUM_5.0	Rtn1	Stx12	Stx1a	Stx1b	Stx7	Vamp2
+CORUM_Baiap2_Tiam1_complex	CORUM_5.0	Baiap2	Tiam1
+CORUM_Ppp1r9b_Tiam1_complex	CORUM_5.0	Ppp1r9b	Tiam1
+CORUM_SNARE_complex_Snap23_Stx4_Syt7_Vamp7_	CORUM_5.0	Snap23	Stx4	Syt7	Vamp7
+CORUM_Tiam2_PAR_3_aPKC_PAR_6_Rac1_GTP_complex	CORUM_5.0	Pard3	Pard6a	Rac1	Tiam2
+CORUM_SNARE_complex_Cplx3_Snap25_Stx1a_Vamp2_	CORUM_5.0	Cplx3	Snap25	Stx1a	Vamp2
+CORUM_SNARE_complex_Cplx1_Snap25_Stx1a_Stx3_Vamp2_	CORUM_5.0	Cplx1	Snap25	Stx1a	Stx3	Vamp2
+CORUM_SNARE_complex_Cplx3_Snap25_Stx1a_Stx3_Vamp2_	CORUM_5.0	Cplx3	Snap25	Stx1a	Stx3	Vamp2
+CORUM_SNARE_complex_Cplx4_Snap25_Vamp2_	CORUM_5.0	Cplx4	Snap25	Vamp2
+CORUM_Hspb2_Hspb3_complex	CORUM_5.0	Hspb2	Hspb3
+CORUM_Irs1_Grb2_Ptpn1_complex	CORUM_5.0	Grb2	Irs1	Ptpn1
+CORUM_Epsin_clathrin_complex	CORUM_5.0	Amph	Ap2a2	Ap2m1	Epn1	Snap91
+CORUM_RACK1_containing_mRNP_complex	CORUM_5.0	G3bp2	Pabpc1	Rack1	Rimbp2
+CORUM_SNARE_complex_Cplx1_Snap25_Stx1a_Syt1_Vamp2_	CORUM_5.0	Cplx1	Snap25	Stx1a	Syt1	Vamp2
+CORUM_SNARE_complex_Cplx2_Snap25_Stx1a_Syt1_Vamp2_	CORUM_5.0	Cplx2	Snap25	Stx1a	Syt1	Vamp2
+CORUM_Esr1_Pou1f1_complex	CORUM_5.0	Esr1	Pou1f1
+CORUM_Septin_complex_Septin2_Septin7_Septin8_Septin9_Septin11_	CORUM_5.0	Septin11	Septin2	Septin7	Septin8	Septin9
+CORUM_Junctional_membrane_subcomplex_Ank2_Slc8a1_Sptan1_Sptbn2_	CORUM_5.0	Slc8a1	Sptan1	Sptbn2
+CORUM_Plxnb1_Rnd1_Rras_complex	CORUM_5.0	Plxnb1	Rnd1	Rras
+CORUM_Cdk5_p35_CaMKII_alpha_alpha_actinin1_complex	CORUM_5.0	Actn1	Camk2a	Cdk5	Cdk5r1
+CORUM_Nbr1_Sqstm1_Trim55_complex	CORUM_5.0	Nbr1	Sqstm1	Trim55
+CORUM_Smad3_Hdac_Runx2_complex	CORUM_5.0	Hdac4	Hdac5	Runx2	Smad3
+CORUM_Axin1_Ctnnb1_Gsk3b_complex	CORUM_5.0	Axin1	Ctnnb1	Gsk3b
+CORUM_ERC2_RIMS1_UNC13B_complex	CORUM_5.0	Erc2	Rims1	Unc13b
+CORUM_SNARE_complex_Unc13a_Snap25_Stx1a_Stx1b_Syt1_Vamp2_	CORUM_5.0	Snap25	Stx1a	Stx1b	Syt1	Unc13a	Vamp2
+CORUM_STX12_SNAP25_HGS_VAMP2_complex	CORUM_5.0	Hgs	Snap25	Stx12	Vamp2
+CORUM_SNARE_complex_Stx4_Napa_Vamp3_Nsf_Vamp2_	CORUM_5.0	Napa	Nsf	Stx4	Vamp2	Vamp3
+CORUM_Nsf_Stx1a_NAPB_complex	CORUM_5.0	Napb	Nsf	Stx1a
+CORUM_SNARE_complex_Stx1a_Napa_Snap25_Vamp2_Nsf_	CORUM_5.0	Napa	Nsf	Snap25	Stx1a	Vamp2
+CORUM_Dlg4_Grin1_Ntrk2_Plcg1_Shc1_complex	CORUM_5.0	Dlg4	Grin1	Ntrk2	Plcg1	Shc1
+CORUM_Drd1_Grin1_complex	CORUM_5.0	Drd1	Grin1
+CORUM_Camk2a_Dlg4_Grin1_Grin2b_Syngap1_complex	CORUM_5.0	Camk2a	Dlg4	Grin1	Grin2b	Syngap1
+CORUM_Camk2a_Dlg4_Grin1_Grin2a_Grin2b_Syngap1_complex	CORUM_5.0	Camk2a	Dlg4	Grin1	Grin2a	Grin2b	Syngap1
+CORUM_Kif1ba_Dlg4_Dlg1_Magi2_complex	CORUM_5.0	Dlg1	Dlg4	Kif1b	Magi2
+CORUM_Actn2_Camk2a_Grin2b_Lrrc7_complex	CORUM_5.0	Actn2	Camk2a	Grin2b	Lrrc7
+CORUM_GT198_homodimer	CORUM_5.0	Psmc3ip
+CORUM_Htt_Hap1_Dctn1_complex	CORUM_5.0	Dctn1	Hap1	Htt
+CORUM_Pick1_homodimer	CORUM_5.0	Pick1
+CORUM_Pick1_Glur2_Pkca_complex_TPA_tissue_plasminogen_activator_treated	CORUM_5.0	Gria2	Pick1	Prkca
+CORUM_Hippocalcin_beta2_adaptin_Glur2_complex_Ca_2_dependent	CORUM_5.0	Ap2b1	Gria2	Hpca
+CORUM_Grip_Glur2_3_liprin_alpha_Lar_complex	CORUM_5.0	Gria2	Gria3	Grip1	Ppfia4	Ptprf
+CORUM_Nsg1_Glur2_Grip1_complex	CORUM_5.0	Gria2	Grip1	Nsg1
+CORUM_Beta_catenin_Cadherin_Grip_liprin_alpha_GluR2_3_complex	CORUM_5.0	Cdh2	Ctnnb1	Gria2	Gria3	Grip1	Ppfia3
+CORUM_GluR_receptor_complex	CORUM_5.0	Gria1	Gria2	Gria3	Gria4
+CORUM_Gria1_homomer	CORUM_5.0	Gria1
+CORUM_Drd2_Gria1_Gria2_complex	CORUM_5.0	Drd2	Gria1	Gria2
+CORUM_Itga3_Itgb1_Tgm2_complex	CORUM_5.0	Itga3	Itgb1	Tgm2
+CORUM_Itga5_Itgb1_Tgm2_complex	CORUM_5.0	Itgb1	Tgm2
+CORUM_Cask_Cd2ap_Nphs1_complex	CORUM_5.0	Cask	Cd2ap	Nphs1
+CORUM_Fyn_Ncam1_Ptk2_complex	CORUM_5.0	Fyn	Ncam1	Ptk2
+CORUM_Khdrbs1_Rasa1_complex	CORUM_5.0	Khdrbs1	Rasa1
+CORUM_Fra1_JunB_DNA_protein_complex	CORUM_5.0	Fosl1	Junb
+CORUM_Atf2_c_Jun_c_Myc_complex	CORUM_5.0	Atf2	Jun	Myc
+CORUM_Aph1a_Psen1_Ncstn_complex	CORUM_5.0	Aph1a	Ncstn	Psen1
+CORUM_NMDA_receptor_complex_Grin1_Grin3a_	CORUM_5.0	Grin1	Grin3a
+CORUM_Ikbkb_Ikbkg_complex	CORUM_5.0	Ikbkb	Ikbkg
+CORUM_Nemo_homo_oligomer_complex	CORUM_5.0	Ikbkg
+CORUM_Golga2_Rab1A_complex	CORUM_5.0	Golga2	Rab1A
+CORUM_Rab1A_Uso1_complex	CORUM_5.0	Rab1A	Uso1
+CORUM_Golga2_Gorasp1_Rab1A_complex	CORUM_5.0	Golga2	Gorasp1	Rab1A
+CORUM_Fos_Jun_Nr3c1_Pou2f1_Stat3_complex	CORUM_5.0	Fos	Jun	Nr3c1	Pou2f1	Stat3
+CORUM_Jun_Nr3c1_Pou2f1_Stat3_complex	CORUM_5.0	Jun	Nr3c1	Pou2f1	Stat3
+CORUM_ATF2_c_Jun_complex	CORUM_5.0	Atf2	Jun
+CORUM_Fosb_Junb_DNA_protein_complex	CORUM_5.0	Fosb	Junb
+CORUM_SNARE_complex_Snap25_Vamp3_Vamp2_Napa_Stx12_	CORUM_5.0	Napa	Snap25	Stx12	Vamp2	Vamp3
+CORUM_Cd2ap_Cdh3_Ctnnd1_Nphs1_complex	CORUM_5.0	Cd2ap	Ctnnd1	Nphs1
+CORUM_Shc_Egfr_complex_EGF_stimulated	CORUM_5.0	Egfr	shc
+CORUM_Egfr_Grb2_complex_EGF_stimulated	CORUM_5.0	Egfr	Grb2
+CORUM_Grb2_Shc_complex_EGF_stimulated	CORUM_5.0	Grb2	shc
+CORUM_Itga1_Itgb1_Tgm2_complex	CORUM_5.0	Itga1	Itgb1	Tgm2
+CORUM_CASK_Caskin1_complex	CORUM_5.0	Cask	Caskin1
+CORUM_CASK_Caskin1_Velis_complex	CORUM_5.0	Cask	Caskin1	Lin7a	Lin7b	Lin7c
+CORUM_PTF1_L_complex_Ptf1a_Tcf12_Rbpjl_	CORUM_5.0	Ptf1a	Rbpjl	Tcf12
+CORUM_PTF1_L_complex_Ptf1a_Tcf4_Rbpjl_	CORUM_5.0	Ptf1a	Rbpjl	Tcf4
+CORUM_PTF1_L_complex_Ptf1a_Tcf3_Rbpjl_	CORUM_5.0	Ptf1a	Rbpjl	Tcf3
+CORUM_PTF1_complex_Ptf1a_Tcf12_Rbpj_	CORUM_5.0	Ptf1a	Rbpj	Tcf12
+CORUM_Axin1_Gsk3b_complex	CORUM_5.0	Axin1	Gsk3b
+CORUM_Axin_Gsk3a_complex	CORUM_5.0	Axin1	Gsk3a
+CORUM_Axin_beta_catenin_complex	CORUM_5.0	Axin1	Ctnnb1
+CORUM_TGF_beta_receptor_type_I	CORUM_5.0	Tgfbr1
+CORUM_Amot_Arhgap17_Pard3_complex	CORUM_5.0	Amot	Arhgap17	Pard3
+CORUM_Elk1_Srf_complex	CORUM_5.0	Elk1	Srf
+CORUM_Myocd_Srf_complex	CORUM_5.0	Myocd	Srf
+CORUM_Kcnd2_Kcnip4_complex	CORUM_5.0	Kcnd2	Kcnip4
+CORUM_Kcnd3_Kcnip1_complex	CORUM_5.0	Kcnd3	Kcnip1
+CORUM_Itgav_Itgb3_Tgm2_complex	CORUM_5.0	Itgav	Itgb3	Tgm2
+CORUM_Itga7_Itgb11_Lama2_complex	CORUM_5.0	Itga7	Itgb1	Lama2
+CORUM_Itga7_Itgb11_Ptk2_complex	CORUM_5.0	Itga7	Itgb1	Ptk2
+CORUM_Tle2_Hes1_complex	CORUM_5.0	Hes1	Tle2
+CORUM_Hes1_Tle1_complex	CORUM_5.0	Hes1	Tle1
+CORUM_VILIP_1_AChR_alpha_4_AChR_beta_2_complex	CORUM_5.0	Chrna4	Chrnb2	Vsnl1
+CORUM_Dlg3_Dlg1_complex	CORUM_5.0	Dlg1	Dlg3
+CORUM_Gnb1_Gng2_Mcf2l_complex	CORUM_5.0	Gnb1	Gng2	Mcf2l
+CORUM_Gnb1_Gng2_Kalrn_complex	CORUM_5.0	Gnb1	Gng2	Kalrn
+CORUM_Dlg4_Grin1_Grin2a_Grin2b_complex	CORUM_5.0	Dlg4	Grin1	Grin2a	Grin2b
+CORUM_Pick1_Pkca_complex_TPA_tissue_plasminogen_activator_treated	CORUM_5.0	Pick1	Prkca
+CORUM_Pick1_Glur2_complex	CORUM_5.0	Gria2	Pick1
+CORUM_Hippocalcin_beta2_adaptin_complex	CORUM_5.0	Ap2b1	Hpca
+CORUM_Gria2_Grip1_Nsg1_Stx12_complex	CORUM_5.0	Gria2	Grip1	Nsg1	Stx12
+CORUM_GluR1_GluR2_complex	CORUM_5.0	Gria1	Gria2
+CORUM_Drd2_Gria2_Nsf_complex	CORUM_5.0	Drd2	Gria2	Nsf
+CORUM_Grip_Glur2_3_liprin_alpha_complex	CORUM_5.0	Gria2	Gria3	Grip1	Ppfia4
+CORUM_Beta_catenin_Cadherin_LAR_complex	CORUM_5.0	Cdh2	Ctnnb1	Ptprf
+CORUM_ClpP_complex_heptameric	CORUM_5.0	Clpp
+CORUM_ClpXP_complex	CORUM_5.0	Clpp	Clpx
+CORUM_Cdk5_p39_CaMKII_alpha_alpha_actinin1_complex	CORUM_5.0	Actn1	Camk2a	Cdk5	Cdk5r2
+CORUM_Nsf_Stx1a_Napa_complex	CORUM_5.0	Napa	Nsf	Stx1a
+CORUM_Nsf_Stx1a_Napg_complex	CORUM_5.0	Napg	Nsf	Stx1a
+CORUM_C3G_Crkl_Ptpn11_complex	CORUM_5.0	c3g	Crkl	Ptpn11
+CORUM_C3G_Cbl_Crkl_Egfr_Ptpn11_complex	CORUM_5.0	c3g	Cbl	Crkl	Egfr	Ptpn11
+CORUM_C3G_Crkl_Gab2_Ntrk1_Ptpn11_complex	CORUM_5.0	c3g	Crkl	Gab2	Ntrk1	Ptpn11
+CORUM_Pentraxin_complex	CORUM_5.0	Nptx1	Nptx2	Nptxr	Rcn2
+CORUM_Iqgap1_Cdc42_Ctnnb1_Cdh2_complex	CORUM_5.0	Cdc42	Cdh2	Ctnnb1	Iqgap1
+CORUM_Actb_Iqgap1_Vim_complex	CORUM_5.0	Actb	Iqgap1	Vim
+CORUM_Cav1_Strn_Strn3_Strn4_complex	CORUM_5.0	Cav1	Strn	Strn3	Strn4
+CORUM_Unc13a_Rab3a_Rims2_complex	CORUM_5.0	Rab3a	Rims2	Unc13a
+CORUM_Endocytic_coat_complex_11_subunits_	CORUM_5.0	Amph	Ap2a1	Ap2b1	Bin1	Cltc	Dnm1	Eps15	Sh3gl1	Sh3gl2	Snap91	Synj1
+CORUM_Endocytic_coat_complex_7_subunits_	CORUM_5.0	Amph	Ap2a1	Ap2b1	Bin1	Cltc	Dnm1	Synj1
+CORUM_Calm1_Ryr1_complex	CORUM_5.0	Calm1	Ryr1
+CORUM_Rock1_Pfn2_complex	CORUM_5.0	Pfn2	Rock1
+CORUM_Kcna2_Kcnab2_complex	CORUM_5.0	Kcna2	Kcnab2
+CORUM_Thyroglobulin_folding_complex_Tg_Hspa5_Pdi_Erp29_Grp94_	CORUM_5.0	Erp29	Grp94	Hspa5	Padi2	Tg
+CORUM_Thyroglobulin_folding_complex_Tg_Pdi_Erp29_	CORUM_5.0	Erp29	Padi2	Tg
+CORUM_Thyroglobulin_folding_complex_Tg_Hspa5_Erp29_Grp94_	CORUM_5.0	Erp29	Grp94	Hspa5	Tg
+CORUM_Tctex1_Ca2_channel_complex	CORUM_5.0	Cacna1a	Cacna1b	Dynlt1
+CORUM_Cdk5_Cdk5r1_complex	CORUM_5.0	Cdk5	Cdk5r1
+CORUM_Pigr_Vps35_Vps26a_Vps29_complex	CORUM_5.0	Pigr	Vps26a	Vps29	Vps35
+CORUM_Ephb1_Sdc2_complex	CORUM_5.0	Ephb1	Sdc2
+CORUM_Per1_Cry1_Cry2_Nono_Wdr5_complex	CORUM_5.0	Cry1	Cry2	Nono	Per1	Wdr5
+CORUM_Per1_Nono_Wdr5_complex	CORUM_5.0	Nono	Per1	Wdr5
+CORUM_Per2_Nono_Wdr5_complex	CORUM_5.0	Nono	Per2	Wdr5
+CORUM_Zip_Prkcz_Kcnab2_complex	CORUM_5.0	Kcnab2	Prkcz	Sqstm1
+CORUM_Zip3_Prkcz_Gabrr3_complex	CORUM_5.0	Gabrr3	Prkcz	Sqstm1
+CORUM_Alpha_GDI_Hsp90_chaperone_complex_ATP_dependent	CORUM_5.0	Dnajc5	Gdi1	Hsp90aa1	Hspa8
+CORUM_Alpha_GDI_Rab3a_complex_cytosolic	CORUM_5.0	Gdi1	Rab3a
+CORUM_Sharpin_homooligomer	CORUM_5.0	Sharpin
+CORUM_Sharpin_Shank1_complex	CORUM_5.0	Shank1	Sharpin
+CORUM_Calm1_Nos3_complex	CORUM_5.0	Calm1	Nos3
+CORUM_p65_p65_Nf_kappa_B_complex	CORUM_5.0	Rela
+CORUM_Nfkb1_Rela_complex	CORUM_5.0	Nfkb1	Rela
+CORUM_Ksr1_Brap_IMP_complex	CORUM_5.0	Brap	Ksr1
+CORUM_Alb_Tgfbr2_complex	CORUM_5.0	Alb	Tgfbr2
+CORUM_Grm5_Ppp2ca_complex	CORUM_5.0	Grm5	Ppp2ca
+CORUM_Lrp4_Psen1_complex	CORUM_5.0	Lrp4	Psen1
+CORUM_Dlgap1_Dlg4_Begain_complex	CORUM_5.0	Begain	Dlg4	Dlgap1
+CORUM_CABP1_CACNA1C_complex	CORUM_5.0	Cabp1	Cacna1c
+CORUM_Slp1_Rab27b_Crmp2_complex	CORUM_5.0	Dpysl2	Rab27b	Sytl1
+CORUM_Dlg4_Dlgap1_Shank1_complex	CORUM_5.0	Dlg4	Dlgap1	Shank1
+CORUM_DLG4_DLGAP1_SHANK2_complex	CORUM_5.0	Dlg4	Dlgap1	Shank2
+CORUM_Ribosome_associated_complex_RAC_	CORUM_5.0	Dnajc2	Hspa14
+CORUM_Dpysl2_Kif5a_Kif5b_Klc1_Ntrk2_Rab27b_Sytl1_complex	CORUM_5.0	Dpysl2	Kif5a	Kif5b	Klc1	Ntrk2	Rab27b	Sytl1
+CORUM_Tubulin_Crmp2_Klc1_complex	CORUM_5.0	Dpysl2	Klc1	Tuba1a	Tuba1b
+CORUM_PDK1_beta_catenin_complex	CORUM_5.0	Ctnnb1	Pdpk1
+CORUM_Dlg4_Cacng8_complex	CORUM_5.0	Cacng8	Dlg4
+CORUM_Cacng8_Gria1_Gria2_complex	CORUM_5.0	Cacng8	Gria1	Gria2
+CORUM_Calcineurin_subunit_CnA_Cacng8_complex	CORUM_5.0	Cacng8	Ppp3ca
+CORUM_Cacng2_Gria1_Gria2_complex	CORUM_5.0	Cacng2	Gria1	Gria2
+CORUM_Dlg4_Cacng2_complex	CORUM_5.0	Cacng2	Dlg4
+CORUM_Calcineurin_subunit_CnA_Cacng8_Tuba1a_complex	CORUM_5.0	Cacng8	Ppp3ca	Tuba1a
+CORUM_Calcineurin_complex_Calna_Cna2_Gria1_Gria2_Cacng8_	CORUM_5.0	Cacng8	Gria1	Gria2	Ppp3ca	Ppp3r1
+CORUM_Dlg4_Cacng8_Calna_complex	CORUM_5.0	Cacng8	Dlg4	Ppp3ca
+CORUM_AnkG_PKP2_Cx43_complex	CORUM_5.0	Ank3	Gja1	Pkp2
+CORUM_Oprm1_Rgs4_complex	CORUM_5.0	Oprm1	Rgs4
+CORUM_BACE1_UBB_complex	CORUM_5.0	Bace1	Ubb
+CORUM_Bcl2l1_Dnm1l_complex	CORUM_5.0	Bcl2l1	Dnm1l
+CORUM_Bcl2l1_Dnm1l_Mff_Clta_complex	CORUM_5.0	Bcl2l1	Clta	Dnm1l	Mff
+CORUM_APC_Asef_complex	CORUM_5.0	Apc	Arhgef4
+CORUM_APC_Asef_beta_catenin_complex	CORUM_5.0	Apc	Arhgef4	Ctnnb1
+CORUM_Tim23_subcomplex_Hspa9_Timm44_mitochondrial	CORUM_5.0	Hspa9	Timm44
+CORUM_Tim23_sort_subcomplex_Timm17a_Timm23_mitochondrial	CORUM_5.0	Timm17a	Timm23
+CORUM_Cx43_Trim21_complex	CORUM_5.0	Gja1	Trim21
+CORUM_Igsf9b_Magi1_2_complex	CORUM_5.0	Igsf9b	Magi2
+CORUM_Igsf9b_Nlgn2_complex	CORUM_5.0	Igsf9b	Nlgn2
+CORUM_SEP15_UGGT1_complex	CORUM_5.0	Selenof	Uggt1
+CORUM_Igsf9b_Nlgn2_Magi2_complex	CORUM_5.0	Igsf9b	Magi2	Nlgn2
+CORUM_Dcdc2_Kif3a_complex	CORUM_5.0	Dcdc2	Kif3a
+CORUM_Protein_geranylgeranyltransferase_type_1_complex	CORUM_5.0	Fnta	Pggt1b
+CORUM_Fbxw8_Grasp65_complex	CORUM_5.0	Fbxw8	Gorasp1
+CORUM_VANGL2_PSD95_complex	CORUM_5.0	Dlg4	Vangl2
+CORUM_Merlin_ERM_moesin_CD44_complex	CORUM_5.0	Cd44	Ezr	Msn	Nf2
+CORUM_Calm1_Kcnq2_Kcnq3_complex	CORUM_5.0	Calm1	Kcnq2	Kcnq3
+CORUM_Grasp1_Grip1_Glur2_complex	CORUM_5.0	Gria2	Grip1	Gripap1
+CORUM_Fgf12_Nav1_2_complex	CORUM_5.0	Fgf12	Scn2a
+CORUM_Fgf12_Scn11a_complex	CORUM_5.0	Fgf12	Scn11a
+CORUM_GCH1_GCHFR_complex	CORUM_5.0	Gch1	Gchfr
+CORUM_Pdlim1_Alpha_actinin_1_complex	CORUM_5.0	Actn1	Pdlim1
+CORUM_Cpt1a_Acsl1_Vdac1_complex	CORUM_5.0	Acsl1	Cpt1a	Vdac1
+CORUM_Ezr_Nherf2_Podxl_complex	CORUM_5.0	Ezr	Nherf2	Podxl
+CORUM_CUBAM_megalin_complex	CORUM_5.0	Amn	Cubn	Lrp2
+CORUM_c_Jun_Atf3_complex	CORUM_5.0	Atf3	Jun
+CORUM_Bcar1_Crk_Ptk2_Rapgef1_complex	CORUM_5.0	Bcar1	c3g	Crk	Ptk2
+CORUM_Lrp6_Pth_Pth1r_complex	CORUM_5.0	Lrp6	Pth	Pth1r
+CORUM_NMDA_receptor_complex_Grin1_Grin2a_heterotetramer	CORUM_5.0	Grin1	Grin2a
+CORUM_AMPA_receptor_complex_anti_GluA1_a_	CORUM_5.0	Cacng2	Cacng3	Cacng4	Cacng7	Cacng8	Cnih2	Cnih3	Cpt1c	Dlg4	Frrs1l	Gria1	Gria2	Gria3	Gria4	Gsg1l	Nrn1	Olfm1	Olfm2	Olfm3	Prrt1	Prrt2	Shisa9	Vwc2	Vwc2l
+CORUM_AMPA_receptor_complex_anti_GluA1_b_	CORUM_5.0	Cacng2	Cacng3	Cacng4	Cacng7	Cacng8	Cnih2	Cnih3	Cpt1c	Frrs1l	Gria1	Gria2	Gria3	Gria4	Gsg1l	Lrrtm4	Nrn1	Olfm1	Olfm2	Olfm3	Prrt1	Prrt2	Shisa9	Vwc2	Vwc2l
+CORUM_Jun_Fbw7_Prr7_complex	CORUM_5.0	Fbxw7	Jun	Prr7
+CORUM_AMPA_receptor_complex_anti_GluA1_c_	CORUM_5.0	Cacng2	Cacng3	Cacng7	Cnih2	Cnih3	Frrs1l	Gria1	Gria2	Gria3	Gria4	Gsg1l	Nrn1	Olfm1	Olfm2	Olfm3	Prrt1	Prrt2	Shisa9
+CORUM_AMPA_receptor_complex_anti_GluA2_a_	CORUM_5.0	Cacng2	Cacng3	Cacng4	Cnih2	Cnih3	Frrs1l	Gria1	Gria2	Gria3	Gria4	Gsg1l	Nrn1	Olfm1	Olfm2	Olfm3	Prrt1	Vwc2
+CORUM_AMPA_receptor_complex_anti_GluA2_b_	CORUM_5.0	Abhd6	Cacng2	Cacng3	Cacng4	Cacng7	Cacng8	Cnih2	Cnih3	Cpt1c	Frrs1l	Gria1	Gria2	Gria3	Gria4	Gsg1l	Lrrtm4	Nrn1	Olfm1	Olfm2	Olfm3	Prrt1	Prrt2	Shisa9	Vwc2	Vwc2l
+CORUM_AMPA_receptor_complex_anti_GluA2_c_	CORUM_5.0	Cacng2	Cacng3	Cnih2	Cnih3	Frrs1l	Gria1	Gria2	Gria3	Gria4	Gsg1l	Nrn1	Olfm1	Olfm2	Olfm3	Prrt1	Shisa9	Vwc2	Vwc2l
+CORUM_Aqp4_Slc1a2_complex	CORUM_5.0	Aqp4	Slc1a2
+CORUM_Gm130_Grasp65_p115_complex	CORUM_5.0	Golga2	Gorasp1	Uso1
+CORUM_Blzf1_Gorasp2_Rab2a_complex	CORUM_5.0	Blzf1	Gorasp2	Rab2a
+CORUM_Golga2_Gorasp1_complex	CORUM_5.0	Golga2	Gorasp1
+CORUM_Hras_Rgs14_complex	CORUM_5.0	Hras	Rgs14
+CORUM_Braf_Hras_Map2k1_Mapk3_Rgs14_complex	CORUM_5.0	Braf	Hras	Map2k1	Mapk3	Rgs14
+CORUM_Nptxr_Nptx1_complex	CORUM_5.0	Nptx1	Nptxr
+CORUM_Nptxr_Nptx2_complex	CORUM_5.0	Nptx2	Nptxr
+CORUM_Dcd_Slc18a2_Th_complex	CORUM_5.0	Ddc	Slc18a2	Th
+CORUM_Slc18a1_Slc18a2_Th_complex	CORUM_5.0	Slc18a1	Slc18a2	Th
+CORUM_Kif15_Myh10_complex	CORUM_5.0	Kif15	Myh10
+CORUM_Cd2ap_Nphs1_Sept7_complex	CORUM_5.0	Cd2ap	Nphs1	Septin7
+CORUM_Dystrophin_71d_DAPC_complex	CORUM_5.0	Dag1	Dmd	Dtna	Dtna	Dtnb	Nos1	Snta1
+CORUM_Dystrophin_71f_DAPC_complex	CORUM_5.0	Dag1	Dmd	Dtna	Dtna	Dtnb	Nos1	Snta1
+CORUM_Slit_diaphragms_complex	CORUM_5.0	Cd2ap	Cgn	F11r	Kirrel1	Nphs1	Nphs2	Ocln	Tjp1
+CORUM_Lrrc6_Zmynd10_complex	CORUM_5.0	Dnaaf11	Zmynd10
+CORUM_Disc1_Kalrn_Rac1_complex	CORUM_5.0	Disc1	Kalrn	Rac1
+CORUM_Ilf2_Ilf3_Khdrbs1_Ncoa5_Ppp1a_Rbmx_Ylpm1_complex	CORUM_5.0	Ilf2	Ilf3	Khdrbs1	Ncoa5	Ppp1ca	Rbmx	Ylpm1
+CORUM_Kcna1_Kcna2_Kcnab2_complex	CORUM_5.0	Kcna1	Kcna2	Kcnab2
+CORUM_Kcna1_Lgi1_complex	CORUM_5.0	Kcna1	Lgi1
+CORUM_Potassium_channel_complex_Kcna5_Kcnab1_	CORUM_5.0	Kcna5	Kcnab1
+CORUM_Kcna1_Kcna2_complex	CORUM_5.0	Kcna1	Kcna2
+CORUM_Kcna1_Kcna4_complex	CORUM_5.0	Kcna1	Kcna4
+CORUM_Kcna1_Kcna2_Kcna6_complex	CORUM_5.0	Kcna1	Kcna2	Kcna6
+CORUM_Chrna4_Chrnb2_P2rx2_complex	CORUM_5.0	Chrna4	Chrnb2	P2rx2
+CORUM_Adam22_Kcna1_complex	CORUM_5.0	Adam22	Kcna1
+CORUM_Hmga1_Nfkb1_complex	CORUM_5.0	Hmga1	Nfkb1
+CORUM_Git1_Kcna1_complex	CORUM_5.0	Git1	Kcna1
+CORUM_Dlg1_Kcna1_complex	CORUM_5.0	Dlg1	Kcna1
+CORUM_Dlg2_Kcna1_complex	CORUM_5.0	Dlg2	Kcna1
+CORUM_Dlg4_Kcna1_complex	CORUM_5.0	Dlg4	Kcna1
+CORUM_Cntn1_Kcna1_complex	CORUM_5.0	Cntn1	Kcna1
+CORUM_Kidins220_Magi2_Ntrk1_Rapgef2_complex	CORUM_5.0	Kidins220	Magi2	Ntrk1	Rapgef2
+CORUM_Kidins220_Ngfr_Ntrk1_complex	CORUM_5.0	Kidins220	Ngfr	Ntrk1
+CORUM_Kcna1_Kcna4_Kcnab1_Lgi1_complex	CORUM_5.0	Kcna1	Kcna4	Kcnab1	Lgi1
+CORUM_Kcna1_Kcna3_complex	CORUM_5.0	Kcna1	Kcna3
+CORUM_Kcna1_Kcna5_complex	CORUM_5.0	Kcna1	Kcna5
+CORUM_Kcna1_Kcnab1_complex	CORUM_5.0	Kcna1	Kcnab1
+CORUM_Kcna1_Kcnab3_complex	CORUM_5.0	Kcna1	Kcnab3
+CORUM_Kcna1_Stxbp1_complex	CORUM_5.0	Kcna1	Stxbp1
+CORUM_Kcna1_Stx1b_complex	CORUM_5.0	Kcna1	Stx1b
+CORUM_Kcna1_Syt1_complex	CORUM_5.0	Kcna1	Syt1
+CORUM_Igsf5_Magi1_Nphs1_complex	CORUM_5.0	Igsf5	Magi1	Nphs1
+CORUM_Glra1_Glrb_complex	CORUM_5.0	Glra1	Glrb
+CORUM_Glycine_receptor_Glra2_Glrb_	CORUM_5.0	Glra2	Glrb
+CORUM_GABA_A_receptor_Gabra4_Gabrb3_Gabrd_	CORUM_5.0	Gabra4	Gabrb3	Gabrd
+CORUM_Adam22_Dlg2_Dlg4_Kcna2_complex	CORUM_5.0	Adam22	Dlg2	Dlg4	Kcna2
+CORUM_Cntnap2_Kcnab2_complex	CORUM_5.0	Cntnap2	Kcnab2
+CORUM_Cntnap2_Kcna2_complex	CORUM_5.0	Cntnap2	Kcna2
+CORUM_GABA_A_receptor_Gabra1_Gabra2_Gabrg2_	CORUM_5.0	Gabra1	Gabra2	Gabrg2
+CORUM_GABA_A_receptor_Gabra2_Gabrg2_	CORUM_5.0	Gabra2	Gabrg2
+CORUM_GABA_A_receptor_Gabra2_Gabra3_Gabrg2_	CORUM_5.0	Gabra2	Gabra3	Gabrg2
+CORUM_GABA_A_receptor_Gabra5_Gabrb2_Gabrg2_	CORUM_5.0	Gabra5	Gabrb2	Gabrg2
+CORUM_GABA_A_receptor_Gabra5_Gabrb3_Gabrg2_	CORUM_5.0	Gabra5	Gabrb3	Gabrg2
+CORUM_GABA_A_receptor_Gabra2_Gabra5_Gabrd_	CORUM_5.0	Gabra2	Gabra5
+CORUM_GABA_A_receptor_Gabra2_Gabrb1_Gabrg1_Gabrq_	CORUM_5.0	Gabra2	Gabrb1	Gabrg1	Gabrq
+CORUM_Wdr26_Vdac1_complex	CORUM_5.0	Vdac1	Wdr26
+CORUM_Potassium_channel_complex_Kcnb1_Kcne2_Kcne1_Kcnh2_	CORUM_5.0	Kcnb1	Kcne1	Kcne2	Kcnh2
+CORUM_Kcnb1_Kcne1_complex	CORUM_5.0	Kcnb1	Kcne1
+CORUM_Kcnb1_Kcne2_complex	CORUM_5.0	Kcnb1	Kcne2
+CORUM_Mmp2_Timp2_complex	CORUM_5.0	Mmp2	Timp2
+CORUM_Masp1_Mbl2_complex	CORUM_5.0	Masp1	Mbl2
+CORUM_Masp2_Mbl2_complex	CORUM_5.0	Masp2	Mbl2
+CORUM_Blzf1_Gorasp2_complex	CORUM_5.0	Blzf1	Gorasp2
+CORUM_Apc_Axin1_Ctnnb1_Gsk3b_Macf1_complex	CORUM_5.0	Apc	Axin1	Ctnnb1	Gsk3b	Macf1
+CORUM_Adam22_Lgi1_Dlg4_complex	CORUM_5.0	Adam22	Dlg4	Lgi1
+CORUM_Branched_chain_ketoacid_dehydrogenase_complex	CORUM_5.0	Bckdha	Bckdhb	Dbt
+CORUM_Map3k5_Txn2_complex	CORUM_5.0	Map3k5	Txn2
+CORUM_Map3k5_Txnip_complex	CORUM_5.0	Map3k5	Txnip
+CORUM_Txn_Txnip_complex	CORUM_5.0	Txn	Txnip
+CORUM_Gabbr1_Gabbr2_Grm1_complex	CORUM_5.0	Gabbr1	Gabbr2	Grm1
+CORUM_Adora2a_Cnr1_complex	CORUM_5.0	Adora2a	Cnr1
+CORUM_Adora2a_Grm5_complex	CORUM_5.0	Adora2a	Grm5
+CORUM_Drd1_Drd2_complex	CORUM_5.0	Drd1	Drd2
+CORUM_Mitf_Pias3_complex	CORUM_5.0	Mitf	Pias3
+CORUM_Clcn2_Hepacam_Mlc1_complex	CORUM_5.0	Clcn2	Hepacam	Mlc1
+CORUM_Grin2a_Ric3_complex	CORUM_5.0	Grin2a	Ric3
+CORUM_Csnk2a1_Csnk2b_Gga3_Pacs1_complex	CORUM_5.0	Csnk2a1	Csnk2b	Gga3	Pacs1
+CORUM_Tsn_Tsnax_complex	CORUM_5.0	Tsn	Tsnax
+CORUM_Cobl_Pacsin1_complex	CORUM_5.0	Cobl	Pacsin1
+CORUM_Cobl_Pacsin1_Wasl_complex	CORUM_5.0	Cobl	Pacsin1	Wasl
+CORUM_Eif1_Eif1a_Eif3b_preinitiation_complex	CORUM_5.0	Eif1	Eif1a	Eif3b
+CORUM_Ppm1a_Vdr_complex	CORUM_5.0	Ppm1a	Vdr
+CORUM_V_ATPase_brain_specific	CORUM_5.0	Atp6ap1	Atp6ap2	Atp6v0a1	Atp6v0a4	Atp6v0c	Atp6v0d1	Atp6v0e2	Atp6v1b2	Atp6v1c1	Atp6v1d	Atp6v1e1	Atp6v1f	Atp6v1g2	Rnasek
+CORUM_Atp1a2_Fdyx1_complex	CORUM_5.0	Atp1a2	Fxyd1
+CORUM_Septin_complex_hippocampal_neuron	CORUM_5.0	Septin11	Septin2	Septin3	Septin5	Septin6	Septin7
+CORUM_Akt2_Appl1_complex	CORUM_5.0	Akt2	Appl1
+CORUM_Stau2_Zer1_complex	CORUM_5.0	Stau2	Zer1
+CORUM_MPP_complex	CORUM_5.0	Pmpca	Pmpcb
+CORUM_Kcna2_Kcna5_complex	CORUM_5.0	Kcna2	Kcna5
+CORUM_Ctnnb1_Esr1_Gsk3b_complex	CORUM_5.0	Ctnnb1	Esr1	Gsk3b
+CORUM_Ctnnb1_Gsk3b_Mapt_Pik3r_complex	CORUM_5.0	Ctnnb1	Gsk3b	Mapt	Pik3r1
+CORUM_Pex5_Pex14_complex	CORUM_5.0	Pex14	Pex5
+CORUM_Pex2_Pex5_Pex12_Pex14_complex	CORUM_5.0	Pex12	Pex14	Pex2	Pex5
+CORUM_Ache_T_G4_Prima1_complex	CORUM_5.0	Ache	Prima1
+CORUM_Ache_T_ColQ_complex	CORUM_5.0	Ache	Colq
+CORUM_Ache_T_homotetramer	CORUM_5.0	Ache
+CORUM_Ache_T_homodimer	CORUM_5.0	Ache
+CORUM_Ache_Nrxn1_complex	CORUM_5.0	Ache	Nrxn1
+CORUM_NMDA_receptor_complex_Grin2a_Grin3a_	CORUM_5.0	Grin2a	Grin3a
+CORUM_Drd1_Grin2a_complex	CORUM_5.0	Drd1	Grin2a
+CORUM_Drd2_Grin2b_complex	CORUM_5.0	Drd2	Grin2b
+CORUM_Camk2a_Grin2b_complex	CORUM_5.0	Camk2a	Grin2b
+CORUM_Kcnb1_Kcnb2_complex	CORUM_5.0	Kcnb1	Kcnb2
+CORUM_KCNC1_KCNC2_complex	CORUM_5.0	Kcnc1	Kcnc2
+CORUM_Actn2_Grin1_complex	CORUM_5.0	Actn2	Grin1
+CORUM_Actn2_Grin2b_complex	CORUM_5.0	Actn2	Grin2b
+CORUM_Actn2_Dlg4_complex	CORUM_5.0	Actn2	Dlg4
+CORUM_Dlg4_Grin2a_complex	CORUM_5.0	Dlg4	Grin2a
+CORUM_Spta1_Grin2b_complex	CORUM_5.0	Grin2b	Spta1
+CORUM_Spta1_Grin1_complex	CORUM_5.0	Grin1	Spta1
+CORUM_Spta1_Grin2a_complex	CORUM_5.0	Grin2a	Spta1
+CORUM_Adenylate_cyclase_Glp1_Glp1r_complex	CORUM_5.0	Adcy3	Gcg	Glp1r
+CORUM_Dlg4_Grin2b_complex	CORUM_5.0	Dlg4	Grin2b
+CORUM_App695_Grin1_Grin2a_complex	CORUM_5.0	App	Grin1	Grin2a
+CORUM_App695_Grin1_Grin2b_complex	CORUM_5.0	App	Grin1	Grin2b
+CORUM_App695_Grin1_complex	CORUM_5.0	App	Grin1
+CORUM_Arrb1_Glp1_Glp1R_complex	CORUM_5.0	Arrb1	Gcg	Glp1r
+CORUM_Oprd1_Oprm1_complex	CORUM_5.0	Oprd1	Oprm1
+CORUM_Cav1_Insulin_receptor_complex	CORUM_5.0	Cav1	Insr	Insr
+CORUM_Stub1_Gucy1a1_complex	CORUM_5.0	Gucy1a1	Stub1
+CORUM_Dlg4_Gucy1a2_complex	CORUM_5.0	Dlg4	Gucy1a2
+CORUM_Ar_Pias2_complex	CORUM_5.0	Ar	Pias2
+CORUM_Dlg2_Gucy1a2_complex	CORUM_5.0	Dlg2	Gucy1a2
+CORUM_Dlg1_Gucy1a2_complex	CORUM_5.0	Dlg1	Gucy1a2
+CORUM_Dlg3_Gucy1a2_complex	CORUM_5.0	Dlg3	Gucy1a2
+CORUM_Akap6_Pde4d3_complex	CORUM_5.0	Akap6	Pde4d
+CORUM_Kcns3_Kcna5_complex	CORUM_5.0	Kcna5	Kcns3
+CORUM_Cacnc1_Cacnb3_complex	CORUM_5.0	Cacna1c	Cacnb3
+CORUM_Cacnac2_Cacnlb3_complex	CORUM_5.0	Cacnb1	Cacnb3
+CORUM_Ar_Nr3c1_complex	CORUM_5.0	Ar	Nr3c1
+CORUM_Kcnq4_Kcnq5_complex	CORUM_5.0	Kcnq4	Kcnq5
+CORUM_Dlg3_Dlg4_Ptk2b_complex	CORUM_5.0	Dlg3	Dlg4	Ptk2b
+CORUM_Grin2a_Grin2b_Ptk2b_Src_complex	CORUM_5.0	Grin2a	Grin2b	Ptk2b	Src
+CORUM_Grin2a_Ptk2b_Src_complex	CORUM_5.0	Grin2a	Ptk2b	Src
+CORUM_Esr1_Helz2_complex	CORUM_5.0	Esr1	Helz2
+CORUM_Ptk2b_Tgfb1i1_complex	CORUM_5.0	Ptk2b	Tgfb1i1
+CORUM_Kcnk3_Kcnk9_complex	CORUM_5.0	Kcnk3	Kcnk9
+CORUM_Helz2_Ppara_complex	CORUM_5.0	Helz2	Ppara
+CORUM_Dhfr_Hspa2_complex	CORUM_5.0	Dhfr	Hspa2
+CORUM_Helz2_Rxra_complex	CORUM_5.0	Helz2	Rxra
+CORUM_Rxrg_Vdr_complex	CORUM_5.0	Rxrg	Vdr
+CORUM_Hdac4_Hdac5_Kcnip3_complex	CORUM_5.0	Hdac4	Hdac5	Kcnip3
+CORUM_Helz2_Thrb_complex	CORUM_5.0	Helz2	Thrb
+CORUM_Casr_Prkce_complex	CORUM_5.0	Casr	Prkce
+CORUM_Thrb_homodimer	CORUM_5.0	Thrb
+CORUM_Smad3_Vdr_complex	CORUM_5.0	Smad3	Vdr
+CORUM_Gucy1a1_Gucy1b2_complex	CORUM_5.0	Gucy1a1	Gucy1b2
+CORUM_Gucy1a1_Gucy1b1_complex	CORUM_5.0	Gucy1a1	Gucy1b1
+CORUM_Kcnh6_Kcnh7_complex	CORUM_5.0	Kcnh6	Kcnh7
+CORUM_Akt2_Pde3b_complex	CORUM_5.0	Akt2	Pde3b
+CORUM_Drd2_Oxtr_complex	CORUM_5.0	Drd2	Oxtr
+CORUM_Adora2a_Oxtr_complex	CORUM_5.0	Adora2a	Oxtr
+CORUM_Gnrhr_homooligomer_agonist_induced	CORUM_5.0	Gnrhr
+CORUM_Thyrotropin_releasing_hormone_receptor	CORUM_5.0	Trhr
+CORUM_Dlg4_Grik5_complex	CORUM_5.0	Dlg4	Grik5
+CORUM_Dlg3_Grik5_complex	CORUM_5.0	Dlg3	Grik5
+CORUM_Dlg3_Grik2_complex	CORUM_5.0	Dlg3	Grik2
+CORUM_Dlg1_Grik2_complex	CORUM_5.0	Dlg1	Grik2
+CORUM_Dlg4_Grik2_complex	CORUM_5.0	Dlg4	Grik2
+CORUM_Grik2_Grik4_complex	CORUM_5.0	Grik2	Grik4
+CORUM_Grik2_Grik5_complex	CORUM_5.0	Grik2	Grik5
+CORUM_Adora1_Grm1_complex	CORUM_5.0	Adora1	Grm1
+CORUM_Adora2a_Drd2_Grm5_complex	CORUM_5.0	Adora2a	Drd2	Grm5
+CORUM_Grik1_Grik2_complex	CORUM_5.0	Grik1	Grik2
+CORUM_Clcn2_homodimer	CORUM_5.0	Clcn2
+CORUM_Clnc2_Hspa8_complex	CORUM_5.0	Clcn2	Hspa8
+CORUM_Atp2a1_Bcl2_complex	CORUM_5.0	Atp2a1	Bcl2
+CORUM_Bax_Bcl2_complex	CORUM_5.0	Bax	Bcl2
+CORUM_Adora1_P2ry1_complex	CORUM_5.0	Adora1	P2ry1
+CORUM_Adora2a_Fgfr1_complex	CORUM_5.0	Adora2a	Fgfr1
+CORUM_Trpv1_Trpv2_complex	CORUM_5.0	Trpv1	Trpv2
+CORUM_Cbl_Syk_complex	CORUM_5.0	Cbl	Syk
+CORUM_Alpha_1a_adrenergic_receptor_signaling_complex	CORUM_5.0	Adcy5	Adra1a	Cav3	Gnas	Prkaca	Prkar1a
+CORUM_Akap6_Cav3_Kcnd2_Kcnd3_complex	CORUM_5.0	Akap6	Cav3	Kcnd2	Kcnd3
+CORUM_Adra1a_Gnaq_complex	CORUM_5.0	Adra1a	Gnaq
+CORUM_Adra1b_Gnao1_complex	CORUM_5.0	Adra1b	Gnao1
+CORUM_Adra1d_Agtr1_complex	CORUM_5.0	Adra1d	Agtr1
+CORUM_Aip_Pde2a_complex	CORUM_5.0	Aip	Pde3a
+CORUM_Calcineurin_Fkbp1a_Itpr1_complex	CORUM_5.0	Fkbp1a	Itpr1	Ppp3ca	Ppp3r1
+CORUM_Calcineurin_Fkbp1a_Ryr1_complex	CORUM_5.0	Fkbp1a	Ppp3ca	Ppp3r1	Ryr1
+CORUM_Fkbp1a_Mtor_complex	CORUM_5.0	Fkbp1a	Mtor
+CORUM_Fkbp1a_Ryr1_complex	CORUM_5.0	Fkbp1a	Ryr1
+CORUM_Fkbp1a_Ryr3_complex	CORUM_5.0	Fkbp1a	Ryr3
+CORUM_Alpha_2B_adrenergic_receptor	CORUM_5.0	Adra2b
+CORUM_Adra2a_Oprm1_complex	CORUM_5.0	Adra2a	Oprm1
+CORUM_Adra2a_Ppp1r9b_complex	CORUM_5.0	Adra2a	Ppp1r9b
+CORUM_Sstr2A_Sstr3_complex	CORUM_5.0	Sstr2	Sstr3
+CORUM_Somatostatin_receptor_type_2A	CORUM_5.0	Sstr2
+CORUM_Somatostatin_receptor_type_3	CORUM_5.0	Sstr3
+CORUM_Sstr2A_Oprm1_complex	CORUM_5.0	Oprm1	Sstr2
+CORUM_Metabotropic_glutamate_receptor_5	CORUM_5.0	Grm5
+CORUM_Muscarinic_acetylcholine_receptor_M3	CORUM_5.0	Chrm3
+CORUM_Slc22a8_homodimer	CORUM_5.0	Slc22a8
+CORUM_Adrb1_Rapgef2_complex	CORUM_5.0	Adrb1	Rapgef2
+CORUM_Scn3a_Scn1b_complex	CORUM_5.0	Scn1b	Scn3a
+CORUM_Scn3a_Scn3b_complex	CORUM_5.0	Scn3a	Scn3b
+CORUM_P2xr2_P2xr3_complex	CORUM_5.0	P2rx2	P2rx3
+CORUM_Adrb2_Cxcr4_complex	CORUM_5.0	Adrb2	Cxcr4
+CORUM_Agtr1_Jak2_complex	CORUM_5.0	Agtr1	Jak2
+CORUM_Agtr1_Tyk2_complex	CORUM_5.0	Agtr1	Tyk2
+CORUM_Agtr1_Aqp1_complex	CORUM_5.0	Agtr1	Aqp1
+CORUM_Agtr1_Rab5a_complex	CORUM_5.0	Agtr1	Rab5a
+CORUM_Agtr1_Cav3_complex	CORUM_5.0	Agtr1	Cav3
+CORUM_Agtr1_Arrb1_complex	CORUM_5.0	Agtr1	Arrb1
+CORUM_Type_1_angiotensin_II_receptor	CORUM_5.0	Agtr1
+CORUM_Type_2_angiotensin_II_receptor	CORUM_5.0	Agtr2
+CORUM_Agtr2_Bdkrb2_complex	CORUM_5.0	Agtr2	Bdkrb2
+CORUM_Agtr2_Drd3_complex	CORUM_5.0	Agtr2	Drd3
+CORUM_Pgf_Vegfa_complex	CORUM_5.0	Pgf	Vegfa
+CORUM_Gabra5_Gabrb3_Gabrg3_complex	CORUM_5.0	Gabra5	Gabrb3	Gabrg3
+CORUM_Gabra6_Gabrb3_Gabrd_complex	CORUM_5.0	Gabra6	Gabrb3	Gabrd
+CORUM_Aplnr_Oprk1_complex	CORUM_5.0	Aplnr	Oprk1
+CORUM_Adipor1_Agtr1_complex	CORUM_5.0	Adipor1	Agtr1
+CORUM_Bdkrb2_Tbxa2r_complex	CORUM_5.0	Bdkrb2	Tbxa2r
+CORUM_Drd3_Ednrb_complex	CORUM_5.0	Drd3	Ednrb
+CORUM_Agtr1_Ednrb_complex	CORUM_5.0	Agtr1	Ednrb
+CORUM_Ntsr1_Oprk1_complex	CORUM_5.0	Ntsr1	Oprk1
+CORUM_Cholecystokinin_receptor_type_A	CORUM_5.0	Cckar
+CORUM_Chrm4_Eef1a2_complex	CORUM_5.0	Chrm4	Eef1a2
+CORUM_Camk2a_Chrm4_complex	CORUM_5.0	Camk2a	Chrm4
+CORUM_Drd5_Gabrg2_complex	CORUM_5.0	Drd5	Gabrg2
+CORUM_Cacna1d_Gabbr2_complex	CORUM_5.0	Cacna1d	Gabbr2
+CORUM_Adora2a_Hrh3_complex	CORUM_5.0	Adora2a	Hrh3
+CORUM_Kpnb1_Tacr3_complex	CORUM_5.0	Kpnb1	Tacr3
+CORUM_H4c2_Tacr3_complex	CORUM_5.0	H4c2	Tacr3
+CORUM_H3_3b_Tacr3_complex	CORUM_5.0	H3-3b	Tacr3
+CORUM_Ppp1r1b_Sstr1_complex	CORUM_5.0	Ppp1r1b	Sstr1
+CORUM_Ppp1r1b_Sstr2_complex	CORUM_5.0	Ppp1r1b	Sstr2
+CORUM_Ppp1r1b_Sstr3_complex	CORUM_5.0	Ppp1r1b	Sstr3
+CORUM_Ppp1r1b_Sstr4_complex	CORUM_5.0	Ppp1r1b	Sstr4
+CORUM_Ppp1r1b_Sstr5_complex	CORUM_5.0	Ppp1r1b	Sstr5
+CORUM_Egln1_Pde4d_complex	CORUM_5.0	Egln1	Pde4d
+CORUM_Egln1_Hsp90ab1_Ptges3_complex	CORUM_5.0	Egln1	Hsp90ab1	Ptges3
+CORUM_Mkln1_Ptger3alpha_complex	CORUM_5.0	Mkln1	Ptger3
+CORUM_P2X_purinoceptor_2	CORUM_5.0	P2rx2
+CORUM_Ectonucleoside_triphosphate_diphosphohydrolase_1	CORUM_5.0	Entpd1
+CORUM_Entpd1_Entpd2_complex	CORUM_5.0	Entpd1	Entpd2
+CORUM_Entpd1_P2ry1_complex	CORUM_5.0	Entpd1	P2ry1
+CORUM_Entpd1_P2ry2_complex	CORUM_5.0	Entpd1	P2ry2
+CORUM_Entpd1_P2ry12_complex	CORUM_5.0	Entpd1	P2ry12
+CORUM_Entpd1_P2ry13_complex	CORUM_5.0	Entpd1	P2ry13
+CORUM_Adora1_Entpd1_complex	CORUM_5.0	Adora1	Entpd1
+CORUM_Adora2a_Entpd1_complex	CORUM_5.0	Adora2a	Entpd1
+CORUM_P2ry1_P2ry2_complex	CORUM_5.0	P2ry1	P2ry2
+CORUM_P2ry1_P2ry12_complex	CORUM_5.0	P2ry1	P2ry12
+CORUM_P2ry1_P2ry13_complex	CORUM_5.0	P2ry1	P2ry13
+CORUM_Adora2a_P2ry1_complex	CORUM_5.0	Adora2a	P2ry1
+CORUM_P2ry2_P2ry12_complex	CORUM_5.0	P2ry12	P2ry2
+CORUM_P2ry12_P2ry13_complex	CORUM_5.0	P2ry12	P2ry13
+CORUM_Adora1_P2ry12_complex	CORUM_5.0	Adora1	P2ry12
+CORUM_Adora2a_P2ry12_complex	CORUM_5.0	Adora2a	P2ry12
+CORUM_P2ry2_P2ry13_complex	CORUM_5.0	P2ry13	P2ry2
+CORUM_P2Y_purinoceptor_13	CORUM_5.0	P2ry13
+CORUM_Adora1_P2ry13_complex	CORUM_5.0	Adora1	P2ry13
+CORUM_Adora2a_P2ry13_complex	CORUM_5.0	Adora2a	P2ry13
+CORUM_Adora1_P2ry2_complex	CORUM_5.0	Adora1	P2ry2
+CORUM_Adora2a_P2ry2_complex	CORUM_5.0	Adora2a	P2ry2
+CORUM_P2Y_purinoceptor_4	CORUM_5.0	P2ry4
+CORUM_Agtr1_P2ry6_complex	CORUM_5.0	Agtr1	P2ry6
+CORUM_Mu_type_opioid_receptor	CORUM_5.0	Oprm1
+CORUM_Oprk1_Oprm1_complex	CORUM_5.0	Oprk1	Oprm1
+CORUM_Kappa_type_opioid_receptor	CORUM_5.0	Oprk1
+CORUM_Maoa_homodimer	CORUM_5.0	Maoa
+CORUM_Isl1_Pdx1_Setd7_complex	CORUM_5.0	Isl1	Pdx1	Setd7
+CORUM_Dlg4_Gper1_complex	CORUM_5.0	Dlg4	Gper1
+CORUM_Gper1_Paqr8_complex	CORUM_5.0	Gper1	Paqr8
+CORUM_Crhr1_Gper1_complex	CORUM_5.0	Crhr1	Gper1
+CORUM_Gper1_Htr1a_complex	CORUM_5.0	Gper1	Htr1a
+CORUM_Htr1a_Yif1b_complex	CORUM_5.0	Htr1a	Yif1b
+CORUM_Cav1_Htr2a_complex	CORUM_5.0	Cav1	Htr2a
+CORUM_Htr1a_Htr2a_complex	CORUM_5.0	Htr1a	Htr2a
+CORUM_Fgfr1_Htr1a_complex	CORUM_5.0	Fgfr1	Htr1a
+CORUM_Hcrtr2_Htr1a_complex	CORUM_5.0	Hcrtr2	Htr1a
+CORUM_Grm2_Htr2a_complex	CORUM_5.0	Grm2	Htr2a
+CORUM_Grm2_Htr2b_complex	CORUM_5.0	Grm2	Htr2b
+CORUM_Grm2_Grm5_complex	CORUM_5.0	Grm2	Grm5
+CORUM_Dlg4_Htr2a_complex	CORUM_5.0	Dlg4	Htr2a
+CORUM_Agtr1_Htr2b_complex	CORUM_5.0	Agtr1	Htr2b
+CORUM_Grin2a_Htr2c_Src_complex	CORUM_5.0	Grin2a	Htr2c	Src
+CORUM_Fyn_Htr6_complex	CORUM_5.0	Fyn	Htr6
+CORUM_Htr6_Map1b_complex	CORUM_5.0	Htr6	Map1b
+CORUM_Histamine_H3_receptor	CORUM_5.0	Hrh3
+CORUM_Gpc4_Gpr158_complex	CORUM_5.0	Gpc4	Gpr158
+CORUM_Slc6a1_Stx1a_complex	CORUM_5.0	Slc6a1	Stx1a
+CORUM_Slc6a1_Arfgap1_complex	CORUM_5.0	Arfgap1	Slc6a1
+CORUM_Sdcbp_Slc6a1_complex	CORUM_5.0	Sdcbp	Slc6a1
+CORUM_Scamp2_Slc6a4_complex	CORUM_5.0	Scamp2	Slc6a4
+CORUM_Slc6a4_Vamp2_complex	CORUM_5.0	Slc6a4	Vamp2
+CORUM_Gpm6b_Slc6a4_complex	CORUM_5.0	Gpm6b	Slc6a4
+CORUM_Ugcg_homodimer	CORUM_5.0	Ugcg
+CORUM_Prkcz_Slc22a8_complex	CORUM_5.0	Prkcz	Slc22a8
+CORUM_Pdia3_Slc12a3_complex	CORUM_5.0	Pdia3	Slc12a3
+CORUM_Npy1r_Ntrk2_complex	CORUM_5.0	Npy1r	Ntrk2
+CORUM_Galr2_Npy1r_complex	CORUM_5.0	Galr2	Npy1r
+CORUM_Flot1_Flot2_Npc1l1_complex	CORUM_5.0	Flot1	Flot2	Npc1l1
+CORUM_Dpysl2_Dpysl5_Fes_complex	CORUM_5.0	Dpysl2	Dpysl5	Fes
+CORUM_Limk1_Nisch_complex	CORUM_5.0	Limk1	Nisch
+CORUM_Nisch_Pak1_complex	CORUM_5.0	Nisch	Pak1
+CORUM_Fgfr1_Nfasc_complex	CORUM_5.0	Fgfr1	Nfasc
+CORUM_Sv2a_Syt1_complex	CORUM_5.0	Sv2a	Syt1
+CORUM_Gab1_Grb2_Kras_Met_Ptpn11_complex	CORUM_5.0	Gab1	Grb2	Kras	Met	Ptpn11
+CORUM_Slc17a7_Sv2a_complex	CORUM_5.0	Slc17a7	Sv2a
+CORUM_Atp1a1_Scn7a_complex	CORUM_5.0	Atp1a1	Scn7a
+CORUM_Scn1a_Scn2b_complex	CORUM_5.0	Scn1a	Scn2b
+CORUM_Scn2a_Calm1_complex	CORUM_5.0	Calm1	Scn1a
+CORUM_Scn3a_Calm1_complex	CORUM_5.0	Calm1	Scn3a
+CORUM_Adora2a_Ntrk2_complex	CORUM_5.0	Adora2a	Ntrk2
+CORUM_Fyn_Ntrk2_complex	CORUM_5.0	Fyn	Ntrk2
+CORUM_Ntrk2_Src_complex	CORUM_5.0	Ntrk2	Src
+CORUM_Appl1_Gipc1_Ntrk1_complex	CORUM_5.0	Appl1	Gipc1	Ntrk1
+CORUM_Grb2_Ntrk1_complex	CORUM_5.0	Grb2	Ntrk1
+CORUM_Insr_Irs1_Ntrk1_complex	CORUM_5.0	Insr	Irs1	Ntrk1
+CORUM_Ntrk1_Rab5a_Ulk1_complex	CORUM_5.0	Ntrk1	Rab5a	Ulk1
+CORUM_Ntrk3_Ptprs_complex	CORUM_5.0	Ntrk3	Ptprs
+CORUM_Grb2_Pdgfrb_Shc1_complex	CORUM_5.0	Grb2	Pdgfrb	Shc1
+CORUM_AMPK_Prkaa1_Prkab1_Prkag2_	CORUM_5.0	Prkaa1	Prkab1	Prkag2
+CORUM_AMPK_Prkaa1_Prkab2_Prkag2_	CORUM_5.0	Prkaa1	Prkab2	Prkag2
+CORUM_AMPK_Prkaa2_Prkab1_Prkag2_	CORUM_5.0	Prkaa2	Prkab1	Prkag2
+CORUM_AMPK_Prkaa2_Prkab2_Prkag2_	CORUM_5.0	Prkaa2	Prkab2	Prkag2
+CORUM_Inpp5d_Prkcd_Shc1_complex	CORUM_5.0	Inpp5d	Prkcd	Shc1
+CORUM_Crp_Fcer1g_Fcgr1a_complex	CORUM_5.0	Crp	Fcer1g	Fcgr1a
+CORUM_Kcna4_Sigmar1_complex	CORUM_5.0	Kcna4	Sigmar1

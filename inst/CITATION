@@ -1,0 +1,8 @@
+bibentry(
+  bibtype = "Manual",
+  title = "enrichVolcano: Composite Volcano and Enrichment Ring Plots for Proteomics",
+  author = person("Dustyn", "Tubbs"),
+  year = format(Sys.Date(), "%Y"),
+  url = "https://github.com/Dustyn-T-Lewis/enrichVolcano",
+  note = paste0("R package version ", utils::packageVersion("enrichVolcano"))
+)
