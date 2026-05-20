@@ -1,0 +1,11 @@
+#!/bin/sh
+# Strip any AI/assistant attribution from commit messages.
+# Activate once per clone with: git config core.hooksPath .githooks
+f="$1"
+sed -i.bak -E \
+  -e '/[Cc]o-[Aa]uthored-[Bb]y:.*([Cc]laude|[Aa]nthropic|noreply@anthropic)/d' \
+  -e '/[Gg]enerated with.*[Cc]laude/d' \
+  -e '/[Cc]reated with.*[Cc]laude/d' \
+  -e '/🤖/d' \
+  "$f"
+rm -f "$f.bak"
