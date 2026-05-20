@@ -5,7 +5,6 @@ linters: linters_with_defaults(
     commented_code_linter = commented_code_linter(),
     unnecessary_concatenation_linter = unnecessary_concatenation_linter(),
     line_length_linter = line_length_linter(120),
-    cyclocomp_linter = NULL,
     return_linter = return_linter(),
     unnecessary_lambda_linter = unnecessary_lambda_linter()
   )
