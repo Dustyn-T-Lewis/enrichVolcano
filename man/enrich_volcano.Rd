@@ -59,9 +59,14 @@ if NULL).}
 \item{dedup}{List with \code{method} (\code{"jaccard"}, \code{"collapse_fgsea"}, or
 \code{"both"}), \code{cutoff}, and \code{scope}. See \code{\link[=ev_collapse]{ev_collapse()}}.}
 
-\item{ring}{List with \code{max_terms}, \code{order_by}, \code{magnitude}, \code{color}.}
+\item{ring}{List controlling the ring. The composite honours \code{max_terms}
+(cap on pathways drawn); arc height is fixed to \code{-log10(padj)} and fill to
+NES by the canonical layout. For tunable \code{order_by}/\code{magnitude}/\code{color}
+encodings use the standalone \code{\link[=ring_plot]{ring_plot()}}.}
 
-\item{volcano}{List with \code{label_n}, \code{label_by}.}
+\item{volcano}{Reserved. The composite volcano shows up/down significant
+counts rather than per-gene labels; for a labelled volcano use the
+standalone \code{\link[=ev_volcano]{ev_volcano()}} (\code{label_n}, \code{label_by}, \code{label_genes}).}
 
 \item{facet}{List with \code{nrow}, \code{ncol} for patchwork outer layout.}
 

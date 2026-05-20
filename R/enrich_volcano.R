@@ -23,8 +23,13 @@
 #' @param enrich_padj Pathway significance cutoff (default 0.05).
 #' @param dedup List with `method` (`"jaccard"`, `"collapse_fgsea"`, or
 #'   `"both"`), `cutoff`, and `scope`. See [ev_collapse()].
-#' @param ring List with `max_terms`, `order_by`, `magnitude`, `color`.
-#' @param volcano List with `label_n`, `label_by`.
+#' @param ring List controlling the ring. The composite honours `max_terms`
+#'   (cap on pathways drawn); arc height is fixed to `-log10(padj)` and fill to
+#'   NES by the canonical layout. For tunable `order_by`/`magnitude`/`color`
+#'   encodings use the standalone [ring_plot()].
+#' @param volcano Reserved. The composite volcano shows up/down significant
+#'   counts rather than per-gene labels; for a labelled volcano use the
+#'   standalone [ev_volcano()] (`label_n`, `label_by`, `label_genes`).
 #' @param facet List with `nrow`, `ncol` for patchwork outer layout.
 #' @param theme Output of `ev_theme()`.
 #' @return Object of class `c("enrichVolcano", "patchwork")` with
