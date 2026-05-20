@@ -26,7 +26,9 @@
 #' @param seed Integer seed.
 #' @return Tidy tibble: contrast | database | pathway | pval | padj | NES |
 #'   size | leading_edge | mode | direction. fgsea-mode rows also carry
-#'   `ES` and `log2err` (NA for ORA rows). The pathway list used for
+#'   `ES` and `log2err` (NA for ORA rows); ORA-mode rows carry
+#'   `fold_enrichment`, the observed/expected overlap ratio (NA for fgsea
+#'   rows). The pathway list used for
 #'   enrichment is attached as `attr(., "ev_pathways")` and the per-contrast
 #'   gene-level ranking vectors as `attr(., "ev_stats")`, both required by
 #'   `ev_collapse(method = "collapse_fgsea")`.
@@ -79,6 +81,7 @@ ev_enrich <- function(data, contrast,
       log2err      = double(0),
       ES           = double(0),
       NES          = double(0),
+      fold_enrichment = double(0),
       size         = integer(0),
       leading_edge = character(0),
       mode         = character(0),
@@ -167,6 +170,7 @@ ev_ora_one <- function(sub, paths, db_name, ctr, background,
     pval = ora$pval,
     padj = ora$padj,
     NES = NA_real_,
+    fold_enrichment = ora$foldEnrichment,
     size = ora$size,
     leading_edge = vapply(ora$overlapGenes, paste, character(1),
                            collapse = ";"),
