@@ -1,0 +1,129 @@
+# enrichVolcano
+
+## Overview
+
+enrichVolcano builds composite volcano + enrichment ring plots from
+differential abundance results. Volcano on top, enrichment terms as
+labeled arcs underneath, both stitched as a single annotated patchwork.
+Returns a ggplot-compatible object that `ggsave()` saves directly.
+
+The package accepts ten common input formats (tidy, wide-suffix, DEP,
+proteoDA, limma, DESeq2, edgeR, MSstats, proDA, DEqMS, MaxQuant,
+Perseus) via
+[`ev_validate()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_validate.md),
+supports two pi-score variants (Xiao 2014 Eq.1 and Eq.2), four
+p-adjustment methods (BH, Bonferroni, q-value, IHW), and 21 registered
+gene-set databases across seven species.
+
+## Installation
+
+``` r
+
+# Development version
+remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
+```
+
+## A 30-second example
+
+``` r
+
+library(enrichVolcano)
+
+# Load a bundled YvO subsample
+data <- readRDS(system.file("extdata", "examples", "yvo_tidy.rds",
+                            package = "enrichVolcano"))
+
+# Mock pathway sets (skip msigdbr in this demo)
+paths <- list(
+  UP_GENES = head(data$gene[data$logFC > 0], 30),
+  DN_GENES = head(data$gene[data$logFC < 0], 30)
+)
+
+p <- enrich_volcano(
+  data, contrast = "Aging",
+  databases = list(test = paths),
+  p_method = "pi_eq2", p_adjust = "BH",
+  enrich_padj = 0.5
+)
+
+p
+```
+
+The output prints the reconstructible call plus a one-line data summary,
+then renders the patchwork. Both panels share the contrast title.
+
+## Why a composed plot
+
+Volcano panels show per-protein effects. Enrichment plots show
+per-pathway aggregates. Drawing them separately loses the connection
+between a hit and the pathway it drives. The composite preserves the
+hit-to-pathway lineage and produces one figure per contrast instead of
+two.
+
+## Reproducibility
+
+Every output carries two attributes:
+
+- `attr(p, "ev_call")` —
+  [`match.call()`](https://rdrr.io/r/base/match.call.html) for exact
+  reconstruction
+- `attr(p, "ev_data")` — list of intermediate tibbles: validated input,
+  pi-scores, enrichment, dedup result
+
+These let you rebuild any panel without re-running the pipeline.
+
+## Pipeline functions
+
+[`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
+orchestrates eight composable steps, all exported:
+
+``` r
+
+ev_validate()   # input adapter (10 sources)
+pi_score()   # Xiao 2014 Eq.1 or Eq.2
+adjust_p()   # BH / Bonferroni / qvalue / IHW
+ev_enrich()     # fgsea + ORA
+ev_collapse()   # Jaccard pathway dedup
+ev_volcano()    # volcano-only ggplot
+ring_plot()       # enrichment ring ggplot
+ev_compose()    # patchwork composition
+```
+
+Plus
+[`list_databases()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/list_databases.md)
+/
+[`database_info()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/database_info.md)
+for the registry and
+[`ev_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_theme.md)
+for styling.
+
+## Learn more
+
+- [`vignette("enrichVolcano")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/enrichVolcano.md)
+  — 30-second example + pipeline anatomy
+- [`vignette("scoring")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/scoring.md)
+  — pi-score variants, p-value adjustment methods
+- [`vignette("pathway-dedup")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/pathway-dedup.md)
+  — Jaccard vs collapsePathways, scope choices
+- [`vignette("databases")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/databases.md)
+  — 21 databases compared, decision flowchart
+- [`vignette("customising")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customising.md)
+  — themes, palettes, multi-contrast layouts
+- [`vignette("enrichVolcano-faq")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/enrichVolcano-faq.md)
+  — common questions
+
+## Citation
+
+``` r
+
+citation("enrichVolcano")
+```
+
+The package implements the pi-score from Xiao Y et al. (2014)
+*Bioinformatics* 30(6):801, fgsea from Korotkevich G et al. (2021)
+bioRxiv 060012, and Benjamini-Hochberg FDR from Benjamini & Hochberg
+(1995) JRSS B 57(1):289.
+
+## License
+
+MIT

@@ -1,0 +1,274 @@
+# Pathway deduplication
+
+``` r
+
+library(enrichVolcano)
+```
+
+## Why deduplicate
+
+Pathway databases overlap. MSigDB Hallmark has 50 gene sets. Reactome
+has more than 1600 in the same release. KEGG, WikiPathways, and BioCarta
+all describe glycolysis with slightly different boundaries. A single
+fgsea run against three databases will hit “glycolysis” three times
+under three names.
+
+This becomes a figure problem. The ring panel in
+[`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
+shows the top N pathways by `padj`. Without dedup, six of those ten
+slots can describe the same biology with different vocabularies. A
+reader looking at the ring sees “HALLMARK_GLYCOLYSIS,
+REACTOME_GLYCOLYSIS, KEGG_GLYCOLYSIS” and either thinks the result is
+overstated or has to mentally collapse the duplicates anyway.
+
+[`ev_collapse()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_collapse.md)
+does that collapsing in code. There are two methods: one based on
+gene-set overlap, one based on the leading-edge logic inside
+[`fgsea::collapsePathways`](https://rdrr.io/pkg/fgsea/man/collapsePathways.html).
+
+## Jaccard overlap (data-independent)
+
+The Jaccard index is the size of the intersection over the size of the
+union of two sets:
+
+``` math
+J(A, B) = \frac{|A \cap B|}{|A \cup B|}
+```
+
+If A has 50 genes and B has 60, and they share 40, then
+$`J = 40 / 70 \approx 0.57`$. By default
+[`ev_collapse()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_collapse.md)
+calls that a duplicate and keeps the one with the smaller `padj`.
+
+A worked example with two synthetic pathways:
+
+``` r
+
+A <- c("ENO1", "PKM", "GAPDH", "HK2", "ALDOA", "PFKM",
+       "LDHA", "TPI1", "PGAM1", "PGK1")
+B <- c("ENO1", "PKM", "GAPDH", "HK2", "ALDOA", "PFKM",
+       "LDHA", "TPI1", "PGAM1", "ENO2")  # 9 of 10 shared
+
+inter <- length(intersect(A, B))
+uni   <- length(union(A, B))
+inter / uni
+#> [1] 0.8181818
+```
+
+The two glycolysis-style sets share 9 of 11 unique genes;
+$`J \approx 0.82`$. With the default cutoff of 0.5 they would collapse
+to one representative.
+
+A note on the inputs.
+[`ev_collapse()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_collapse.md)
+computes Jaccard on the `leading_edge` column of the enrichment table,
+not on the full pathway gene list. The leading edge is the subset of
+pathway genes that drove the fgsea signal in your data. Two pathways
+that share 50% of their full memberships can still have disjoint leading
+edges in a given study and survive dedup. Two pathways with low overall
+overlap can have identical leading edges and collapse. This makes the
+operation data-aware in practice, even though the index itself is a
+property of the gene sets.
+
+The `keep_by` argument picks the tie-breaker. Default is `padj`
+(smallest wins). `size` keeps the larger gene set, which is useful when
+you want to show the broader category. `NES` keeps the strongest signal
+in either direction.
+
+In the package code (`R/collapse.R`), the loop is short: for each
+cluster of overlapping pathways, sort by `keep_by` and walk the list,
+dropping any pathway whose Jaccard with an already-kept member exceeds
+the cutoff. The output is deterministic given the inputs.
+
+## fgsea::collapsePathways (data-dependent)
+
+`fgsea` ships its own deduplication:
+[`fgsea::collapsePathways()`](https://rdrr.io/pkg/fgsea/man/collapsePathways.html).
+It takes the original `fgsea` result, the ranked gene statistics, and
+the full pathway list. For each pair of significant pathways, it removes
+the leading-edge genes of the more-significant pathway from the rank
+vector and asks whether the less-significant pathway is *still*
+enriched. If not, the less-significant one is dropped because its signal
+came entirely from the same genes that drove the first.
+
+This is conceptually different from Jaccard. Two pathways with low gene
+overlap can still be flagged as redundant if they enrich on the same
+handful of leading-edge genes. Two pathways with high gene overlap can
+still survive if their leading edges happen to be disjoint.
+
+In `enrichVolcano` v0.1, `ev_collapse(method = "collapse_fgsea")` is
+currently a no-op stub. See `NEWS.md` for the reason: full integration
+requires threading the pathway gene sets and the ranked statistics
+through the
+[`ev_collapse()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_collapse.md)
+signature, which is scheduled for v0.2. For production deduplication use
+the default `method = "jaccard"`.
+
+## When to pick which
+
+Jaccard suits aggregated multi-database ring plots and any analysis
+where reproducibility across studies is the priority. Two pipelines
+calling
+[`ev_collapse()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_collapse.md)
+on the same enrichment input with the same cutoff produce the same kept
+set.
+
+`collapsePathways` suits a single-database fgsea report where you want a
+non-redundant top-line story driven by the actual gene rankings in your
+study. The same database analysed in two different studies can give
+different non-redundant lists, because the leading edges differ. That is
+a feature when reporting one experiment and a bug when comparing across
+experiments.
+
+## Scope: within_db vs cross_db
+
+[`ev_collapse()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_collapse.md)
+has three scopes.
+
+    #> # A tibble: 3 × 3
+    #>   scope     groups_dedup_within typical_use                            
+    #>   <chr>     <chr>               <chr>                                  
+    #> 1 within_db contrast + database YvO default; preserves source diversity
+    #> 2 cross_db  contrast only       Mito default; most aggressive          
+    #> 3 global    none                Cross-contrast, cross-database; rare
+
+`within_db` (default) runs Jaccard separately inside each (contrast,
+database) bucket. HALLMARK_GLYCOLYSIS and REACTOME_GLYCOLYSIS will both
+survive, because they live in different databases. This matches the YvO
+2025 pipeline.
+
+`cross_db` runs Jaccard across all databases inside one contrast.
+HALLMARK_GLYCOLYSIS and REACTOME_GLYCOLYSIS now compete; the more
+significant one wins. This matches the Mito 2026 convention.
+
+`global` ignores both database and contrast. It is the most aggressive
+option and rarely the right choice; an Aging pathway and a Training
+pathway can collapse even though they describe different biology.
+
+## Worked example with the YvO subsample
+
+The dedup mechanics are the same whichever fixture you use. The package
+install bundles the YvO results, so the example below uses that:
+
+``` r
+
+fixture <- system.file(
+  "extdata", "examples", "yvo_tidy.rds",
+  package = "enrichVolcano"
+)
+if (!nzchar(fixture)) {
+  fixture <- "../tests/testthat/fixtures/yvo_tidy.rds"
+}
+res <- readRDS(fixture)
+res <- res[!is.na(res$gene) & !is.na(res$contrast), ]
+res <- pi_score(res, variant = "eq2")
+res <- adjust_p(res, method = "BH")
+```
+
+Build two mock databases with a deliberate overlap between
+`HALLMARK_GLYCOLYSIS` (in the first DB) and `REACTOME_GLYCOLYSIS` (in
+the second DB):
+
+``` r
+
+set.seed(7)
+genes <- unique(res$gene)
+core <- sample(genes, 30)
+
+hallmark_mock <- list(
+  HALLMARK_GLYCOLYSIS = c(core, sample(setdiff(genes, core), 10)),
+  HALLMARK_OXPHOS     = sample(genes, 25),
+  HALLMARK_APOPTOSIS  = sample(genes, 20)
+)
+reactome_mock <- list(
+  REACTOME_GLYCOLYSIS = c(core, sample(setdiff(genes, core), 5)),
+  REACTOME_TCA        = sample(genes, 18),
+  REACTOME_BETAOX     = sample(genes, 22)
+)
+```
+
+`HALLMARK_GLYCOLYSIS` and `REACTOME_GLYCOLYSIS` share the 30 `core`
+genes plus a few extras; their pairwise Jaccard sits well above 0.5.
+
+Run enrichment and collapse:
+
+``` r
+
+e <- ev_enrich(
+  res,
+  contrast = "Training_Old",
+  databases = list(hallmark_mock = hallmark_mock,
+                   reactome_mock = reactome_mock),
+  enrich_mode = "fgsea",
+  rank_by = "logFC",
+  min_size = 5, max_size = 200
+)
+e[, c("database", "pathway", "padj", "NES")]
+#> # A tibble: 6 × 4
+#>   database      pathway              padj    NES
+#>   <chr>         <chr>               <dbl>  <dbl>
+#> 1 hallmark_mock HALLMARK_APOPTOSIS  0.708  0.802
+#> 2 hallmark_mock HALLMARK_GLYCOLYSIS 0.157 -1.59 
+#> 3 hallmark_mock HALLMARK_OXPHOS     0.708  0.777
+#> 4 reactome_mock REACTOME_BETAOX     0.694 -0.802
+#> 5 reactome_mock REACTOME_GLYCOLYSIS 0.316 -1.39 
+#> 6 reactome_mock REACTOME_TCA        0.694  0.985
+```
+
+Apply Jaccard dedup at two scopes:
+
+``` r
+
+d_within <- ev_collapse(e, method = "jaccard", cutoff = 0.5,
+                        scope = "within_db")
+d_cross  <- ev_collapse(e, method = "jaccard", cutoff = 0.5,
+                        scope = "cross_db")
+c(within_db_kept = sum(d_within$dedup_kept),
+  cross_db_kept  = sum(d_cross$dedup_kept))
+#> within_db_kept  cross_db_kept 
+#>              6              5
+```
+
+With `within_db`, every pathway is kept: the two glycolysis sets live in
+different databases and never get compared. With `cross_db`, the two
+glycolysis sets compete and the higher-`padj` one is dropped.
+
+Inspect the `dedup_kept` flag directly:
+
+``` r
+
+d_cross[, c("database", "pathway", "padj", "dedup_kept")]
+#> # A tibble: 6 × 4
+#>   database      pathway              padj dedup_kept
+#>   <chr>         <chr>               <dbl> <lgl>     
+#> 1 hallmark_mock HALLMARK_APOPTOSIS  0.708 TRUE      
+#> 2 hallmark_mock HALLMARK_GLYCOLYSIS 0.157 TRUE      
+#> 3 hallmark_mock HALLMARK_OXPHOS     0.708 TRUE      
+#> 4 reactome_mock REACTOME_BETAOX     0.694 TRUE      
+#> 5 reactome_mock REACTOME_GLYCOLYSIS 0.316 FALSE     
+#> 6 reactome_mock REACTOME_TCA        0.694 TRUE
+```
+
+[`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md)
+and
+[`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
+both honour `dedup_kept` and only plot rows where it is `TRUE`. If you
+want to compare before and after in the same figure, run
+[`ev_enrich()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_enrich.md)
+once, then call
+[`ev_collapse()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_collapse.md)
+with two different scopes and pass each result to
+[`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md)
+separately.
+
+Next: how to pick the right gene-set database for your question. See
+[`vignette("databases")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/databases.md).
+
+## References
+
+Korotkevich G, Sukhov V, Sergushichev A. Fast gene set enrichment
+analysis. *bioRxiv* 060012 (2019). (fgsea package)
+
+Subramanian A, Tamayo P, Mootha VK, et al. Gene set enrichment analysis:
+a knowledge-based approach for interpreting genome-wide expression
+profiles. *PNAS* 102(43):15545-15550 (2005).

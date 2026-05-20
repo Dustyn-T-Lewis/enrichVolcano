@@ -1,0 +1,14 @@
+pandoc: 3.8.3
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles:
+  customising: customising.html
+  databases: databases.html
+  enrichVolcano-faq: enrichVolcano-faq.html
+  enrichVolcano: enrichVolcano.html
+  pathway-dedup: pathway-dedup.html
+  scoring: scoring.html
+last_built: 2026-05-20T14:14Z
+urls:
+  reference: https://Dustyn-T-Lewis.github.io/enrichVolcano/reference
+  article: https://Dustyn-T-Lewis.github.io/enrichVolcano/articles
