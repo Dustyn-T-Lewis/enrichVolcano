@@ -242,6 +242,9 @@ ev_tick_data <- function(ring_data, volc_df,
 #' @param title Plot title (defaults to the contrast name).
 #' @param volcano_radius Inner volcano radius.
 #' @param p_threshold Significance cutoff applied to `pi_eq2` for up/down calls.
+#' @param logfc_threshold Effect-size cutoff; a point is called up/down only when
+#'   `abs(logFC) >= logfc_threshold` as well as significant. Default `0` keeps
+#'   every significant point; `enrich_volcano()` passes its own default.
 #' @param point_size,point_alpha Volcano point aesthetics.
 #' @param label_size Pathway-label text size.
 #' @param disc_color Optional fill for a tinted central disc (default NULL = none).
@@ -250,6 +253,7 @@ ev_tick_data <- function(ring_data, volc_df,
 #' @export
 ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
                             volcano_radius = 3.5, p_threshold = 0.05,
+                            logfc_threshold = 0,
                             disc_color = NULL,
                             point_size = 0.9, point_alpha = 0.6,
                             label_size = 2.6, theme = ev_theme()) {
@@ -261,8 +265,9 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
   v$neg_log10p <- -log10(v$P.Value)
   v <- v[is.finite(v$neg_log10p), , drop = FALSE]
   score <- if ("pi_eq2" %in% colnames(v)) v$pi_eq2 else v$P.Value
-  v$direction <- ifelse(score < p_threshold & v$logFC > 0, "up",
-                        ifelse(score < p_threshold & v$logFC < 0, "down", "ns"))
+  sig <- score < p_threshold
+  v$direction <- ifelse(sig & v$logFC >= logfc_threshold, "up",
+                        ifelse(sig & v$logFC <= -logfc_threshold, "down", "ns"))
   n_up <- sum(v$direction == "up")
   n_down <- sum(v$direction == "down")
 
