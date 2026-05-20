@@ -63,32 +63,45 @@ and
 [`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md)
 read the palette out of `theme$palette` at draw time.
 
+## Two ways to plot
+
+[`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
+is the opinionated hero: it returns the canonical volcano-in-ring
+composite with fixed encodings (up/down counts on the volcano, arc
+height = `-log10(padj)`, fill = NES). It is tuned through `p_threshold`,
+`enrich_padj`, `dedup`, `ring$max_terms`, `facet`, and `theme`.
+
+When you need per-gene labels or different ring encodings, drop down to
+the standalone trio the package also exports —
+[`ev_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.md),
+[`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md),
+and
+[`ev_compose()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_compose.md)
+— and assemble the panels yourself. The rest of this vignette uses those
+functions for the tunable options.
+
 ## Volcano label control
 
-The volcano panel honours two label arguments passed through the
-`volcano` list to
-[`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md).
+The composite volcano reports up/down counts rather than labelling
+genes. For a labelled volcano, call
+[`ev_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.md)
+directly. `label_n` is the number of top genes to label and `label_by`
+is the ranking column (`"pi_eq2"`, `"pi_eq1"`, `"adj.P.Val"`, or
+`"logFC"`; smaller is better for pi-score and p-value columns, absolute
+value for `logFC`).
 
 ``` r
 
-p <- enrich_volcano(
-  data     = yvo,
+p_volcano <- ev_volcano(
+  yvo,
   contrast = "Aging",
-  volcano  = list(
-    label_n  = 10,
-    label_by = "pi_eq2"
-  )
+  label_n  = 10,
+  label_by = "pi_eq2"
 )
 ```
 
-`label_n` is the number of top genes to label. `label_by` is the column
-used to rank them: `"pi_eq2"`, `"pi_eq1"`, `"adj.P.Val"`, or `"logFC"`.
-Smaller is better for pi-score and p-value columns; absolute value is
-used for `logFC`.
-
-To force-label a specific set of genes regardless of rank, call
-[`ev_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.md)
-directly with `label_genes`:
+To force-label a specific set of genes regardless of rank, add
+`label_genes`:
 
 ``` r
 
@@ -101,16 +114,11 @@ p_volcano <- ev_volcano(
 )
 ```
 
-[`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
-in v0.1 forwards `label_n` and `label_by` to
-[`ev_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.md)
-but does not pass `label_genes` through the `volcano` list. Forwarding
-is planned for v0.2. Until then, build the volcano panel with
-[`ev_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.md),
-the ring with
-[`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md),
-and stitch with
-[`ev_compose()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_compose.md).
+Build the matching ring with
+[`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md)
+and stitch the two with
+[`ev_compose()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_compose.md)
+to get a labelled composite.
 
 `ggrepel` parameters are set inside
 [`ev_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.md):
@@ -136,21 +144,27 @@ is a plain ggplot, so any ggplot2 modifier works.
 
 ## Ring encodings
 
-The ring panel maps three pathway-level columns to three visual
-channels. All three are exposed through the `ring` list.
+In the hero composite the ring encoding is fixed (arc height =
+`-log10(padj)`, fill = NES) and only `ring$max_terms` is tunable. To
+remap the visual channels, draw the ring with the standalone
+[`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md),
+which exposes three encodings. Start from an enrichment table:
 
 ``` r
 
-p <- enrich_volcano(
-  data     = yvo,
-  contrast = "Aging",
-  ring     = list(
-    max_terms = 8,
-    order_by  = "padj",
-    order_dir = "asc",
-    magnitude = "neg_log_padj",
-    color     = "nes"
-  )
+enr <- ev_enrich(yvo, contrast = "Aging",
+                 databases = list(mock = mock_msigdb), enrich_mode = "fgsea")
+```
+
+``` r
+
+p_ring <- ring_plot(
+  enr, contrast = "Aging",
+  max_terms = 8,
+  order_by  = "padj",
+  order_dir = "asc",
+  magnitude = "neg_log_padj",
+  color     = "nes"
 )
 ```
 
@@ -167,32 +181,28 @@ and `"direction"` (categorical: up red, down blue).
 `order_dir = "asc"` or `"desc"` to flip direction.
 
 A practical example: map arc thickness to gene count and arc fill to
-NES, ordered by absolute NES:
+NES, ordered by descending NES:
 
 ``` r
 
-p <- enrich_volcano(
-  data     = yvo,
-  contrast = "Aging",
-  ring     = list(
-    max_terms = 8,
-    order_by  = "NES",
-    order_dir = "desc",
-    magnitude = "gene_count",
-    color     = "nes"
-  )
+p_ring <- ring_plot(
+  enr, contrast = "Aging",
+  max_terms = 8,
+  order_by  = "NES",
+  order_dir = "desc",
+  magnitude = "gene_count",
+  color     = "nes"
 )
 ```
 
-This layout shows the biggest pathways first and uses fill for
-direction, which works well when reviewers want to see effect size at a
-glance.
+This layout shows the biggest pathways first, which works well when
+reviewers want to see effect size at a glance.
 
 ## Multi-contrast layouts
 
 Pass a vector to `contrast` to build one volcano-ring pair per contrast.
-[`ev_compose()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_compose.md)
-arranges the pairs into a single patchwork.
+[`patchwork::wrap_plots()`](https://patchwork.data-imaginist.com/reference/wrap_plots.html)
+arranges the pairs into a single figure.
 
 ``` r
 
@@ -206,35 +216,35 @@ p <- enrich_volcano(
 ```
 
 `facet$nrow` and `facet$ncol` go to
-[`patchwork::plot_layout()`](https://patchwork.data-imaginist.com/reference/plot_layout.html).
-The result is a 2x2 grid of volcano-ring pairs. Each pair keeps its own
-contrast title; the outer layout collects guides into a single legend
-strip via `plot_layout(guides = "collect")`.
+[`patchwork::wrap_plots()`](https://patchwork.data-imaginist.com/reference/wrap_plots.html).
+The result is a 2x2 grid of volcano-ring pairs, each keeping its own
+contrast title.
 
-The 4-contrast YvO example produces the same composite that appears in
-F02 of the YvO 2025 pipeline. The fixture has the four contrasts needed;
+The 4-contrast YvO example mirrors the composite that appears in F03 of
+the YvO 2025 pipeline. The fixture has the four contrasts needed;
 substitute a real database for `mock_msigdb` to reproduce the published
 figure.
 
 ## Term-label cleaning
 
 Ring labels can be long. `HALLMARK_OXIDATIVE_PHOSPHORYLATION` is 35
-characters and crowds the ring. `ev_default_clean_label()` strips the
-database prefix (`HALLMARK_`, `REACTOME_`, `KEGG_LEGACY_`,
+characters and crowds the ring. By default
+[`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md)
+strips the database prefix (`HALLMARK_`, `REACTOME_`, `KEGG_LEGACY_`,
 `KEGG_MEDICUS_`) and replaces underscores with spaces, leaving
-`Oxidative Phosphorylation`.
+`Oxidative Phosphorylation`. (The hero composite uses a richer cleaner
+that also expands common acronyms and wraps long names.)
 
-The default fires automatically inside
-[`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md).
-For v0.1, the clean function is fixed. A custom override
-(`ring$label_clean_fn = function(x) gsub(...)`) is planned for v0.2.
-Until then, post-process the ggplot returned by
-[`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md):
+[`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md)
+accepts a `label_clean_fn` argument, so you can supply your own naming
+function instead of the default:
 
 ``` r
 
-p <- ring_plot(enr, contrast = "Aging")
-p$data$label <- gsub("Oxidative", "OxPhos", p$data$label)
+p_ring <- ring_plot(
+  enr, contrast = "Aging",
+  label_clean_fn = function(x) gsub("Oxidative", "OxPhos", x)
+)
 ```
 
 This works because the label data lives on the ggplot, not in a separate
@@ -250,14 +260,19 @@ returns a patchwork. `ggsave()` works directly:
 ggplot2::ggsave("fig.pdf", p, width = 180, height = 120, units = "mm")
 ```
 
-A sizing gotcha: nested patchwork annotations need
-`plot_layout(guides = "collect")` at the outer level to share legends.
-[`ev_compose()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_compose.md)
-already sets this, so multi-contrast figures collect guides
-automatically. If you wrap an
+A sizing gotcha: each contrast panel carries its own NES colourbar, so a
+multi-contrast figure shows one legend per panel. To share a single
+legend, collect guides at the outer level:
+
+``` r
+
+p & patchwork::plot_layout(guides = "collect")
+```
+
+The same applies if you wrap an
 [`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
-result inside a larger patchwork, set `guides = "collect"` again at the
-new outer level or the legends will multiply.
+result inside a larger patchwork: set `guides = "collect"` at the new
+outer level or the legends will multiply.
 
 Common sizes for journal submission:
 

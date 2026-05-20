@@ -109,7 +109,7 @@ from the test fixtures.</p>
 <span><span class="co">#&gt; 3 2.369003e-06     -1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">contrast</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Aging"          "Interaction"    "Training_Old"   "Training_Young"</span></span></code></pre></div>
-<p>The fixture has 1000 protein rows across four contrasts (Aging,
+<p>The fixture has 400 protein rows across four contrasts (Aging,
 Training_Young, Training_Old, Interaction). Each row already has
 <code>logFC</code>, <code>P.Value</code>, and
 <code>adj.P.Val</code>.</p>
@@ -137,9 +137,7 @@ database:</p>
 <span>  databases  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mock <span class="op">=</span> <span class="va">mock_msigdb</span><span class="op">)</span>,</span>
 <span>  enrich_padj <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  enrich_mode <span class="op">=</span> <span class="st">"fgsea"</span>,</span>
-<span>  ring   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>max_terms <span class="op">=</span> <span class="fl">5</span>, order_by <span class="op">=</span> <span class="st">"padj"</span>,</span>
-<span>                magnitude <span class="op">=</span> <span class="st">"neg_log_padj"</span>, color <span class="op">=</span> <span class="st">"nes"</span><span class="op">)</span>,</span>
-<span>  volcano <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>label_n <span class="op">=</span> <span class="fl">8</span>, label_by <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span>  ring   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>max_terms <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">fig</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -147,8 +145,7 @@ database:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call: `enrich_volcano(data = yvo, contrast = "Aging", databases = list(mock =</span></span>
 <span><span class="co">#&gt; mock_msigdb), enrich_mode = "fgsea", enrich_padj = 1, ring = list(max_terms =</span></span>
-<span><span class="co">#&gt; 5, order_by = "padj", magnitude = "neg_log_padj", color = "nes"), volcano =</span></span>
-<span><span class="co">#&gt; list(label_n = 8, label_by = NULL))`</span></span>
+<span><span class="co">#&gt; 5))`</span></span>
 <span><span class="co">#&gt; Contrasts: 4</span></span>
 <span><span class="co">#&gt; Proteins: 400</span></span>
 <span><span class="co">#&gt; Significant pathways (post-dedup): 0</span></span></code></pre></div>
@@ -161,20 +158,25 @@ Reactome collections.</p>
 <div class="section level2">
 <h2 id="anatomy-of-the-output">Anatomy of the output<a class="anchor" aria-label="anchor" href="#anatomy-of-the-output"></a>
 </h2>
-<p>The volcano panel maps <code>logFC</code> to the x-axis and
-<code>-log10(pi_eq2)</code> to the y-axis. Significance is decided by
-<code>p_threshold</code> on the y-column and
-<code>logfc_threshold</code> on the x-column; coloured points cross both
-cut-offs. The top <code>label_n</code> genes are tagged with
-<code>ggrepel</code>.</p>
-<p>The ring panel uses <code><a href="https://ggforce.data-imaginist.com/reference/geom_arc_bar.html" class="external-link">ggforce::geom_arc_bar</a></code>. Each pathway
-becomes one arc segment. Arc thickness encodes <code>magnitude</code>
-(default <code>-log10(padj)</code>), arc fill encodes <code>color</code>
-(default <code>NES</code>). <code>split_by_direction = TRUE</code> puts
-up-regulated pathways on the top half-circle and down-regulated ones on
-the bottom.</p>
-<p>Both panels share the contrast name as a title. The composite is a
-<code>patchwork</code> object, which means it supports <code>+</code>,
+<p>The volcano sits at the centre: <code>logFC</code> on the x-axis,
+<code>-log10(pi_eq2)</code> on the y-axis. A point is called up or down
+when its pi-score clears <code>p_threshold</code> (default 0.05) and its
+<code>logFC</code> is positive or negative; the panel reports the up and
+down counts in coloured boxes rather than labelling individual genes.
+(For a labelled standalone volcano with <code>ggrepel</code>, call
+<code><a href="../reference/ev_volcano.html">ev_volcano()</a></code> — see
+<code><a href="../articles/customising.html">vignette("customising")</a></code>.)</p>
+<p>The enrichment ring wraps the volcano, drawn with
+<code><a href="https://ggforce.data-imaginist.com/reference/geom_arc_bar.html" class="external-link">ggforce::geom_arc_bar</a></code> in a fixed Cartesian layout (no
+<code>coord_polar</code>). Up-regulated pathways cluster on the right
+(centred at 90°) and down-regulated on the left (270°), so direction
+reads at a glance. Each arc’s outer radius encodes
+<code>-log10(padj)</code> (taller = more significant) and its fill
+encodes NES on a colourblind-safe blue-white-red diverging scale. Short
+radial ticks under each arc mark its leading-edge genes, coloured by the
+sign of their fold change.</p>
+<p>The contrast name is the title. The composite is a
+<code>patchwork</code> object, so it supports the <code>+</code>,
 <code>/</code>, and <code>|</code> operators for further layout.</p>
 <p>Two attributes hold the intermediate state:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -192,9 +194,7 @@ the bottom.</p>
 <span><span class="co">#&gt;   ..- attr(*, "ev_stats")=List of 1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fig</span>, <span class="st">"ev_call"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; enrich_volcano(data = yvo, contrast = "Aging", databases = list(mock = mock_msigdb), </span></span>
-<span><span class="co">#&gt;     enrich_mode = "fgsea", enrich_padj = 1, ring = list(max_terms = 5, </span></span>
-<span><span class="co">#&gt;         order_by = "padj", magnitude = "neg_log_padj", color = "nes"), </span></span>
-<span><span class="co">#&gt;     volcano = list(label_n = 8, label_by = NULL))</span></span></code></pre></div>
+<span><span class="co">#&gt;     enrich_mode = "fgsea", enrich_padj = 1, ring = list(max_terms = 5))</span></span></code></pre></div>
 <p><code>ev_data</code> is a list with four tibbles: the validated
 input, the pi-score table, the raw <code><a href="../reference/ev_enrich.html">ev_enrich()</a></code> output, and
 the post-dedup enrichment table. <code>ev_call</code> is the literal
@@ -204,9 +204,8 @@ from the object alone.</p>
 <div class="section level2">
 <h2 id="the-pipeline-under-the-hood">The pipeline under the hood<a class="anchor" aria-label="anchor" href="#the-pipeline-under-the-hood"></a>
 </h2>
-<p><code><a href="../reference/enrich_volcano.html">enrich_volcano()</a></code> is a thin wrapper over eight exported
-functions. Each can be called on its own if you want to step through the
-workflow or swap in a custom stage.</p>
+<p><code><a href="../reference/enrich_volcano.html">enrich_volcano()</a></code> chains the exported pipeline stages and
+then draws the canonical composite:</p>
 <ol style="list-style-type: decimal">
 <li>
 <code>ev_validate(data)</code> detects the input format and renames
@@ -220,26 +219,26 @@ pi-score and writes it to <code>pi_eq2</code>.</li>
 <code>adj.P.Val</code> from the raw p-values within each contrast.</li>
 <li>
 <code>ev_enrich(data, contrast, databases)</code> runs
-<code>fgsea</code> and <code>fora</code> against the requested pathway
-sets.</li>
+<code>fgsea</code> (and optionally <code>fora</code>) against the
+requested pathway sets, ranking genes by the signed statistic
+<code>sign(logFC) * -log10(P)</code>.</li>
 <li>
 <code>ev_collapse(enrich, method = "jaccard")</code> removes
 redundant pathways with overlapping leading-edge gene sets.</li>
 <li>
-<code>ev_volcano(data, contrast)</code> draws the volcano
-panel.</li>
-<li>
-<code>ring_plot(enrich_result, contrast)</code> draws the ring
-panel.</li>
-<li>
-<code>ev_compose(volcano_plots, ring_plots)</code> stitches the
-panels into a <code>patchwork</code> and attaches <code>ev_data</code>
-and <code>ev_call</code>.</li>
+<code>ev_volcano_ring(volcano_sub, enrich_sub)</code> draws one
+volcano-in-ring composite per contrast;
+<code><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html" class="external-link">patchwork::wrap_plots()</a></code> arranges multiple contrasts and
+attaches <code>ev_data</code> and <code>ev_call</code>.</li>
 </ol>
-<p>Each function is exported because a real analysis often needs to stop
-between steps. A common pattern is to compute pi-scores once, write the
-table to disk, and re-enter the pipeline at <code><a href="../reference/ev_enrich.html">ev_enrich()</a></code>
-with different database choices.</p>
+<p>Stages 1-5 are exported, so a real analysis can stop between them — a
+common pattern is to compute pi-scores once, write the table to disk,
+and re-enter at <code><a href="../reference/ev_enrich.html">ev_enrich()</a></code> with different database
+choices. For a panel layout you assemble yourself, the package also
+ships the standalone trio <code><a href="../reference/ev_volcano.html">ev_volcano()</a></code> +
+<code><a href="../reference/ring_plot.html">ring_plot()</a></code> + <code><a href="../reference/ev_compose.html">ev_compose()</a></code>, which expose the
+tunable label and ring-encoding options the opinionated composite keeps
+fixed (see <code><a href="../articles/customising.html">vignette("customising")</a></code>).</p>
 </div>
 <div class="section level2">
 <h2 id="what-next">What next<a class="anchor" aria-label="anchor" href="#what-next"></a>

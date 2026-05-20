@@ -93,11 +93,18 @@ enrich_volcano(
 
 - ring:
 
-  List with `max_terms`, `order_by`, `magnitude`, `color`.
+  List controlling the ring. The composite honours `max_terms` (cap on
+  pathways drawn); arc height is fixed to `-log10(padj)` and fill to NES
+  by the canonical layout. For tunable `order_by`/`magnitude`/`color`
+  encodings use the standalone
+  [`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md).
 
 - volcano:
 
-  List with `label_n`, `label_by`.
+  Reserved. The composite volcano shows up/down significant counts
+  rather than per-gene labels; for a labelled volcano use the standalone
+  [`ev_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.md)
+  (`label_n`, `label_by`, `label_genes`).
 
 - facet:
 

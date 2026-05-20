@@ -49,7 +49,7 @@ unique(yvo$contrast)
 #> [1] "Aging"          "Interaction"    "Training_Old"   "Training_Young"
 ```
 
-The fixture has 1000 protein rows across four contrasts (Aging,
+The fixture has 400 protein rows across four contrasts (Aging,
 Training_Young, Training_Old, Interaction). Each row already has
 `logFC`, `P.Value`, and `adj.P.Val`.
 
@@ -83,9 +83,7 @@ fig <- enrich_volcano(
   databases  = list(mock = mock_msigdb),
   enrich_padj = 1,
   enrich_mode = "fgsea",
-  ring   = list(max_terms = 5, order_by = "padj",
-                magnitude = "neg_log_padj", color = "nes"),
-  volcano = list(label_n = 8, label_by = NULL)
+  ring   = list(max_terms = 5)
 )
 fig
 #> 
@@ -93,8 +91,7 @@ fig
 #> 
 #> Call: `enrich_volcano(data = yvo, contrast = "Aging", databases = list(mock =
 #> mock_msigdb), enrich_mode = "fgsea", enrich_padj = 1, ring = list(max_terms =
-#> 5, order_by = "padj", magnitude = "neg_log_padj", color = "nes"), volcano =
-#> list(label_n = 8, label_by = NULL))`
+#> 5))`
 #> Contrasts: 4
 #> Proteins: 400
 #> Significant pathways (post-dedup): 0
@@ -109,21 +106,28 @@ in for the real Hallmark or Reactome collections.
 
 ## Anatomy of the output
 
-The volcano panel maps `logFC` to the x-axis and `-log10(pi_eq2)` to the
-y-axis. Significance is decided by `p_threshold` on the y-column and
-`logfc_threshold` on the x-column; coloured points cross both cut-offs.
-The top `label_n` genes are tagged with `ggrepel`.
+The volcano sits at the centre: `logFC` on the x-axis, `-log10(pi_eq2)`
+on the y-axis. A point is called up or down when its pi-score clears
+`p_threshold` (default 0.05) and its `logFC` is positive or negative;
+the panel reports the up and down counts in coloured boxes rather than
+labelling individual genes. (For a labelled standalone volcano with
+`ggrepel`, call
+[`ev_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.md)
+— see
+[`vignette("customising")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customising.md).)
 
-The ring panel uses
-[`ggforce::geom_arc_bar`](https://ggforce.data-imaginist.com/reference/geom_arc_bar.html).
-Each pathway becomes one arc segment. Arc thickness encodes `magnitude`
-(default `-log10(padj)`), arc fill encodes `color` (default `NES`).
-`split_by_direction = TRUE` puts up-regulated pathways on the top
-half-circle and down-regulated ones on the bottom.
+The enrichment ring wraps the volcano, drawn with
+[`ggforce::geom_arc_bar`](https://ggforce.data-imaginist.com/reference/geom_arc_bar.html)
+in a fixed Cartesian layout (no `coord_polar`). Up-regulated pathways
+cluster on the right (centred at 90°) and down-regulated on the left
+(270°), so direction reads at a glance. Each arc’s outer radius encodes
+`-log10(padj)` (taller = more significant) and its fill encodes NES on a
+colourblind-safe blue-white-red diverging scale. Short radial ticks
+under each arc mark its leading-edge genes, coloured by the sign of
+their fold change.
 
-Both panels share the contrast name as a title. The composite is a
-`patchwork` object, which means it supports `+`, `/`, and `|` operators
-for further layout.
+The contrast name is the title. The composite is a `patchwork` object,
+so it supports the `+`, `/`, and `|` operators for further layout.
 
 Two attributes hold the intermediate state:
 
@@ -143,9 +147,7 @@ str(attr(fig, "ev_data"), max.level = 1)
 #>   ..- attr(*, "ev_stats")=List of 1
 attr(fig, "ev_call")
 #> enrich_volcano(data = yvo, contrast = "Aging", databases = list(mock = mock_msigdb), 
-#>     enrich_mode = "fgsea", enrich_padj = 1, ring = list(max_terms = 5, 
-#>         order_by = "padj", magnitude = "neg_log_padj", color = "nes"), 
-#>     volcano = list(label_n = 8, label_by = NULL))
+#>     enrich_mode = "fgsea", enrich_padj = 1, ring = list(max_terms = 5))
 ```
 
 `ev_data` is a list with four tibbles: the validated input, the pi-score
@@ -158,9 +160,8 @@ can re-run the exact figure from the object alone.
 ## The pipeline under the hood
 
 [`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
-is a thin wrapper over eight exported functions. Each can be called on
-its own if you want to step through the workflow or swap in a custom
-stage.
+chains the exported pipeline stages and then draws the canonical
+composite:
 
 1.  `ev_validate(data)` detects the input format and renames columns to
     `gene`, `contrast`, `logFC`, `P.Value`, `adj.P.Val`.
@@ -168,20 +169,28 @@ stage.
     and writes it to `pi_eq2`.
 3.  `adjust_p(data, method = "BH")` recomputes `adj.P.Val` from the raw
     p-values within each contrast.
-4.  `ev_enrich(data, contrast, databases)` runs `fgsea` and `fora`
-    against the requested pathway sets.
+4.  `ev_enrich(data, contrast, databases)` runs `fgsea` (and optionally
+    `fora`) against the requested pathway sets, ranking genes by the
+    signed statistic `sign(logFC) * -log10(P)`.
 5.  `ev_collapse(enrich, method = "jaccard")` removes redundant pathways
     with overlapping leading-edge gene sets.
-6.  `ev_volcano(data, contrast)` draws the volcano panel.
-7.  `ring_plot(enrich_result, contrast)` draws the ring panel.
-8.  `ev_compose(volcano_plots, ring_plots)` stitches the panels into a
-    `patchwork` and attaches `ev_data` and `ev_call`.
+6.  `ev_volcano_ring(volcano_sub, enrich_sub)` draws one volcano-in-ring
+    composite per contrast;
+    [`patchwork::wrap_plots()`](https://patchwork.data-imaginist.com/reference/wrap_plots.html)
+    arranges multiple contrasts and attaches `ev_data` and `ev_call`.
 
-Each function is exported because a real analysis often needs to stop
-between steps. A common pattern is to compute pi-scores once, write the
-table to disk, and re-enter the pipeline at
+Stages 1-5 are exported, so a real analysis can stop between them — a
+common pattern is to compute pi-scores once, write the table to disk,
+and re-enter at
 [`ev_enrich()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_enrich.md)
-with different database choices.
+with different database choices. For a panel layout you assemble
+yourself, the package also ships the standalone trio
+[`ev_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.md) +
+[`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md) +
+[`ev_compose()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_compose.md),
+which expose the tunable label and ring-encoding options the opinionated
+composite keeps fixed (see
+[`vignette("customising")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customising.md)).
 
 ## What next
 

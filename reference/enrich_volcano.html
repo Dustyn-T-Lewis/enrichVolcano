@@ -134,11 +134,16 @@ if NULL).</p></dd>
 
 
 <dt id="arg-ring">ring<a class="anchor" aria-label="anchor" href="#arg-ring"></a></dt>
-<dd><p>List with <code>max_terms</code>, <code>order_by</code>, <code>magnitude</code>, <code>color</code>.</p></dd>
+<dd><p>List controlling the ring. The composite honours <code>max_terms</code>
+(cap on pathways drawn); arc height is fixed to <code>-log10(padj)</code> and fill to
+NES by the canonical layout. For tunable <code>order_by</code>/<code>magnitude</code>/<code>color</code>
+encodings use the standalone <code><a href="ring_plot.html">ring_plot()</a></code>.</p></dd>
 
 
 <dt id="arg-volcano">volcano<a class="anchor" aria-label="anchor" href="#arg-volcano"></a></dt>
-<dd><p>List with <code>label_n</code>, <code>label_by</code>.</p></dd>
+<dd><p>Reserved. The composite volcano shows up/down significant
+counts rather than per-gene labels; for a labelled volcano use the
+standalone <code><a href="ev_volcano.html">ev_volcano()</a></code> (<code>label_n</code>, <code>label_by</code>, <code>label_genes</code>).</p></dd>
 
 
 <dt id="arg-facet">facet<a class="anchor" aria-label="anchor" href="#arg-facet"></a></dt>
