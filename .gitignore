@@ -1,0 +1,34 @@
+# R artifacts
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.Rapp.history
+.Renviron
+*.Rproj
+*.tar.gz
+*.Rcheck/
+
+# Devtools / pkgdown caches
+inst/doc/
+/doc/
+/Meta/
+_pkgdown/
+lib/
+coverage-report.html
+
+# pkgdown built site (deployed via gh-pages)
+docs/articles/
+docs/reference/
+docs/news/
+docs/index.html
+docs/pkgdown.yml
+
+# OS
+.DS_Store
+
+# stray plot artifact
+Rplots.pdf
+
+# raw licensed source downloads (not redistributed; GMTs are built from these)
+data-raw/raw/

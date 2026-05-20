@@ -1,0 +1,13 @@
+linters: linters_with_defaults(
+    object_name_linter = object_name_linter("snake_case"),
+    commented_code_linter = commented_code_linter(),
+    unnecessary_concatenation_linter = unnecessary_concatenation_linter(),
+    line_length_linter = line_length_linter(100),
+    cyclocomp_linter = NULL,
+    return_linter = return_linter(),
+    unnecessary_lambda_linter = unnecessary_lambda_linter()
+  )
+exclusions: list(
+    "tests/testthat/fixtures",
+    "data-raw"
+  )
