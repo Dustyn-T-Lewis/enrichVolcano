@@ -64,10 +64,14 @@ column. Unsigned pi-score columns are rejected.}
 \item{dedup}{List with \code{method} (\code{"jaccard"}, \code{"collapse_fgsea"}, or
 \code{"both"}), \code{cutoff}, and \code{scope}. See \code{\link[=ev_collapse]{ev_collapse()}}.}
 
-\item{ring}{List controlling the ring. The composite honours \code{max_terms}
-(cap on pathways drawn); arc height is fixed to \code{-log10(padj)} and fill to
-NES by the canonical layout. For tunable \code{order_by}/\code{magnitude}/\code{color}
-encodings use the standalone \code{\link[=ring_plot]{ring_plot()}}.}
+\item{ring}{List controlling the ring. Honoured fields: \code{max_terms} (cap on
+pathways drawn in the ring); \code{show_databases} (default NULL = all enriched
+databases; pass a character vector to restrict the ring to those named
+databases); \code{direction_balance} (default FALSE = global top-N by padj;
+TRUE = balanced selection of top up-NES + top down-NES terms). Arc height
+is fixed to \code{-log10(padj)} and fill to NES by the canonical layout. For
+tunable \code{order_by}/\code{magnitude}/\code{color} encodings use the standalone
+\code{\link[=ring_plot]{ring_plot()}}.}
 
 \item{volcano}{Reserved. The composite volcano shows up/down significant
 counts rather than per-gene labels; for a labelled volcano use the

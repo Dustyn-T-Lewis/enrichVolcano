@@ -53,3 +53,26 @@ test_that("enrich_volcano forwards rank_by to ev_enrich", {
     class = "ev_unsigned_ranking"
   )
 })
+
+test_that("ring show_databases and direction_balance control selection", {
+  enr <- tibble::tibble(
+    contrast = "ctr",
+    database = c(rep("hallmark", 4), rep("reactome", 4)),
+    pathway  = paste0("P", 1:8),
+    padj     = c(1e-9, 1e-8, 1e-3, 1e-2, 1e-7, 1e-6, 1e-1, 2e-1),
+    NES      = c(2, -2, 1.5, -1.5, 2.2, -2.2, 1.1, -1.1),
+    size     = 20,
+    leading_edge = "G1;G2", mode = "fgsea", direction = "up"
+  )
+  s1 <- ev_select_ring_terms(enr, max_terms = 10,
+                             show_databases = "hallmark", direction_balance = FALSE)
+  expect_setequal(unique(s1$database), "hallmark")
+  s2 <- ev_select_ring_terms(enr, max_terms = 4,
+                             show_databases = NULL, direction_balance = TRUE)
+  expect_true(any(s2$NES > 0) && any(s2$NES < 0))
+  expect_lte(nrow(s2), 4)
+  s3 <- ev_select_ring_terms(enr, max_terms = 3,
+                             show_databases = NULL, direction_balance = FALSE)
+  # global top-3 by padj: P1 (1e-9), P2 (1e-8), P5 (1e-7)
+  expect_equal(s3$pathway, c("P1", "P2", "P5"))
+})
