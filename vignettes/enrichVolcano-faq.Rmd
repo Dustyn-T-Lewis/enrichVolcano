@@ -22,9 +22,19 @@ library(enrichVolcano)
 
 ## Why is my ring plot empty?
 
-Three likely causes.
+Four likely causes.
 
-First, no pathways passed the `enrich_padj` filter. The default is
+The classic one is the **wrong ranking statistic**. GSEA needs a
+*signed* score so up- and down-regulated genes sit at opposite ends of
+the ranked list (Subramanian et al. 2005; Reimand et al. 2019). Ranking
+by an unsigned pi-score collapses everything to one tail and yields
+near-empty rings. The package defaults to `rank_by = "signed_p"`
+(`sign(logFC) * -log10(P)`) and now refuses an unsigned pi-score with an
+`ev_unsigned_ranking` error rather than silently mis-ranking. If you see
+that error, drop the `rank_by` override and use the default. See
+`vignette("scoring")` for the full explanation.
+
+Second, no pathways passed the `enrich_padj` filter. The default is
 0.05, which is strict on a small contrast or a small fixture. Inspect
 the padj distribution on the figure object:
 
@@ -39,12 +49,12 @@ If the smallest padj is above 0.05, raise the cutoff:
 p <- enrich_volcano(data, contrast = "ctr", enrich_padj = 0.25)
 ```
 
-Second, your gene symbols do not match the database species. msigdbr
+Third, your gene symbols do not match the database species. msigdbr
 collections key on human symbols for `species = "human"`, mouse
 symbols for `"mouse"`, and so on. If your input has rat symbols but
 you passed `species = "human"`, the overlap is empty by construction.
 
-Third, all pathways were dropped by `ev_collapse()`. Loosen the
+Fourth, all pathways were dropped by `ev_collapse()`. Loosen the
 dedup cutoff by passing a higher value through the `dedup` list:
 
 ```{r empty-collapse, eval = FALSE}

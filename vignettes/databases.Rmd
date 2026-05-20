@@ -206,6 +206,14 @@ ortholog table. Passing `species = "rat"` resolves to
 non-human collections are derived by orthology mapping from human
 symbols using HCOP and msigdbr's curated tables.
 
+Since msigdbr 10, the underlying database is selected with `db_species`
+(`"HS"` or `"MM"`) and the output orthologs with `species`. This package
+uses the human database (`db_species = "HS"`) and maps to your `species`,
+so for a mouse study you will see a one-time note that mouse results come
+from human-derived orthologs rather than the mouse-native MM collections.
+That is the intended default; human-keyed sets are the better-curated and
+more widely cited reference.
+
 The mapping is one-to-many in principle. One human gene can map to
 two rat paralogs; one rat gene can map to none if the orthology is
 unresolved. msigdbr handles this by emitting every mapped pair into
