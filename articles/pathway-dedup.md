@@ -44,13 +44,13 @@ A worked example with two synthetic pathways:
 
 ``` r
 
-A <- c("ENO1", "PKM", "GAPDH", "HK2", "ALDOA", "PFKM",
-       "LDHA", "TPI1", "PGAM1", "PGK1")
-B <- c("ENO1", "PKM", "GAPDH", "HK2", "ALDOA", "PFKM",
-       "LDHA", "TPI1", "PGAM1", "ENO2")  # 9 of 10 shared
+set_a <- c("ENO1", "PKM", "GAPDH", "HK2", "ALDOA", "PFKM",
+           "LDHA", "TPI1", "PGAM1", "PGK1")
+set_b <- c("ENO1", "PKM", "GAPDH", "HK2", "ALDOA", "PFKM",
+           "LDHA", "TPI1", "PGAM1", "ENO2")  # 9 of 10 shared
 
-inter <- length(intersect(A, B))
-uni   <- length(union(A, B))
+inter <- length(intersect(set_a, set_b))
+uni <- length(union(set_a, set_b))
 inter / uni
 #> [1] 0.8181818
 ```
