@@ -50,7 +50,9 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #'   pathways drawn in the ring); `show_databases` (default NULL = all enriched
 #'   databases; pass a character vector to restrict the ring to those named
 #'   databases); `direction_balance` (default FALSE = global top-N by padj;
-#'   TRUE = balanced selection of top up-NES + top down-NES terms). Arc height
+#'   TRUE = balanced selection of top up-NES + top down-NES terms; rows without
+#'   a signed NES, such as ORA results, are excluded from balanced selection).
+#'   Arc height
 #'   is fixed to `-log10(padj)` and fill to NES by the canonical layout. For
 #'   tunable `order_by`/`magnitude`/`color` encodings use the standalone
 #'   [ring_plot()].
