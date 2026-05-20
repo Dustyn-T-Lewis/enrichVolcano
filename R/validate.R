@@ -24,6 +24,15 @@ ev_validate <- function(data, x = NULL, y = NULL, lab = NULL) {
     data
   )
   data <- tibble::as_tibble(ev_rename_canonical(data, src, x = x, y = y, lab = lab))
+  # MSstats can report log10 fold changes; the rest of the package assumes
+  # log2. Rescale when logFC was taken from a log10FC column (and no log2FC
+  # column was available to prefer).
+  if ("log10FC" %in% colnames(data) && !"log2FC" %in% colnames(data) &&
+      is.null(x)) {
+    ev_inform("Detected MSstats {.field log10FC}; rescaling to log2 via {.code x * log2(10)}.",
+              class = "ev_msstats_log10")
+    data$logFC <- data$logFC * log2(10)
+  }
   if (!"P.Value" %in% colnames(data) && all(c("t", "df") %in% colnames(data))) {
     ev_inform("No {.field P.Value} column; deriving from {.field t} and {.field df}.",
               class = "ev_derive_p")
@@ -40,7 +49,8 @@ ev_detect_source <- function(data) {
   if (any(grepl("sca\\.P\\.Value", cn))) return("DEqMS")
   if (all(c("baseMean", "log2FoldChange", "padj") %in% cn)) return("DESeq2")
   if (all(c("logCPM", "PValue") %in% cn)) return("edgeR")
-  if (all(c("Label", "log2FC", "adj.pvalue") %in% cn)) return("MSstats")
+  if (all(c("Label", "adj.pvalue") %in% cn) &&
+      any(c("log2FC", "log10FC") %in% cn)) return("MSstats")
   if (all(c("diff", "pval", "adj_pval", "t_statistic") %in% cn)) return("proDA")
   if (any(grepl("_(diff|p\\.val|p\\.adj)$", cn))) return("DEP_wide")
   if (any(grepl("Student's T-test Difference", cn, fixed = TRUE))) return("Perseus_wide")
@@ -56,7 +66,8 @@ ev_col_aliases <- list(
   gene      = c("gene", "Gene", "name", "Protein", "ID", "Genes",
                 "Protein.IDs", "Majority protein IDs"),
   contrast  = c("contrast", "comparison", "Label", "coef", "term"),
-  logFC     = c("logFC", "log2FoldChange", "log2FC", "diff", "Difference"),
+  logFC     = c("logFC", "log2FoldChange", "log2FC", "log10FC", "diff",
+                "Difference"),
   P.Value   = c("P.Value", "PValue", "pvalue", "pval", "p.val", "p_value", "sca.P.Value"),
   adj.P.Val = c("adj.P.Val", "padj", "FDR", "FWER", "adj.pvalue", "adj_pval",
                 "qval", "p.adj", "sca.adj.pval")

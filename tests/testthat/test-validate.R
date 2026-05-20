@@ -42,6 +42,34 @@ test_that("ev_validate handles limma topTable single-contrast", {
   expect_equal(attr(result, "ev_source"), "limma")
 })
 
+test_that("ev_validate detects MSstats log2FC output", {
+  d <- tibble::tibble(
+    Protein = paste0("G", 1:5),
+    Label = "A_vs_B",
+    log2FC = c(-2, -1, 0, 1, 2),
+    SE = runif(5),
+    pvalue = runif(5),
+    adj.pvalue = runif(5)
+  )
+  result <- ev_validate(d)
+  expect_equal(attr(result, "ev_source"), "MSstats")
+  expect_equal(result$logFC, d$log2FC)
+})
+
+test_that("ev_validate rescales MSstats log10FC to log2", {
+  d <- tibble::tibble(
+    Protein = paste0("G", 1:5),
+    Label = "A_vs_B",
+    log10FC = c(-1, -0.5, 0, 0.5, 1),
+    SE = runif(5),
+    pvalue = runif(5),
+    adj.pvalue = runif(5)
+  )
+  expect_message(result <- ev_validate(d), class = "ev_msstats_log10")
+  expect_equal(attr(result, "ev_source"), "MSstats")
+  expect_equal(result$logFC, d$log10FC * log2(10))
+})
+
 test_that("ev_validate handles DESeq2 results", {
   d <- tibble::tibble(
     gene = paste0("G", 1:5),
