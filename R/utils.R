@@ -49,3 +49,24 @@ ev_warn <- function(message, ..., class = NULL,
     .envir = .envir
   )
 }
+
+#' Assert that a value is a single recognisable colour
+#'
+#' `grDevices::col2rgb()` accepts names ("red"), hex ("#1B9E77"), and the
+#' integer palette; anything else throws deep inside grid when the plot draws.
+#' Catch it at the boundary instead.
+#' @keywords internal
+#' @noRd
+ev_assert_colour <- function(x, arg = "disc_color") {
+  if (is.null(x)) return(invisible(NULL))
+  ok <- is.character(x) && length(x) == 1L && !is.na(x) &&
+    tryCatch({
+      grDevices::col2rgb(x)
+      TRUE
+    }, error = function(e) FALSE)
+  if (!ok) {
+    ev_abort("{.arg {arg}} must be a single colour name or hex code; got {.val {x}}.",
+             class = "ev_invalid_colour")
+  }
+  invisible(x)
+}

@@ -70,6 +70,28 @@ test_that("ev_volcano_ring accepts disc_color and adds a layer", {
   expect_gt(length(p_disc$layers), length(p_plain$layers))
 })
 
+test_that("ev_volcano_ring rejects an invalid disc_color at the boundary", {
+  volc <- tibble::tibble(gene = paste0("G", 1:20), contrast = "ctr",
+                         logFC = rnorm(20), P.Value = runif(20),
+                         pi_eq2 = runif(20, max = 0.5))
+  enr <- tibble::tibble(contrast = "ctr", database = "test",
+                        pathway = c("A", "B"), padj = c(0.01, 0.02),
+                        NES = c(2, -2), size = 20,
+                        leading_edge = c("G1;G2", "G3;G4"),
+                        mode = "fgsea", direction = c("up", "down"))
+  expect_error(ev_volcano_ring(volc, enr, disc_color = "notacolour"),
+               class = "ev_invalid_colour")
+  expect_error(ev_volcano_ring(volc, enr, disc_color = c("red", "blue")),
+               class = "ev_invalid_colour")
+})
+
+test_that("ev_assert_colour accepts names and hex, passes NULL through", {
+  expect_invisible(enrichVolcano:::ev_assert_colour(NULL))
+  expect_identical(enrichVolcano:::ev_assert_colour("red"), "red")
+  expect_identical(enrichVolcano:::ev_assert_colour("#1B9E77"), "#1B9E77")
+  expect_error(enrichVolcano:::ev_assert_colour(42), class = "ev_invalid_colour")
+})
+
 test_that("ev_clean_label strips the GOSLIM_ prefix", {
   expect_equal(enrichVolcano:::ev_clean_label("GOSLIM_MUSCLE_SYSTEM_PROCESS"),
                "Muscle System\nProcess")

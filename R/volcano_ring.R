@@ -118,6 +118,12 @@ ev_clean_label_mitocarta <- function(name) {
 ev_nes_colours <- c("#08306B", "#4393C3", "white", "#D6604D", "#67000D")
 ev_nes_values  <- c(-3, -1.5, 0, 1.5, 3)
 
+# Radii (in the coord_fixed panel's data units) of the grey pathway track that
+# rings the volcano. The central disc fills to the inner edge, the per-gene
+# ticks cross the track, and the NES arcs grow outward from the outer edge.
+ev_ring_r_inner <- 4.4
+ev_ring_r_outer <- 4.8
+
 #' Compute arc geometry for the enrichment ring
 #'
 #' Up-regulated pathways cluster at 90 deg (right), down at 270 deg (left);
@@ -127,7 +133,8 @@ ev_nes_values  <- c(-3, -1.5, 0, 1.5, 3)
 #' @noRd
 ev_ring_geometry <- function(enrich_df,
                              gap_intra = 3, gap_split = 8,
-                             arc_r0 = 4.8, min_height = 0.05, max_height = 1.6) {
+                             arc_r0 = ev_ring_r_outer,
+                             min_height = 0.05, max_height = 1.6) {
   if (nrow(enrich_df) == 0) return(enrich_df)
 
   ring <- enrich_df
@@ -198,7 +205,8 @@ ev_ring_geometry <- function(enrich_df,
 #' Per-gene radial ticks for each pathway arc
 #' @keywords internal
 #' @noRd
-ev_tick_data <- function(ring_data, volc_df, tick_r0 = 4.4, tick_r1 = 4.8) {
+ev_tick_data <- function(ring_data, volc_df,
+                         tick_r0 = ev_ring_r_inner, tick_r1 = ev_ring_r_outer) {
   if (nrow(ring_data) == 0) return(tibble::tibble())
   gene_lfc <- volc_df[!is.na(volc_df$logFC), c("gene", "logFC"), drop = FALSE]
   gene_lfc <- gene_lfc[!duplicated(gene_lfc$gene), , drop = FALSE]
@@ -245,6 +253,7 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
                             disc_color = NULL,
                             point_size = 0.9, point_alpha = 0.6,
                             label_size = 2.6, theme = ev_theme()) {
+  ev_assert_colour(disc_color)
   pal <- theme$palette
   vr <- volcano_radius * 0.92
 
@@ -273,8 +282,8 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
 
   if (!is.null(disc_color)) {
     disc <- data.frame(
-      x = 4.4 * cos(seq(0, 2 * pi, length.out = 200)),
-      y = 4.4 * sin(seq(0, 2 * pi, length.out = 200))
+      x = ev_ring_r_inner * cos(seq(0, 2 * pi, length.out = 200)),
+      y = ev_ring_r_inner * sin(seq(0, 2 * pi, length.out = 200))
     )
     p <- p + ggplot2::geom_polygon(
       data = disc, ggplot2::aes(.data$x, .data$y),
@@ -285,7 +294,7 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
   if (nrow(ring) > 0) {
     p <- p + ggforce::geom_arc_bar(
       data = ring,
-      ggplot2::aes(x0 = 0, y0 = 0, r0 = 4.4, r = 4.8,
+      ggplot2::aes(x0 = 0, y0 = 0, r0 = ev_ring_r_inner, r = ev_ring_r_outer,
                    start = .data$start_rad, end = .data$end_rad),
       fill = "grey93", colour = "grey78", linewidth = 0.15,
       inherit.aes = FALSE
@@ -343,7 +352,7 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
     p <- p +
       ggforce::geom_arc_bar(
         data = ring,
-        ggplot2::aes(x0 = 0, y0 = 0, r0 = 4.8, r = .data$arc_r1_var,
+        ggplot2::aes(x0 = 0, y0 = 0, r0 = ev_ring_r_outer, r = .data$arc_r1_var,
                      start = .data$start_rad, end = .data$end_rad,
                      fill = .data$NES),
         colour = "grey40", linewidth = 0.2, inherit.aes = FALSE
