@@ -12,7 +12,7 @@ ev_enrich(
   species = "human",
   enrich_mode = c("fgsea", "ora"),
   rank_by = "signed_p",
-  min_size = 10,
+  min_size = 15,
   max_size = 500,
   background = NULL,
   exclude_terms = "DISEASE|CANCER|TUMOR",
@@ -53,7 +53,10 @@ ev_enrich(
 
 - min_size, max_size:
 
-  Gene-set size filters.
+  Gene-set size filters. Defaults `15`/`500` follow Reimand et al. 2019
+  (*Nat Protoc* §S3.4): sets below ~15 genes are noise-prone and sets
+  above ~500 are non-specific. (clusterProfiler defaults to a more
+  permissive `minGSSize = 10`.)
 
 - background:
 

@@ -113,11 +113,52 @@ ranking, the two variants rank-order genes the same way as long as every
 raw p is below 1 (which is always true in practice). For ORA, only the
 \[0, 1\] form has a natural significance threshold.
 
-Both ignore the *sign* of logFC, so they collapse up- and
-down-regulation onto the same axis. If you need direction-aware ranking
-(the standard input to fgsea), pass `rank_by = "logFC"` to
-[`ev_enrich()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_enrich.md).
-The pi-score is for filtering and labelling, not for GSEA pre-ranking.
+## Pi-score is for the volcano, never for GSEA ranking
+
+Both pi-score variants ignore the *sign* of logFC: Eq.2 is bounded in
+$`[0, 1]`$ and Eq.1 is non-negative, so up- and down-regulation collapse
+onto the same axis. That is exactly what you want for the volcano y-axis
+and the up/down significance call, but it is wrong for ranking a GSEA.
+
+Gene-set enrichment analysis needs a **signed** ranking statistic so
+that up-regulated genes sit at one end of the ranked list and
+down-regulated genes at the other (Subramanian et al. 2005; Reimand et
+al. 2019). Feeding an unsigned score puts every strong gene at the same
+end, collapses the running-sum to one tail, and produces near-empty
+rings.
+[`ev_enrich()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_enrich.md)
+therefore ranks by a signed statistic by default:
+
+``` math
+\text{signed\_p} = \operatorname{sign}(\log_2 \text{FC}) \times -\log_{10} P
+```
+
+This is the package default (`rank_by = "signed_p"`), and the hero
+[`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
+hard-codes it. A raw moderated *t*-statistic (`rank_by = "t"`) or
+`rank_by = "logFC"` are equally valid signed choices. To guard the
+invariant,
+[`ev_enrich()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_enrich.md)
+**rejects** any attempt to rank by an unsigned pi-score column:
+
+``` r
+
+data <- pi_score(example, variant = "eq2")
+data$contrast <- "ctr"
+# this is the wrong thing to do, and the package stops you:
+ev_enrich(data, contrast = "ctr",
+          databases = list(toy = list(SET = c("A", "B"))),
+          rank_by = "pi_eq2")
+#> Error in `ev_rank_stats()`:
+#> ! Cannot rank fgsea by the unsigned pi-score column "pi_eq2".
+#> ℹ GSEA requires a signed statistic; use "signed_p" (default) or a signed column
+#>   such as "t" or "logFC".
+```
+
+In short: pi-score answers “is this protein significant *and* large?”
+for the volcano; the signed statistic answers “which direction and how
+strongly?” for the ring. They are different questions and must use
+different scores.
 
 ## Multiple-testing correction overview
 
@@ -233,6 +274,14 @@ Next: how to deduplicate redundant enrichment hits. See
 Xiao Y, Hsiao TH, Suresh U, Chen HIH, Wu X, Wolf SE, Chen Y. A novel
 significance score for gene identification from RNA-seq data.
 *Bioinformatics* 30(6):801-807 (2014).
+
+Subramanian A, Tamayo P, Mootha VK, et al. Gene set enrichment analysis:
+a knowledge-based approach for interpreting genome-wide expression
+profiles. *PNAS* 102(43):15545-15550 (2005).
+
+Reimand J, Isserlin R, Voisin V, et al. Pathway enrichment analysis and
+visualization of omics data using g:Profiler, GSEA, Cytoscape and
+EnrichmentMap. *Nature Protocols* 14:482-517 (2019).
 
 Benjamini Y, Hochberg Y. Controlling the false discovery rate: a
 practical and powerful approach to multiple testing. *JRSS-B*

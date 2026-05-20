@@ -305,6 +305,14 @@ species names are resolved to scientific names via
 Human gene symbols are the canonical key; non-human collections are
 derived by orthology mapping from human symbols using HCOP and msigdbr’s
 curated tables.</p>
+<p>Since msigdbr 10, the underlying database is selected with
+<code>db_species</code> (<code>"HS"</code> or <code>"MM"</code>) and the
+output orthologs with <code>species</code>. This package uses the human
+database (<code>db_species = "HS"</code>) and maps to your
+<code>species</code>, so for a mouse study you will see a one-time note
+that mouse results come from human-derived orthologs rather than the
+mouse-native MM collections. That is the intended default; human-keyed
+sets are the better-curated and more widely cited reference.</p>
 <p>The mapping is one-to-many in principle. One human gene can map to
 two rat paralogs; one rat gene can map to none if the orthology is
 unresolved. msigdbr handles this by emitting every mapped pair into the

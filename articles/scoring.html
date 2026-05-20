@@ -197,11 +197,47 @@ to compare against a paper that reports unbounded pi values. For fgsea
 ranking, the two variants rank-order genes the same way as long as every
 raw p is below 1 (which is always true in practice). For ORA, only the
 [0, 1] form has a natural significance threshold.</p>
-<p>Both ignore the <em>sign</em> of logFC, so they collapse up- and
-down-regulation onto the same axis. If you need direction-aware ranking
-(the standard input to fgsea), pass <code>rank_by = "logFC"</code> to
-<code><a href="../reference/ev_enrich.html">ev_enrich()</a></code>. The pi-score is for filtering and labelling,
-not for GSEA pre-ranking.</p>
+</div>
+<div class="section level2">
+<h2 id="pi-score-is-for-the-volcano-never-for-gsea-ranking">Pi-score is for the volcano, never for GSEA ranking<a class="anchor" aria-label="anchor" href="#pi-score-is-for-the-volcano-never-for-gsea-ranking"></a>
+</h2>
+<p>Both pi-score variants ignore the <em>sign</em> of logFC: Eq.2 is
+bounded in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>
+and Eq.1 is non-negative, so up- and down-regulation collapse onto the
+same axis. That is exactly what you want for the volcano y-axis and the
+up/down significance call, but it is wrong for ranking a GSEA.</p>
+<p>Gene-set enrichment analysis needs a <strong>signed</strong> ranking
+statistic so that up-regulated genes sit at one end of the ranked list
+and down-regulated genes at the other (Subramanian et al. 2005; Reimand
+et al. 2019). Feeding an unsigned score puts every strong gene at the
+same end, collapses the running-sum to one tail, and produces near-empty
+rings. <code><a href="../reference/ev_enrich.html">ev_enrich()</a></code> therefore ranks by a signed statistic by
+default:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">signed_p</mtext><mo>=</mo><mrow><mi mathvariant="normal">sign</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>2</mn></msub><mtext mathvariant="normal">FC</mtext><mo stretchy="false" form="postfix">)</mo><mo>×</mo><mi>−</mi><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>10</mn></msub><mi>P</mi></mrow><annotation encoding="application/x-tex">
+\text{signed\_p} = \operatorname{sign}(\log_2 \text{FC}) \times -\log_{10} P
+</annotation></semantics></math></p>
+<p>This is the package default (<code>rank_by = "signed_p"</code>), and
+the hero <code><a href="../reference/enrich_volcano.html">enrich_volcano()</a></code> hard-codes it. A raw moderated
+<em>t</em>-statistic (<code>rank_by = "t"</code>) or
+<code>rank_by = "logFC"</code> are equally valid signed choices. To
+guard the invariant, <code><a href="../reference/ev_enrich.html">ev_enrich()</a></code> <strong>rejects</strong>
+any attempt to rank by an unsigned pi-score column:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pi_score.html">pi_score</a></span><span class="op">(</span><span class="va">example</span>, variant <span class="op">=</span> <span class="st">"eq2"</span><span class="op">)</span></span>
+<span><span class="va">data</span><span class="op">$</span><span class="va">contrast</span> <span class="op">&lt;-</span> <span class="st">"ctr"</span></span>
+<span><span class="co"># this is the wrong thing to do, and the package stops you:</span></span>
+<span><span class="fu"><a href="../reference/ev_enrich.html">ev_enrich</a></span><span class="op">(</span><span class="va">data</span>, contrast <span class="op">=</span> <span class="st">"ctr"</span>,</span>
+<span>          databases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>toy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>SET <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>          rank_by <span class="op">=</span> <span class="st">"pi_eq2"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `ev_rank_stats()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Cannot rank fgsea by the unsigned pi-score column <span style="color: #0000BB;">"pi_eq2"</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> GSEA requires a signed statistic; use <span style="color: #0000BB;">"signed_p"</span> (default) or a signed column</span></span>
+<span><span class="co">#&gt;   such as <span style="color: #0000BB;">"t"</span> or <span style="color: #0000BB;">"logFC"</span>.</span></span></code></pre></div>
+<p>In short: pi-score answers “is this protein significant <em>and</em>
+large?” for the volcano; the signed statistic answers “which direction
+and how strongly?” for the ring. They are different questions and must
+use different scores.</p>
 </div>
 <div class="section level2">
 <h2 id="multiple-testing-correction-overview">Multiple-testing correction overview<a class="anchor" aria-label="anchor" href="#multiple-testing-correction-overview"></a>
@@ -265,7 +301,7 @@ reduces to BH.</p>
 <div class="section level2">
 <h2 id="worked-example-with-the-yvo-subsample">Worked example with the YvO subsample<a class="anchor" aria-label="anchor" href="#worked-example-with-the-yvo-subsample"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fixture</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span>
 <span>  <span class="st">"extdata"</span>, <span class="st">"examples"</span>, <span class="st">"yvo_tidy.rds"</span>,</span>
 <span>  package <span class="op">=</span> <span class="st">"enrichVolcano"</span></span>
@@ -279,7 +315,7 @@ reduces to BH.</p>
 <span><span class="co">#&gt; [1] 400</span></span></code></pre></div>
 <p>Compute pi-scores both ways and look at the rank correlation within
 the Aging contrast:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">yvo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pi_score.html">pi_score</a></span><span class="op">(</span><span class="va">yvo</span>, variant <span class="op">=</span> <span class="st">"eq2"</span><span class="op">)</span></span>
 <span><span class="va">yvo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pi_score.html">pi_score</a></span><span class="op">(</span><span class="va">yvo</span>, variant <span class="op">=</span> <span class="st">"eq1"</span><span class="op">)</span></span>
 <span><span class="va">aging</span> <span class="op">&lt;-</span> <span class="va">yvo</span><span class="op">[</span><span class="va">yvo</span><span class="op">$</span><span class="va">contrast</span> <span class="op">==</span> <span class="st">"Aging"</span>, <span class="op">]</span></span>
@@ -290,7 +326,7 @@ identically. The two are interchangeable for ordering; they differ only
 in scale.</p>
 <p>Now compare BH and Bonferroni at
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.05</mn></mrow><annotation encoding="application/x-tex">\alpha = 0.05</annotation></semantics></math>:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">yvo_bh</span>   <span class="op">&lt;-</span> <span class="fu"><a href="../reference/adjust_p.html">adjust_p</a></span><span class="op">(</span><span class="va">yvo</span>, method <span class="op">=</span> <span class="st">"BH"</span><span class="op">)</span></span>
 <span><span class="va">yvo_bonf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/adjust_p.html">adjust_p</a></span><span class="op">(</span><span class="va">yvo</span>, method <span class="op">=</span> <span class="st">"bonferroni"</span><span class="op">)</span></span>
 <span><span class="va">sig_bh</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">yvo_bh</span><span class="op">$</span><span class="va">adj.P.Val</span>   <span class="op">&lt;</span> <span class="fl">0.05</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -315,6 +351,12 @@ should not share an error budget.</p>
 <p>Xiao Y, Hsiao TH, Suresh U, Chen HIH, Wu X, Wolf SE, Chen Y. A novel
 significance score for gene identification from RNA-seq data.
 <em>Bioinformatics</em> 30(6):801-807 (2014).</p>
+<p>Subramanian A, Tamayo P, Mootha VK, et al. Gene set enrichment
+analysis: a knowledge-based approach for interpreting genome-wide
+expression profiles. <em>PNAS</em> 102(43):15545-15550 (2005).</p>
+<p>Reimand J, Isserlin R, Voisin V, et al. Pathway enrichment analysis
+and visualization of omics data using g:Profiler, GSEA, Cytoscape and
+EnrichmentMap. <em>Nature Protocols</em> 14:482-517 (2019).</p>
 <p>Benjamini Y, Hochberg Y. Controlling the false discovery rate: a
 practical and powerful approach to multiple testing. <em>JRSS-B</em>
 57(1):289-300 (1995).</p>

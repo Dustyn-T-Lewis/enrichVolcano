@@ -97,7 +97,7 @@ fig
 #> list(label_n = 8, label_by = NULL))`
 #> Contrasts: 4
 #> Proteins: 400
-#> Significant pathways (post-dedup): 3
+#> Significant pathways (post-dedup): 0
 ```
 
 ![Volcano panel above an enrichment ring panel for the Aging
@@ -135,10 +135,10 @@ str(attr(fig, "ev_data"), max.level = 1)
 #>   ..- attr(*, "ev_source")= chr "limma"
 #>  $ pi_scores      : tibble [400 × 10] (S3: tbl_df/tbl/data.frame)
 #>   ..- attr(*, "ev_source")= chr "limma"
-#>  $ enrichment     : tibble [3 × 12] (S3: tbl_df/tbl/data.frame)
+#>  $ enrichment     : tibble [0 × 13] (S3: tbl_df/tbl/data.frame)
 #>   ..- attr(*, "ev_pathways")=List of 1
 #>   ..- attr(*, "ev_stats")=List of 1
-#>  $ dedup_result   : tibble [3 × 13] (S3: tbl_df/tbl/data.frame)
+#>  $ dedup_result   : tibble [0 × 13] (S3: tbl_df/tbl/data.frame)
 #>   ..- attr(*, "ev_pathways")=List of 1
 #>   ..- attr(*, "ev_stats")=List of 1
 attr(fig, "ev_call")

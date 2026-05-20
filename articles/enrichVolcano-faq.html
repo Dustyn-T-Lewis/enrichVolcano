@@ -71,8 +71,19 @@
 <div class="section level2">
 <h2 id="why-is-my-ring-plot-empty">Why is my ring plot empty?<a class="anchor" aria-label="anchor" href="#why-is-my-ring-plot-empty"></a>
 </h2>
-<p>Three likely causes.</p>
-<p>First, no pathways passed the <code>enrich_padj</code> filter. The
+<p>Four likely causes.</p>
+<p>The classic one is the <strong>wrong ranking statistic</strong>. GSEA
+needs a <em>signed</em> score so up- and down-regulated genes sit at
+opposite ends of the ranked list (Subramanian et al. 2005; Reimand et
+al. 2019). Ranking by an unsigned pi-score collapses everything to one
+tail and yields near-empty rings. The package defaults to
+<code>rank_by = "signed_p"</code> (<code>sign(logFC) * -log10(P)</code>)
+and now refuses an unsigned pi-score with an
+<code>ev_unsigned_ranking</code> error rather than silently mis-ranking.
+If you see that error, drop the <code>rank_by</code> override and use
+the default. See <code><a href="../articles/scoring.html">vignette("scoring")</a></code> for the full
+explanation.</p>
+<p>Second, no pathways passed the <code>enrich_padj</code> filter. The
 default is 0.05, which is strict on a small contrast or a small fixture.
 Inspect the padj distribution on the figure object:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -81,12 +92,12 @@ Inspect the padj distribution on the figure object:</p>
 <p>If the smallest padj is above 0.05, raise the cutoff:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/enrich_volcano.html">enrich_volcano</a></span><span class="op">(</span><span class="va">data</span>, contrast <span class="op">=</span> <span class="st">"ctr"</span>, enrich_padj <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span></code></pre></div>
-<p>Second, your gene symbols do not match the database species. msigdbr
+<p>Third, your gene symbols do not match the database species. msigdbr
 collections key on human symbols for <code>species = "human"</code>,
 mouse symbols for <code>"mouse"</code>, and so on. If your input has rat
 symbols but you passed <code>species = "human"</code>, the overlap is
 empty by construction.</p>
-<p>Third, all pathways were dropped by <code><a href="../reference/ev_collapse.html">ev_collapse()</a></code>.
+<p>Fourth, all pathways were dropped by <code><a href="../reference/ev_collapse.html">ev_collapse()</a></code>.
 Loosen the dedup cutoff by passing a higher value through the
 <code>dedup</code> list:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
