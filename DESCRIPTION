@@ -35,6 +35,7 @@ Imports:
     tidyselect,
     withr
 Suggests:
+    shiny,
     covr,
     GO.db,
     IHW,

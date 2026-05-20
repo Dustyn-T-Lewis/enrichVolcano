@@ -6,6 +6,7 @@ reference:
     contents:
       - enrich_volcano
       - ev_volcano_ring
+      - ev_app
   - title: "Pipeline steps"
     contents:
       - ev_validate
