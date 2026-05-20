@@ -51,7 +51,9 @@ DISEASE/CANCER/TUMOR terms).}
 \value{
 Tidy tibble: contrast | database | pathway | pval | padj | NES |
 size | leading_edge | mode | direction. fgsea-mode rows also carry
-\code{ES} and \code{log2err} (NA for ORA rows). The pathway list used for
+\code{ES} and \code{log2err} (NA for ORA rows); ORA-mode rows carry
+\code{fold_enrichment}, the observed/expected overlap ratio (NA for fgsea
+rows). The pathway list used for
 enrichment is attached as \code{attr(., "ev_pathways")} and the per-contrast
 gene-level ranking vectors as \code{attr(., "ev_stats")}, both required by
 \code{ev_collapse(method = "collapse_fgsea")}.
