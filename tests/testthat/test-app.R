@@ -14,3 +14,17 @@ test_that("bundled shiny app is constructible", {
   app <- shiny::shinyAppDir(system.file("shiny", package = "enrichVolcano"))
   expect_s3_class(app, "shiny.appobj")
 })
+
+test_that("ev_app server validates the bundled example and lists its contrasts", {
+  skip_if_not_installed("shiny")
+  app_dir <- system.file("shiny", package = "enrichVolcano")
+  skip_if(!nzchar(app_dir), "bundled app not installed")
+  shiny::testServer(app_dir, {
+    session$setInputs(source = "example")
+    v <- validated()
+    expect_s3_class(v, "tbl_df")
+    expect_true(!is.null(attr(v, "ev_source")))
+    expect_gt(length(unique(v$contrast)), 0)
+    expect_match(output$summary, "Detected format")
+  })
+})
