@@ -22,8 +22,7 @@ enrich_volcano(
   logfc_threshold = log2(1.5),
   enrich_mode = c("fgsea", "ora"),
   enrich_padj = 0.05,
-  dedup = list(method = "jaccard", cutoff = 0.5, scope = "within_db", collapse_fgsea =
-    TRUE),
+  dedup = list(method = "jaccard", cutoff = 0.5, scope = "within_db"),
   ring = list(max_terms = 10, order_by = "padj", magnitude = "neg_log_padj", color =
     "nes"),
   volcano = list(label_n = 10, label_by = NULL),
@@ -88,7 +87,9 @@ enrich_volcano(
 
 - dedup:
 
-  List with `method`, `cutoff`, `scope`, `collapse_fgsea`.
+  List with `method` (`"jaccard"`, `"collapse_fgsea"`, or `"both"`),
+  `cutoff`, and `scope`. See
+  [`ev_collapse()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_collapse.md).
 
 - ring:
 

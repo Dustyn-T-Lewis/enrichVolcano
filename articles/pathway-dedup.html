@@ -148,13 +148,26 @@ came entirely from the same genes that drove the first.</p>
 gene overlap can still be flagged as redundant if they enrich on the
 same handful of leading-edge genes. Two pathways with high gene overlap
 can still survive if their leading edges happen to be disjoint.</p>
-<p>In <code>enrichVolcano</code> v0.1,
-<code>ev_collapse(method = "collapse_fgsea")</code> is currently a no-op
-stub. See <code>NEWS.md</code> for the reason: full integration requires
-threading the pathway gene sets and the ranked statistics through the
-<code><a href="../reference/ev_collapse.html">ev_collapse()</a></code> signature, which is scheduled for v0.2. For
-production deduplication use the default
-<code>method = "jaccard"</code>.</p>
+<p><code>ev_collapse(method = "collapse_fgsea")</code> (and
+<code>method = "both"</code>, which runs Jaccard first and then
+collapsePathways) is fully implemented. It relies on the
+<code>ev_pathways</code> and <code>ev_stats</code> attributes that
+<code><a href="../reference/ev_enrich.html">ev_enrich()</a></code> attaches to its output — the pathway gene sets
+and the per-contrast ranked statistics — so pass the
+<code><a href="../reference/ev_enrich.html">ev_enrich()</a></code> result straight through without dropping those
+attributes. From the hero function, select it through the
+<code>dedup</code> list:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/enrich_volcano.html">enrich_volcano</a></span><span class="op">(</span></span>
+<span>  <span class="va">data</span>, contrast <span class="op">=</span> <span class="st">"ctr"</span>,</span>
+<span>  dedup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"both"</span>, scope <span class="op">=</span> <span class="st">"within_db"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>If the attributes are missing (for example, a hand-built enrichment
+table), <code><a href="../reference/ev_collapse.html">ev_collapse()</a></code> warns and keeps every pathway rather
+than failing. Jaccard remains the default because it is data-independent
+and reproducible across studies; reach for collapsePathways when you
+want a single study’s leading-edge structure to drive the non-redundant
+set.</p>
 </div>
 <div class="section level2">
 <h2 id="when-to-pick-which">When to pick which<a class="anchor" aria-label="anchor" href="#when-to-pick-which"></a>
@@ -198,7 +211,7 @@ biology.</p>
 <p>The dedup mechanics are the same whichever fixture you use. The
 package install bundles the YvO results, so the example below uses
 that:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fixture</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span>
 <span>  <span class="st">"extdata"</span>, <span class="st">"examples"</span>, <span class="st">"yvo_tidy.rds"</span>,</span>
 <span>  package <span class="op">=</span> <span class="st">"enrichVolcano"</span></span>
@@ -213,7 +226,7 @@ that:</p>
 <p>Build two mock databases with a deliberate overlap between
 <code>HALLMARK_GLYCOLYSIS</code> (in the first DB) and
 <code>REACTOME_GLYCOLYSIS</code> (in the second DB):</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">7</span><span class="op">)</span></span>
 <span><span class="va">genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">gene</span><span class="op">)</span></span>
 <span><span class="va">core</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">genes</span>, <span class="fl">30</span><span class="op">)</span></span>
@@ -232,7 +245,7 @@ that:</p>
 share the 30 <code>core</code> genes plus a few extras; their pairwise
 Jaccard sits well above 0.5.</p>
 <p>Run enrichment and collapse:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ev_enrich.html">ev_enrich</a></span><span class="op">(</span></span>
 <span>  <span class="va">res</span>,</span>
 <span>  contrast <span class="op">=</span> <span class="st">"Training_Old"</span>,</span>
@@ -253,7 +266,7 @@ Jaccard sits well above 0.5.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> reactome_mock REACTOME_GLYCOLYSIS 0.316 -<span style="color: #BB0000;">1.39</span> </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> reactome_mock REACTOME_TCA        0.694  0.985</span></span></code></pre></div>
 <p>Apply Jaccard dedup at two scopes:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">d_within</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ev_collapse.html">ev_collapse</a></span><span class="op">(</span><span class="va">e</span>, method <span class="op">=</span> <span class="st">"jaccard"</span>, cutoff <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>                        scope <span class="op">=</span> <span class="st">"within_db"</span><span class="op">)</span></span>
 <span><span class="va">d_cross</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ev_collapse.html">ev_collapse</a></span><span class="op">(</span><span class="va">e</span>, method <span class="op">=</span> <span class="st">"jaccard"</span>, cutoff <span class="op">=</span> <span class="fl">0.5</span>,</span>
@@ -267,7 +280,7 @@ glycolysis sets live in different databases and never get compared. With
 <code>cross_db</code>, the two glycolysis sets compete and the
 higher-<code>padj</code> one is dropped.</p>
 <p>Inspect the <code>dedup_kept</code> flag directly:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">d_cross</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"database"</span>, <span class="st">"pathway"</span>, <span class="st">"padj"</span>, <span class="st">"dedup_kept"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   database      pathway              padj dedup_kept</span></span>

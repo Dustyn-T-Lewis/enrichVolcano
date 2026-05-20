@@ -96,13 +96,31 @@ overlap can still be flagged as redundant if they enrich on the same
 handful of leading-edge genes. Two pathways with high gene overlap can
 still survive if their leading edges happen to be disjoint.
 
-In `enrichVolcano` v0.1, `ev_collapse(method = "collapse_fgsea")` is
-currently a no-op stub. See `NEWS.md` for the reason: full integration
-requires threading the pathway gene sets and the ranked statistics
-through the
+`ev_collapse(method = "collapse_fgsea")` (and `method = "both"`, which
+runs Jaccard first and then collapsePathways) is fully implemented. It
+relies on the `ev_pathways` and `ev_stats` attributes that
+[`ev_enrich()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_enrich.md)
+attaches to its output — the pathway gene sets and the per-contrast
+ranked statistics — so pass the
+[`ev_enrich()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_enrich.md)
+result straight through without dropping those attributes. From the hero
+function, select it through the `dedup` list:
+
+``` r
+
+p <- enrich_volcano(
+  data, contrast = "ctr",
+  dedup = list(method = "both", scope = "within_db")
+)
+```
+
+If the attributes are missing (for example, a hand-built enrichment
+table),
 [`ev_collapse()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_collapse.md)
-signature, which is scheduled for v0.2. For production deduplication use
-the default `method = "jaccard"`.
+warns and keeps every pathway rather than failing. Jaccard remains the
+default because it is data-independent and reproducible across studies;
+reach for collapsePathways when you want a single study’s leading-edge
+structure to drive the non-redundant set.
 
 ## When to pick which
 

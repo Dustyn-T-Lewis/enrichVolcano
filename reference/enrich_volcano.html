@@ -65,8 +65,7 @@ deduplicate -&gt; build volcano + ring panels -&gt; compose patchwork.</p>
 <span>  logfc_threshold <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>,</span>
 <span>  enrich_mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fgsea"</span>, <span class="st">"ora"</span><span class="op">)</span>,</span>
 <span>  enrich_padj <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>  dedup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"jaccard"</span>, cutoff <span class="op">=</span> <span class="fl">0.5</span>, scope <span class="op">=</span> <span class="st">"within_db"</span>, collapse_fgsea <span class="op">=</span></span>
-<span>    <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  dedup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"jaccard"</span>, cutoff <span class="op">=</span> <span class="fl">0.5</span>, scope <span class="op">=</span> <span class="st">"within_db"</span><span class="op">)</span>,</span>
 <span>  ring <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>max_terms <span class="op">=</span> <span class="fl">10</span>, order_by <span class="op">=</span> <span class="st">"padj"</span>, magnitude <span class="op">=</span> <span class="st">"neg_log_padj"</span>, color <span class="op">=</span></span>
 <span>    <span class="st">"nes"</span><span class="op">)</span>,</span>
 <span>  volcano <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>label_n <span class="op">=</span> <span class="fl">10</span>, label_by <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
@@ -130,7 +129,8 @@ if NULL).</p></dd>
 
 
 <dt id="arg-dedup">dedup<a class="anchor" aria-label="anchor" href="#arg-dedup"></a></dt>
-<dd><p>List with <code>method</code>, <code>cutoff</code>, <code>scope</code>, <code>collapse_fgsea</code>.</p></dd>
+<dd><p>List with <code>method</code> (<code>"jaccard"</code>, <code>"collapse_fgsea"</code>, or
+<code>"both"</code>), <code>cutoff</code>, and <code>scope</code>. See <code><a href="ev_collapse.html">ev_collapse()</a></code>.</p></dd>
 
 
 <dt id="arg-ring">ring<a class="anchor" aria-label="anchor" href="#arg-ring"></a></dt>
