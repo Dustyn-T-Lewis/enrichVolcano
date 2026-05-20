@@ -54,3 +54,18 @@ test_that("ev_ring_geometry tolerates NA padj/NES from fgsea", {
   g <- enrichVolcano:::ev_ring_geometry(enr)
   expect_true(all(is.finite(g$arc_r1_var)))
 })
+
+test_that("ev_volcano_ring accepts disc_color and adds a layer", {
+  volc <- tibble::tibble(gene = paste0("G", 1:20), contrast = "ctr",
+                         logFC = rnorm(20), P.Value = runif(20),
+                         pi_eq2 = runif(20, max = 0.5))
+  enr <- tibble::tibble(contrast = "ctr", database = "test",
+                        pathway = c("A", "B"), padj = c(0.01, 0.02),
+                        NES = c(2, -2), size = 20,
+                        leading_edge = c("G1;G2", "G3;G4"),
+                        mode = "fgsea", direction = c("up", "down"))
+  p_plain <- ev_volcano_ring(volc, enr)
+  p_disc  <- ev_volcano_ring(volc, enr, disc_color = "#E69F00")
+  expect_s3_class(p_disc, "ggplot")
+  expect_gt(length(p_disc$layers), length(p_plain$layers))
+})

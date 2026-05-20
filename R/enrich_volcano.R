@@ -58,6 +58,7 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #'   counts rather than per-gene labels; for a labelled volcano use the
 #'   standalone [ev_volcano()] (`label_n`, `label_by`, `label_genes`).
 #' @param facet List with `nrow`, `ncol` for patchwork outer layout.
+#' @param disc_color Optional contrast-tint for the ring's central disc.
 #' @param theme Output of `ev_theme()`.
 #' @return Object of class `c("enrichVolcano", "patchwork")` with
 #'   `attr(., "ev_data")` and `attr(., "ev_call")`.
@@ -81,6 +82,7 @@ enrich_volcano <- function(data, contrast,
                                        color = "nes"),
                            volcano = list(label_n = 10, label_by = NULL),
                            facet = list(nrow = NULL, ncol = NULL),
+                           disc_color = NULL,
                            theme = ev_theme()) {
   call <- match.call()
   p_method <- match.arg(p_method)
@@ -132,7 +134,8 @@ enrich_volcano <- function(data, contrast,
         direction_balance = isTRUE(ring$direction_balance)
       )
       ev_volcano_ring(volc_sub, enr_sub, title = ctr,
-                      p_threshold = p_threshold, theme = theme)
+                      p_threshold = p_threshold, disc_color = disc_color,
+                      theme = theme)
     }),
     contrast
   )
