@@ -24,6 +24,8 @@ ev_clean_label <- function(name) {
     return(ev_clean_label_mitocarta(name))
   }
 
+  # Prefixes are mutually exclusive (a name carries at most one); GOSLIM_ and
+  # GO(BP|CC|MF)_ never both match the same name, so order is immaterial.
   out <- name |>
     sub("^HALLMARK_", "", x = _) |>
     sub("^REACTOME_", "", x = _) |>

@@ -69,7 +69,9 @@ column. Unsigned pi-score columns are rejected.}
 pathways drawn in the ring); \code{show_databases} (default NULL = all enriched
 databases; pass a character vector to restrict the ring to those named
 databases); \code{direction_balance} (default FALSE = global top-N by padj;
-TRUE = balanced selection of top up-NES + top down-NES terms). Arc height
+TRUE = balanced selection of top up-NES + top down-NES terms; rows without
+a signed NES, such as ORA results, are excluded from balanced selection).
+Arc height
 is fixed to \code{-log10(padj)} and fill to NES by the canonical layout. For
 tunable \code{order_by}/\code{magnitude}/\code{color} encodings use the standalone
 \code{\link[=ring_plot]{ring_plot()}}.}
