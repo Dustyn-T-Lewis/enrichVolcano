@@ -24,3 +24,16 @@ test_that("bundled GMT files are valid when present", {
     }
   }
 })
+
+test_that("go_slim is registered and its bundled GMTs are valid", {
+  reg <- list_databases()
+  expect_true("go_slim" %in% reg$name)
+  for (sp in c("human", "mouse", "rat")) {
+    f <- system.file("extdata", "gmt", paste0("go_slim_", sp, ".gmt"),
+                     package = "enrichVolcano")
+    skip_if(!nzchar(f), paste("go_slim GMT not bundled:", sp))
+    p <- fgsea::gmtPathways(f)
+    expect_gt(length(p), 30)
+    expect_true(all(grepl("^GOSLIM_", names(p))))
+  }
+})
