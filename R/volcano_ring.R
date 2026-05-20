@@ -27,6 +27,7 @@ ev_clean_label <- function(name) {
   out <- name |>
     sub("^HALLMARK_", "", x = _) |>
     sub("^REACTOME_", "", x = _) |>
+    sub("^GOSLIM_", "", x = _) |>
     sub("^KEGG_(MEDICUS|LEGACY)_", "", x = _) |>
     sub("^GO(BP|CC|MF)_", "", x = _) |>
     sub("^WP_", "", x = _) |>

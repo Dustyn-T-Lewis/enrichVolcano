@@ -69,3 +69,8 @@ test_that("ev_volcano_ring accepts disc_color and adds a layer", {
   expect_s3_class(p_disc, "ggplot")
   expect_gt(length(p_disc$layers), length(p_plain$layers))
 })
+
+test_that("ev_clean_label strips the GOSLIM_ prefix", {
+  expect_equal(enrichVolcano:::ev_clean_label("GOSLIM_MUSCLE_SYSTEM_PROCESS"),
+               "Muscle System\nProcess")
+})
