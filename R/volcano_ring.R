@@ -233,11 +233,13 @@ ev_tick_data <- function(ring_data, volc_df, tick_r0 = 4.4, tick_r1 = 4.8) {
 #' @param p_threshold Significance cutoff applied to `pi_eq2` for up/down calls.
 #' @param point_size,point_alpha Volcano point aesthetics.
 #' @param label_size Pathway-label text size.
+#' @param disc_color Optional fill for a tinted central disc (default NULL = none).
 #' @param theme Output of `ev_theme()`.
 #' @return A ggplot object (class `c("enrichVolcano", ...)`).
 #' @export
 ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
                             volcano_radius = 3.5, p_threshold = 0.05,
+                            disc_color = NULL,
                             point_size = 0.9, point_alpha = 0.6,
                             label_size = 2.6, theme = ev_theme()) {
   pal <- theme$palette
@@ -265,6 +267,17 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
   ticks <- ev_tick_data(ring, v)
 
   p <- ggplot2::ggplot()
+
+  if (!is.null(disc_color)) {
+    disc <- data.frame(
+      x = 4.4 * cos(seq(0, 2 * pi, length.out = 200)),
+      y = 4.4 * sin(seq(0, 2 * pi, length.out = 200))
+    )
+    p <- p + ggplot2::geom_polygon(
+      data = disc, ggplot2::aes(.data$x, .data$y),
+      fill = disc_color, alpha = 0.12, colour = NA, inherit.aes = FALSE
+    )
+  }
 
   if (nrow(ring) > 0) {
     p <- p + ggforce::geom_arc_bar(

@@ -10,6 +10,7 @@ ev_volcano_ring(
   title = NULL,
   volcano_radius = 3.5,
   p_threshold = 0.05,
+  disc_color = NULL,
   point_size = 0.9,
   point_alpha = 0.6,
   label_size = 2.6,
@@ -28,6 +29,8 @@ ev_volcano_ring(
 \item{volcano_radius}{Inner volcano radius.}
 
 \item{p_threshold}{Significance cutoff applied to \code{pi_eq2} for up/down calls.}
+
+\item{disc_color}{Optional fill for a tinted central disc (default NULL = none).}
 
 \item{point_size, point_alpha}{Volcano point aesthetics.}
 

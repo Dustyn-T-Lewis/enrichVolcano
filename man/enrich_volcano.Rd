@@ -25,6 +25,7 @@ enrich_volcano(
     "nes"),
   volcano = list(label_n = 10, label_by = NULL),
   facet = list(nrow = NULL, ncol = NULL),
+  disc_color = NULL,
   theme = ev_theme()
 )
 }
@@ -78,6 +79,8 @@ counts rather than per-gene labels; for a labelled volcano use the
 standalone \code{\link[=ev_volcano]{ev_volcano()}} (\code{label_n}, \code{label_by}, \code{label_genes}).}
 
 \item{facet}{List with \code{nrow}, \code{ncol} for patchwork outer layout.}
+
+\item{disc_color}{Optional contrast-tint for the ring's central disc.}
 
 \item{theme}{Output of \code{ev_theme()}.}
 }
