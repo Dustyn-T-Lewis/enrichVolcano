@@ -85,27 +85,19 @@ enrich_volcano <- function(data, contrast,
     enrich
   }
 
-  volcano_plots <- stats::setNames(
+  composites <- stats::setNames(
     lapply(contrast, function(ctr) {
-      ev_volcano(with_padj, contrast = ctr,
-                 p_method = p_method,
-                 p_threshold = p_threshold,
-                 logfc_threshold = logfc_threshold,
-                 label_n = volcano$label_n,
-                 label_by = volcano$label_by,
-                 theme = theme)
-    }),
-    contrast
-  )
-
-  ring_plots <- stats::setNames(
-    lapply(contrast, function(ctr) {
-      ring_plot(dedup_res, contrast = ctr,
-              max_terms = ring$max_terms,
-              order_by = ring$order_by,
-              magnitude = ring$magnitude,
-              color = ring$color,
-              theme = theme)
+      volc_sub <- with_padj[with_padj$contrast == ctr, , drop = FALSE]
+      enr_sub <- dedup_res[dedup_res$contrast == ctr, , drop = FALSE]
+      if ("dedup_kept" %in% colnames(enr_sub)) {
+        enr_sub <- enr_sub[enr_sub$dedup_kept, , drop = FALSE]
+      }
+      if (nrow(enr_sub) > ring$max_terms) {
+        enr_sub <- enr_sub[order(enr_sub$padj), , drop = FALSE]
+        enr_sub <- utils::head(enr_sub, ring$max_terms)
+      }
+      ev_volcano_ring(volc_sub, enr_sub, title = ctr,
+                      p_threshold = p_threshold, theme = theme)
     }),
     contrast
   )
@@ -117,9 +109,15 @@ enrich_volcano <- function(data, contrast,
     dedup_result = dedup_res
   )
 
-  p <- ev_compose(volcano_plots, ring_plots,
-                  nrow = facet$nrow, ncol = facet$ncol,
-                  data = data_attr)
+  p <- if (length(composites) == 1) {
+    composites[[1]]
+  } else {
+    patchwork::wrap_plots(composites, nrow = facet$nrow, ncol = facet$ncol)
+  }
+  if (!inherits(p, "enrichVolcano")) {
+    class(p) <- c("enrichVolcano", class(p))
+  }
+  attr(p, "ev_data") <- data_attr
   attr(p, "ev_call") <- call
   p
 }

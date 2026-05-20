@@ -5,6 +5,7 @@ reference:
   - title: "Hero function"
     contents:
       - enrich_volcano
+      - ev_volcano_ring
   - title: "Pipeline steps"
     contents:
       - ev_validate
