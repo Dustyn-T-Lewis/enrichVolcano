@@ -6,6 +6,8 @@
   : Build a composite volcano + enrichment ring plot
 - [`ev_volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano_ring.md)
   : Build a volcano-in-ring composite for one contrast
+- [`ev_app()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_app.md)
+  : Launch the interactive enrichVolcano GUI
 
 ## Pipeline steps
 
