@@ -2,7 +2,8 @@
 #'
 #' @details
 #' Each entry in `databases` (or each registered name) produces fgsea and/or
-#' ORA results. fgsea ranks genes by `rank_by` (default `pi_eq2`). ORA uses
+#' ORA results. fgsea ranks genes by `rank_by` (default `"signed_p"` =
+#' sign(logFC) * -log10(P), a signed statistic). ORA uses
 #' significant genes (`pi_eq2 < 0.05` if present, else `adj.P.Val < 0.05`)
 #' against the supplied or inferred background.
 #'
@@ -31,7 +32,7 @@ ev_enrich <- function(data, contrast,
                       databases,
                       species = "human",
                       enrich_mode = c("fgsea", "ora"),
-                      rank_by = "pi_eq2",
+                      rank_by = "signed_p",
                       min_size = 10, max_size = 500,
                       background = NULL,
                       exclude_terms = "DISEASE|CANCER|TUMOR",
@@ -91,8 +92,17 @@ ev_enrich <- function(data, contrast,
 # than once (protein isoforms, or test data with replace = TRUE), keep the
 # row with the largest absolute rank value — the most informative signal.
 ev_rank_stats <- function(sub, rank_by) {
-  stats <- stats::setNames(sub[[rank_by]], sub$gene)
-  stats <- stats[!is.na(stats)]
+  # fgsea/GSEA needs a SIGNED ranking statistic so up- and down-regulated genes
+  # sit at opposite ends. "signed_p" = sign(logFC) * -log10(P) (default) and a
+  # raw "t" column both satisfy this; pi-scores do NOT (they are unsigned in
+  # [0,1]) and must never be used to rank fgsea.
+  vals <- if (identical(rank_by, "signed_p") || !(rank_by %in% colnames(sub))) {
+    sign(sub$logFC) * -log10(pmax(sub$P.Value, .Machine$double.xmin))
+  } else {
+    sub[[rank_by]]
+  }
+  stats <- stats::setNames(vals, sub$gene)
+  stats <- stats[is.finite(stats)]
   if (anyDuplicated(names(stats))) {
     stats <- tapply(stats, names(stats), function(x) x[which.max(abs(x))])
     stats <- unlist(stats, use.names = TRUE)

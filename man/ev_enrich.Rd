@@ -10,7 +10,7 @@ ev_enrich(
   databases,
   species = "human",
   enrich_mode = c("fgsea", "ora"),
-  rank_by = "pi_eq2",
+  rank_by = "signed_p",
   min_size = 10,
   max_size = 500,
   background = NULL,
@@ -58,7 +58,8 @@ Run enrichment (fgsea + ORA) against one or many databases
 }
 \details{
 Each entry in \code{databases} (or each registered name) produces fgsea and/or
-ORA results. fgsea ranks genes by \code{rank_by} (default \code{pi_eq2}). ORA uses
+ORA results. fgsea ranks genes by \code{rank_by} (default \code{"signed_p"} =
+sign(logFC) * -log10(P), a signed statistic). ORA uses
 significant genes (\code{pi_eq2 < 0.05} if present, else \code{adj.P.Val < 0.05})
 against the supplied or inferred background.
 }

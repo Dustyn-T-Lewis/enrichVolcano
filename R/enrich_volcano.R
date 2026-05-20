@@ -62,7 +62,9 @@ enrich_volcano <- function(data, contrast,
 
   with_padj <- adjust_p(with_pi, method = p_adjust)
 
-  rank_by <- if (p_method == "pi_eq1") "pi_eq1" else "pi_eq2"
+  # fgsea is ranked by a signed statistic (sign(logFC) * -log10(P)), NOT the
+  # pi-score, so up/down genes sit at opposite ends of the ranked list.
+  rank_by <- "signed_p"
 
   enrich <- ev_enrich(
     with_padj, contrast = contrast, databases = databases,
