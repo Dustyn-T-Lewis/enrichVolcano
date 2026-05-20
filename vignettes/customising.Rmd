@@ -266,3 +266,24 @@ ggplot2::ggsave("fig.tiff", p, width = 180, height = 120,
 ```
 
 If you hit issues, check `vignette("enrichVolcano-faq")`.
+
+## Reproducing the YvO figure
+
+The published YvO ring is reproducible by matching three enrichment inputs —
+the ranking statistic, the displayed databases, and direction-balanced
+selection — and tinting the central disc:
+
+```{r yvo-recipe, eval = FALSE}
+p <- enrich_volcano(
+  yvo, contrast = "Aging",
+  rank_by    = "t",                          # limma moderated t (canonical)
+  databases  = c("hallmark", "go_slim"),     # the displayed sets
+  ring       = list(max_terms = 12, direction_balance = TRUE),
+  disc_color = "#1B9E77"                      # contrast colour
+)
+```
+
+`rank_by = "t"` requires a `t` column in the input (the YvO export carries
+`t_<contrast>`). To enrich a broader set but *display* only some databases,
+pass the full set to `databases` and restrict the ring with
+`ring = list(show_databases = c("hallmark", "go_slim"))`.
