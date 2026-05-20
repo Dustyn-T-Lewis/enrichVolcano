@@ -2,10 +2,10 @@ test_that("enrich_volcano accepts multiple databases and binds results", {
   skip_if_not_installed("msigdbr")
 
   # 80 real HGNC symbols drawn from the top of the Hallmark frequency table so
-  # that fgsea has enough unique genes to exceed min_size = 10 for at least
-  # one pathway in each of hallmark and reactome.  The original 10-gene pool
-  # produced only 9 unique ranked entries after deduplication, which is below
-  # the default min_size = 10, causing fgsea to return zero rows.
+  # that fgsea has enough unique genes to exceed the default min_size = 15 for
+  # at least one pathway in each of hallmark and reactome.  The original
+  # 10-gene pool produced only 9 unique ranked entries after deduplication,
+  # below the size filter, causing fgsea to return zero rows.
   gene_pool <- c(
     "CDKN1A", "IL6", "MYC", "SERPINE1", "BTG2", "CA2", "CD44", "IDH1",
     "IRF1", "PLAUR", "RETSAT", "ATF3", "BHLHE40", "BMP2", "CCND1", "CCND2",

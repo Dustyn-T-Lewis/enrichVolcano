@@ -14,7 +14,10 @@
 #' @param species Character (for registered DBs).
 #' @param enrich_mode `c("fgsea", "ora")` — either or both.
 #' @param rank_by Column to rank genes by for fgsea.
-#' @param min_size,max_size Gene-set size filters.
+#' @param min_size,max_size Gene-set size filters. Defaults `15`/`500` follow
+#'   Reimand et al. 2019 (*Nat Protoc* §S3.4): sets below ~15 genes are
+#'   noise-prone and sets above ~500 are non-specific. (clusterProfiler defaults
+#'   to a more permissive `minGSSize = 10`.)
 #' @param background Optional character vector of background genes for ORA;
 #'   default is all genes in `data` for the given contrast.
 #' @param exclude_terms Regex of pathway names to exclude (default removes
@@ -33,7 +36,7 @@ ev_enrich <- function(data, contrast,
                       species = "human",
                       enrich_mode = c("fgsea", "ora"),
                       rank_by = "signed_p",
-                      min_size = 10, max_size = 500,
+                      min_size = 15, max_size = 500,
                       background = NULL,
                       exclude_terms = "DISEASE|CANCER|TUMOR",
                       nperm = 10000, seed = 42) {
@@ -94,8 +97,17 @@ ev_enrich <- function(data, contrast,
 ev_rank_stats <- function(sub, rank_by) {
   # fgsea/GSEA needs a SIGNED ranking statistic so up- and down-regulated genes
   # sit at opposite ends. "signed_p" = sign(logFC) * -log10(P) (default) and a
-  # raw "t" column both satisfy this; pi-scores do NOT (they are unsigned in
-  # [0,1]) and must never be used to rank fgsea.
+  # raw "t" column both satisfy this; pi-scores do NOT (Eq.2 is bounded [0,1],
+  # Eq.1 is non-negative) so ranking by them collapses the list to one tail and
+  # yields near-empty rings. Reject them explicitly rather than fail silently.
+  if (grepl("^pi_?(score|eq[12])$", rank_by)) {
+    ev_abort(
+      c("Cannot rank fgsea by the unsigned pi-score column {.val {rank_by}}.",
+        "i" = paste("GSEA requires a signed statistic; use {.val signed_p}",
+                    "(default) or a signed column such as {.val t} or {.val logFC}.")),
+      class = "ev_unsigned_ranking"
+    )
+  }
   vals <- if (identical(rank_by, "signed_p") || !(rank_by %in% colnames(sub))) {
     sign(sub$logFC) * -log10(pmax(sub$P.Value, .Machine$double.xmin))
   } else {

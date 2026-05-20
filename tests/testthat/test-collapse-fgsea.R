@@ -19,7 +19,7 @@ test_that("collapse_fgsea removes redundant pathways sharing leading-edge genes"
   enrich <- ev_enrich(
     data, contrast = "ctr",
     databases    = list(test = paths),
-    enrich_mode  = "fgsea", rank_by = "pi_eq2",
+    enrich_mode  = "fgsea", rank_by = "signed_p",
     min_size = 1, max_size = 1000, nperm = 1000
   )
   expect_false(is.null(attr(enrich, "ev_pathways")))
@@ -43,7 +43,7 @@ test_that("collapse method='both' applies jaccard then fgsea", {
   enrich <- ev_enrich(
     data, contrast = "ctr",
     databases = list(hallmark_sub = paths),
-    enrich_mode = "fgsea", rank_by = "pi_eq2",
+    enrich_mode = "fgsea", rank_by = "signed_p",
     min_size = 1, max_size = 1000, nperm = 1000
   )
 

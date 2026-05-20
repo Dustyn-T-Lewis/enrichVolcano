@@ -5,7 +5,7 @@ test_that("ev_compose returns enrichVolcano-classed patchwork", {
   enrich <- suppressWarnings(ev_enrich(
     data, contrast = "ctr",
     databases = list(test = paths),
-    enrich_mode = "fgsea", rank_by = "pi_eq2",
+    enrich_mode = "fgsea", rank_by = "signed_p",
     nperm = 100, min_size = 5, max_size = 100
   ))
   enrich <- ev_collapse(enrich, method = "jaccard", cutoff = 0.5)

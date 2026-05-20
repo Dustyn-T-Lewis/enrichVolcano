@@ -44,7 +44,7 @@ test_that("ev_collapse method='both' runs without error (collapse_fgsea is no-op
   enrich <- suppressWarnings(ev_enrich(
     data, contrast = "ctr",
     databases = list(test = paths),
-    enrich_mode = "fgsea", rank_by = "pi_eq2",
+    enrich_mode = "fgsea", rank_by = "signed_p",
     nperm = 100, min_size = 5, max_size = 100
   ))
   result <- ev_collapse(enrich, method = "both",

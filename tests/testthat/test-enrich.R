@@ -5,7 +5,7 @@ test_that("ev_enrich fgsea mode runs and returns expected schema", {
     data, contrast = "ctr",
     databases = list(hallmark = pathways),
     enrich_mode = "fgsea",
-    rank_by = "pi_eq2",
+    rank_by = "signed_p",
     nperm = 1000, seed = 42, min_size = 5, max_size = 100
   ))
   expect_s3_class(result, "tbl_df")
@@ -22,7 +22,7 @@ test_that("ev_enrich returns empty tibble (not error) when no pathways match", {
     data, contrast = "ctr",
     databases = list(test = empty_paths),
     enrich_mode = "fgsea",
-    rank_by = "pi_eq2",
+    rank_by = "signed_p",
     nperm = 100, min_size = 5
   ))
   expect_s3_class(result, "tbl_df")
