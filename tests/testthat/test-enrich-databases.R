@@ -50,3 +50,19 @@ test_that("ev_resolve_databases passes through a named list unchanged", {
   out <- enrichVolcano:::ev_resolve_databases(paths, species = "human")
   expect_identical(out, paths)
 })
+
+test_that("database keyword 'compartments' expands to compartment DBs", {
+  expanded <- enrichVolcano:::ev_expand_db_keywords("compartments")
+  expect_setequal(expanded, c("go_cc", "corum", "mitocarta3"))
+})
+
+test_that("database keyword 'pathways' expands and mixes with explicit names", {
+  expanded <- enrichVolcano:::ev_expand_db_keywords(c("pathways", "go_cc"))
+  expect_true(all(c("hallmark", "reactome", "go_bp", "go_cc") %in% expanded))
+  expect_false("compartments" %in% expanded)
+})
+
+test_that("non-keyword names pass through unchanged", {
+  expect_equal(enrichVolcano:::ev_expand_db_keywords(c("hallmark", "reactome")),
+               c("hallmark", "reactome"))
+})

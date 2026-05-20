@@ -175,8 +175,22 @@ ev_ora_one <- function(sub, paths, db_name, ctr, background,
   )
 }
 
+# Convenience keywords that expand to a set of registered database names.
+ev_db_keywords <- list(
+  compartments = c("go_cc", "corum", "mitocarta3"),
+  pathways     = c("hallmark", "reactome", "go_bp")
+)
+
+ev_expand_db_keywords <- function(databases) {
+  out <- unlist(lapply(databases, function(d) {
+    if (!is.null(ev_db_keywords[[d]])) ev_db_keywords[[d]] else d
+  }), use.names = FALSE)
+  unique(out)
+}
+
 ev_resolve_databases <- function(databases, species) {
   if (is.list(databases) && !is.character(databases)) return(databases)
+  databases <- ev_expand_db_keywords(databases)
   reg <- list_databases()
   resolved <- list()
   for (db_name in databases) {
