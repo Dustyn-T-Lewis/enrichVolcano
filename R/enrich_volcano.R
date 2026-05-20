@@ -1,3 +1,23 @@
+# Choose which enrichment rows the ring displays for one contrast.
+ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
+                                  direction_balance = FALSE) {
+  if (!is.null(show_databases)) {
+    enr <- enr[enr$database %in% show_databases, , drop = FALSE]
+  }
+  if (nrow(enr) == 0) return(enr)
+  enr <- enr[order(enr$padj), , drop = FALSE]
+  if (!direction_balance) {
+    return(utils::head(enr, max_terms))
+  }
+  up <- enr[!is.na(enr$NES) & enr$NES > 0, , drop = FALSE]
+  dn <- enr[!is.na(enr$NES) & enr$NES < 0, , drop = FALSE]
+  n_up <- min(nrow(up), ceiling(max_terms / 2))
+  n_dn <- min(nrow(dn), max_terms - n_up)
+  n_up <- min(nrow(up), max_terms - n_dn)  # let one side fill remainder
+  out <- rbind(utils::head(up, n_up), utils::head(dn, n_dn))
+  out[order(out$padj), , drop = FALSE]
+}
+
 #' Build a composite volcano + enrichment ring plot
 #'
 #' Hero function for `enrichVolcano`. Runs the full pipeline:
@@ -26,10 +46,14 @@
 #' @param enrich_padj Pathway significance cutoff (default 0.05).
 #' @param dedup List with `method` (`"jaccard"`, `"collapse_fgsea"`, or
 #'   `"both"`), `cutoff`, and `scope`. See [ev_collapse()].
-#' @param ring List controlling the ring. The composite honours `max_terms`
-#'   (cap on pathways drawn); arc height is fixed to `-log10(padj)` and fill to
-#'   NES by the canonical layout. For tunable `order_by`/`magnitude`/`color`
-#'   encodings use the standalone [ring_plot()].
+#' @param ring List controlling the ring. Honoured fields: `max_terms` (cap on
+#'   pathways drawn in the ring); `show_databases` (default NULL = all enriched
+#'   databases; pass a character vector to restrict the ring to those named
+#'   databases); `direction_balance` (default FALSE = global top-N by padj;
+#'   TRUE = balanced selection of top up-NES + top down-NES terms). Arc height
+#'   is fixed to `-log10(padj)` and fill to NES by the canonical layout. For
+#'   tunable `order_by`/`magnitude`/`color` encodings use the standalone
+#'   [ring_plot()].
 #' @param volcano Reserved. The composite volcano shows up/down significant
 #'   counts rather than per-gene labels; for a labelled volcano use the
 #'   standalone [ev_volcano()] (`label_n`, `label_by`, `label_genes`).
@@ -101,10 +125,12 @@ enrich_volcano <- function(data, contrast,
       if ("dedup_kept" %in% colnames(enr_sub)) {
         enr_sub <- enr_sub[enr_sub$dedup_kept, , drop = FALSE]
       }
-      if (nrow(enr_sub) > ring$max_terms) {
-        enr_sub <- enr_sub[order(enr_sub$padj), , drop = FALSE]
-        enr_sub <- utils::head(enr_sub, ring$max_terms)
-      }
+      enr_sub <- ev_select_ring_terms(
+        enr_sub,
+        max_terms         = ring$max_terms,
+        show_databases    = ring$show_databases,
+        direction_balance = isTRUE(ring$direction_balance)
+      )
       ev_volcano_ring(volc_sub, enr_sub, title = ctr,
                       p_threshold = p_threshold, theme = theme)
     }),
