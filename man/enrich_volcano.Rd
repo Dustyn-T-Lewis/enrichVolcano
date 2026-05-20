@@ -19,6 +19,7 @@ enrich_volcano(
   logfc_threshold = log2(1.5),
   enrich_mode = c("fgsea", "ora"),
   enrich_padj = 0.05,
+  rank_by = "signed_p",
   dedup = list(method = "jaccard", cutoff = 0.5, scope = "within_db"),
   ring = list(max_terms = 10, order_by = "padj", magnitude = "neg_log_padj", color =
     "nes"),
@@ -55,6 +56,10 @@ if NULL).}
 \item{enrich_mode}{\code{c("fgsea", "ora")} - either or both.}
 
 \item{enrich_padj}{Pathway significance cutoff (default 0.05).}
+
+\item{rank_by}{Signed statistic fgsea ranks genes by. \code{"signed_p"}
+(default, \code{sign(logFC) * -log10(P)}), \code{"t"}, \code{"logFC"}, or any signed
+column. Unsigned pi-score columns are rejected.}
 
 \item{dedup}{List with \code{method} (\code{"jaccard"}, \code{"collapse_fgsea"}, or
 \code{"both"}), \code{cutoff}, and \code{scope}. See \code{\link[=ev_collapse]{ev_collapse()}}.}

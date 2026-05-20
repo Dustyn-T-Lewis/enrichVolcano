@@ -17,6 +17,9 @@
 #' @param custom_gmt Reserved for v0.2 (GMT path input).
 #' @param p_method Y-axis transform: `"pi_eq2"` (default), `"pi_eq1"`,
 #'   `"raw_p"`, `"adj_p"`.
+#' @param rank_by Signed statistic fgsea ranks genes by. `"signed_p"`
+#'   (default, `sign(logFC) * -log10(P)`), `"t"`, `"logFC"`, or any signed
+#'   column. Unsigned pi-score columns are rejected.
 #' @param p_adjust Method: `"BH"` (default), `"bonferroni"`, `"qvalue"`, `"IHW"`.
 #' @param p_threshold,logfc_threshold Volcano significance cutoffs.
 #' @param enrich_mode `c("fgsea", "ora")` - either or both.
@@ -46,6 +49,7 @@ enrich_volcano <- function(data, contrast,
                            logfc_threshold = log2(1.5),
                            enrich_mode = c("fgsea", "ora"),
                            enrich_padj = 0.05,
+                           rank_by = "signed_p",
                            dedup = list(method = "jaccard", cutoff = 0.5,
                                         scope = "within_db"),
                            ring = list(max_terms = 10, order_by = "padj",
@@ -67,10 +71,8 @@ enrich_volcano <- function(data, contrast,
 
   with_padj <- adjust_p(with_pi, method = p_adjust)
 
-  # fgsea is ranked by a signed statistic (sign(logFC) * -log10(P)), NOT the
-  # pi-score, so up/down genes sit at opposite ends of the ranked list.
-  rank_by <- "signed_p"
-
+  # fgsea needs a SIGNED ranking statistic (default sign(logFC) * -log10(P)).
+  # ev_enrich() rejects unsigned pi-score columns.
   enrich <- ev_enrich(
     with_padj, contrast = contrast, databases = databases,
     species = species, enrich_mode = enrich_mode,

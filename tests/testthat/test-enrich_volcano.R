@@ -29,3 +29,27 @@ test_that("enrich_volcano handles multiple contrasts", {
   expect_s3_class(p, "enrichVolcano")
   expect_equal(length(unique(attr(p, "ev_data")$validated_input$contrast)), 2)
 })
+
+test_that("enrich_volcano forwards rank_by to ev_enrich", {
+  data <- make_ranked_input()  # has gene/contrast/logFC/P.Value/pi_eq2, contrast "ctr"
+  paths <- make_mini_pathways()
+  # default signed_p works
+  p1 <- suppressWarnings(enrich_volcano(
+    data, contrast = "ctr", databases = list(test = paths),
+    enrich_mode = "fgsea", enrich_padj = 1
+  ))
+  expect_s3_class(p1, "enrichVolcano")
+  # explicit t ranking is accepted (add a t column)
+  data$t <- data$logFC / 0.3
+  p2 <- suppressWarnings(enrich_volcano(
+    data, contrast = "ctr", databases = list(test = paths),
+    enrich_mode = "fgsea", enrich_padj = 1, rank_by = "t"
+  ))
+  expect_s3_class(p2, "enrichVolcano")
+  # unsigned pi-score is still rejected through the hero
+  expect_error(
+    enrich_volcano(data, contrast = "ctr", databases = list(test = paths),
+                   enrich_mode = "fgsea", rank_by = "pi_eq2"),
+    class = "ev_unsigned_ranking"
+  )
+})
