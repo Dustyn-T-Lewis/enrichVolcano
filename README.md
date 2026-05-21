@@ -22,9 +22,11 @@ directly.
 
 The package accepts twelve common input formats (tidy, wide-suffix, DEP,
 proteoDA, limma, DESeq2, edgeR, MSstats, proDA, DEqMS, MaxQuant,
-Perseus) via `ev_validate()`, supports two pi-score variants (Xiao 2014
-Eq.1 and Eq.2), four p-adjustment methods (BH, Bonferroni, q-value,
-IHW), and 21 registered gene-set databases across seven species.
+Perseus) via `ev_validate()`, and reads UniProt-keyed per-contrast CSVs
+via `ev_read_contrasts()` (accessions are mapped to gene symbols for
+enrichment). It supports two pi-score variants (Xiao 2014 Eq.1 and
+Eq.2), four p-adjustment methods (BH, Bonferroni, q-value, IHW), and 21
+registered gene-set databases across seven species.
 
 ## Installation
 
@@ -86,18 +88,22 @@ These let you rebuild any panel without re-running the pipeline.
 one yourself:
 
 ``` r
-ev_validate()      # input adapter (12 sources)
-pi_score()         # Xiao 2014 Eq.1 or Eq.2
-adjust_p()         # BH / Bonferroni / qvalue / IHW
-ev_enrich()        # fgsea + ORA
-ev_collapse()      # Jaccard / collapsePathways dedup
-ev_volcano_ring()  # the volcano-in-ring composite
+ev_read_contrasts() # optional: load UniProt-keyed per-contrast CSVs
+ev_validate()       # input adapter (12 sources + UniProt accessions)
+pi_score()          # Xiao 2014 Eq.1 or Eq.2
+adjust_p()          # BH / Bonferroni / qvalue / IHW
+ev_enrich()         # fgsea + ORA
+ev_collapse()       # Jaccard / collapsePathways dedup
+ev_volcano_ring()   # the volcano-in-ring composite
 ```
 
 For building panels by hand there are also `ev_volcano()` (volcano
 only), `ring_plot()` (ring only), and `ev_compose()` (patchwork stitch),
-plus `list_databases()` / `database_info()` for the registry and
-`ev_theme()` for styling.
+plus `list_databases()` / `database_info()` for the registry,
+`ev_idmap_report()` for the UniProt-to-symbol mapping summary, and
+`ev_theme()` for styling. Volcano labelling is rule-driven via
+`label_mode` (`none` by default, `top_per_direction`, `top_total`,
+`all_significant`, or `explicit`).
 
 ## Learn more
 
