@@ -1,3 +1,17 @@
+test_that("build_registry.R reproduces the shipped db_registry.csv", {
+  script <- testthat::test_path("..", "..", "data-raw", "build_registry.R")
+  skip_if(!file.exists(script),
+          "data-raw/build_registry.R not available (installed package)")
+  shipped <- system.file("extdata", "db_registry.csv",
+                         package = "enrichVolcano")
+  script <- normalizePath(script)
+  tmp <- withr::local_tempdir()
+  withr::with_dir(tmp, sys.source(script, envir = new.env()))
+  built <- file.path(tmp, "inst", "extdata", "db_registry.csv")
+  expect_true(file.exists(built))
+  expect_identical(readLines(built), readLines(shipped))
+})
+
 test_that("list_databases returns tibble with required schema", {
   db <- list_databases()
   expect_s3_class(db, "tbl_df")

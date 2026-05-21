@@ -22,11 +22,9 @@ db_registry <- tibble::tribble(
   "cell_type_sig",      "Cell Type Signatures (C8)","cell_type", "human",                                                 "msigdbr",           "Academic",          "msigdb_c8",          "Curated cell-type signatures",
   "mirdb",              "miRDB targets",           "regulatory", "human;mouse;rat;zebrafish;fly;yeast;pig",               "msigdbr",           "CC BY-NC 4.0",      "mirdb_2020",         "miRNA target gene sets",
   "tft_gtrd",           "TFT GTRD",                "regulatory", "human;mouse;rat;zebrafish;fly;yeast;pig",               "msigdbr",           "CC BY 4.0",         "tft_gtrd_2019",      "Transcription factor target genes",
-  "mitocarta3",         "MitoCarta 3.0",           "organelle",  "human;mouse;rat",                                       "bundled_gmt",       "CC BY-NC 4.0",      "mitocarta_rath_2021","Mitochondrial proteins + 149 MitoPathways",
-  "hpa_subcellular",    "HPA Subcellular",         "organelle",  "human",                                                 "bundled_gmt",       "CC BY-SA 4.0",      "hpa_thul_2017",      "Human Protein Atlas subcellular localization",
-  "uniprot_subcellular","UniProt Subcellular",     "organelle",  "human;mouse;rat;zebrafish;fly;yeast;pig",               "bundled_gmt",       "CC BY 4.0",         "uniprot_2024",       "UniProt subcellular location keywords",
-  "disgenet",           "DisGeNET",                "disease",    "human",                                                 "fetch_on_demand",   "CC BY-NC-SA 4.0",   "disgenet_pinero_2020","Disease-gene associations",
-  "opentargets_disease","Open Targets Diseases",   "disease",    "human",                                                 "fetch_on_demand",   "CC0",               "opentargets_2024",   "Disease-target associations"
+  "mitocarta3",         "MitoCarta 3.0",           "organelle",  "human;mouse",                                           "bundled_gmt",       "CC BY-NC 4.0",      "mitocarta_rath_2021","Mitochondrial proteins + 149 MitoPathways",
+  "corum",              "CORUM 5.0",               "complex",    "human;mouse;rat",                                       "bundled_gmt",       "CC BY 4.0",         "corum_tschen_2023",  "Mammalian protein complexes (proteomics-native gene sets)",
+  "go_slim",            "GO Slim (generic BP)",    "ontology",   "human;mouse;rat",                                       "bundled_gmt",       "CC BY 4.0",         "go_consortium",      "62 generic GO Slim biological-process categories"
 )
 
 dir.create("inst/extdata", recursive = TRUE, showWarnings = FALSE)
