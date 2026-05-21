@@ -20,10 +20,13 @@ ev_load_idmap <- function(species) {
       class = "ev_no_idmap"
     )
   }
-  tab <- data.table::fread(
-    path, sep = "\t", header = TRUE, data.table = FALSE,
-    colClasses = list(character = c("accession", "symbol"),
-                      logical = "is_secondary")
+  # Read with base R via a gzfile connection; data.table::fread() would need the
+  # Suggests-only R.utils package to decompress .gz, which is not guaranteed in
+  # a clean environment. read.delim opens and closes the connection itself.
+  tab <- utils::read.delim(
+    gzfile(path), header = TRUE, stringsAsFactors = FALSE,
+    colClasses = c(accession = "character", symbol = "character",
+                   is_secondary = "logical")
   )
   .ev_idmap_cache[[species]] <- tab
   tab
