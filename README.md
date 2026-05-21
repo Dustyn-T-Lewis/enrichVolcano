@@ -24,7 +24,7 @@ The package accepts twelve common input formats (tidy, wide-suffix, DEP,
 proteoDA, limma, DESeq2, edgeR, MSstats, proDA, DEqMS, MaxQuant,
 Perseus) via `ev_validate()`, supports two pi-score variants (Xiao 2014
 Eq.1 and Eq.2), four p-adjustment methods (BH, Bonferroni, q-value,
-IHW), and 19 registered gene-set databases across seven species.
+IHW), and 21 registered gene-set databases across seven species.
 
 ## Installation
 
@@ -105,7 +105,7 @@ plus `list_databases()` / `database_info()` for the registry and
 - `vignette("scoring")` — pi-score variants, p-value adjustment methods
 - `vignette("pathway-dedup")` — Jaccard vs collapsePathways, scope
   choices
-- `vignette("databases")` — 19 databases compared, decision flowchart
+- `vignette("databases")` — 21 databases compared, decision flowchart
 - `vignette("customising")` — themes, palettes, multi-contrast layouts
 - `vignette("enrichVolcano-faq")` — common questions
 

@@ -23,6 +23,8 @@ db_registry <- tibble::tribble(
   "mirdb",              "miRDB targets",           "regulatory", "human;mouse;rat;zebrafish;fly;yeast;pig",               "msigdbr",           "CC BY-NC 4.0",      "mirdb_2020",         "miRNA target gene sets",
   "tft_gtrd",           "TFT GTRD",                "regulatory", "human;mouse;rat;zebrafish;fly;yeast;pig",               "msigdbr",           "CC BY 4.0",         "tft_gtrd_2019",      "Transcription factor target genes",
   "mitocarta3",         "MitoCarta 3.0",           "organelle",  "human;mouse",                                           "bundled_gmt",       "CC BY-NC 4.0",      "mitocarta_rath_2021","Mitochondrial proteins + 149 MitoPathways",
+  "hpa_subcellular",    "HPA Subcellular",         "organelle",  "human",                                                 "bundled_gmt",       "CC BY-SA 4.0",      "hpa_thul_2017",      "Human Protein Atlas subcellular localization (Main location)",
+  "uniprot_subcellular","UniProt Subcellular",     "organelle",  "human;mouse;rat",                                       "bundled_gmt",       "CC BY 4.0",         "uniprot_2024",       "UniProt top-level subcellular compartments (reviewed)",
   "corum",              "CORUM 5.0",               "complex",    "human;mouse;rat",                                       "bundled_gmt",       "CC BY 4.0",         "corum_tschen_2023",  "Mammalian protein complexes (proteomics-native gene sets)",
   "go_slim",            "GO Slim (generic BP)",    "ontology",   "human;mouse;rat",                                       "bundled_gmt",       "CC BY 4.0",         "go_consortium",      "62 generic GO Slim biological-process categories"
 )
