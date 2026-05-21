@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 library(enrichVolcano)
 ```
 
-## The 19 registered databases
+## The 21 registered databases
 
 `list_databases()` returns a tibble with one row per registered database.
 The full registry ships with the package in
@@ -32,7 +32,7 @@ db <- list_databases()
 db[, c("name", "display_name", "type", "species", "license")]
 ```
 
-Nineteen rows cover six database types. The next section walks
+Twenty-one rows cover six database types. The next section walks
 through each type and gives a one-line use-case.
 
 ## Database types
@@ -82,17 +82,23 @@ phenotype set.
 
 ### Organelle
 
-Subcellular localization sets. Example: `mitocarta3`. Use when the
-question is "which cellular compartment is affected?". MitoCarta3 has
-149 curated mitochondrial sub-pathways on top of the master
-mitochondrial gene list.
+Subcellular localization sets. Examples: `mitocarta3`,
+`hpa_subcellular`, `uniprot_subcellular`. Use when the question is
+"which cellular compartment is affected?". MitoCarta3 has 149 curated
+mitochondrial sub-pathways on top of the master mitochondrial gene
+list.
 
 MitoCarta3 is the strongest organelle source for mitochondrial work
 in human, mouse, and rat. The sub-pathways resolve OXPHOS complexes
 individually, separate matrix from intermembrane space, and split
 beta-oxidation by chain length. For non-mitochondrial compartments,
-pair it with `go_cc` (the GO Cellular Component ontology) and `corum`
-(see Complex below).
+pair it with `go_cc` (the GO Cellular Component ontology), `corum`
+(see Complex below), and the two whole-cell compartment maps:
+`hpa_subcellular` (Human Protein Atlas, human only; 49 imaging-based
+"Main location" sets) and `uniprot_subcellular` (top-level UniProt
+location compartments parsed from reviewed entries, for human, mouse,
+and rat). HPA is antibody-imaging evidence; UniProt is curated from
+the literature, so the two complement each other.
 
 ### Complex
 
@@ -134,7 +140,8 @@ A short tour for picking a starting point:
 * Deep ontology with dedup: `go_bp` plus
   `ev_collapse(scope = "within_db")`.
 * Mitochondrial focus: `mitocarta3` plus `go_cc` for cross-check.
-* Subcellular localization: `go_cc` or `corum`.
+* Subcellular localization: `go_cc`, `hpa_subcellular`, or
+  `uniprot_subcellular`.
 * Protein complexes: `corum`.
 * TF activity: `tft_gtrd`.
 * Immune phenotype: `immunesigdb`.
@@ -223,8 +230,9 @@ counterpart, and a few rare paralog-only genes will appear in rat
 but not human. This is normal and rarely changes top-line
 enrichment.
 
-For bundled GMT files (MitoCarta3, CORUM, GO Slim), the package
-selects the species-specific file from `inst/extdata/gmt/`. The
+For bundled GMT files (MitoCarta3, CORUM, GO Slim, HPA Subcellular,
+UniProt Subcellular), the package selects the species-specific file
+from `inst/extdata/gmt/`. The
 naming convention is `<db>_<species>.gmt`. If a species file is
 missing, `enrich_volcano()` aborts with a clear message rather than
 silently falling back to human.
@@ -267,8 +275,10 @@ running the analysis. The registry summarises each:
   academic use. Commercial use needs a Broad Institute license.
 * **MitoCarta CC BY-NC 4.0**: non-commercial with attribution to
   Rath et al. 2021.
-* **GO, Reactome, CORUM, GO Slim**: open under CC BY 4.0. Cite the
-  consortium.
+* **GO, Reactome, CORUM, GO Slim, UniProt Subcellular**: open under
+  CC BY 4.0. Cite the consortium.
+* **HPA Subcellular CC BY-SA 4.0**: open with attribution; the
+  share-alike clause applies to redistributed derivatives.
 * **KEGG Academic**: free for academic use; commercial use needs
   KEGG Inc. license.
 * **miRDB CC BY-NC 4.0**: non-commercial with attribution.
