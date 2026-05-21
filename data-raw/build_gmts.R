@@ -62,24 +62,61 @@ build_hpa_gmt <- function(input_path) {
 build_hpa_gmt("data-raw/raw/subcellular_location.tsv")
 
 # ---- UniProt subcellular ----
+# UniProt's REST TSV ships the location as the free-text "Subcellular location
+# [CC]" field, e.g.
+#   "SUBCELLULAR LOCATION: Cytoplasm {ECO:...}; Multi-pass membrane protein. Nucleus."
+# Reduce each entry to its top-level compartment terms: strip the prefix and
+# {ECO} evidence tags, drop trailing Note=... text and [Isoform]: markers, split
+# into location statements on ".", drop membrane-topology descriptors after the
+# first ";", and take the leading compartment before the first ",".
+ev_parse_uniprot_cc <- function(x) {
+  x <- sub("^SUBCELLULAR LOCATION:\\s*", "", x)
+  x <- gsub("\\{[^}]*\\}", "", x)        # ECO evidence tags
+  x <- sub("Note=.*$", "", x)            # trailing free-text notes
+  x <- gsub("\\[Isoform[^]]*\\]:", "", x) # isoform markers
+  stmts <- strsplit(x, "\\.\\s*")[[1]]
+  comp <- vapply(stmts, function(s) {
+    s <- strsplit(s, ";", fixed = TRUE)[[1]][1]  # drop membrane topology
+    s <- strsplit(s, ",", fixed = TRUE)[[1]][1]  # top-level compartment
+    trimws(s)
+  }, character(1), USE.NAMES = FALSE)
+  comp <- comp[!is.na(comp) & nzchar(comp)]
+  unique(comp)
+}
+
 build_uniprot_gmt <- function(input_path, species) {
   if (!file.exists(input_path)) {
     message("Skipping UniProt ", species, ": ", input_path, " not found.")
     return(invisible())
   }
-  up <- read_tsv(input_path, show_col_types = FALSE) |>
+  up <- read_tsv(input_path, show_col_types = FALSE)
+  # Map UniProt REST field names (new = old) to the canonical columns; tolerate
+  # files that already use the canonical names.
+  rest_map <- c(gene_name = "Gene Names (primary)",
+                subcellular_location = "Subcellular location [CC]")
+  hit <- rest_map %in% names(up)
+  if (any(hit)) up <- dplyr::rename(up, !!!rest_map[hit])
+  if (!all(c("gene_name", "subcellular_location") %in% names(up))) {
+    stop("UniProt ", species, ": expected columns gene_name + ",
+         "subcellular_location (or the UniProt REST equivalents).")
+  }
+  up <- up |>
     select(gene_name, subcellular_location) |>
-    filter(!is.na(subcellular_location)) |>
-    separate_rows(subcellular_location, sep = ";\\s*") |>
-    group_by(subcellular_location) |>
+    filter(!is.na(gene_name), !is.na(subcellular_location),
+           nzchar(gene_name)) |>
+    mutate(loc = map(subcellular_location, ev_parse_uniprot_cc)) |>
+    select(gene_name, loc) |>
+    unnest(loc) |>
+    distinct() |>
+    group_by(loc) |>
     summarise(genes = list(unique(gene_name)), .groups = "drop")
   out <- file.path(dest, paste0("uniprot_subcellular_", species, ".gmt"))
   lines <- map_chr(seq_len(nrow(up)), function(i) {
-    paste(c(paste0("UNIPROT_", gsub(" ", "_", up$subcellular_location[i])),
+    paste(c(paste0("UNIPROT_", gsub(" ", "_", up$loc[i])),
             "UniProt Subcellular", up$genes[[i]]), collapse = "\t")
   })
   writeLines(lines, out)
-  message("Wrote ", out)
+  message("Wrote ", out, " (", nrow(up), " compartments)")
 }
 build_uniprot_gmt("data-raw/raw/uniprot_human.tsv", "human")
 build_uniprot_gmt("data-raw/raw/uniprot_mouse.tsv", "mouse")

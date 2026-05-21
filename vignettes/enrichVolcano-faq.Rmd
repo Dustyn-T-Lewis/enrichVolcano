@@ -191,7 +191,8 @@ p <- enrich_volcano(
 Supported species strings: `"human"`, `"mouse"`, `"rat"`,
 `"zebrafish"`, `"fly"`, `"yeast"`, `"pig"`. msigdbr handles
 ortholog mapping for fetched collections; bundled GMTs (MitoCarta3,
-CORUM, GO Slim) ship per-species files where the species is supported.
+CORUM, GO Slim, HPA Subcellular, UniProt Subcellular) ship per-species
+files where the species is supported.
 
 Input gene symbols must match the species namespace. Rat symbols for
 a rat study, mouse symbols for a mouse study. Mixing namespaces
