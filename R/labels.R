@@ -40,7 +40,7 @@ ev_select_labels <- function(df, mode, n, rank_by, genes,
   }
   if (mode == "none") return(df[0, , drop = FALSE])
 
-  sig <- df[[p_col]] <= p_threshold & abs(df$logFC) >= logfc_threshold
+  sig <- df[[p_col]] < p_threshold & abs(df$logFC) >= logfc_threshold
   pool <- df[sig & !is.na(sig), , drop = FALSE]
   if (nrow(pool) == 0) return(pool)
 

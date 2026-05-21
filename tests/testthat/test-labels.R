@@ -5,7 +5,7 @@ make_df <- function() {
     uniprot = paste0("P0000", 1:6),
     logFC = c(3, -2, 1.5, -3, 0.1, 2.5),
     P.Value = c(1e-5, 1e-4, 1e-3, 1e-6, 0.2, 1e-2),
-    adj.P.Val = c(1e-4, 1e-3, 1e-2, 1e-5, 0.5, 0.05),
+    adj.P.Val = c(1e-4, 1e-3, 1e-2, 1e-5, 0.5, 0.04),
     contrast = "C1"
   )
 }
