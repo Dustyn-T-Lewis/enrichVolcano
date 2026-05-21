@@ -36,3 +36,25 @@ test_that("explicit accession label resolves to symbol text", {
   d <- repel_layer_data(p)
   expect_identical(d$label_text, "DDD")
 })
+
+test_that("ev_volcano_ring labels nothing by default", {
+  v <- vdata()
+  enr <- tibble::tibble(contrast = "C1", database = "x", pathway = "P",
+                        pval = 0.01, padj = 0.02, NES = 1.5, size = 20,
+                        leading_edge = "AAA;DDD", mode = "fgsea",
+                        direction = "up")
+  p <- ev_volcano_ring(v, enr, title = "C1")
+  expect_null(repel_layer_data(p))
+})
+
+test_that("ev_volcano_ring labels per the rule when asked", {
+  v <- vdata()
+  enr <- tibble::tibble(contrast = "C1", database = "x", pathway = "P",
+                        pval = 0.01, padj = 0.02, NES = 1.5, size = 20,
+                        leading_edge = "AAA;DDD", mode = "fgsea",
+                        direction = "up")
+  p <- ev_volcano_ring(v, enr, title = "C1",
+                       label_mode = "top_per_direction", label_n = 1)
+  d <- repel_layer_data(p)
+  expect_setequal(d$label_text, c("AAA", "BBB"))
+})

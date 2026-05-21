@@ -247,6 +247,10 @@ ev_tick_data <- function(ring_data, volc_df,
 #'   every significant point; `enrich_volcano()` passes its own default.
 #' @param point_size,point_alpha Volcano point aesthetics.
 #' @param label_size Pathway-label text size.
+#' @param label_mode,label_n,label_rank_by,label_genes Volcano point labeling,
+#'   passed to the shared selector; default `label_mode = "none"`.
+#' @param p_method Significance column used for label selection (`"pi_eq2"`,
+#'   `"pi_eq1"`, `"raw_p"`, `"adj_p"`); defaults to `"pi_eq2"`.
 #' @param disc_color Optional fill for a tinted central disc (default NULL = none).
 #' @param theme Output of `ev_theme()`.
 #' @return A ggplot object (class `c("enrichVolcano", ...)`).
@@ -256,7 +260,18 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
                             logfc_threshold = 0,
                             disc_color = NULL,
                             point_size = 0.9, point_alpha = 0.6,
-                            label_size = 2.6, theme = ev_theme()) {
+                            label_size = 2.6,
+                            label_mode = c("none", "top_per_direction",
+                                           "top_total", "all_significant",
+                                           "explicit"),
+                            label_n = 10,
+                            label_rank_by = c("significance", "logfc"),
+                            label_genes = NULL,
+                            p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
+                            theme = ev_theme()) {
+  label_mode <- match.arg(label_mode)
+  label_rank_by <- match.arg(label_rank_by)
+  p_method <- match.arg(p_method)
   ev_assert_colour(disc_color)
   pal <- theme$palette
   vr <- volcano_radius * 0.92
@@ -279,6 +294,15 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
   v$y_plot <- v$neg_log10p / y_max * 2 * vr - vr
   v_ns <- v[v$direction == "ns", , drop = FALSE]
   v_sig <- v[v$direction != "ns", , drop = FALSE]
+
+  p_col <- switch(p_method, pi_eq2 = "pi_eq2", pi_eq1 = "pi_eq1",
+                  raw_p = "P.Value", adj_p = "adj.P.Val")
+  if (!p_col %in% colnames(v)) p_col <- "P.Value"
+  lab_pts <- ev_select_labels(
+    v, mode = label_mode, n = label_n, rank_by = label_rank_by,
+    genes = label_genes, p_col = p_col,
+    p_threshold = p_threshold, logfc_threshold = logfc_threshold
+  )
 
   ring <- ev_ring_geometry(enrich_df)
   ticks <- ev_tick_data(ring, v)
@@ -395,6 +419,15 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
         label.r = ggplot2::unit(1.5, "pt"), lineheight = 0.85,
         inherit.aes = FALSE
       )
+  }
+
+  if (nrow(lab_pts) > 0) {
+    p <- p + ggrepel::geom_text_repel(
+      data = lab_pts,
+      ggplot2::aes(.data$x_plot, .data$y_plot, label = .data$label_text),
+      size = label_size, max.overlaps = 50, force = 4, seed = 42,
+      inherit.aes = FALSE
+    )
   }
 
   p <- p +

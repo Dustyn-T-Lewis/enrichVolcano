@@ -23,6 +23,10 @@ enrich_volcano(
   ring = list(max_terms = 10),
   facet = list(nrow = NULL, ncol = NULL),
   disc_color = NULL,
+  label_mode = c("none", "top_per_direction", "top_total", "all_significant", "explicit"),
+  label_n = 10,
+  label_rank_by = c("significance", "logfc"),
+  label_genes = NULL,
   theme = ev_theme()
 )
 }
@@ -76,6 +80,9 @@ tunable \code{order_by}/\code{magnitude}/\code{color} encodings use the standalo
 \item{facet}{List with \code{nrow}, \code{ncol} for patchwork outer layout.}
 
 \item{disc_color}{Optional contrast-tint for the ring's central disc.}
+
+\item{label_mode, label_n, label_rank_by, label_genes}{Volcano point labeling,
+passed to the shared selector; default \code{label_mode = "none"}.}
 
 \item{theme}{Output of \code{ev_theme()}.}
 }

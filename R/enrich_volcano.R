@@ -58,6 +58,8 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #'   tunable `order_by`/`magnitude`/`color` encodings use the standalone
 #'   [ring_plot()].
 #' @param facet List with `nrow`, `ncol` for patchwork outer layout.
+#' @param label_mode,label_n,label_rank_by,label_genes Volcano point labeling,
+#'   passed to the shared selector; default `label_mode = "none"`.
 #' @param disc_color Optional contrast-tint for the ring's central disc.
 #' @param theme Output of `ev_theme()`.
 #' @return Object of class `c("enrichVolcano", "patchwork")` with
@@ -79,9 +81,17 @@ enrich_volcano <- function(data, contrast,
                            ring = list(max_terms = 10),
                            facet = list(nrow = NULL, ncol = NULL),
                            disc_color = NULL,
+                           label_mode = c("none", "top_per_direction",
+                                          "top_total", "all_significant",
+                                          "explicit"),
+                           label_n = 10,
+                           label_rank_by = c("significance", "logfc"),
+                           label_genes = NULL,
                            theme = ev_theme()) {
   call <- match.call()
   p_method <- match.arg(p_method)
+  label_mode <- match.arg(label_mode)
+  label_rank_by <- match.arg(label_rank_by)
 
   validated <- ev_validate(data, x = x, y = y, lab = lab)
 
@@ -132,7 +142,10 @@ enrich_volcano <- function(data, contrast,
       ev_volcano_ring(volc_sub, enr_sub, title = ctr,
                       p_threshold = p_threshold,
                       logfc_threshold = logfc_threshold,
-                      disc_color = disc_color, theme = theme)
+                      disc_color = disc_color, theme = theme,
+                      label_mode = label_mode, label_n = label_n,
+                      label_rank_by = label_rank_by, label_genes = label_genes,
+                      p_method = p_method)
     }),
     contrast
   )
