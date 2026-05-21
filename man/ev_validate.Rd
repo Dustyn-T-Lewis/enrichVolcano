@@ -4,7 +4,14 @@
 \alias{ev_validate}
 \title{Validate and canonicalize input from any supported source}
 \usage{
-ev_validate(data, x = NULL, y = NULL, lab = NULL)
+ev_validate(
+  data,
+  x = NULL,
+  y = NULL,
+  lab = NULL,
+  uniprot = NULL,
+  species = NULL
+)
 }
 \arguments{
 \item{data}{Input data frame from any supported source.}
@@ -14,6 +21,13 @@ ev_validate(data, x = NULL, y = NULL, lab = NULL)
 \item{y}{Column name for p-value (defaults to auto-detect).}
 
 \item{lab}{Column name for gene labels (defaults to auto-detect).}
+
+\item{uniprot}{Column name holding UniProt accessions (defaults to
+auto-detect). When supplied or detected, the input is treated as
+UniProt-first and \code{species} is required.}
+
+\item{species}{One of \code{"human"}, \code{"mouse"}, \code{"rat"}; required only for
+UniProt input. Used to map accessions to gene symbols for enrichment.}
 }
 \value{
 Tidy long tibble with attribute \code{ev_source} indicating detected format.

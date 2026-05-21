@@ -8,9 +8,15 @@
 #' @param x Column name for log fold change (defaults to auto-detect).
 #' @param y Column name for p-value (defaults to auto-detect).
 #' @param lab Column name for gene labels (defaults to auto-detect).
+#' @param uniprot Column name holding UniProt accessions (defaults to
+#'   auto-detect). When supplied or detected, the input is treated as
+#'   UniProt-first and `species` is required.
+#' @param species One of `"human"`, `"mouse"`, `"rat"`; required only for
+#'   UniProt input. Used to map accessions to gene symbols for enrichment.
 #' @return Tidy long tibble with attribute `ev_source` indicating detected format.
 #' @export
-ev_validate <- function(data, x = NULL, y = NULL, lab = NULL) {
+ev_validate <- function(data, x = NULL, y = NULL, lab = NULL,
+                        uniprot = NULL, species = NULL) {
   if (!is.data.frame(data)) {
     ev_abort("`data` must be a data.frame or tibble; got {.cls {class(data)[1]}}.",
              class = "ev_input_not_dataframe")
@@ -38,6 +44,7 @@ ev_validate <- function(data, x = NULL, y = NULL, lab = NULL) {
               class = "ev_derive_p")
     data$P.Value <- 2 * stats::pt(-abs(data$t), df = data$df)
   }
+  data <- ev_apply_uniprot(data, uniprot = uniprot, species = species)
   ev_assert_min_cols(data)
   attr(data, "ev_source") <- src
   data
@@ -186,4 +193,59 @@ ev_pivot_wide_suffix <- function(data) {
     )
   long <- long[!is.na(long$contrast), , drop = FALSE]
   long
+}
+
+# ---- UniProt resolution ----
+ev_detect_uniprot_col <- function(data) {
+  # First pass: column name strongly suggests UniProt accessions
+  name_hints <- grepl("^(uniprot|accession|uniprot[._-]?id)$",
+                      colnames(data), ignore.case = TRUE)
+  for (col in colnames(data)[name_hints]) {
+    v <- data[[col]]
+    if (!is.character(v) && !is.factor(v)) next
+    v <- as.character(v)
+    v <- v[!is.na(v) & nzchar(v)]
+    if (length(v) == 0) next
+    if (mean(ev_is_uniprot_accession(v)) > 0.5) return(col)
+  }
+  # Second pass: column values are overwhelmingly accession-shaped
+  for (col in colnames(data)[!name_hints]) {
+    v <- data[[col]]
+    if (!is.character(v) && !is.factor(v)) next
+    v <- as.character(v)
+    v <- v[!is.na(v) & nzchar(v)]
+    if (length(v) == 0) next
+    if (mean(ev_is_uniprot_accession(v)) > 0.8) return(col)
+  }
+  NULL
+}
+
+ev_apply_uniprot <- function(data, uniprot = NULL, species = NULL) {
+  acc_col <- uniprot %||% ev_detect_uniprot_col(data)
+  if (is.null(acc_col) || !(acc_col %in% colnames(data))) {
+    # legacy symbol-only path
+    if (!"uniprot" %in% colnames(data)) data$uniprot <- NA_character_
+    if (!"symbol" %in% colnames(data)) {
+      data$symbol <- if ("gene" %in% colnames(data)) data$gene else NA_character_
+    }
+    return(data)
+  }
+  if (is.null(species)) {
+    ev_abort(
+      c("UniProt accessions detected in {.field {acc_col}} but {.arg species} is NULL.",
+        "i" = "Pass {.code species = \"human\"}, {.val mouse}, or {.val rat}."),
+      class = "ev_uniprot_no_species"
+    )
+  }
+  data$uniprot <- as.character(data[[acc_col]])
+  map <- ev_map_uniprot(data$uniprot, species)
+  data$symbol <- map$symbol
+  data$gene <- ifelse(map$mapped, map$symbol, data$uniprot)
+  rep <- ev_make_idmap_report(map)
+  ev_inform(
+    "UniProt mapping: {rep$n_mapped}/{rep$n_input} mapped, {rep$n_unmapped} unmapped.",
+    class = "ev_idmap_summary"
+  )
+  attr(data, "ev_idmap_report") <- rep
+  data
 }
