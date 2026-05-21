@@ -31,3 +31,39 @@ test_that("symbol-only input is unaffected (backward compatible)", {
   expect_identical(out$symbol, c("TP53", "EGFR"))
   expect_null(ev_idmap_report(out))
 })
+
+test_that("UniProt mapping emits a classed summary message", {
+  df <- data.frame(UniProt = c("P04637", "Q9ZZZ1"), logFC = c(1, -1),
+                   P.Value = c(0.01, 0.02), contrast = "C1",
+                   stringsAsFactors = FALSE)
+  expect_message(ev_validate(df, species = "human"),
+                 class = "ev_idmap_summary")
+})
+
+test_that("all-unmapped UniProt input keeps accessions as the gene key", {
+  df <- data.frame(UniProt = c("Q9ZZZ1", "Q9ZZZ2"), logFC = c(1, -1),
+                   P.Value = c(0.01, 0.02), contrast = "C1",
+                   stringsAsFactors = FALSE)
+  out <- suppressMessages(ev_validate(df, species = "human"))
+  expect_true(all(is.na(out$symbol)))
+  expect_identical(out$gene, c("Q9ZZZ1", "Q9ZZZ2"))
+  expect_equal(ev_idmap_report(out)$n_unmapped, 2)
+})
+
+test_that("accession column is detected without a UniProt-like name (second pass)", {
+  df <- data.frame(Protein = c("P04637", "P00533", "P38398"),
+                   logFC = c(1, -1, 2), P.Value = c(0.01, 0.02, 0.03),
+                   contrast = "C1", stringsAsFactors = FALSE)
+  out <- suppressMessages(ev_validate(df, species = "human"))
+  expect_identical(out$symbol, c("TP53", "EGFR", "BRCA1"))
+  expect_identical(out$uniprot, c("P04637", "P00533", "P38398"))
+})
+
+test_that("factor-typed accession column is handled", {
+  df <- data.frame(UniProt = factor(c("P04637", "P00533")),
+                   logFC = c(1, -1), P.Value = c(0.01, 0.02),
+                   contrast = "C1", stringsAsFactors = FALSE)
+  out <- suppressMessages(ev_validate(df, species = "human"))
+  expect_identical(out$symbol, c("TP53", "EGFR"))
+  expect_type(out$uniprot, "character")
+})

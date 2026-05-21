@@ -31,6 +31,8 @@ UniProt input. Used to map accessions to gene symbols for enrichment.}
 }
 \value{
 Tidy long tibble with attribute \code{ev_source} indicating detected format.
+UniProt input additionally carries an \code{ev_idmap_report} attribute (see
+\code{\link[=ev_idmap_report]{ev_idmap_report()}}) summarising accession-to-symbol mapping.
 }
 \description{
 Detects input format from column patterns, applies the appropriate

@@ -14,6 +14,8 @@
 #' @param species One of `"human"`, `"mouse"`, `"rat"`; required only for
 #'   UniProt input. Used to map accessions to gene symbols for enrichment.
 #' @return Tidy long tibble with attribute `ev_source` indicating detected format.
+#'   UniProt input additionally carries an `ev_idmap_report` attribute (see
+#'   [ev_idmap_report()]) summarising accession-to-symbol mapping.
 #' @export
 ev_validate <- function(data, x = NULL, y = NULL, lab = NULL,
                         uniprot = NULL, species = NULL) {
@@ -206,7 +208,7 @@ ev_detect_uniprot_col <- function(data) {
     v <- as.character(v)
     v <- v[!is.na(v) & nzchar(v)]
     if (length(v) == 0) next
-    if (mean(ev_is_uniprot_accession(v)) > 0.5) return(col)
+    if (mean(ev_is_uniprot_accession(v)) >= 0.5) return(col)
   }
   # Second pass: column values are overwhelmingly accession-shaped
   for (col in colnames(data)[!name_hints]) {
