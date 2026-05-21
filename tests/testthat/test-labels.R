@@ -70,3 +70,28 @@ test_that("explicit matches symbol, accession, or gene", {
                           p_threshold = 0.05, logfc_threshold = log2(1.5))
   expect_setequal(out$gene, c("G1", "G4"))
 })
+
+test_that("explicit mode works when the gene column is absent", {
+  df <- make_df()
+  df$gene <- NULL
+  out <- ev_select_labels(df, mode = "explicit", n = 10,
+                          rank_by = "significance",
+                          genes = c("AAA", "P00004"), p_col = "adj.P.Val",
+                          p_threshold = 0.05, logfc_threshold = log2(1.5))
+  expect_setequal(out$symbol, c("AAA", "DDD"))
+})
+
+test_that("unknown label mode aborts with a classed condition", {
+  df <- make_df()
+  expect_error(
+    ev_select_labels(df, mode = "bogus", n = 1, rank_by = "significance",
+                     genes = NULL, p_col = "adj.P.Val",
+                     p_threshold = 0.05, logfc_threshold = log2(1.5)),
+    class = "ev_bad_label_mode"
+  )
+})
+
+test_that("ev_label_text falls back to gene when symbol and uniprot are absent", {
+  df <- tibble::tibble(gene = c("G1", "G2"))
+  expect_identical(ev_label_text(df), c("G1", "G2"))
+})

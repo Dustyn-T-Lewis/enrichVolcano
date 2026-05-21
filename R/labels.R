@@ -5,9 +5,10 @@
 #' @keywords internal
 #' @noRd
 ev_label_text <- function(df) {
-  symbol  <- if ("symbol" %in% names(df)) df$symbol else NA_character_
-  uniprot <- if ("uniprot" %in% names(df)) df$uniprot else NA_character_
-  gene    <- if ("gene" %in% names(df)) df$gene else NA_character_
+  n       <- nrow(df)
+  symbol  <- if ("symbol"  %in% names(df)) df$symbol  else rep(NA_character_, n)
+  uniprot <- if ("uniprot" %in% names(df)) df$uniprot else rep(NA_character_, n)
+  gene    <- if ("gene"    %in% names(df)) df$gene    else rep(NA_character_, n)
   out <- ifelse(!is.na(symbol) & nzchar(symbol), symbol,
                 ifelse(!is.na(uniprot) & nzchar(uniprot), uniprot, gene))
   as.character(out)
@@ -32,11 +33,12 @@ ev_select_labels <- function(df, mode, n, rank_by, genes,
                              p_col, p_threshold, logfc_threshold) {
   df$label_text <- ev_label_text(df)
   if (mode == "explicit") {
-    keep <- df$label_text %in% genes |
-      ("symbol" %in% names(df) & df$symbol %in% genes) |
-      ("uniprot" %in% names(df) & df$uniprot %in% genes) |
-      df$gene %in% genes
-    return(df[keep & !is.na(keep), , drop = FALSE])
+    in_genes <- function(col) {
+      if (col %in% names(df)) df[[col]] %in% genes else rep(FALSE, nrow(df))
+    }
+    keep <- df$label_text %in% genes | in_genes("symbol") |
+      in_genes("uniprot") | in_genes("gene")
+    return(df[keep, , drop = FALSE])
   }
   if (mode == "none") return(df[0, , drop = FALSE])
 
@@ -55,6 +57,7 @@ ev_select_labels <- function(df, mode, n, rank_by, genes,
     all_significant = pool,
     top_total = utils::head(pool, n),
     top_per_direction = {
+      # logFC == 0 belongs to neither direction and is intentionally excluded.
       up <- pool[pool$logFC > 0, , drop = FALSE]
       dn <- pool[pool$logFC < 0, , drop = FALSE]
       rbind(utils::head(up, n), utils::head(dn, n))
