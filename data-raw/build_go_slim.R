@@ -3,7 +3,12 @@
 #   GO.db, org.Hs.eg.db, org.Mm.eg.db, org.Rn.eg.db, AnnotationDbi
 # 62 generic GO Slim BP terms (signaling + nervous-system excluded), ported from
 # A_YvO_2026/04_Figures/shared/pathway_utils.R::build_goslim_gene_sets().
+# Sets are filtered to MIN_SIZE-MAX_SIZE genes (matching the source): broad GO
+# categories (>500 genes, e.g. SIGNALING, CELL_DIFFERENTIATION) are excluded as
+# too non-specific to be informative in enrichment.
 dest <- "inst/extdata/gmt"
+MIN_SIZE <- 10L
+MAX_SIZE <- 500L
 dir.create(dest, recursive = TRUE, showWarnings = FALSE)
 
 bp_slim <- c(
@@ -52,7 +57,7 @@ build_go_slim_gmt <- function(orgdb_pkg, species) {
       go_to_symbols[intersect(all_terms, names(go_to_symbols))],
       use.names = FALSE))
     genes <- genes[!is.na(genes) & nzchar(genes)]
-    if (length(genes) == 0) next
+    if (length(genes) < MIN_SIZE || length(genes) > MAX_SIZE) next
     set_name <- paste0("GOSLIM_", toupper(gsub("[^A-Za-z0-9]+", "_", nm)))
     lines <- c(lines, paste(c(set_name, "GO Slim (generic BP)", genes),
                             collapse = "\t"))

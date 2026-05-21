@@ -33,7 +33,10 @@ test_that("go_slim is registered and its bundled GMTs are valid", {
                      package = "enrichVolcano")
     skip_if(!nzchar(f), paste("go_slim GMT not bundled:", sp))
     p <- fgsea::gmtPathways(f)
-    expect_gt(length(p), 30)
+    # Sets are size-filtered to 10-500 genes at build (broad GO categories
+    # excluded), leaving ~27-30 per species.
+    expect_gt(length(p), 20)
+    expect_true(all(lengths(p) >= 10 & lengths(p) <= 500))
     expect_true(all(grepl("^GOSLIM_", names(p))))
   }
 })
