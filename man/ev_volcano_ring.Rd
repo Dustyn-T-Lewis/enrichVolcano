@@ -15,6 +15,11 @@ ev_volcano_ring(
   point_size = 0.9,
   point_alpha = 0.6,
   label_size = 2.6,
+  label_mode = c("none", "top_per_direction", "top_total", "all_significant", "explicit"),
+  label_n = 10,
+  label_rank_by = c("significance", "logfc"),
+  label_genes = NULL,
+  p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
   theme = ev_theme()
 )
 }
@@ -40,6 +45,13 @@ every significant point; \code{enrich_volcano()} passes its own default.}
 \item{point_size, point_alpha}{Volcano point aesthetics.}
 
 \item{label_size}{Pathway-label text size.}
+
+\item{label_mode, label_n, label_rank_by, label_genes}{Volcano point labeling,
+passed to the shared selector; default \code{label_mode = "none"}.}
+
+\item{p_method}{Significance column used for BOTH point coloring and label
+selection (\code{"pi_eq2"}, \code{"pi_eq1"}, \code{"raw_p"}, \code{"adj_p"}); defaults to
+\code{"pi_eq2"}.}
 
 \item{theme}{Output of \code{ev_theme()}.}
 }

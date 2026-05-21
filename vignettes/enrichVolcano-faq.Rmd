@@ -93,14 +93,15 @@ p  <- enrich_volcano(df, contrast = "ctr")
 
 ## How do I force-label specific genes on the volcano?
 
-In v0.1, `enrich_volcano()` does not forward `label_genes` through
-the `volcano` list. Call `ev_volcano()` directly:
+`enrich_volcano()` now forwards `label_mode`, `label_n`, `label_rank_by`, and
+`label_genes` to the composite volcano, so you can label directly from the
+hero call. Use `label_mode = "explicit"` to pin specific genes regardless of
+rank:
 
 ```{r force-label, eval = FALSE}
 p_volcano <- ev_volcano(
   data, contrast = "ctr",
-  label_n     = 10,
-  label_by    = "pi_eq2",
+  label_mode  = "explicit",
   label_genes = c("GENE1", "GENE2")
 )
 ```
@@ -112,9 +113,6 @@ enr <- ev_enrich(data, contrast = "ctr", databases = "hallmark")
 p_ring <- ring_plot(enr, contrast = "ctr")
 p <- ev_compose(list(ctr = p_volcano), list(ctr = p_ring))
 ```
-
-`label_genes` forwarding through `enrich_volcano()` is on the v0.2
-list.
 
 ## Why don't I see KEGG pathways even though I requested them?
 

@@ -29,11 +29,14 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #'   or Perseus formats - `ev_validate()` auto-detects.
 #' @param contrast Character; one or many contrast names.
 #' @param species Character; "human" (default), "mouse", "rat", "zebrafish",
-#'   "fly", "yeast", "pig".
+#'   "fly", "yeast", "pig". UniProt accession mapping is available for `human`,
+#'   `mouse`, and `rat`; other species are supported for enrichment but require
+#'   gene-symbol input.
 #' @param databases Character vector of registered DB names (see
 #'   `list_databases()`), or a named list of pathway lists.
 #' @param x,y,lab Column names for logFC, p-value, gene label (auto-detected
 #'   if NULL).
+#' @param uniprot Column name holding UniProt accessions (auto-detected by default).
 #' @param p_method Y-axis transform: `"pi_eq2"` (default), `"pi_eq1"`,
 #'   `"raw_p"`, `"adj_p"`.
 #' @param rank_by Signed statistic fgsea ranks genes by. `"signed_p"`
@@ -58,6 +61,8 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #'   tunable `order_by`/`magnitude`/`color` encodings use the standalone
 #'   [ring_plot()].
 #' @param facet List with `nrow`, `ncol` for patchwork outer layout.
+#' @param label_mode,label_n,label_rank_by,label_genes Volcano point labeling,
+#'   passed to the shared selector; default `label_mode = "none"`.
 #' @param disc_color Optional contrast-tint for the ring's central disc.
 #' @param theme Output of `ev_theme()`.
 #' @return Object of class `c("enrichVolcano", "patchwork")` with
@@ -67,6 +72,7 @@ enrich_volcano <- function(data, contrast,
                            species = "human",
                            databases = c("hallmark", "reactome", "go_bp"),
                            x = NULL, y = NULL, lab = NULL,
+                           uniprot = NULL,
                            p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
                            p_adjust = "BH",
                            p_threshold = 0.05,
@@ -79,11 +85,20 @@ enrich_volcano <- function(data, contrast,
                            ring = list(max_terms = 10),
                            facet = list(nrow = NULL, ncol = NULL),
                            disc_color = NULL,
+                           label_mode = c("none", "top_per_direction",
+                                          "top_total", "all_significant",
+                                          "explicit"),
+                           label_n = 10,
+                           label_rank_by = c("significance", "logfc"),
+                           label_genes = NULL,
                            theme = ev_theme()) {
   call <- match.call()
   p_method <- match.arg(p_method)
+  label_mode <- match.arg(label_mode)
+  label_rank_by <- match.arg(label_rank_by)
 
-  validated <- ev_validate(data, x = x, y = y, lab = lab)
+  validated <- ev_validate(data, x = x, y = y, lab = lab,
+                           uniprot = uniprot, species = species)
 
   with_pi <- if (p_method %in% c("pi_eq2", "pi_eq1")) {
     pi_score(validated, variant = sub("pi_", "", p_method))
@@ -132,7 +147,10 @@ enrich_volcano <- function(data, contrast,
       ev_volcano_ring(volc_sub, enr_sub, title = ctr,
                       p_threshold = p_threshold,
                       logfc_threshold = logfc_threshold,
-                      disc_color = disc_color, theme = theme)
+                      disc_color = disc_color, theme = theme,
+                      label_mode = label_mode, label_n = label_n,
+                      label_rank_by = label_rank_by, label_genes = label_genes,
+                      p_method = p_method)
     }),
     contrast
   )

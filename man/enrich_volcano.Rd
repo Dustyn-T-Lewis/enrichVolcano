@@ -12,6 +12,7 @@ enrich_volcano(
   x = NULL,
   y = NULL,
   lab = NULL,
+  uniprot = NULL,
   p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
   p_adjust = "BH",
   p_threshold = 0.05,
@@ -23,6 +24,10 @@ enrich_volcano(
   ring = list(max_terms = 10),
   facet = list(nrow = NULL, ncol = NULL),
   disc_color = NULL,
+  label_mode = c("none", "top_per_direction", "top_total", "all_significant", "explicit"),
+  label_n = 10,
+  label_rank_by = c("significance", "logfc"),
+  label_genes = NULL,
   theme = ev_theme()
 )
 }
@@ -34,13 +39,17 @@ or Perseus formats - \code{ev_validate()} auto-detects.}
 \item{contrast}{Character; one or many contrast names.}
 
 \item{species}{Character; "human" (default), "mouse", "rat", "zebrafish",
-"fly", "yeast", "pig".}
+"fly", "yeast", "pig". UniProt accession mapping is available for \code{human},
+\code{mouse}, and \code{rat}; other species are supported for enrichment but require
+gene-symbol input.}
 
 \item{databases}{Character vector of registered DB names (see
 \code{list_databases()}), or a named list of pathway lists.}
 
 \item{x, y, lab}{Column names for logFC, p-value, gene label (auto-detected
 if NULL).}
+
+\item{uniprot}{Column name holding UniProt accessions (auto-detected by default).}
 
 \item{p_method}{Y-axis transform: \code{"pi_eq2"} (default), \code{"pi_eq1"},
 \code{"raw_p"}, \code{"adj_p"}.}
@@ -76,6 +85,9 @@ tunable \code{order_by}/\code{magnitude}/\code{color} encodings use the standalo
 \item{facet}{List with \code{nrow}, \code{ncol} for patchwork outer layout.}
 
 \item{disc_color}{Optional contrast-tint for the ring's central disc.}
+
+\item{label_mode, label_n, label_rank_by, label_genes}{Volcano point labeling,
+passed to the shared selector; default \code{label_mode = "none"}.}
 
 \item{theme}{Output of \code{ev_theme()}.}
 }
