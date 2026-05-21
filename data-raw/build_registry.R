@@ -26,7 +26,7 @@ db_registry <- tibble::tribble(
   "hpa_subcellular",    "HPA Subcellular",         "organelle",  "human",                                                 "bundled_gmt",       "CC BY-SA 4.0",      "hpa_thul_2017",      "Human Protein Atlas subcellular localization (Main location)",
   "uniprot_subcellular","UniProt Subcellular",     "organelle",  "human;mouse;rat",                                       "bundled_gmt",       "CC BY 4.0",         "uniprot_2024",       "UniProt top-level subcellular compartments (reviewed)",
   "corum",              "CORUM 5.0",               "complex",    "human;mouse;rat",                                       "bundled_gmt",       "CC BY 4.0",         "corum_tschen_2023",  "Mammalian protein complexes (proteomics-native gene sets)",
-  "go_slim",            "GO Slim (generic BP)",    "ontology",   "human;mouse;rat",                                       "bundled_gmt",       "CC BY 4.0",         "go_consortium",      "62 generic GO Slim biological-process categories"
+  "go_slim",            "GO Slim (generic BP)",    "ontology",   "human;mouse;rat",                                       "bundled_gmt",       "CC BY 4.0",         "go_consortium",      "Generic GO Slim BP categories (sets filtered to 10-500 genes)"
 )
 
 dir.create("inst/extdata", recursive = TRUE, showWarnings = FALSE)
