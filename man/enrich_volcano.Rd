@@ -12,6 +12,7 @@ enrich_volcano(
   x = NULL,
   y = NULL,
   lab = NULL,
+  uniprot = NULL,
   p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
   p_adjust = "BH",
   p_threshold = 0.05,
@@ -38,13 +39,17 @@ or Perseus formats - \code{ev_validate()} auto-detects.}
 \item{contrast}{Character; one or many contrast names.}
 
 \item{species}{Character; "human" (default), "mouse", "rat", "zebrafish",
-"fly", "yeast", "pig".}
+"fly", "yeast", "pig". UniProt accession mapping is available for \code{human},
+\code{mouse}, and \code{rat}; other species are supported for enrichment but require
+gene-symbol input.}
 
 \item{databases}{Character vector of registered DB names (see
 \code{list_databases()}), or a named list of pathway lists.}
 
 \item{x, y, lab}{Column names for logFC, p-value, gene label (auto-detected
 if NULL).}
+
+\item{uniprot}{Column name holding UniProt accessions (auto-detected by default).}
 
 \item{p_method}{Y-axis transform: \code{"pi_eq2"} (default), \code{"pi_eq1"},
 \code{"raw_p"}, \code{"adj_p"}.}

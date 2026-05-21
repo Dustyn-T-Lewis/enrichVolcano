@@ -223,6 +223,12 @@ ev_detect_uniprot_col <- function(data) {
 }
 
 ev_apply_uniprot <- function(data, uniprot = NULL, species = NULL) {
+  # Idempotent: input already resolved by a prior ev_validate() (carries both
+  # identity columns) and no explicit override -> leave the mapping as-is so a
+  # validated tibble can safely re-enter the pipeline.
+  if (is.null(uniprot) && all(c("uniprot", "symbol") %in% colnames(data))) {
+    return(data)
+  }
   acc_col <- uniprot %||% ev_detect_uniprot_col(data)
   if (is.null(acc_col) || !(acc_col %in% colnames(data))) {
     # legacy symbol-only path

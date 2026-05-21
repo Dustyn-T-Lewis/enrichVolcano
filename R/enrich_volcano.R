@@ -29,11 +29,14 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #'   or Perseus formats - `ev_validate()` auto-detects.
 #' @param contrast Character; one or many contrast names.
 #' @param species Character; "human" (default), "mouse", "rat", "zebrafish",
-#'   "fly", "yeast", "pig".
+#'   "fly", "yeast", "pig". UniProt accession mapping is available for `human`,
+#'   `mouse`, and `rat`; other species are supported for enrichment but require
+#'   gene-symbol input.
 #' @param databases Character vector of registered DB names (see
 #'   `list_databases()`), or a named list of pathway lists.
 #' @param x,y,lab Column names for logFC, p-value, gene label (auto-detected
 #'   if NULL).
+#' @param uniprot Column name holding UniProt accessions (auto-detected by default).
 #' @param p_method Y-axis transform: `"pi_eq2"` (default), `"pi_eq1"`,
 #'   `"raw_p"`, `"adj_p"`.
 #' @param rank_by Signed statistic fgsea ranks genes by. `"signed_p"`
@@ -69,6 +72,7 @@ enrich_volcano <- function(data, contrast,
                            species = "human",
                            databases = c("hallmark", "reactome", "go_bp"),
                            x = NULL, y = NULL, lab = NULL,
+                           uniprot = NULL,
                            p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
                            p_adjust = "BH",
                            p_threshold = 0.05,
@@ -93,7 +97,8 @@ enrich_volcano <- function(data, contrast,
   label_mode <- match.arg(label_mode)
   label_rank_by <- match.arg(label_rank_by)
 
-  validated <- ev_validate(data, x = x, y = y, lab = lab)
+  validated <- ev_validate(data, x = x, y = y, lab = lab,
+                           uniprot = uniprot, species = species)
 
   with_pi <- if (p_method %in% c("pi_eq2", "pi_eq1")) {
     pi_score(validated, variant = sub("pi_", "", p_method))

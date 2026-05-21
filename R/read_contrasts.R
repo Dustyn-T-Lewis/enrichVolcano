@@ -8,7 +8,9 @@
 #'
 #' @param path A directory (all matching files are read) or a character vector
 #'   of file paths.
-#' @param species One of `"human"`, `"mouse"`, `"rat"`.
+#' @param species One of `"human"`, `"mouse"`, `"rat"`. UniProt accession
+#'   mapping is available for `human`, `mouse`, and `rat`; other species are
+#'   supported for enrichment but require gene-symbol input.
 #' @param p_adjust Adjustment method passed to [adjust_p()] when no adjusted
 #'   column is present (default `"BH"`).
 #' @param uniprot,x,y Optional column-name overrides for the accession, logFC,
@@ -48,6 +50,8 @@ ev_read_contrasts <- function(path, species, p_adjust = "BH",
   }
   validated <- ev_validate(combined, x = x, y = y,
                            uniprot = uniprot, species = species)
+  # adjust_p() runs dplyr::group_modify, which drops custom attributes; stash
+  # and restore the mapping report so ev_idmap_report() still works downstream.
   idmap_rep <- attr(validated, "ev_idmap_report")
   if (!"adj.P.Val" %in% colnames(validated)) {
     validated <- adjust_p(validated, method = p_adjust)

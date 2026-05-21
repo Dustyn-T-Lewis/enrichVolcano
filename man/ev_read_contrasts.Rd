@@ -19,7 +19,9 @@ ev_read_contrasts(
 \item{path}{A directory (all matching files are read) or a character vector
 of file paths.}
 
-\item{species}{One of \code{"human"}, \code{"mouse"}, \code{"rat"}.}
+\item{species}{One of \code{"human"}, \code{"mouse"}, \code{"rat"}. UniProt accession
+mapping is available for \code{human}, \code{mouse}, and \code{rat}; other species are
+supported for enrichment but require gene-symbol input.}
 
 \item{p_adjust}{Adjustment method passed to \code{\link[=adjust_p]{adjust_p()}} when no adjusted
 column is present (default \code{"BH"}).}

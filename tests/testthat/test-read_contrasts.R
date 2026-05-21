@@ -46,3 +46,28 @@ test_that("ev_read_contrasts aborts on duplicate contrast names", {
     class = "ev_dup_contrast"
   )
 })
+
+test_that("ev_read_contrasts output flows through enrich_volcano end-to-end", {
+  res <- suppressMessages(
+    ev_read_contrasts(testthat::test_path("fixtures", "contrasts"),
+                      species = "human"))
+  paths <- list(S1 = c("TP53", "EGFR"), S2 = c("BRCA1", "TP53"))
+  p <- suppressWarnings(suppressMessages(enrich_volcano(
+    res, contrast = "Cancer_vs_Healthy",
+    databases = list(test = paths), enrich_padj = 1,
+    label_mode = "top_per_direction", label_n = 2
+  )))
+  expect_s3_class(p, "enrichVolcano")
+})
+
+test_that("raw UniProt data flows through enrich_volcano with species set", {
+  df <- data.frame(
+    UniProt = c("P04637", "P00533", "P38398"),
+    logFC = c(2, -1.5, 1.2), P.Value = c(1e-4, 1e-3, 1e-2),
+    contrast = "C1", stringsAsFactors = FALSE)
+  paths <- list(S1 = c("TP53", "EGFR"), S2 = "BRCA1")
+  p <- suppressWarnings(suppressMessages(enrich_volcano(
+    df, contrast = "C1", species = "human",
+    databases = list(test = paths), enrich_padj = 1)))
+  expect_s3_class(p, "enrichVolcano")
+})
