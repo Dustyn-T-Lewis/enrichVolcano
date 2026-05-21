@@ -90,6 +90,24 @@ fig
 practice you would use the default 0.05. The `mock_msigdb` here stands
 in for the real Hallmark or Reactome collections.
 
+## UniProt-anchored input
+
+Point `ev_read_contrasts()` at a folder of per-contrast CSVs (each with a
+UniProt accession column, `logFC`, and a p-value). The file name becomes the
+contrast label; accessions are mapped to gene symbols for enrichment, and the
+mapping summary is available via `ev_idmap_report()`.
+
+```{r uniprot-input, eval = FALSE}
+res <- ev_read_contrasts("path/to/contrast_csvs", species = "human")
+ev_idmap_report(res)
+enrich_volcano(res, contrast = "Cancer_vs_Healthy",
+               label_mode = "top_per_direction", label_n = 8)
+```
+
+Volcano labels are off by default; choose `label_mode` =
+`"top_per_direction"`, `"top_total"`, `"all_significant"`, or `"explicit"`,
+and rank candidates by `label_rank_by` = `"significance"` or `"logfc"`.
+
 ## Anatomy of the output
 
 The volcano sits at the centre: `logFC` on the x-axis, `-log10(pi_eq2)`
