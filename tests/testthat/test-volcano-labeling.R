@@ -58,3 +58,15 @@ test_that("ev_volcano_ring labels per the rule when asked", {
   d <- repel_layer_data(p)
   expect_setequal(d$label_text, c("AAA", "BBB"))
 })
+
+test_that("enrich_volcano accepts and threads label params without error", {
+  data <- make_ranked_input()
+  paths <- make_mini_pathways()
+  p <- suppressWarnings(enrich_volcano(
+    data, contrast = "ctr",
+    databases = list(test = paths),
+    enrich_padj = 1,
+    label_mode = "top_per_direction", label_n = 5
+  ))
+  expect_s3_class(p, "enrichVolcano")
+})

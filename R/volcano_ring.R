@@ -249,8 +249,9 @@ ev_tick_data <- function(ring_data, volc_df,
 #' @param label_size Pathway-label text size.
 #' @param label_mode,label_n,label_rank_by,label_genes Volcano point labeling,
 #'   passed to the shared selector; default `label_mode = "none"`.
-#' @param p_method Significance column used for label selection (`"pi_eq2"`,
-#'   `"pi_eq1"`, `"raw_p"`, `"adj_p"`); defaults to `"pi_eq2"`.
+#' @param p_method Significance column used for BOTH point coloring and label
+#'   selection (`"pi_eq2"`, `"pi_eq1"`, `"raw_p"`, `"adj_p"`); defaults to
+#'   `"pi_eq2"`.
 #' @param disc_color Optional fill for a tinted central disc (default NULL = none).
 #' @param theme Output of `ev_theme()`.
 #' @return A ggplot object (class `c("enrichVolcano", ...)`).
@@ -279,7 +280,10 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
   v <- volc_df[!is.na(volc_df$logFC) & !is.na(volc_df$P.Value), , drop = FALSE]
   v$neg_log10p <- -log10(v$P.Value)
   v <- v[is.finite(v$neg_log10p), , drop = FALSE]
-  score <- if ("pi_eq2" %in% colnames(v)) v$pi_eq2 else v$P.Value
+  p_col <- switch(p_method, pi_eq2 = "pi_eq2", pi_eq1 = "pi_eq1",
+                  raw_p = "P.Value", adj_p = "adj.P.Val")
+  if (!p_col %in% colnames(v)) p_col <- "P.Value"
+  score <- v[[p_col]]
   sig <- score < p_threshold
   v$direction <- ifelse(sig & v$logFC >= logfc_threshold, "up",
                         ifelse(sig & v$logFC <= -logfc_threshold, "down", "ns"))
@@ -295,9 +299,6 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
   v_ns <- v[v$direction == "ns", , drop = FALSE]
   v_sig <- v[v$direction != "ns", , drop = FALSE]
 
-  p_col <- switch(p_method, pi_eq2 = "pi_eq2", pi_eq1 = "pi_eq1",
-                  raw_p = "P.Value", adj_p = "adj.P.Val")
-  if (!p_col %in% colnames(v)) p_col <- "P.Value"
   lab_pts <- ev_select_labels(
     v, mode = label_mode, n = label_n, rank_by = label_rank_by,
     genes = label_genes, p_col = p_col,

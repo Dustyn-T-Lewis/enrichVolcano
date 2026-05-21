@@ -49,8 +49,9 @@ every significant point; \code{enrich_volcano()} passes its own default.}
 \item{label_mode, label_n, label_rank_by, label_genes}{Volcano point labeling,
 passed to the shared selector; default \code{label_mode = "none"}.}
 
-\item{p_method}{Significance column used for label selection (\code{"pi_eq2"},
-\code{"pi_eq1"}, \code{"raw_p"}, \code{"adj_p"}); defaults to \code{"pi_eq2"}.}
+\item{p_method}{Significance column used for BOTH point coloring and label
+selection (\code{"pi_eq2"}, \code{"pi_eq1"}, \code{"raw_p"}, \code{"adj_p"}); defaults to
+\code{"pi_eq2"}.}
 
 \item{theme}{Output of \code{ev_theme()}.}
 }
