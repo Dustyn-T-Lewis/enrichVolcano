@@ -10,8 +10,9 @@ ev_volcano(
   p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
   p_threshold = 0.05,
   logfc_threshold = log2(1.5),
+  label_mode = c("none", "top_per_direction", "top_total", "all_significant", "explicit"),
   label_n = 10,
-  label_by = NULL,
+  label_rank_by = c("significance", "logfc"),
   label_genes = NULL,
   theme = ev_theme()
 )
@@ -28,11 +29,15 @@ ev_volcano(
 
 \item{logfc_threshold}{Effect-size cutoff (default log2(1.5)).}
 
-\item{label_n}{Top N proteins to label.}
+\item{label_mode}{Labeling rule: \code{"none"} (default), \code{"top_per_direction"},
+\code{"top_total"}, \code{"all_significant"}, or \code{"explicit"}.}
 
-\item{label_by}{Column used to rank labels.}
+\item{label_n}{Cap for the top-* modes (per direction for
+\code{"top_per_direction"}).}
 
-\item{label_genes}{Optional character vector forcing specific labels.}
+\item{label_rank_by}{\code{"significance"} (default) or \code{"logfc"}.}
+
+\item{label_genes}{Symbols/accessions to label when \code{label_mode = "explicit"}.}
 
 \item{theme}{Output of \code{ev_theme()}.}
 }
