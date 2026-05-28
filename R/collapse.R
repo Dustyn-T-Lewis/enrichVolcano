@@ -4,6 +4,11 @@ ev_subset_preserve_attr <- function(df, idx, attrs = c("ev_pathways", "ev_stats"
   out
 }
 
+ev_sig_idx <- function(idx, padj, sig_threshold) {
+  if (is.na(sig_threshold)) return(idx)
+  idx[!is.na(padj[idx]) & padj[idx] < sig_threshold]
+}
+
 #' Deduplicate enrichment results
 #'
 #' @details
@@ -72,10 +77,7 @@ ev_collapse <- function(enrich_result,
   for (k in unique(keys)) {
     idx <- which(keys == k)
     if (length(idx) < 2) next
-    sig_idx <- if (is.na(sig_threshold)) idx else {
-      idx[!is.na(enrich_result$padj[idx]) &
-            enrich_result$padj[idx] < sig_threshold]
-    }
+    sig_idx <- ev_sig_idx(idx, enrich_result$padj, sig_threshold)
     if (length(sig_idx) < 2) next
     if (method %in% c("jaccard", "jaccard_then_collapse")) {
       enrich_result$dedup_kept[sig_idx] <- ev_jaccard_dedup(
