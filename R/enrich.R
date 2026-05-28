@@ -20,13 +20,18 @@
 #'   to a more permissive `minGSSize = 10`.)
 #' @param background Optional character vector of background genes for ORA;
 #'   default is all genes in `data` for the given contrast.
-#' @param include_terms Regex; if non-NULL, only pathway names matching the
-#'   regex are tested. NULL keeps all pathways.
-#' @param exclude_terms Regex of pathway names to exclude (default removes
-#'   DISEASE/CANCER/TUMOR terms).
-#' @param filter_mode One of `"before"` (default; filter pathway list before
-#'   fgsea/fora) or `"display"` (run on full list, drop rows after — padj
-#'   reflects full universe).
+#' @param include_terms Regex; if non-NULL, only pathway names matching
+#'   the regex are tested. NULL keeps all pathways.
+#' @param exclude_terms Regex; pathway names matching are dropped.
+#'   Default \code{"DISEASE|CANCER|TUMOR"}. Set NULL to disable.
+#' @param filter_mode One of \code{"before"} (default) or \code{"display"}.
+#'   \code{"before"} applies the regexes before fgsea/fora; multiple-testing
+#'   correction reflects the filtered count. Use this when the filter is
+#'   pre-specified as part of the analysis protocol (Reimand et al. 2019).
+#'   \code{"display"} runs enrichment on the unfiltered pathway list and
+#'   drops non-matching rows after; \code{padj} reflects the full set.
+#'   Use this for post-hoc viewing lenses to avoid the garden-of-forking
+#'   paths concern of Wijesooriya et al. 2022.
 #' @param nperm Permutations for fgsea (default 10000).
 #' @param seed Integer seed.
 #' @return Tidy tibble: contrast | database | pathway | pval | padj | NES |
@@ -37,6 +42,14 @@
 #'   enrichment is attached as `attr(., "ev_pathways")` and the per-contrast
 #'   gene-level ranking vectors as `attr(., "ev_stats")`, both required by
 #'   `ev_collapse(method = "collapse_fgsea")`.
+#' @references
+#' Reimand J, Isserlin R, Voisin V, et al. Pathway enrichment analysis and
+#' visualization of omics data using g:Profiler, GSEA, Cytoscape and
+#' EnrichmentMap. \emph{Nat Protoc} 14, 482–517 (2019).
+#'
+#' Wijesooriya K, Jadaan SA, Perera KL, Kaur T, Ziemann M. Urgent need for
+#' consistent standards in functional enrichment analysis. \emph{PLoS Comput
+#' Biol} 18(3):e1009935 (2022).
 #' @export
 ev_enrich <- function(data, contrast,
                       databases,
