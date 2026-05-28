@@ -16,6 +16,7 @@ ev_enrich(
   background = NULL,
   include_terms = NULL,
   exclude_terms = "DISEASE|CANCER|TUMOR",
+  filter_mode = c("before", "display"),
   nperm = 10000,
   seed = 42
 )
@@ -47,6 +48,10 @@ regex are tested. NULL keeps all pathways.}
 
 \item{exclude_terms}{Regex of pathway names to exclude (default removes
 DISEASE/CANCER/TUMOR terms).}
+
+\item{filter_mode}{One of \code{"before"} (default; filter pathway list before
+fgsea/fora) or \code{"display"} (run on full list, drop rows after — padj
+reflects full universe).}
 
 \item{nperm}{Permutations for fgsea (default 10000).}
 
