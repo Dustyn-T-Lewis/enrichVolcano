@@ -1,4 +1,5 @@
-ev_subset_preserve_attr <- function(df, idx, attrs = c("ev_pathways", "ev_stats")) {
+ev_subset_preserve_attr <- function(df, idx,
+                                    attrs = c("ev_pathways", "ev_stats", "ev_filter")) {
   out <- df[idx, , drop = FALSE]
   for (a in attrs) attr(out, a) <- attr(df, a)
   out

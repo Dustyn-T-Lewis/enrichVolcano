@@ -53,6 +53,8 @@ ev_enrich <- function(data, contrast,
                            several.ok = TRUE)
   filter_mode <- match.arg(filter_mode)
   pathway_list <- ev_resolve_databases(databases, species = species)
+  n_before <- vapply(pathway_list, length, integer(1))
+  n_after  <- integer(0)
   results <- list()
   stats_by_contrast <- list()
   for (ctr in contrast) {
@@ -65,11 +67,11 @@ ev_enrich <- function(data, contrast,
     stats_by_contrast[[ctr]] <- ev_rank_stats(sub, rank_by)
     for (db_name in names(pathway_list)) {
       paths <- pathway_list[[db_name]]
-      paths_used <- if (filter_mode == "before") {
-        ev_apply_name_filter(paths, include_terms, exclude_terms)
-      } else {
-        paths
-      }
+      paths_filtered <- ev_apply_name_filter(paths, include_terms, exclude_terms)
+      # n_after captured per-database; identical across contrasts because the
+      # pathway list and regexes don't vary by contrast.
+      n_after[db_name] <- length(paths_filtered)
+      paths_used <- if (filter_mode == "before") paths_filtered else paths
       if ("fgsea" %in% enrich_mode) {
         results[[paste(ctr, db_name, "fgsea", sep = "::")]] <-
           ev_fgsea_one(sub, paths_used, db_name, ctr, rank_by,
@@ -112,6 +114,13 @@ ev_enrich <- function(data, contrast,
   }
   attr(out, "ev_pathways") <- pathway_list
   attr(out, "ev_stats")    <- stats_by_contrast
+  attr(out, "ev_filter") <- list(
+    include_terms     = include_terms,
+    exclude_terms     = exclude_terms,
+    filter_mode       = filter_mode,
+    n_pathways_before = n_before,
+    n_pathways_after  = n_after
+  )
   out
 }
 

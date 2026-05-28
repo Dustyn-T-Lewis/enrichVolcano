@@ -81,3 +81,37 @@ test_that('ORA universe is independent of include/exclude filters', {
                       exclude_terms = NULL))
   expect_identical(captured[[1]], captured[[2]])
 })
+
+test_that('ev_enrich attaches ev_filter audit attribute', {
+  data <- make_ranked_input()
+  paths <- list(
+    A = paste0("G", 1:20),
+    B = paste0("G", 21:40),
+    MITO_X = paste0("G", 41:60)
+  )
+  out <- ev_enrich(data, contrast = "ctr",
+                   databases = list(test = paths),
+                   enrich_mode = "fgsea",
+                   min_size = 5, max_size = 100,
+                   include_terms = "^MITO",
+                   exclude_terms = "JUNK",
+                   filter_mode = "before")
+  filt <- attr(out, "ev_filter")
+  expect_type(filt, "list")
+  expect_equal(filt$include_terms, "^MITO")
+  expect_equal(filt$exclude_terms, "JUNK")
+  expect_equal(filt$filter_mode, "before")
+  expect_equal(filt$n_pathways_before[["test"]], 3L)
+  expect_equal(filt$n_pathways_after[["test"]], 1L)
+})
+
+test_that('ev_filter survives row subsetting via ev_subset_preserve_attr', {
+  data <- make_ranked_input()
+  paths <- list(A = paste0("G", 1:20), B = paste0("G", 21:40))
+  out <- ev_enrich(data, contrast = "ctr",
+                   databases = list(test = paths),
+                   enrich_mode = "fgsea",
+                   min_size = 5, max_size = 100)
+  sub <- ev_subset_preserve_attr(out, 1)
+  expect_false(is.null(attr(sub, "ev_filter")))
+})
