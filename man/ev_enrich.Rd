@@ -14,6 +14,7 @@ ev_enrich(
   min_size = 15,
   max_size = 500,
   background = NULL,
+  include_terms = NULL,
   exclude_terms = "DISEASE|CANCER|TUMOR",
   nperm = 10000,
   seed = 42
@@ -40,6 +41,9 @@ to a more permissive \code{minGSSize = 10}.)}
 
 \item{background}{Optional character vector of background genes for ORA;
 default is all genes in \code{data} for the given contrast.}
+
+\item{include_terms}{Regex; if non-NULL, only pathway names matching the
+regex are tested. NULL keeps all pathways.}
 
 \item{exclude_terms}{Regex of pathway names to exclude (default removes
 DISEASE/CANCER/TUMOR terms).}
