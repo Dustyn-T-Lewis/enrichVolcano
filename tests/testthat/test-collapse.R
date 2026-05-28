@@ -135,3 +135,40 @@ test_that('NA padj is treated as non-significant (kept)', {
                      keep_by = "padj")
   expect_true(all(out$dedup_kept))
 })
+
+test_that('collapse_then_jaccard runs collapse first, then Jaccard on survivors', {
+  # Two glycolysis-like pathways that share leading edge (collapse drops one),
+  # plus a third with high Jaccard to the survivor (Jaccard drops it).
+  enrich <- tibble::tibble(
+    contrast = "c", database = "db", mode = "fgsea",
+    pathway = c("HALLMARK_GLYCOLYSIS", "REACTOME_GLYCOLYSIS",
+                "WP_GLYCOLYSIS_REDUNDANT"),
+    pval = c(0.001, 0.002, 0.003),
+    padj = c(0.01, 0.02, 0.03),
+    NES = c(2.5, 2.0, 1.8),
+    size = c(40, 35, 30),
+    direction = "up",
+    leading_edge = c(
+      "ENO1;PKM;GAPDH;HK2;ALDOA;PFKM;LDHA;TPI1;PGAM1;PGK1",
+      "ENO1;PKM;GAPDH;HK2;ALDOA;PFKM;LDHA;TPI1;PGAM1;ENO2",
+      "ENO1;PKM;GAPDH;HK2;ALDOA;PFKM;LDHA;TPI1;PGAM1;ENO3"
+    )
+  )
+  pw_list <- list(
+    HALLMARK_GLYCOLYSIS      = strsplit(enrich$leading_edge[1], ";")[[1]],
+    REACTOME_GLYCOLYSIS      = strsplit(enrich$leading_edge[2], ";")[[1]],
+    WP_GLYCOLYSIS_REDUNDANT  = strsplit(enrich$leading_edge[3], ";")[[1]]
+  )
+  ranks <- stats::setNames(
+    seq(3, by = -0.01, length.out = length(unique(unlist(pw_list)))),
+    unique(unlist(pw_list))
+  )
+  attr(enrich, "ev_pathways") <- pw_list
+  attr(enrich, "ev_stats") <- list(c = ranks)
+
+  out <- ev_collapse(enrich, method = "collapse_then_jaccard",
+                     cutoff = 0.5, scope = "within_db",
+                     sig_threshold = 0.05, keep_by = "padj")
+  expect_true(out$dedup_kept[1])
+  expect_equal(sum(out$dedup_kept), 1)
+})
