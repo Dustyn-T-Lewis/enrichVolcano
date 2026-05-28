@@ -71,7 +71,7 @@ test_that("collapse_fgsea warns and falls back when ev_pathways attribute missin
   expect_true(all(out$dedup_kept))
 })
 
-test_that('ev_collapse_fgsea flattens db-keyed ev_pathways from ev_enrich', {
+test_that("ev_collapse_fgsea flattens db-keyed ev_pathways from ev_enrich", {
   # Mimic the structure ev_enrich attaches: list keyed by db name, each
   # value a named list of pathway -> gene character vectors. Build two
   # genuinely independent pathways: HALLMARK_GLYCOLYSIS enriches at the
@@ -111,5 +111,68 @@ test_that('ev_collapse_fgsea flattens db-keyed ev_pathways from ev_enrich', {
   # Both pathways have disjoint leading edges → collapsePathways should
   # keep both. Regression check: with the unfixed indexing, this would
   # drop everything because pathway_list[fg_subset$pathway] returns NULLs.
+  expect_true(all(out$dedup_kept))
+})
+
+test_that("ev_collapse_fgsea: missing stats for contrast warns and keeps all", {
+  # Triggers lines 168-172: ev_stats present but with no entry for this contrast.
+  enrich <- tibble::tibble(
+    contrast = "missing_ctr", database = "db", mode = "fgsea",
+    pathway = c("P1", "P2"),
+    pval = c(0.001, 0.002), padj = c(0.01, 0.02),
+    NES = c(2, 1.5), size = c(10, 10), direction = "up",
+    leading_edge = c("A;B;C;D;E", "F;G;H;I;J")
+  )
+  attr(enrich, "ev_pathways") <- list(P1 = LETTERS[1:5], P2 = LETTERS[6:10])
+  # Stats keyed by a different contrast — lookup returns NULL.
+  attr(enrich, "ev_stats") <- list(other_ctr = stats::setNames(rnorm(10), LETTERS[1:10]))
+  expect_warning(
+    out <- ev_collapse(enrich, method = "collapse_fgsea", sig_threshold = NA),
+    class = "ev_collapse_no_pathways"
+  )
+  expect_true(all(out$dedup_kept))
+})
+
+test_that("ev_collapse_fgsea: returns TRUE for groups with no fgsea rows", {
+  # Triggers line 164: nrow(fg_subset) == 0 early-return when mode != fgsea.
+  enrich <- tibble::tibble(
+    contrast = "c", database = "db", mode = "ora",
+    pathway = c("P1", "P2"),
+    pval = c(0.001, 0.002), padj = c(0.01, 0.02),
+    NES = c(NA_real_, NA_real_), size = c(10, 10), direction = "up",
+    leading_edge = c("A;B;C", "D;E;F")
+  )
+  attr(enrich, "ev_pathways") <- list(P1 = LETTERS[1:5], P2 = LETTERS[6:10])
+  attr(enrich, "ev_stats") <- list(c = stats::setNames(rnorm(10), LETTERS[1:10]))
+  out <- ev_collapse(enrich, method = "collapse_fgsea", sig_threshold = NA)
+  expect_true(all(out$dedup_kept))
+})
+
+test_that("ev_collapse_fgsea: catches errors from fgsea::collapsePathways", {
+  # Triggers lines 196-203 (tryCatch error path). Force an error by handing
+  # collapsePathways a stats vector containing NAs, which it rejects.
+  skip_if_not_installed("fgsea")
+  enrich <- tibble::tibble(
+    contrast = "c", database = "db", mode = "fgsea",
+    pathway = c("P1", "P2"),
+    pval = c(0.001, 0.002), padj = c(0.01, 0.02),
+    NES = c(2, 1.5), size = c(5, 5), direction = "up",
+    leading_edge = c("A;B;C;D;E", "F;G;H;I;J")
+  )
+  attr(enrich, "ev_pathways") <- list(
+    P1 = c("A", "B", "C", "D", "E"),
+    P2 = c("F", "G", "H", "I", "J")
+  )
+  # Stats with NA values causes fgsea to throw.
+  attr(enrich, "ev_stats") <- list(c = stats::setNames(
+    c(NA_real_, NA_real_, NA_real_, NA_real_, NA_real_,
+      NA_real_, NA_real_, NA_real_, NA_real_, NA_real_),
+    LETTERS[1:10]
+  ))
+  expect_warning(
+    out <- ev_collapse(enrich, method = "collapse_fgsea",
+                       sig_threshold = NA),
+    class = "ev_collapse_fgsea_error"
+  )
   expect_true(all(out$dedup_kept))
 })

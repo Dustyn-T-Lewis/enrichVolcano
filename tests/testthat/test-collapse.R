@@ -82,7 +82,7 @@ test_that('method = "both" is deprecated alias for jaccard_then_collapse', {
   expect_identical(out_both$dedup_kept, out_new$dedup_kept)
 })
 
-test_that('sig_threshold gates dedup to significant pathways only', {
+test_that("sig_threshold gates dedup to significant pathways only", {
   enrich <- tibble::tibble(
     contrast = "c", database = "db", mode = "fgsea",
     pathway = c("P1", "P2", "P3", "P4"),
@@ -107,7 +107,7 @@ test_that('sig_threshold gates dedup to significant pathways only', {
   expect_false(out$dedup_kept[out$pathway == "P2"])
 })
 
-test_that('sig_threshold = NA disables gating (dedup all rows)', {
+test_that("sig_threshold = NA disables gating (dedup all rows)", {
   enrich <- tibble::tibble(
     contrast = "c", database = "db", mode = "fgsea",
     pathway = c("P1", "P2"),
@@ -121,7 +121,7 @@ test_that('sig_threshold = NA disables gating (dedup all rows)', {
   expect_equal(sum(out$dedup_kept), 1)
 })
 
-test_that('NA padj is treated as non-significant (kept)', {
+test_that("NA padj is treated as non-significant (kept)", {
   enrich <- tibble::tibble(
     contrast = "c", database = "db", mode = "fgsea",
     pathway = c("P1", "P2"),
@@ -136,7 +136,7 @@ test_that('NA padj is treated as non-significant (kept)', {
   expect_true(all(out$dedup_kept))
 })
 
-test_that('collapse_then_jaccard runs collapse first, then Jaccard on survivors', {
+test_that("collapse_then_jaccard runs collapse first, then Jaccard on survivors", {
   # Two glycolysis-like pathways that share leading edge (collapse drops one),
   # plus a third with high Jaccard to the survivor (Jaccard drops it).
   enrich <- tibble::tibble(
@@ -173,8 +173,59 @@ test_that('collapse_then_jaccard runs collapse first, then Jaccard on survivors'
   expect_equal(sum(out$dedup_kept), 1)
 })
 
-test_that('ev_collapse default method is collapse_then_jaccard', {
+test_that("ev_collapse default method is collapse_then_jaccard", {
   fn <- ev_collapse
   default <- eval(formals(fn)$method)[1]
   expect_identical(default, "collapse_then_jaccard")
+})
+
+test_that("collapse_then_jaccard: Jaccard prunes survivors when >=2 survive", {
+  # Exercises R/collapse.R lines 110-116: collapse keeps >=2 pathways, then
+  # Jaccard further dedups them.
+  #
+  # Trick: ev_collapse_fgsea uses the supplied pathway *gene sets* to re-run
+  # fgsea internally — so we make those structurally independent (3 separated
+  # signal blocks in 500-gene background). collapsePathways then keeps all 3.
+  # Separately, the *leading_edge* strings (which feed Jaccard) are crafted so
+  # PW_A and PW_B share 19/20 genes (J ~= 0.90 > cutoff 0.5) and PW_C is
+  # disjoint. After collapse-then-Jaccard, we expect {PW_A, PW_C} kept.
+  set.seed(42)
+  big_n <- 500
+  ranks <- stats::setNames(stats::rnorm(big_n, 0, 1), paste0("G", seq_len(big_n)))
+  ranks[paste0("G", 1:20)]    <- seq(5, 4, length.out = 20)
+  ranks[paste0("G", 150:169)] <- seq(5, 4, length.out = 20)
+  ranks[paste0("G", 350:369)] <- seq(5, 4, length.out = 20)
+
+  pw_list <- list(
+    PW_A = paste0("G", 1:20),
+    PW_B = paste0("G", 150:169),
+    PW_C = paste0("G", 350:369)
+  )
+  enrich <- tibble::tibble(
+    contrast = "c", database = "db", mode = "fgsea",
+    pathway = c("PW_A", "PW_B", "PW_C"),
+    pval = c(0.001, 0.002, 0.003),
+    padj = c(0.01, 0.02, 0.03),
+    NES = c(2.5, 2.4, 2.3),
+    size = c(20, 20, 20),
+    direction = "up",
+    leading_edge = c(
+      # A and B leading edges share 19/20 (Jaccard ~ 0.90)
+      paste(paste0("G", 1:20), collapse = ";"),
+      paste(c(paste0("G", 1:19), "G170"), collapse = ";"),
+      # C disjoint
+      paste(paste0("G", 350:369), collapse = ";")
+    )
+  )
+  attr(enrich, "ev_pathways") <- pw_list
+  attr(enrich, "ev_stats") <- list(c = ranks)
+
+  out <- suppressWarnings(
+    ev_collapse(enrich, method = "collapse_then_jaccard",
+                cutoff = 0.5, scope = "within_db",
+                sig_threshold = 0.05, keep_by = "padj")
+  )
+  expect_true(out$dedup_kept[out$pathway == "PW_A"])
+  expect_false(out$dedup_kept[out$pathway == "PW_B"])
+  expect_true(out$dedup_kept[out$pathway == "PW_C"])
 })

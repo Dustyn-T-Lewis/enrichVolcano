@@ -42,7 +42,7 @@ test_that('filter_mode = "display" filters after enrichment, padj over full set'
   expect_equal(nrow(out_disp), 1)
 })
 
-test_that('GSEA ranking is independent of include/exclude filters', {
+test_that("GSEA ranking is independent of include/exclude filters", {
   data <- make_ranked_input()
   sub <- data[data$contrast == "ctr", ]
   r1 <- ev_rank_stats(sub, "signed_p")
@@ -50,7 +50,7 @@ test_that('GSEA ranking is independent of include/exclude filters', {
   expect_identical(r1, r2)
 })
 
-test_that('ORA universe is independent of include/exclude filters', {
+test_that("ORA universe is independent of include/exclude filters", {
   skip_if_not_installed("mockery")
   data <- make_ranked_input()
   paths <- list(
@@ -82,7 +82,7 @@ test_that('ORA universe is independent of include/exclude filters', {
   expect_identical(captured[[1]], captured[[2]])
 })
 
-test_that('ev_enrich attaches ev_filter audit attribute', {
+test_that("ev_enrich attaches ev_filter audit attribute", {
   data <- make_ranked_input()
   paths <- list(
     A = paste0("G", 1:20),
@@ -105,7 +105,40 @@ test_that('ev_enrich attaches ev_filter audit attribute', {
   expect_equal(filt$n_pathways_after[["test"]], 1L)
 })
 
-test_that('ev_filter survives row subsetting via ev_subset_preserve_attr', {
+test_that('filter_mode = "display" honors exclude_terms post-enrichment', {
+  data <- make_ranked_input()
+  paths <- list(
+    HALLMARK_GLYCOLYSIS = paste0("G", 1:20),
+    HALLMARK_HYPOXIA    = paste0("G", 21:40),
+    MITO_TRANSPORT      = paste0("G", 41:60)
+  )
+  out <- ev_enrich(data, contrast = "ctr",
+                   databases = list(test = paths),
+                   enrich_mode = "fgsea",
+                   min_size = 5, max_size = 100,
+                   include_terms = NULL,
+                   exclude_terms = "^MITO",
+                   filter_mode = "display")
+  # MITO is excluded post-enrichment; padj reflects the full pre-filter set.
+  expect_false("MITO_TRANSPORT" %in% out$pathway)
+  expect_true(all(out$pathway %in% c("HALLMARK_GLYCOLYSIS", "HALLMARK_HYPOXIA")))
+})
+
+test_that("ev_enrich warns and skips contrasts with no matching rows", {
+  data <- make_ranked_input()
+  paths <- list(A = paste0("G", 1:20))
+  # contrast "nonesuch" matches no rows -> ev_warn(class = "ev_empty_contrast")
+  expect_warning(
+    out <- ev_enrich(data, contrast = "nonesuch",
+                     databases = list(test = paths),
+                     enrich_mode = "fgsea",
+                     min_size = 1, max_size = 1000),
+    class = "ev_empty_contrast"
+  )
+  expect_equal(nrow(out), 0)
+})
+
+test_that("ev_filter survives row subsetting via ev_subset_preserve_attr", {
   data <- make_ranked_input()
   paths <- list(A = paste0("G", 1:20), B = paste0("G", 21:40))
   out <- ev_enrich(data, contrast = "ctr",
