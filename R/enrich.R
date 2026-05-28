@@ -20,6 +20,8 @@
 #'   to a more permissive `minGSSize = 10`.)
 #' @param background Optional character vector of background genes for ORA;
 #'   default is all genes in `data` for the given contrast.
+#' @param include_terms Regex; if non-NULL, only pathway names matching the
+#'   regex are tested. NULL keeps all pathways.
 #' @param exclude_terms Regex of pathway names to exclude (default removes
 #'   DISEASE/CANCER/TUMOR terms).
 #' @param nperm Permutations for fgsea (default 10000).
@@ -40,6 +42,7 @@ ev_enrich <- function(data, contrast,
                       rank_by = "signed_p",
                       min_size = 15, max_size = 500,
                       background = NULL,
+                      include_terms = NULL,
                       exclude_terms = "DISEASE|CANCER|TUMOR",
                       nperm = 10000, seed = 42) {
   enrich_mode <- match.arg(enrich_mode, choices = c("fgsea", "ora"),
@@ -57,7 +60,7 @@ ev_enrich <- function(data, contrast,
     stats_by_contrast[[ctr]] <- ev_rank_stats(sub, rank_by)
     for (db_name in names(pathway_list)) {
       paths <- pathway_list[[db_name]]
-      paths <- paths[!grepl(exclude_terms, names(paths), ignore.case = TRUE)]
+      paths <- ev_apply_name_filter(paths, include_terms, exclude_terms)
       if ("fgsea" %in% enrich_mode) {
         results[[paste(ctr, db_name, "fgsea", sep = "::")]] <-
           ev_fgsea_one(sub, paths, db_name, ctr, rank_by,
@@ -262,6 +265,18 @@ ev_msigdbr_category <- function(db_name) {
              class = "ev_msigdbr_unmapped")
   }
   out
+}
+
+# Apply include/exclude regex filters to a named pathway list. NULL skips that
+# filter. Used by both pre-enrichment filtering and post-hoc display mode.
+ev_apply_name_filter <- function(paths, include_terms, exclude_terms) {
+  if (!is.null(include_terms)) {
+    paths <- paths[grepl(include_terms, names(paths), ignore.case = TRUE)]
+  }
+  if (!is.null(exclude_terms)) {
+    paths <- paths[!grepl(exclude_terms, names(paths), ignore.case = TRUE)]
+  }
+  paths
 }
 
 ev_msigdbr_species <- function(species) {
