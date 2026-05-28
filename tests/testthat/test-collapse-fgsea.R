@@ -62,8 +62,10 @@ test_that("collapse_fgsea warns and falls back when ev_pathways attribute missin
     leading_edge = paste0("G", 1:5), mode = "fgsea",
     direction = "up"
   )
+  # sig_threshold = NA bypasses the sig gate so collapse_fgsea is reached
+  # and can emit its missing-attribute warning regardless of fixture padj.
   expect_warning(
-    out <- ev_collapse(enrich, method = "collapse_fgsea"),
+    out <- ev_collapse(enrich, method = "collapse_fgsea", sig_threshold = NA),
     class = "ev_collapse_no_pathways"
   )
   expect_true(all(out$dedup_kept))

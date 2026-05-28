@@ -72,16 +72,22 @@ ev_collapse <- function(enrich_result,
   for (k in unique(keys)) {
     idx <- which(keys == k)
     if (length(idx) < 2) next
+    sig_idx <- if (is.na(sig_threshold)) idx else {
+      idx[!is.na(enrich_result$padj[idx]) &
+            enrich_result$padj[idx] < sig_threshold]
+    }
+    if (length(sig_idx) < 2) next
     if (method %in% c("jaccard", "jaccard_then_collapse")) {
-      enrich_result$dedup_kept[idx] <- ev_jaccard_dedup(
-        ev_subset_preserve_attr(enrich_result, idx), cutoff, keep_by
+      enrich_result$dedup_kept[sig_idx] <- ev_jaccard_dedup(
+        ev_subset_preserve_attr(enrich_result, sig_idx), cutoff, keep_by
       )
     }
     if (method %in% c("collapse_fgsea", "jaccard_then_collapse")) {
-      kept_idx <- idx[enrich_result$dedup_kept[idx]]
-      if (length(kept_idx) >= 2) {
-        enrich_result$dedup_kept[idx] <- enrich_result$dedup_kept[idx] &
-          ev_collapse_fgsea(ev_subset_preserve_attr(enrich_result, idx), collapse_pval_threshold)
+      kept_sig <- sig_idx[enrich_result$dedup_kept[sig_idx]]
+      if (length(kept_sig) >= 2) {
+        enrich_result$dedup_kept[sig_idx] <- enrich_result$dedup_kept[sig_idx] &
+          ev_collapse_fgsea(ev_subset_preserve_attr(enrich_result, sig_idx),
+                            collapse_pval_threshold)
       }
     }
   }
