@@ -40,7 +40,7 @@ test_that("YvO end-to-end: enrich_volcano runs and returns patchwork", {
                c("validated_input", "pi_scores", "enrichment", "dedup_result"))
 })
 
-test_that('default pipeline reproduces YvO F03 panel A kept-pathway set', {
+test_that("default pipeline reproduces YvO F03 panel A kept-pathway set", {
   fixture <- system.file("extdata", "examples", "yvo_tidy.rds",
                          package = "enrichVolcano")
   if (!nzchar(fixture)) fixture <- testthat::test_path("fixtures", "yvo_tidy.rds")

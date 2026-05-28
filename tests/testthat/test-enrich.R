@@ -62,7 +62,7 @@ test_that("ev_enrich returns empty tibble (not error) when no pathways match", {
   expect_equal(nrow(result), 0)
 })
 
-test_that('include_terms restricts pathway universe before testing', {
+test_that("include_terms restricts pathway universe before testing", {
   data <- make_ranked_input()
   paths <- list(
     HALLMARK_GLYCOLYSIS = paste0("G", 1:20),
