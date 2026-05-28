@@ -51,3 +51,24 @@ test_that("ev_collapse method='both' applies jaccard then collapsePathways", {
                        collapse_pval_threshold = 0.05)
   expect_true("dedup_kept" %in% colnames(result))
 })
+
+test_that('method = "both" is deprecated alias for jaccard_then_collapse', {
+  enrich <- tibble::tibble(
+    contrast = "c", database = "db", mode = "fgsea",
+    pathway = c("P1", "P2"),
+    pval = c(0.001, 0.01), padj = c(0.01, 0.05),
+    NES = c(2, 1.5), size = c(10, 10), direction = c("up", "up"),
+    leading_edge = c("A;B;C;D;E;F;G;H;I;J", "A;B;C;D;E;F;G;H;I;K")
+  )
+  rlang::local_options(lifecycle_verbosity = "warning")
+  expect_warning(
+    out_both <- ev_collapse(enrich, method = "both", cutoff = 0.5,
+                            scope = "within_db", keep_by = "padj",
+                            sig_threshold = NA),
+    class = "lifecycle_warning_deprecated"
+  )
+  out_new <- ev_collapse(enrich, method = "jaccard_then_collapse",
+                         cutoff = 0.5, scope = "within_db",
+                         keep_by = "padj", sig_threshold = NA)
+  expect_identical(out_both$dedup_kept, out_new$dedup_kept)
+})

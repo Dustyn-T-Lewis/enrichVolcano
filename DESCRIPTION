@@ -21,6 +21,7 @@ Imports:
     data.table,
     dplyr,
     fgsea (>= 1.24),
+    lifecycle,
     ggforce,
     ggplot2,
     ggrepel,

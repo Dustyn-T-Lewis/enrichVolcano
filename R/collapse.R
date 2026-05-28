@@ -26,14 +26,27 @@ ev_subset_preserve_attr <- function(df, idx, attrs = c("ev_pathways", "ev_stats"
 #' @return Tibble with `dedup_kept` logical column (TRUE = retained).
 #' @export
 ev_collapse <- function(enrich_result,
-                        method = c("jaccard", "collapse_fgsea", "both"),
+                        method = c("collapse_then_jaccard",
+                                   "jaccard_then_collapse",
+                                   "jaccard",
+                                   "collapse_fgsea",
+                                   "both"),
                         cutoff = 0.5,
                         scope = c("within_db", "cross_db", "global"),
+                        sig_threshold = 0.05,
                         collapse_pval_threshold = 0.05,
                         keep_by = c("padj", "size", "NES")) {
   method <- match.arg(method)
   scope <- match.arg(scope)
   keep_by <- match.arg(keep_by)
+  if (identical(method, "both")) {
+    lifecycle::deprecate_warn(
+      when = "0.2.0",
+      what = 'ev_collapse(method = "both")',
+      with = 'ev_collapse(method = "jaccard_then_collapse")'
+    )
+    method <- "jaccard_then_collapse"
+  }
   group_cols <- switch(scope,
     within_db = c("contrast", "database"),
     cross_db  = "contrast",
@@ -48,12 +61,12 @@ ev_collapse <- function(enrich_result,
   for (k in unique(keys)) {
     idx <- which(keys == k)
     if (length(idx) < 2) next
-    if (method %in% c("jaccard", "both")) {
+    if (method %in% c("jaccard", "jaccard_then_collapse")) {
       enrich_result$dedup_kept[idx] <- ev_jaccard_dedup(
         ev_subset_preserve_attr(enrich_result, idx), cutoff, keep_by
       )
     }
-    if (method %in% c("collapse_fgsea", "both")) {
+    if (method %in% c("collapse_fgsea", "jaccard_then_collapse")) {
       kept_idx <- idx[enrich_result$dedup_kept[idx]]
       if (length(kept_idx) >= 2) {
         enrich_result$dedup_kept[idx] <- enrich_result$dedup_kept[idx] &
