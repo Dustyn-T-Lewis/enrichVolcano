@@ -38,7 +38,7 @@ test_that("ev_collapse cross_db scope merges across DBs", {
   expect_equal(sum(result$dedup_kept), 1)
 })
 
-test_that("ev_collapse method='both' applies jaccard then collapsePathways", {
+test_that("ev_collapse method='jaccard_then_collapse' applies jaccard then collapsePathways", {
   data <- make_ranked_input()
   paths <- make_mini_pathways()
   enrich <- suppressWarnings(ev_enrich(
@@ -47,7 +47,7 @@ test_that("ev_collapse method='both' applies jaccard then collapsePathways", {
     enrich_mode = "fgsea", rank_by = "signed_p",
     nperm = 100, min_size = 5, max_size = 100
   ))
-  result <- ev_collapse(enrich, method = "both",
+  result <- ev_collapse(enrich, method = "jaccard_then_collapse",
                        collapse_pval_threshold = 0.05)
   expect_true("dedup_kept" %in% colnames(result))
 })

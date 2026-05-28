@@ -6,9 +6,11 @@
 \usage{
 ev_collapse(
   enrich_result,
-  method = c("jaccard", "collapse_fgsea", "both"),
+  method = c("collapse_then_jaccard", "jaccard_then_collapse", "jaccard",
+    "collapse_fgsea", "both"),
   cutoff = 0.5,
   scope = c("within_db", "cross_db", "global"),
+  sig_threshold = 0.05,
   collapse_pval_threshold = 0.05,
   keep_by = c("padj", "size", "NES")
 )
@@ -16,11 +18,17 @@ ev_collapse(
 \arguments{
 \item{enrich_result}{Tibble from \code{ev_enrich()}.}
 
-\item{method}{\code{"jaccard"}, \code{"collapse_fgsea"}, or \code{"both"}.}
+\item{method}{One of \code{"collapse_then_jaccard"} (default), \code{"jaccard_then_collapse"},
+\code{"jaccard"}, or \code{"collapse_fgsea"}. \code{"both"} is a deprecated alias for
+\code{"jaccard_then_collapse"}.}
 
 \item{cutoff}{Jaccard similarity cutoff.}
 
 \item{scope}{\code{"within_db"}, \code{"cross_db"}, or \code{"global"}.}
+
+\item{sig_threshold}{Numeric in [0, 1] or NA. Only rows with
+\code{padj < sig_threshold} enter dedup. Non-significant rows always retain
+\code{dedup_kept = TRUE}. NA disables the gate. Default 0.05.}
 
 \item{collapse_pval_threshold}{For \code{collapse_fgsea}.}
 
@@ -34,12 +42,18 @@ Deduplicate enrichment results
 }
 \details{
 \itemize{
-\item \strong{Jaccard}: \eqn{J(A,B) = |A \cap B| / |A \cup B|}.
+\item \strong{collapse_then_jaccard} (default, since 0.2.0): runs
+\code{fgsea::collapsePathways} first on significant rows
+(\code{padj < sig_threshold}), then Jaccard on the survivors. Matches
+the source pipeline used for the YvO 2025 figures.
+\item \strong{jaccard_then_collapse}: Jaccard first, then
+collapsePathways. Equivalent to the deprecated \code{"both"}.
+\item \strong{jaccard}: \eqn{J(A,B) = |A \cap B| / |A \cup B|}.
 Above cutoff, keep representative (by \code{keep_by}). Data-independent.
 \item \strong{collapse_fgsea}: \code{fgsea::collapsePathways} — tests
 leading-edge dependency. Data-dependent; preferred for fgsea output.
 Requires the \code{ev_pathways} attribute attached by \code{ev_enrich()}; if
 absent, warns and keeps all pathways for that group.
-\item \strong{both}: Jaccard first, then collapsePathways.
+\item \strong{both}: deprecated alias for \code{jaccard_then_collapse}.
 }
 }
