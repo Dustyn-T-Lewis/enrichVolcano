@@ -172,3 +172,9 @@ test_that('collapse_then_jaccard runs collapse first, then Jaccard on survivors'
   expect_true(out$dedup_kept[1])
   expect_equal(sum(out$dedup_kept), 1)
 })
+
+test_that('ev_collapse default method is collapse_then_jaccard', {
+  fn <- ev_collapse
+  default <- eval(formals(fn)$method)[1]
+  expect_identical(default, "collapse_then_jaccard")
+})
