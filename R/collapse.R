@@ -136,6 +136,15 @@ ev_jaccard_dedup <- function(df, cutoff, keep_by) {
 ev_collapse_fgsea <- function(df, pval_threshold) {
   pathway_list <- attr(df, "ev_pathways")
   stats_list   <- attr(df, "ev_stats")
+  # ev_enrich stores ev_pathways as a list keyed by database, each value
+  # itself a named list of pathways. Test fixtures sometimes store a flat
+  # name-keyed list. Detect and flatten — fgsea::collapsePathways needs the
+  # latter to look up pathway names directly.
+  flat_paths <- if (length(pathway_list) > 0 && is.list(pathway_list[[1]])) {
+    do.call(c, unname(pathway_list))
+  } else {
+    pathway_list
+  }
   if (is.null(pathway_list) || is.null(stats_list)) {
     ev_warn(
       c("ev_collapse(method = 'collapse_fgsea') requires the 'ev_pathways' and",
@@ -165,13 +174,17 @@ ev_collapse_fgsea <- function(df, pval_threshold) {
     size        = fg_subset$size,
     leadingEdge = strsplit(fg_subset$leading_edge, ";", fixed = TRUE)
   )
+  # collapsePathways internally re-runs fgsea on residual gene lists and
+  # is RNG-sensitive. Pin the seed so dedup is reproducible across calls.
   collapsed <- tryCatch(
-    fgsea::collapsePathways(
-      fgseaRes       = fg_input,
-      pathways       = pathway_list[fg_subset$pathway],
-      stats          = stats,
-      pval.threshold = pval_threshold
-    ),
+    withr::with_seed(42, {
+      fgsea::collapsePathways(
+        fgseaRes       = fg_input,
+        pathways       = flat_paths[fg_subset$pathway],
+        stats          = stats,
+        pval.threshold = pval_threshold
+      )
+    }),
     error = function(e) {
       ev_warn(
         "fgsea::collapsePathways failed: {conditionMessage(e)}; keeping all pathways.",

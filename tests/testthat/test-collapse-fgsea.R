@@ -70,3 +70,46 @@ test_that("collapse_fgsea warns and falls back when ev_pathways attribute missin
   )
   expect_true(all(out$dedup_kept))
 })
+
+test_that('ev_collapse_fgsea flattens db-keyed ev_pathways from ev_enrich', {
+  # Mimic the structure ev_enrich attaches: list keyed by db name, each
+  # value a named list of pathway -> gene character vectors. Build two
+  # genuinely independent pathways: HALLMARK_GLYCOLYSIS enriches at the
+  # top of the ranked list (G1-G40, ranks +3 -> +1) and HALLMARK_HYPOXIA
+  # at the bottom (G61-G100, ranks -1 -> -3), separated by buffer genes
+  # G41-G60 with ~0 ranks. With disjoint leading edges and opposite
+  # directions, collapsePathways should retain both.
+  set.seed(11)
+  enrich <- tibble::tibble(
+    contrast = "c", database = c("hallmark", "hallmark"),
+    mode = "fgsea",
+    pathway = c("HALLMARK_GLYCOLYSIS", "HALLMARK_HYPOXIA"),
+    pval = c(0.001, 0.002), padj = c(0.01, 0.02),
+    NES = c(2.5, -2.0), size = c(40, 40), direction = c("up", "down"),
+    leading_edge = c(
+      paste0("G", 1:10, collapse = ";"),
+      paste0("G", 91:100, collapse = ";")
+    )
+  )
+  db_keyed <- list(
+    hallmark = list(
+      HALLMARK_GLYCOLYSIS = paste0("G", 1:40),
+      HALLMARK_HYPOXIA    = paste0("G", 61:100)
+    )
+  )
+  ranks <- c(
+    stats::setNames(seq(3, 1, length.out = 40), paste0("G", 1:40)),
+    stats::setNames(rnorm(20, 0, 0.1), paste0("G", 41:60)),
+    stats::setNames(seq(-1, -3, length.out = 40), paste0("G", 61:100))
+  )
+  attr(enrich, "ev_pathways") <- db_keyed
+  attr(enrich, "ev_stats") <- list(c = ranks)
+
+  out <- ev_collapse(enrich, method = "collapse_fgsea", cutoff = 0.5,
+                     scope = "within_db", sig_threshold = 0.05,
+                     keep_by = "padj")
+  # Both pathways have disjoint leading edges → collapsePathways should
+  # keep both. Regression check: with the unfixed indexing, this would
+  # drop everything because pathway_list[fg_subset$pathway] returns NULLs.
+  expect_true(all(out$dedup_kept))
+})

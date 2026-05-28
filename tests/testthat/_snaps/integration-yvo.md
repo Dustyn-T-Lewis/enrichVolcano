@@ -3,6 +3,6 @@
     {
       "type": "character",
       "attributes": {},
-      "value": []
+      "value": ["go_bp::GOBP_CELLULAR_COMPONENT_ASSEMBLY_INVOLVED_IN_MORPHOGENESIS"]
     }
 
