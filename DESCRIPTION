@@ -1,6 +1,6 @@
 Package: enrichVolcano
 Title: Composite Volcano and Enrichment Ring Plots for Proteomics
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person("Dustyn", "Tubbs", , "dtlts14@gmail.com", role = c("aut", "cre"))
 Description: Builds composite volcano and enrichment ring plots from
