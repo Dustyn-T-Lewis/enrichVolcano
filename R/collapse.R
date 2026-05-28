@@ -92,6 +92,24 @@ ev_collapse <- function(enrich_result,
                             collapse_pval_threshold)
       }
     }
+    if (identical(method, "collapse_then_jaccard")) {
+      survive_collapse <- ev_collapse_fgsea(
+        ev_subset_preserve_attr(enrich_result, sig_idx),
+        collapse_pval_threshold
+      )
+      kept_after_collapse <- sig_idx[survive_collapse]
+      if (length(kept_after_collapse) >= 2) {
+        survive_jaccard <- ev_jaccard_dedup(
+          ev_subset_preserve_attr(enrich_result, kept_after_collapse),
+          cutoff, keep_by
+        )
+        survive_final <- rep(FALSE, length(sig_idx))
+        survive_final[survive_collapse] <- survive_jaccard
+        enrich_result$dedup_kept[sig_idx] <- survive_final
+      } else {
+        enrich_result$dedup_kept[sig_idx] <- survive_collapse
+      }
+    }
   }
   enrich_result
 }
