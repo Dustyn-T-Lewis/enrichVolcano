@@ -39,3 +39,29 @@ test_that("YvO end-to-end: enrich_volcano runs and returns patchwork", {
   expect_named(attr(p, "ev_data"),
                c("validated_input", "pi_scores", "enrichment", "dedup_result"))
 })
+
+test_that('default pipeline reproduces YvO F03 panel A kept-pathway set', {
+  fixture <- system.file("extdata", "examples", "yvo_tidy.rds",
+                         package = "enrichVolcano")
+  if (!nzchar(fixture)) fixture <- testthat::test_path("fixtures", "yvo_tidy.rds")
+  skip_if_not(file.exists(fixture), "yvo_tidy fixture missing")
+  res <- readRDS(fixture)
+  res <- res[!is.na(res$gene) & !is.na(res$contrast), ]
+  res <- pi_score(res, variant = "eq2")
+  res <- adjust_p(res, method = "BH")
+
+  # Defaults exercise collapse_then_jaccard, sig_threshold = 0.05,
+  # filter_mode = "before", exclude_terms = DISEASE|CANCER|TUMOR.
+  e <- ev_enrich(res, contrast = "Aging",
+                 databases = c("hallmark", "go_bp"),
+                 enrich_mode = "fgsea",
+                 min_size = 10, max_size = 500,
+                 seed = 42)
+  d <- ev_collapse(e)
+
+  kept <- d[d$dedup_kept & d$padj < 0.05, c("database", "pathway")]
+  testthat::expect_snapshot_value(
+    sort(paste(kept$database, kept$pathway, sep = "::")),
+    style = "json2"
+  )
+})
