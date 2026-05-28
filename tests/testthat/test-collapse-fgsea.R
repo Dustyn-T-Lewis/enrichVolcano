@@ -31,7 +31,7 @@ test_that("collapse_fgsea removes redundant pathways sharing leading-edge genes"
   expect_true(all(collapsed$pathway[collapsed$dedup_kept] %in% enrich$pathway))
 })
 
-test_that("collapse method='both' applies jaccard then fgsea", {
+test_that("collapse method='jaccard_then_collapse' applies jaccard then fgsea", {
   skip_if_not_installed("fgsea")
   skip_if_not_installed("msigdbr")
 
@@ -47,10 +47,10 @@ test_that("collapse method='both' applies jaccard then fgsea", {
     min_size = 1, max_size = 1000, nperm = 1000
   )
 
-  both <- ev_collapse(enrich, method = "both", cutoff = 0.3)
+  both <- ev_collapse(enrich, method = "jaccard_then_collapse", cutoff = 0.3)
   jac  <- ev_collapse(enrich, method = "jaccard", cutoff = 0.3)
   expect_lte(sum(both$dedup_kept), sum(jac$dedup_kept),
-             label = "'both' should keep <= jaccard alone")
+             label = "'jaccard_then_collapse' should keep <= jaccard alone")
 })
 
 test_that("collapse_fgsea warns and falls back when ev_pathways attribute missing", {
