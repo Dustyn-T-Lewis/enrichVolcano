@@ -15,29 +15,36 @@ ev_sig_idx <- function(idx, padj, sig_threshold) {
 #' @details
 #' \itemize{
 #'   \item \strong{collapse_then_jaccard} (default, since 0.2.0): runs
-#'     `fgsea::collapsePathways` first on significant rows
-#'     (`padj < sig_threshold`), then Jaccard on the survivors. Matches
-#'     the source pipeline used for the YvO 2025 figures.
+#'     \code{fgsea::collapsePathways} first on significant pathways
+#'     (\code{padj < sig_threshold}), then Jaccard on the survivors.
+#'     Matches the source pipeline that generated the YvO 2025 figures.
 #'   \item \strong{jaccard_then_collapse}: Jaccard first, then
-#'     collapsePathways. Equivalent to the deprecated `"both"`.
+#'     collapsePathways. Equivalent to the deprecated \code{"both"}.
 #'   \item \strong{jaccard}: \eqn{J(A,B) = |A \cap B| / |A \cup B|}.
-#'     Above cutoff, keep representative (by `keep_by`). Data-independent.
-#'   \item \strong{collapse_fgsea}: `fgsea::collapsePathways` — tests
-#'     leading-edge dependency. Data-dependent; preferred for fgsea output.
-#'     Requires the `ev_pathways` attribute attached by `ev_enrich()`; if
-#'     absent, warns and keeps all pathways for that group.
-#'   \item \strong{both}: deprecated alias for `jaccard_then_collapse`.
+#'     Above cutoff, keep representative (by \code{keep_by}). Data-independent.
+#'   \item \strong{collapse_fgsea}: \code{fgsea::collapsePathways} only.
+#'     Data-dependent; preferred for single-database fgsea output.
+#'     Requires the \code{ev_pathways} attribute attached by
+#'     \code{ev_enrich()}; if absent, warns and keeps all pathways for
+#'     that group.
+#'   \item \strong{both}: deprecated alias for \code{jaccard_then_collapse}.
 #' }
 #'
+#' Non-significant rows (\code{padj >= sig_threshold} or NA) always retain
+#' \code{dedup_kept = TRUE}. Set \code{sig_threshold = NA} to disable the
+#' gate and dedup every row.
+#'
 #' @param enrich_result Tibble from `ev_enrich()`.
-#' @param method One of `"collapse_then_jaccard"` (default), `"jaccard_then_collapse"`,
-#'   `"jaccard"`, or `"collapse_fgsea"`. `"both"` is a deprecated alias for
-#'   `"jaccard_then_collapse"`.
+#' @param method One of \code{"collapse_then_jaccard"} (default),
+#'   \code{"jaccard_then_collapse"}, \code{"jaccard"}, or
+#'   \code{"collapse_fgsea"}. \code{"both"} is a deprecated alias for
+#'   \code{"jaccard_then_collapse"}.
 #' @param cutoff Jaccard similarity cutoff.
 #' @param scope `"within_db"`, `"cross_db"`, or `"global"`.
 #' @param sig_threshold Numeric in \[0, 1\] or NA. Only rows with
-#'   `padj < sig_threshold` enter dedup. Non-significant rows always retain
-#'   `dedup_kept = TRUE`. NA disables the gate. Default 0.05.
+#'   \code{padj < sig_threshold} are considered for dedup; non-significant
+#'   rows always retain \code{dedup_kept = TRUE}. NA disables the gate.
+#'   Default 0.05.
 #' @param collapse_pval_threshold For `collapse_fgsea`.
 #' @param keep_by Tie-breaking column ("padj", "size", "NES").
 #' @return Tibble with `dedup_kept` logical column (TRUE = retained).
