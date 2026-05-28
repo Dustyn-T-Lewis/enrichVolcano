@@ -24,6 +24,9 @@
 #'   regex are tested. NULL keeps all pathways.
 #' @param exclude_terms Regex of pathway names to exclude (default removes
 #'   DISEASE/CANCER/TUMOR terms).
+#' @param filter_mode One of `"before"` (default; filter pathway list before
+#'   fgsea/fora) or `"display"` (run on full list, drop rows after — padj
+#'   reflects full universe).
 #' @param nperm Permutations for fgsea (default 10000).
 #' @param seed Integer seed.
 #' @return Tidy tibble: contrast | database | pathway | pval | padj | NES |
@@ -44,9 +47,11 @@ ev_enrich <- function(data, contrast,
                       background = NULL,
                       include_terms = NULL,
                       exclude_terms = "DISEASE|CANCER|TUMOR",
+                      filter_mode = c("before", "display"),
                       nperm = 10000, seed = 42) {
   enrich_mode <- match.arg(enrich_mode, choices = c("fgsea", "ora"),
                            several.ok = TRUE)
+  filter_mode <- match.arg(filter_mode)
   pathway_list <- ev_resolve_databases(databases, species = species)
   results <- list()
   stats_by_contrast <- list()
@@ -60,20 +65,34 @@ ev_enrich <- function(data, contrast,
     stats_by_contrast[[ctr]] <- ev_rank_stats(sub, rank_by)
     for (db_name in names(pathway_list)) {
       paths <- pathway_list[[db_name]]
-      paths <- ev_apply_name_filter(paths, include_terms, exclude_terms)
+      paths_used <- if (filter_mode == "before") {
+        ev_apply_name_filter(paths, include_terms, exclude_terms)
+      } else {
+        paths
+      }
       if ("fgsea" %in% enrich_mode) {
         results[[paste(ctr, db_name, "fgsea", sep = "::")]] <-
-          ev_fgsea_one(sub, paths, db_name, ctr, rank_by,
+          ev_fgsea_one(sub, paths_used, db_name, ctr, rank_by,
                        min_size, max_size, nperm, seed)
       }
       if ("ora" %in% enrich_mode) {
         results[[paste(ctr, db_name, "ora", sep = "::")]] <-
-          ev_ora_one(sub, paths, db_name, ctr, background,
+          ev_ora_one(sub, paths_used, db_name, ctr, background,
                      min_size, max_size)
       }
     }
   }
   out <- dplyr::bind_rows(results)
+  if (filter_mode == "display" && nrow(out) > 0) {
+    keep <- rep(TRUE, nrow(out))
+    if (!is.null(include_terms)) {
+      keep <- keep & grepl(include_terms, out$pathway, ignore.case = TRUE)
+    }
+    if (!is.null(exclude_terms)) {
+      keep <- keep & !grepl(exclude_terms, out$pathway, ignore.case = TRUE)
+    }
+    out <- out[keep, , drop = FALSE]
+  }
   if (nrow(out) == 0) {
     out <- tibble::tibble(
       contrast     = character(0),

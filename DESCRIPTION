@@ -36,17 +36,18 @@ Imports:
     tidyselect,
     withr
 Suggests:
-    shiny,
     covr,
     GO.db,
     IHW,
     knitr,
+    mockery,
     org.Hs.eg.db,
     org.Mm.eg.db,
     org.Rn.eg.db,
     pkgdown,
     qvalue,
     rmarkdown,
+    shiny,
     testthat (>= 3.0.0),
     vdiffr
 Config/testthat/edition: 3
