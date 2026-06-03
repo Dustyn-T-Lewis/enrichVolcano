@@ -351,6 +351,6 @@ complexes), and `mitocarta3` (mitochondrial sub-compartments) are curated and
 version-stable, so results reproduce across runs. Three caveats from the
 literature, all handled by the package defaults: annotation and abundance bias
 is controlled by using the quantified proteome as the ORA background;
-multi-localization redundancy is handled by `ev_collapse()`; and GO:CC
+multi-localization redundancy is handled by `ev_collapse()`; and `go_cc`
 parent-child overlap is reduced by the size filter and dedup
 (Reimand et al. 2019).
