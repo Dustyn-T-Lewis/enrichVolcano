@@ -20,8 +20,18 @@
 #'   to a more permissive `minGSSize = 10`.)
 #' @param background Optional character vector of background genes for ORA;
 #'   default is all genes in `data` for the given contrast.
-#' @param exclude_terms Regex of pathway names to exclude (default removes
-#'   DISEASE/CANCER/TUMOR terms).
+#' @param include_terms Regex; if non-NULL, only pathway names matching
+#'   the regex are tested. NULL keeps all pathways.
+#' @param exclude_terms Regex; pathway names matching are dropped.
+#'   Default \code{"DISEASE|CANCER|TUMOR"}. Set NULL to disable.
+#' @param filter_mode One of \code{"before"} (default) or \code{"display"}.
+#'   \code{"before"} applies the regexes before fgsea/fora; multiple-testing
+#'   correction reflects the filtered count. Use this when the filter is
+#'   pre-specified as part of the analysis protocol (Reimand et al. 2019).
+#'   \code{"display"} runs enrichment on the unfiltered pathway list and
+#'   drops non-matching rows after; \code{padj} reflects the full set.
+#'   Use this for post-hoc viewing lenses to avoid the garden-of-forking
+#'   paths concern of Wijesooriya et al. 2022.
 #' @param nperm Permutations for fgsea (default 10000).
 #' @param seed Integer seed.
 #' @return Tidy tibble: contrast | database | pathway | pval | padj | NES |
@@ -32,6 +42,14 @@
 #'   enrichment is attached as `attr(., "ev_pathways")` and the per-contrast
 #'   gene-level ranking vectors as `attr(., "ev_stats")`, both required by
 #'   `ev_collapse(method = "collapse_fgsea")`.
+#' @references
+#' Reimand J, Isserlin R, Voisin V, et al. Pathway enrichment analysis and
+#' visualization of omics data using g:Profiler, GSEA, Cytoscape and
+#' EnrichmentMap. \emph{Nat Protoc} 14, 482–517 (2019).
+#'
+#' Wijesooriya K, Jadaan SA, Perera KL, Kaur T, Ziemann M. Urgent need for
+#' consistent standards in functional enrichment analysis. \emph{PLoS Comput
+#' Biol} 18(3):e1009935 (2022).
 #' @export
 ev_enrich <- function(data, contrast,
                       databases,
@@ -40,11 +58,21 @@ ev_enrich <- function(data, contrast,
                       rank_by = "signed_p",
                       min_size = 15, max_size = 500,
                       background = NULL,
+                      include_terms = NULL,
                       exclude_terms = "DISEASE|CANCER|TUMOR",
+                      filter_mode = c("before", "display"),
                       nperm = 10000, seed = 42) {
   enrich_mode <- match.arg(enrich_mode, choices = c("fgsea", "ora"),
                            several.ok = TRUE)
+  filter_mode <- match.arg(filter_mode)
   pathway_list <- ev_resolve_databases(databases, species = species)
+  # n_after is computed once here (not inside the contrast loop) so the audit
+  # attribute stays structurally parallel to n_before even when every contrast
+  # is empty — pathway list and regexes don't vary by contrast.
+  n_before <- vapply(pathway_list, length, integer(1))
+  n_after  <- vapply(pathway_list, function(p) {
+    length(ev_apply_name_filter(p, include_terms, exclude_terms))
+  }, integer(1))
   results <- list()
   stats_by_contrast <- list()
   for (ctr in contrast) {
@@ -57,20 +85,31 @@ ev_enrich <- function(data, contrast,
     stats_by_contrast[[ctr]] <- ev_rank_stats(sub, rank_by)
     for (db_name in names(pathway_list)) {
       paths <- pathway_list[[db_name]]
-      paths <- paths[!grepl(exclude_terms, names(paths), ignore.case = TRUE)]
+      paths_filtered <- ev_apply_name_filter(paths, include_terms, exclude_terms)
+      paths_used <- if (filter_mode == "before") paths_filtered else paths
       if ("fgsea" %in% enrich_mode) {
         results[[paste(ctr, db_name, "fgsea", sep = "::")]] <-
-          ev_fgsea_one(sub, paths, db_name, ctr, rank_by,
+          ev_fgsea_one(sub, paths_used, db_name, ctr, rank_by,
                        min_size, max_size, nperm, seed)
       }
       if ("ora" %in% enrich_mode) {
         results[[paste(ctr, db_name, "ora", sep = "::")]] <-
-          ev_ora_one(sub, paths, db_name, ctr, background,
+          ev_ora_one(sub, paths_used, db_name, ctr, background,
                      min_size, max_size)
       }
     }
   }
   out <- dplyr::bind_rows(results)
+  if (filter_mode == "display" && nrow(out) > 0) {
+    keep <- rep(TRUE, nrow(out))
+    if (!is.null(include_terms)) {
+      keep <- keep & grepl(include_terms, out$pathway, ignore.case = TRUE)
+    }
+    if (!is.null(exclude_terms)) {
+      keep <- keep & !grepl(exclude_terms, out$pathway, ignore.case = TRUE)
+    }
+    out <- out[keep, , drop = FALSE]
+  }
   if (nrow(out) == 0) {
     out <- tibble::tibble(
       contrast     = character(0),
@@ -90,6 +129,13 @@ ev_enrich <- function(data, contrast,
   }
   attr(out, "ev_pathways") <- pathway_list
   attr(out, "ev_stats")    <- stats_by_contrast
+  attr(out, "ev_filter") <- list(
+    include_terms     = include_terms,
+    exclude_terms     = exclude_terms,
+    filter_mode       = filter_mode,
+    n_pathways_before = n_before,
+    n_pathways_after  = n_after
+  )
   out
 }
 
@@ -262,6 +308,18 @@ ev_msigdbr_category <- function(db_name) {
              class = "ev_msigdbr_unmapped")
   }
   out
+}
+
+# Apply include/exclude regex filters to a named pathway list. NULL skips that
+# filter. Used by both pre-enrichment filtering and post-hoc display mode.
+ev_apply_name_filter <- function(paths, include_terms, exclude_terms) {
+  if (!is.null(include_terms)) {
+    paths <- paths[grepl(include_terms, names(paths), ignore.case = TRUE)]
+  }
+  if (!is.null(exclude_terms)) {
+    paths <- paths[!grepl(exclude_terms, names(paths), ignore.case = TRUE)]
+  }
+  paths
 }
 
 ev_msigdbr_species <- function(species) {

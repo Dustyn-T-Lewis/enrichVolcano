@@ -140,6 +140,34 @@ studies can give different non-redundant lists, because the leading
 edges differ. That is a feature when reporting one experiment and a
 bug when comparing across experiments.
 
+## Ordering and significance gating
+
+`ev_collapse(method = "collapse_then_jaccard")` is the default starting from
+version 0.2.0. It reproduces the order used by the source pipeline that
+generated the YvO 2025 figures:
+
+1. Filter rows to `padj < sig_threshold` (default 0.05). Non-significant
+   rows are always retained.
+2. Run `fgsea::collapsePathways` on the survivors and drop non-main pathways.
+3. Run Jaccard dedup on what remains.
+
+The previous order (`jaccard_then_collapse`, equivalent to the deprecated
+`method = "both"`) is still available. The difference matters in practice:
+two pathways with high Jaccard but disjoint leading edges are kept by
+`collapse_then_jaccard` and dropped by `jaccard_then_collapse`. We chose
+the source-pipeline order as default because the leading-edge dependency
+is what the original figures encoded.
+
+The significance gate (`sig_threshold`) exists because dedup is a
+display-time concern: non-significant pathways are not shown in the ring,
+so collapsing them adds work without changing the figure. Set
+`sig_threshold = NA` to dedup every row regardless of significance.
+
+Implementation note: the source pipeline drops non-survivors by rewriting
+`padj <- 1`. The package uses a soft drop via the `dedup_kept` flag,
+preserving honest `padj` for downstream users. `ring_plot()` and
+`enrich_volcano()` already honor `dedup_kept`.
+
 ## Scope: within_db vs cross_db
 
 `ev_collapse()` has three scopes.
@@ -256,11 +284,65 @@ separately.
 Next: how to pick the right gene-set database for your question. See
 `vignette("databases")`.
 
+## Filtering pathways: before vs display
+
+`ev_enrich()` accepts two regexes — `include_terms` (default `NULL`, keep all)
+and `exclude_terms` (default `"DISEASE|CANCER|TUMOR"`) — plus a `filter_mode`
+toggle that controls when the regexes are applied.
+
+```{r filter-mode-example, eval = FALSE}
+# Filter is part of the pre-specified analysis protocol (default).
+# Multiple-testing correction reflects the filtered pathway count.
+mito_pre <- ev_enrich(
+  data, contrast = "ctr",
+  databases = "hallmark",
+  include_terms = "MITO|OXPHOS",
+  filter_mode = "before"
+)
+
+# Filter is decided after looking at results.
+# padj reflects the full pathway universe.
+mito_display <- ev_enrich(
+  data, contrast = "ctr",
+  databases = "hallmark",
+  include_terms = "MITO|OXPHOS",
+  filter_mode = "display"
+)
+```
+
+The two modes return the same row set with different `padj` columns. `"before"`
+is appropriate when the filter is a study-design decision; this is the
+standard practice endorsed by Reimand et al. (2019) and matches the source
+pipeline. `"display"` is appropriate when the filter is a post-hoc viewing
+lens — for example, you ran a general enrichment and now want to look only at
+mitochondrial pathways for one figure panel without misrepresenting `padj`.
+Wijesooriya et al. (2022) call out the garden-of-forking-paths failure that
+`"display"` prevents.
+
+Every `ev_enrich()` output carries an `attr(out, "ev_filter")` list recording
+the filter inputs and per-database pathway counts before and after filtering.
+Use this in the methods section of a manuscript to make the hypothesis space
+auditable.
+
+Note on `n_pathways_after` semantics under `display` mode: the count records
+pathways that survive the regex filter (what is displayed), NOT what was
+sent to fgsea/fora. Use `filter_mode` to disambiguate — `"before"` means
+fgsea saw `n_after`; `"display"` means fgsea saw `n_before` and the row drop
+happens afterward.
+
 ## References
 
 Korotkevich G, Sukhov V, Sergushichev A. Fast gene set enrichment
-analysis. *bioRxiv* 060012 (2019). (fgsea package)
+analysis. *bioRxiv* 060012 (2021). (fgsea package)
 
-Subramanian A, Tamayo P, Mootha VK, et al. Gene set enrichment
-analysis: a knowledge-based approach for interpreting genome-wide
-expression profiles. *PNAS* 102(43):15545-15550 (2005).
+Reimand J, Isserlin R, Voisin V, et al. Pathway enrichment analysis and
+visualization of omics data using g:Profiler, GSEA, Cytoscape and
+EnrichmentMap. *Nat Protoc* 14, 482–517 (2019).
+
+Subramanian A, Tamayo P, Mootha VK, et al. Gene set enrichment analysis:
+a knowledge-based approach for interpreting genome-wide expression
+profiles. *PNAS* 102(43):15545–15550 (2005).
+
+Wijesooriya K, Jadaan SA, Perera KL, Kaur T, Ziemann M. Urgent need for
+consistent standards in functional enrichment analysis. *PLoS Comput Biol*
+18(3):e1009935 (2022).

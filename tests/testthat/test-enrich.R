@@ -61,3 +61,25 @@ test_that("ev_enrich returns empty tibble (not error) when no pathways match", {
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), 0)
 })
+
+test_that("include_terms restricts pathway universe before testing", {
+  data <- make_ranked_input()
+  paths <- list(
+    HALLMARK_GLYCOLYSIS = paste0("G", 1:20),
+    HALLMARK_HYPOXIA    = paste0("G", 21:40),
+    MITO_TRANSPORT      = paste0("G", 41:60)
+  )
+  out_all <- ev_enrich(data, contrast = "ctr",
+                       databases = list(test = paths),
+                       enrich_mode = "fgsea",
+                       min_size = 5, max_size = 100,
+                       include_terms = NULL, exclude_terms = NULL)
+  out_mito <- ev_enrich(data, contrast = "ctr",
+                        databases = list(test = paths),
+                        enrich_mode = "fgsea",
+                        min_size = 5, max_size = 100,
+                        include_terms = "^MITO",
+                        exclude_terms = NULL)
+  expect_setequal(unique(out_mito$pathway), "MITO_TRANSPORT")
+  expect_gt(nrow(out_all), nrow(out_mito))
+})

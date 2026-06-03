@@ -14,7 +14,9 @@ ev_enrich(
   min_size = 15,
   max_size = 500,
   background = NULL,
+  include_terms = NULL,
   exclude_terms = "DISEASE|CANCER|TUMOR",
+  filter_mode = c("before", "display"),
   nperm = 10000,
   seed = 42
 )
@@ -41,8 +43,20 @@ to a more permissive \code{minGSSize = 10}.)}
 \item{background}{Optional character vector of background genes for ORA;
 default is all genes in \code{data} for the given contrast.}
 
-\item{exclude_terms}{Regex of pathway names to exclude (default removes
-DISEASE/CANCER/TUMOR terms).}
+\item{include_terms}{Regex; if non-NULL, only pathway names matching
+the regex are tested. NULL keeps all pathways.}
+
+\item{exclude_terms}{Regex; pathway names matching are dropped.
+Default \code{"DISEASE|CANCER|TUMOR"}. Set NULL to disable.}
+
+\item{filter_mode}{One of \code{"before"} (default) or \code{"display"}.
+\code{"before"} applies the regexes before fgsea/fora; multiple-testing
+correction reflects the filtered count. Use this when the filter is
+pre-specified as part of the analysis protocol (Reimand et al. 2019).
+\code{"display"} runs enrichment on the unfiltered pathway list and
+drops non-matching rows after; \code{padj} reflects the full set.
+Use this for post-hoc viewing lenses to avoid the garden-of-forking
+paths concern of Wijesooriya et al. 2022.}
 
 \item{nperm}{Permutations for fgsea (default 10000).}
 
@@ -67,4 +81,13 @@ ORA results. fgsea ranks genes by \code{rank_by} (default \code{"signed_p"} =
 sign(logFC) * -log10(P), a signed statistic). ORA uses
 significant genes (\code{pi_eq2 < 0.05} if present, else \code{adj.P.Val < 0.05})
 against the supplied or inferred background.
+}
+\references{
+Reimand J, Isserlin R, Voisin V, et al. Pathway enrichment analysis and
+visualization of omics data using g:Profiler, GSEA, Cytoscape and
+EnrichmentMap. \emph{Nat Protoc} 14, 482–517 (2019).
+
+Wijesooriya K, Jadaan SA, Perera KL, Kaur T, Ziemann M. Urgent need for
+consistent standards in functional enrichment analysis. \emph{PLoS Comput
+Biol} 18(3):e1009935 (2022).
 }
