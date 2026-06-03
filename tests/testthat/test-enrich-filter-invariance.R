@@ -43,11 +43,36 @@ test_that('filter_mode = "display" filters after enrichment, padj over full set'
 })
 
 test_that("GSEA ranking is independent of include/exclude filters", {
+  # The fgsea rank vector must be built from every gene in the contrast, not
+  # just genes that appear in pathways surviving the include/exclude regex.
+  # Compare the ev_stats vectors attached by ev_enrich with and without a
+  # filter that drops one of three pathways — the rank vectors must be
+  # byte-identical because filtering changes only which pathways are tested,
+  # not how genes are ranked.
   data <- make_ranked_input()
-  sub <- data[data$contrast == "ctr", ]
-  r1 <- ev_rank_stats(sub, "signed_p")
-  r2 <- ev_rank_stats(sub, "signed_p")
-  expect_identical(r1, r2)
+  paths <- list(
+    HALLMARK_GLYCOLYSIS = paste0("G", 1:20),
+    HALLMARK_HYPOXIA    = paste0("G", 21:40),
+    MITO_TRANSPORT      = paste0("G", 41:60)
+  )
+  s_unfiltered <- attr(
+    ev_enrich(data, contrast = "ctr",
+              databases = list(test = paths),
+              enrich_mode = "fgsea", rank_by = "signed_p",
+              min_size = 5, max_size = 100,
+              include_terms = NULL,  exclude_terms = NULL),
+    "ev_stats"
+  )
+  s_filtered <- attr(
+    ev_enrich(data, contrast = "ctr",
+              databases = list(test = paths),
+              enrich_mode = "fgsea", rank_by = "signed_p",
+              min_size = 5, max_size = 100,
+              include_terms = "^MITO", exclude_terms = NULL,
+              filter_mode = "before"),
+    "ev_stats"
+  )
+  expect_identical(s_unfiltered, s_filtered)
 })
 
 test_that("ORA universe is independent of include/exclude filters", {
@@ -136,6 +161,11 @@ test_that("ev_enrich warns and skips contrasts with no matching rows", {
     class = "ev_empty_contrast"
   )
   expect_equal(nrow(out), 0)
+  # Audit attribute must stay structurally parallel between before/after even
+  # when no contrast runs — both keyed by database, never an unnamed integer(0).
+  filt <- attr(out, "ev_filter")
+  expect_identical(names(filt$n_pathways_before), names(filt$n_pathways_after))
+  expect_equal(filt$n_pathways_after[["test"]], 1L)
 })
 
 test_that("ev_filter survives row subsetting via ev_subset_preserve_attr", {

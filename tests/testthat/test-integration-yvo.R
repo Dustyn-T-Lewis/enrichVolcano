@@ -41,6 +41,12 @@ test_that("YvO end-to-end: enrich_volcano runs and returns patchwork", {
 })
 
 test_that("default pipeline reproduces YvO F03 panel A kept-pathway set", {
+  # Snapshot pins exact pathway IDs and depends on msigdbr/fgsea versions plus
+  # the BH adjustment count, so on CRAN an upstream release would flag this as
+  # "package broken" rather than "upstream changed". The two sibling tests in
+  # this file already skip on CRAN for the same reason.
+  skip_on_cran()
+  skip_if_not_installed("msigdbr")
   fixture <- system.file("extdata", "examples", "yvo_tidy.rds",
                          package = "enrichVolcano")
   if (!nzchar(fixture)) fixture <- testthat::test_path("fixtures", "yvo_tidy.rds")

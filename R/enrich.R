@@ -66,8 +66,13 @@ ev_enrich <- function(data, contrast,
                            several.ok = TRUE)
   filter_mode <- match.arg(filter_mode)
   pathway_list <- ev_resolve_databases(databases, species = species)
+  # n_after is computed once here (not inside the contrast loop) so the audit
+  # attribute stays structurally parallel to n_before even when every contrast
+  # is empty — pathway list and regexes don't vary by contrast.
   n_before <- vapply(pathway_list, length, integer(1))
-  n_after  <- integer(0)
+  n_after  <- vapply(pathway_list, function(p) {
+    length(ev_apply_name_filter(p, include_terms, exclude_terms))
+  }, integer(1))
   results <- list()
   stats_by_contrast <- list()
   for (ctr in contrast) {
@@ -81,9 +86,6 @@ ev_enrich <- function(data, contrast,
     for (db_name in names(pathway_list)) {
       paths <- pathway_list[[db_name]]
       paths_filtered <- ev_apply_name_filter(paths, include_terms, exclude_terms)
-      # n_after captured per-database; identical across contrasts because the
-      # pathway list and regexes don't vary by contrast.
-      n_after[db_name] <- length(paths_filtered)
       paths_used <- if (filter_mode == "before") paths_filtered else paths
       if ("fgsea" %in% enrich_mode) {
         results[[paste(ctr, db_name, "fgsea", sep = "::")]] <-

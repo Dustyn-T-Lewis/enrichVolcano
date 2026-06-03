@@ -1,5 +1,7 @@
 # enrichVolcano 0.2.0
 
+## New features
+
 * `ev_collapse()` default method is now `"collapse_then_jaccard"`, matching the
   source pipeline that generated the YvO 2025 figures. The previous default
   `"jaccard"` remains available; the alias `"both"` is deprecated and will be
@@ -12,3 +14,28 @@
   `vignette("pathway-dedup")` for when to use which.
 * `ev_enrich()` output now carries an `ev_filter` attribute recording the
   filter inputs and per-database pathway counts before and after filtering.
+
+## Bug fixes
+
+* `enrich_volcano()` no longer pins `method = "jaccard"` in its `dedup`
+  default; the hero function now inherits whatever default `ev_collapse()`
+  ships, so users calling the wrapper with defaults get the documented
+  `"collapse_then_jaccard"` behavior.
+* `ev_collapse_fgsea()` now looks up pathway gene sets by `(database,
+  pathway)` rather than by name alone. The previous flatten preserved
+  duplicate pathway names across databases, so a user combining (for example)
+  a custom GMT and an MSigDB collection that shared a pathway name would get
+  the first database's gene set for both rows.
+* `ev_collapse_fgsea()` now partitions its input by contrast and runs
+  `fgsea::collapsePathways` once per contrast against the matching gene-level
+  rank vector. Previously, under `scope = "global"` with multiple contrasts,
+  every pathway was silently scored against the first contrast's ranks.
+* `ev_collapse(method = "jaccard_then_collapse")` (and the deprecated
+  `"both"` alias) now passes only the Jaccard survivors to the collapse step
+  and writes back positionally, mirroring `"collapse_then_jaccard"`. The
+  previous AND-merge could drop both members of a redundant cluster when
+  `collapsePathways` and Jaccard's `keep_by` tie-breaker disagreed on which
+  row represented the cluster.
+* `ev_enrich()` `ev_filter$n_pathways_after` is now structurally parallel to
+  `n_pathways_before` even when every contrast is empty (previously
+  `integer(0)` instead of a named integer keyed by database).
