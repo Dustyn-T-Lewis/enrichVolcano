@@ -20,7 +20,7 @@ enrich_volcano(
   enrich_mode = c("fgsea", "ora"),
   enrich_padj = 0.05,
   rank_by = "signed_p",
-  dedup = list(method = "jaccard", cutoff = 0.5, scope = "within_db"),
+  dedup = list(cutoff = 0.5, scope = "within_db"),
   ring = list(max_terms = 10),
   facet = list(nrow = NULL, ncol = NULL),
   disc_color = NULL,
@@ -68,8 +68,11 @@ coloured up/down only when it clears both \code{p_threshold} and
 (default, \code{sign(logFC) * -log10(P)}), \code{"t"}, \code{"logFC"}, or any signed
 column. Unsigned pi-score columns are rejected.}
 
-\item{dedup}{List with \code{method} (\code{"jaccard"}, \code{"collapse_fgsea"}, or
-\code{"both"}), \code{cutoff}, and \code{scope}. See \code{\link[=ev_collapse]{ev_collapse()}}.}
+\item{dedup}{List with \code{method}, \code{cutoff}, and \code{scope}. \code{method} may be
+\code{"collapse_then_jaccard"} (default), \code{"jaccard_then_collapse"},
+\code{"jaccard"}, or \code{"collapse_fgsea"}; \code{"both"} is a deprecated alias for
+\code{"jaccard_then_collapse"}. When \code{method} is omitted, the default from
+\code{\link[=ev_collapse]{ev_collapse()}} is used. See \code{\link[=ev_collapse]{ev_collapse()}} for the full semantics.}
 
 \item{ring}{List controlling the ring. Honoured fields: \code{max_terms} (cap on
 pathways drawn in the ring); \code{show_databases} (default NULL = all enriched

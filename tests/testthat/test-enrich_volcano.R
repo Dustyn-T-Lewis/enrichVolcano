@@ -54,6 +54,51 @@ test_that("enrich_volcano forwards rank_by to ev_enrich", {
   )
 })
 
+test_that("enrich_volcano default dedup delegates method to ev_collapse default", {
+  # Regression: the hero function previously pinned method = "jaccard" in its
+  # dedup default, so the documented "collapse_then_jaccard" default never
+  # reached users who called the wrapper. Assert the dedup call no longer
+  # forwards an explicit method when the user does not supply one.
+  skip_if_not_installed("mockery")
+  data <- make_ranked_input()
+  paths <- make_mini_pathways()
+  captured <- list()
+  capture_collapse <- function(enrich_result, ...) {
+    captured <<- list(...)
+    enrich_result$dedup_kept <- TRUE
+    enrich_result
+  }
+  mockery::stub(enrich_volcano, "ev_collapse", capture_collapse)
+  invisible(suppressWarnings(enrich_volcano(
+    data, contrast = "ctr",
+    databases = list(test = paths),
+    p_method = "pi_eq2", p_adjust = "BH",
+    enrich_mode = "fgsea", enrich_padj = 1.0
+  )))
+  expect_false("method" %in% names(captured))
+})
+
+test_that("enrich_volcano forwards dedup$method override unchanged", {
+  skip_if_not_installed("mockery")
+  data <- make_ranked_input()
+  paths <- make_mini_pathways()
+  captured <- list()
+  capture_collapse <- function(enrich_result, ...) {
+    captured <<- list(...)
+    enrich_result$dedup_kept <- TRUE
+    enrich_result
+  }
+  mockery::stub(enrich_volcano, "ev_collapse", capture_collapse)
+  invisible(suppressWarnings(enrich_volcano(
+    data, contrast = "ctr",
+    databases = list(test = paths),
+    p_method = "pi_eq2", p_adjust = "BH",
+    enrich_mode = "fgsea", enrich_padj = 1.0,
+    dedup = list(method = "jaccard", cutoff = 0.5, scope = "within_db")
+  )))
+  expect_identical(captured$method, "jaccard")
+})
+
 test_that("ring show_databases and direction_balance control selection", {
   enr <- tibble::tibble(
     contrast = "ctr",
