@@ -24,6 +24,9 @@ docs/news/
 docs/index.html
 docs/pkgdown.yml
 
+# Local design specs and implementation plans (never tracked)
+docs/superpowers/
+
 # OS
 .DS_Store
 
