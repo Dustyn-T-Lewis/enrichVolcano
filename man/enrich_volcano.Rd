@@ -24,6 +24,10 @@ enrich_volcano(
   ring = list(max_terms = 10),
   facet = list(nrow = NULL, ncol = NULL),
   disc_color = NULL,
+  subtitle = NULL,
+  tag = NULL,
+  count_x_mult = 0.5,
+  count_y_mult = 1,
   label_mode = c("none", "top_per_direction", "top_total", "all_significant", "explicit"),
   label_n = 10,
   label_rank_by = c("significance", "logfc"),
@@ -88,6 +92,17 @@ tunable \code{order_by}/\code{magnitude}/\code{color} encodings use the standalo
 \item{facet}{List with \code{nrow}, \code{ncol} for patchwork outer layout.}
 
 \item{disc_color}{Optional contrast-tint for the ring's central disc.}
+
+\item{subtitle}{Optional subtitle. When \code{contrast} is a single name, the
+string is rendered verbatim; for multi-contrast input, pass a named
+character vector or NULL.}
+
+\item{tag}{Optional panel tag (e.g. \code{"A"}); single-character for a single
+contrast, named character vector for multi-contrast.}
+
+\item{count_x_mult, count_y_mult}{Position of the up/down count boxes,
+forwarded to \code{\link[=ev_volcano_ring]{ev_volcano_ring()}}. Defaults \verb{(0.5, 1.0)}; the YvO 2026
+panel layout uses \verb{(0.85, 0.75)}.}
 
 \item{label_mode, label_n, label_rank_by, label_genes}{Volcano point labeling,
 passed to the shared selector; default \code{label_mode = "none"}.}

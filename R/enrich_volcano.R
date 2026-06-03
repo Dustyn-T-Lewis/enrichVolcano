@@ -67,6 +67,14 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #' @param label_mode,label_n,label_rank_by,label_genes Volcano point labeling,
 #'   passed to the shared selector; default `label_mode = "none"`.
 #' @param disc_color Optional contrast-tint for the ring's central disc.
+#' @param subtitle Optional subtitle. When `contrast` is a single name, the
+#'   string is rendered verbatim; for multi-contrast input, pass a named
+#'   character vector or NULL.
+#' @param tag Optional panel tag (e.g. `"A"`); single-character for a single
+#'   contrast, named character vector for multi-contrast.
+#' @param count_x_mult,count_y_mult Position of the up/down count boxes,
+#'   forwarded to [ev_volcano_ring()]. Defaults `(0.5, 1.0)`; the YvO 2026
+#'   panel layout uses `(0.85, 0.75)`.
 #' @param theme Output of `ev_theme()`.
 #' @return Object of class `c("enrichVolcano", "patchwork")` with
 #'   `attr(., "ev_data")` and `attr(., "ev_call")`.
@@ -87,6 +95,10 @@ enrich_volcano <- function(data, contrast,
                            ring = list(max_terms = 10),
                            facet = list(nrow = NULL, ncol = NULL),
                            disc_color = NULL,
+                           subtitle = NULL,
+                           tag = NULL,
+                           count_x_mult = 0.5,
+                           count_y_mult = 1.0,
                            label_mode = c("none", "top_per_direction",
                                           "top_total", "all_significant",
                                           "explicit"),
@@ -138,6 +150,12 @@ enrich_volcano <- function(data, contrast,
     enrich
   }
 
+  pick_for_ctr <- function(value, ctr) {
+    if (is.null(value)) return(NULL)
+    if (length(value) == 1L && is.null(names(value))) return(unname(value))
+    if (!is.null(names(value)) && ctr %in% names(value)) return(value[[ctr]])
+    NULL
+  }
   composites <- stats::setNames(
     lapply(contrast, function(ctr) {
       volc_sub <- with_padj[with_padj$contrast == ctr, , drop = FALSE]
@@ -152,9 +170,13 @@ enrich_volcano <- function(data, contrast,
         direction_balance = isTRUE(ring$direction_balance)
       )
       ev_volcano_ring(volc_sub, enr_sub, title = ctr,
+                      subtitle = pick_for_ctr(subtitle, ctr),
+                      tag      = pick_for_ctr(tag, ctr),
                       p_threshold = p_threshold,
                       logfc_threshold = logfc_threshold,
                       disc_color = disc_color, theme = theme,
+                      count_x_mult = count_x_mult,
+                      count_y_mult = count_y_mult,
                       label_mode = label_mode, label_n = label_n,
                       label_rank_by = label_rank_by, label_genes = label_genes,
                       p_method = p_method)
