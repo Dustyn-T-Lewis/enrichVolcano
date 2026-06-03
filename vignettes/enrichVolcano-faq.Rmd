@@ -93,14 +93,15 @@ p  <- enrich_volcano(df, contrast = "ctr")
 
 ## How do I force-label specific genes on the volcano?
 
-In v0.1, `enrich_volcano()` does not forward `label_genes` through
-the `volcano` list. Call `ev_volcano()` directly:
+`enrich_volcano()` now forwards `label_mode`, `label_n`, `label_rank_by`, and
+`label_genes` to the composite volcano, so you can label directly from the
+hero call. Use `label_mode = "explicit"` to pin specific genes regardless of
+rank:
 
 ```{r force-label, eval = FALSE}
 p_volcano <- ev_volcano(
   data, contrast = "ctr",
-  label_n     = 10,
-  label_by    = "pi_eq2",
+  label_mode  = "explicit",
   label_genes = c("GENE1", "GENE2")
 )
 ```
@@ -112,9 +113,6 @@ enr <- ev_enrich(data, contrast = "ctr", databases = "hallmark")
 p_ring <- ring_plot(enr, contrast = "ctr")
 p <- ev_compose(list(ctr = p_volcano), list(ctr = p_ring))
 ```
-
-`label_genes` forwarding through `enrich_volcano()` is on the v0.2
-list.
 
 ## Why don't I see KEGG pathways even though I requested them?
 
@@ -132,8 +130,8 @@ Four checks.
 * The default `exclude_terms = "DISEASE|CANCER|TUMOR"` regex inside
   `ev_enrich()` strips disease-named KEGG entries out of pathway
   databases. KEGG includes hundreds of disease-named entries; the
-  default filters them so they do not double-count against
-  `disgenet` results. To keep them, call `ev_enrich()` directly:
+  default filters them so a disease label does not stand in for a
+  mechanism. To keep them, call `ev_enrich()` directly:
 
 ```{r kegg-disease, eval = FALSE}
 enr <- ev_enrich(
@@ -174,8 +172,8 @@ p <- enrich_volcano(
 )
 ```
 
-A direct `custom_gmt = "path/to/sets.gmt"` argument is planned for
-v0.2.
+Reading the file yourself and passing the list keeps the gene-set
+source explicit and under your control.
 
 ## My data is rat (or mouse / fly / zebrafish / yeast / pig). What do I pass?
 
@@ -192,8 +190,9 @@ p <- enrich_volcano(
 
 Supported species strings: `"human"`, `"mouse"`, `"rat"`,
 `"zebrafish"`, `"fly"`, `"yeast"`, `"pig"`. msigdbr handles
-ortholog mapping for fetched collections; bundled GMTs (MitoCarta,
-HPA, UniProt) ship per-species files where the species is supported.
+ortholog mapping for fetched collections; bundled GMTs (MitoCarta3,
+CORUM, GO Slim, HPA Subcellular, UniProt Subcellular) ship per-species
+files where the species is supported.
 
 Input gene symbols must match the species namespace. Rat symbols for
 a rat study, mouse symbols for a mouse study. Mixing namespaces

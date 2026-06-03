@@ -118,6 +118,12 @@ ev_clean_label_mitocarta <- function(name) {
 ev_nes_colours <- c("#08306B", "#4393C3", "white", "#D6604D", "#67000D")
 ev_nes_values  <- c(-3, -1.5, 0, 1.5, 3)
 
+# Radii (in the coord_fixed panel's data units) of the grey pathway track that
+# rings the volcano. The central disc fills to the inner edge, the per-gene
+# ticks cross the track, and the NES arcs grow outward from the outer edge.
+ev_ring_r_inner <- 4.4
+ev_ring_r_outer <- 4.8
+
 #' Compute arc geometry for the enrichment ring
 #'
 #' Up-regulated pathways cluster at 90 deg (right), down at 270 deg (left);
@@ -127,7 +133,8 @@ ev_nes_values  <- c(-3, -1.5, 0, 1.5, 3)
 #' @noRd
 ev_ring_geometry <- function(enrich_df,
                              gap_intra = 3, gap_split = 8,
-                             arc_r0 = 4.8, min_height = 0.05, max_height = 1.6) {
+                             arc_r0 = ev_ring_r_outer,
+                             min_height = 0.05, max_height = 1.6) {
   if (nrow(enrich_df) == 0) return(enrich_df)
 
   ring <- enrich_df
@@ -198,7 +205,8 @@ ev_ring_geometry <- function(enrich_df,
 #' Per-gene radial ticks for each pathway arc
 #' @keywords internal
 #' @noRd
-ev_tick_data <- function(ring_data, volc_df, tick_r0 = 4.4, tick_r1 = 4.8) {
+ev_tick_data <- function(ring_data, volc_df,
+                         tick_r0 = ev_ring_r_inner, tick_r1 = ev_ring_r_outer) {
   if (nrow(ring_data) == 0) return(tibble::tibble())
   gene_lfc <- volc_df[!is.na(volc_df$logFC), c("gene", "logFC"), drop = FALSE]
   gene_lfc <- gene_lfc[!duplicated(gene_lfc$gene), , drop = FALSE]
@@ -234,26 +242,51 @@ ev_tick_data <- function(ring_data, volc_df, tick_r0 = 4.4, tick_r1 = 4.8) {
 #' @param title Plot title (defaults to the contrast name).
 #' @param volcano_radius Inner volcano radius.
 #' @param p_threshold Significance cutoff applied to `pi_eq2` for up/down calls.
+#' @param logfc_threshold Effect-size cutoff; a point is called up/down only when
+#'   `abs(logFC) >= logfc_threshold` as well as significant. Default `0` keeps
+#'   every significant point; `enrich_volcano()` passes its own default.
 #' @param point_size,point_alpha Volcano point aesthetics.
 #' @param label_size Pathway-label text size.
+#' @param label_mode,label_n,label_rank_by,label_genes Volcano point labeling,
+#'   passed to the shared selector; default `label_mode = "none"`.
+#' @param p_method Significance column used for BOTH point coloring and label
+#'   selection (`"pi_eq2"`, `"pi_eq1"`, `"raw_p"`, `"adj_p"`); defaults to
+#'   `"pi_eq2"`.
 #' @param disc_color Optional fill for a tinted central disc (default NULL = none).
 #' @param theme Output of `ev_theme()`.
 #' @return A ggplot object (class `c("enrichVolcano", ...)`).
 #' @export
 ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
                             volcano_radius = 3.5, p_threshold = 0.05,
+                            logfc_threshold = 0,
                             disc_color = NULL,
                             point_size = 0.9, point_alpha = 0.6,
-                            label_size = 2.6, theme = ev_theme()) {
+                            label_size = 2.6,
+                            label_mode = c("none", "top_per_direction",
+                                           "top_total", "all_significant",
+                                           "explicit"),
+                            label_n = 10,
+                            label_rank_by = c("significance", "logfc"),
+                            label_genes = NULL,
+                            p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
+                            theme = ev_theme()) {
+  label_mode <- match.arg(label_mode)
+  label_rank_by <- match.arg(label_rank_by)
+  p_method <- match.arg(p_method)
+  ev_assert_colour(disc_color)
   pal <- theme$palette
   vr <- volcano_radius * 0.92
 
   v <- volc_df[!is.na(volc_df$logFC) & !is.na(volc_df$P.Value), , drop = FALSE]
   v$neg_log10p <- -log10(v$P.Value)
   v <- v[is.finite(v$neg_log10p), , drop = FALSE]
-  score <- if ("pi_eq2" %in% colnames(v)) v$pi_eq2 else v$P.Value
-  v$direction <- ifelse(score < p_threshold & v$logFC > 0, "up",
-                        ifelse(score < p_threshold & v$logFC < 0, "down", "ns"))
+  p_col <- switch(p_method, pi_eq2 = "pi_eq2", pi_eq1 = "pi_eq1",
+                  raw_p = "P.Value", adj_p = "adj.P.Val")
+  if (!p_col %in% colnames(v)) p_col <- "P.Value"
+  score <- v[[p_col]]
+  sig <- score < p_threshold
+  v$direction <- ifelse(sig & v$logFC >= logfc_threshold, "up",
+                        ifelse(sig & v$logFC <= -logfc_threshold, "down", "ns"))
   n_up <- sum(v$direction == "up")
   n_down <- sum(v$direction == "down")
 
@@ -266,6 +299,12 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
   v_ns <- v[v$direction == "ns", , drop = FALSE]
   v_sig <- v[v$direction != "ns", , drop = FALSE]
 
+  lab_pts <- ev_select_labels(
+    v, mode = label_mode, n = label_n, rank_by = label_rank_by,
+    genes = label_genes, p_col = p_col,
+    p_threshold = p_threshold, logfc_threshold = logfc_threshold
+  )
+
   ring <- ev_ring_geometry(enrich_df)
   ticks <- ev_tick_data(ring, v)
 
@@ -273,8 +312,8 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
 
   if (!is.null(disc_color)) {
     disc <- data.frame(
-      x = 4.4 * cos(seq(0, 2 * pi, length.out = 200)),
-      y = 4.4 * sin(seq(0, 2 * pi, length.out = 200))
+      x = ev_ring_r_inner * cos(seq(0, 2 * pi, length.out = 200)),
+      y = ev_ring_r_inner * sin(seq(0, 2 * pi, length.out = 200))
     )
     p <- p + ggplot2::geom_polygon(
       data = disc, ggplot2::aes(.data$x, .data$y),
@@ -285,7 +324,7 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
   if (nrow(ring) > 0) {
     p <- p + ggforce::geom_arc_bar(
       data = ring,
-      ggplot2::aes(x0 = 0, y0 = 0, r0 = 4.4, r = 4.8,
+      ggplot2::aes(x0 = 0, y0 = 0, r0 = ev_ring_r_inner, r = ev_ring_r_outer,
                    start = .data$start_rad, end = .data$end_rad),
       fill = "grey93", colour = "grey78", linewidth = 0.15,
       inherit.aes = FALSE
@@ -343,7 +382,7 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
     p <- p +
       ggforce::geom_arc_bar(
         data = ring,
-        ggplot2::aes(x0 = 0, y0 = 0, r0 = 4.8, r = .data$arc_r1_var,
+        ggplot2::aes(x0 = 0, y0 = 0, r0 = ev_ring_r_outer, r = .data$arc_r1_var,
                      start = .data$start_rad, end = .data$end_rad,
                      fill = .data$NES),
         colour = "grey40", linewidth = 0.2, inherit.aes = FALSE
@@ -381,6 +420,15 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
         label.r = ggplot2::unit(1.5, "pt"), lineheight = 0.85,
         inherit.aes = FALSE
       )
+  }
+
+  if (nrow(lab_pts) > 0) {
+    p <- p + ggrepel::geom_text_repel(
+      data = lab_pts,
+      ggplot2::aes(.data$x_plot, .data$y_plot, label = .data$label_text),
+      size = label_size, max.overlaps = 50, force = 4, seed = 42,
+      inherit.aes = FALSE
+    )
   }
 
   p <- p +

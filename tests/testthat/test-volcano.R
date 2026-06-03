@@ -18,7 +18,8 @@ test_that("ev_volcano applies significance classes via ev_class column", {
 test_that("ev_volcano labels top N proteins via ggrepel", {
   data <- make_ranked_input()
   data <- pi_score(data, variant = "eq2")
-  p <- ev_volcano(data, contrast = "ctr", label_n = 3)
+  p <- ev_volcano(data, contrast = "ctr",
+                  label_mode = "top_total", label_n = 3)
   has_repel <- any(vapply(p$layers, function(l) {
     inherits(l$geom, "GeomTextRepel") || grepl("repel", class(l$geom)[1], ignore.case = TRUE)
   }, logical(1)))

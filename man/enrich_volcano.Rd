@@ -12,7 +12,7 @@ enrich_volcano(
   x = NULL,
   y = NULL,
   lab = NULL,
-  custom_gmt = NULL,
+  uniprot = NULL,
   p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
   p_adjust = "BH",
   p_threshold = 0.05,
@@ -20,12 +20,14 @@ enrich_volcano(
   enrich_mode = c("fgsea", "ora"),
   enrich_padj = 0.05,
   rank_by = "signed_p",
-  dedup = list(method = "jaccard", cutoff = 0.5, scope = "within_db"),
-  ring = list(max_terms = 10, order_by = "padj", magnitude = "neg_log_padj", color =
-    "nes"),
-  volcano = list(label_n = 10, label_by = NULL),
+  dedup = list(cutoff = 0.5, scope = "within_db"),
+  ring = list(max_terms = 10),
   facet = list(nrow = NULL, ncol = NULL),
   disc_color = NULL,
+  label_mode = c("none", "top_per_direction", "top_total", "all_significant", "explicit"),
+  label_n = 10,
+  label_rank_by = c("significance", "logfc"),
+  label_genes = NULL,
   theme = ev_theme()
 )
 }
@@ -37,7 +39,9 @@ or Perseus formats - \code{ev_validate()} auto-detects.}
 \item{contrast}{Character; one or many contrast names.}
 
 \item{species}{Character; "human" (default), "mouse", "rat", "zebrafish",
-"fly", "yeast", "pig".}
+"fly", "yeast", "pig". UniProt accession mapping is available for \code{human},
+\code{mouse}, and \code{rat}; other species are supported for enrichment but require
+gene-symbol input.}
 
 \item{databases}{Character vector of registered DB names (see
 \code{list_databases()}), or a named list of pathway lists.}
@@ -45,14 +49,16 @@ or Perseus formats - \code{ev_validate()} auto-detects.}
 \item{x, y, lab}{Column names for logFC, p-value, gene label (auto-detected
 if NULL).}
 
-\item{custom_gmt}{Reserved for v0.2 (GMT path input).}
+\item{uniprot}{Column name holding UniProt accessions (auto-detected by default).}
 
 \item{p_method}{Y-axis transform: \code{"pi_eq2"} (default), \code{"pi_eq1"},
 \code{"raw_p"}, \code{"adj_p"}.}
 
 \item{p_adjust}{Method: \code{"BH"} (default), \code{"bonferroni"}, \code{"qvalue"}, \code{"IHW"}.}
 
-\item{p_threshold, logfc_threshold}{Volcano significance cutoffs.}
+\item{p_threshold, logfc_threshold}{Volcano significance cutoffs. A point is
+coloured up/down only when it clears both \code{p_threshold} and
+\code{abs(logFC) >= logfc_threshold}.}
 
 \item{enrich_mode}{\code{c("fgsea", "ora")} - either or both.}
 
@@ -62,8 +68,11 @@ if NULL).}
 (default, \code{sign(logFC) * -log10(P)}), \code{"t"}, \code{"logFC"}, or any signed
 column. Unsigned pi-score columns are rejected.}
 
-\item{dedup}{List with \code{method} (\code{"jaccard"}, \code{"collapse_fgsea"}, or
-\code{"both"}), \code{cutoff}, and \code{scope}. See \code{\link[=ev_collapse]{ev_collapse()}}.}
+\item{dedup}{List with \code{method}, \code{cutoff}, and \code{scope}. \code{method} may be
+\code{"collapse_then_jaccard"} (default), \code{"jaccard_then_collapse"},
+\code{"jaccard"}, or \code{"collapse_fgsea"}; \code{"both"} is a deprecated alias for
+\code{"jaccard_then_collapse"}. When \code{method} is omitted, the default from
+\code{\link[=ev_collapse]{ev_collapse()}} is used. See \code{\link[=ev_collapse]{ev_collapse()}} for the full semantics.}
 
 \item{ring}{List controlling the ring. Honoured fields: \code{max_terms} (cap on
 pathways drawn in the ring); \code{show_databases} (default NULL = all enriched
@@ -76,13 +85,12 @@ is fixed to \code{-log10(padj)} and fill to NES by the canonical layout. For
 tunable \code{order_by}/\code{magnitude}/\code{color} encodings use the standalone
 \code{\link[=ring_plot]{ring_plot()}}.}
 
-\item{volcano}{Reserved. The composite volcano shows up/down significant
-counts rather than per-gene labels; for a labelled volcano use the
-standalone \code{\link[=ev_volcano]{ev_volcano()}} (\code{label_n}, \code{label_by}, \code{label_genes}).}
-
 \item{facet}{List with \code{nrow}, \code{ncol} for patchwork outer layout.}
 
 \item{disc_color}{Optional contrast-tint for the ring's central disc.}
+
+\item{label_mode, label_n, label_rank_by, label_genes}{Volcano point labeling,
+passed to the shared selector; default \code{label_mode = "none"}.}
 
 \item{theme}{Output of \code{ev_theme()}.}
 }

@@ -63,10 +63,15 @@ test_that("ev_collapse respects scope parameter", {
     leading_edge = rep("G1;G2;G3", 6),  # all identical -> maximally redundant
     mode = "fgsea", direction = "up"
   )
+  # sig_threshold = NA preserves original intent: this test isolates the
+  # scope behavior on a maximally redundant fixture; random padj would
+  # otherwise be filtered out by the default sig gate.
   kept_within <- sum(ev_collapse(enrich, method = "jaccard",
-                                  cutoff = 0.2, scope = "within_db")$dedup_kept)
+                                  cutoff = 0.2, scope = "within_db",
+                                  sig_threshold = NA)$dedup_kept)
   kept_global <- sum(ev_collapse(enrich, method = "jaccard",
-                                  cutoff = 0.2, scope = "global")$dedup_kept)
+                                  cutoff = 0.2, scope = "global",
+                                  sig_threshold = NA)$dedup_kept)
   # within_db: 1 per db = 2 kept; global: 1 total
   expect_equal(kept_within, 2)
   expect_equal(kept_global, 1)

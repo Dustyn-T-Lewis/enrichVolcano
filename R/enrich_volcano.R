@@ -29,23 +29,30 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #'   or Perseus formats - `ev_validate()` auto-detects.
 #' @param contrast Character; one or many contrast names.
 #' @param species Character; "human" (default), "mouse", "rat", "zebrafish",
-#'   "fly", "yeast", "pig".
+#'   "fly", "yeast", "pig". UniProt accession mapping is available for `human`,
+#'   `mouse`, and `rat`; other species are supported for enrichment but require
+#'   gene-symbol input.
 #' @param databases Character vector of registered DB names (see
 #'   `list_databases()`), or a named list of pathway lists.
 #' @param x,y,lab Column names for logFC, p-value, gene label (auto-detected
 #'   if NULL).
-#' @param custom_gmt Reserved for v0.2 (GMT path input).
+#' @param uniprot Column name holding UniProt accessions (auto-detected by default).
 #' @param p_method Y-axis transform: `"pi_eq2"` (default), `"pi_eq1"`,
 #'   `"raw_p"`, `"adj_p"`.
 #' @param rank_by Signed statistic fgsea ranks genes by. `"signed_p"`
 #'   (default, `sign(logFC) * -log10(P)`), `"t"`, `"logFC"`, or any signed
 #'   column. Unsigned pi-score columns are rejected.
 #' @param p_adjust Method: `"BH"` (default), `"bonferroni"`, `"qvalue"`, `"IHW"`.
-#' @param p_threshold,logfc_threshold Volcano significance cutoffs.
+#' @param p_threshold,logfc_threshold Volcano significance cutoffs. A point is
+#'   coloured up/down only when it clears both `p_threshold` and
+#'   `abs(logFC) >= logfc_threshold`.
 #' @param enrich_mode `c("fgsea", "ora")` - either or both.
 #' @param enrich_padj Pathway significance cutoff (default 0.05).
-#' @param dedup List with `method` (`"jaccard"`, `"collapse_fgsea"`, or
-#'   `"both"`), `cutoff`, and `scope`. See [ev_collapse()].
+#' @param dedup List with `method`, `cutoff`, and `scope`. `method` may be
+#'   `"collapse_then_jaccard"` (default), `"jaccard_then_collapse"`,
+#'   `"jaccard"`, or `"collapse_fgsea"`; `"both"` is a deprecated alias for
+#'   `"jaccard_then_collapse"`. When `method` is omitted, the default from
+#'   [ev_collapse()] is used. See [ev_collapse()] for the full semantics.
 #' @param ring List controlling the ring. Honoured fields: `max_terms` (cap on
 #'   pathways drawn in the ring); `show_databases` (default NULL = all enriched
 #'   databases; pass a character vector to restrict the ring to those named
@@ -56,10 +63,9 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #'   is fixed to `-log10(padj)` and fill to NES by the canonical layout. For
 #'   tunable `order_by`/`magnitude`/`color` encodings use the standalone
 #'   [ring_plot()].
-#' @param volcano Reserved. The composite volcano shows up/down significant
-#'   counts rather than per-gene labels; for a labelled volcano use the
-#'   standalone [ev_volcano()] (`label_n`, `label_by`, `label_genes`).
 #' @param facet List with `nrow`, `ncol` for patchwork outer layout.
+#' @param label_mode,label_n,label_rank_by,label_genes Volcano point labeling,
+#'   passed to the shared selector; default `label_mode = "none"`.
 #' @param disc_color Optional contrast-tint for the ring's central disc.
 #' @param theme Output of `ev_theme()`.
 #' @return Object of class `c("enrichVolcano", "patchwork")` with
@@ -69,7 +75,7 @@ enrich_volcano <- function(data, contrast,
                            species = "human",
                            databases = c("hallmark", "reactome", "go_bp"),
                            x = NULL, y = NULL, lab = NULL,
-                           custom_gmt = NULL,
+                           uniprot = NULL,
                            p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
                            p_adjust = "BH",
                            p_threshold = 0.05,
@@ -77,19 +83,24 @@ enrich_volcano <- function(data, contrast,
                            enrich_mode = c("fgsea", "ora"),
                            enrich_padj = 0.05,
                            rank_by = "signed_p",
-                           dedup = list(method = "jaccard", cutoff = 0.5,
-                                        scope = "within_db"),
-                           ring = list(max_terms = 10, order_by = "padj",
-                                       magnitude = "neg_log_padj",
-                                       color = "nes"),
-                           volcano = list(label_n = 10, label_by = NULL),
+                           dedup = list(cutoff = 0.5, scope = "within_db"),
+                           ring = list(max_terms = 10),
                            facet = list(nrow = NULL, ncol = NULL),
                            disc_color = NULL,
+                           label_mode = c("none", "top_per_direction",
+                                          "top_total", "all_significant",
+                                          "explicit"),
+                           label_n = 10,
+                           label_rank_by = c("significance", "logfc"),
+                           label_genes = NULL,
                            theme = ev_theme()) {
   call <- match.call()
   p_method <- match.arg(p_method)
+  label_mode <- match.arg(label_mode)
+  label_rank_by <- match.arg(label_rank_by)
 
-  validated <- ev_validate(data, x = x, y = y, lab = lab)
+  validated <- ev_validate(data, x = x, y = y, lab = lab,
+                           uniprot = uniprot, species = species)
 
   with_pi <- if (p_method %in% c("pi_eq2", "pi_eq1")) {
     pi_score(validated, variant = sub("pi_", "", p_method))
@@ -112,10 +123,15 @@ enrich_volcano <- function(data, contrast,
   }
 
   dedup_res <- if (nrow(enrich) > 0) {
-    ev_collapse(
-      enrich,
-      method = dedup$method, cutoff = dedup$cutoff,
-      scope = dedup$scope
+    # Forward only the fields the caller actually supplied so ev_collapse()
+    # owns the canonical method default; omitting method here lets a future
+    # default change in ev_collapse() propagate without touching the hero.
+    do.call(
+      ev_collapse,
+      c(list(enrich_result = enrich),
+        dedup[intersect(names(dedup),
+                        c("method", "cutoff", "scope", "sig_threshold",
+                          "collapse_pval_threshold", "keep_by"))])
     )
   } else {
     enrich$dedup_kept <- logical(0)
@@ -136,8 +152,12 @@ enrich_volcano <- function(data, contrast,
         direction_balance = isTRUE(ring$direction_balance)
       )
       ev_volcano_ring(volc_sub, enr_sub, title = ctr,
-                      p_threshold = p_threshold, disc_color = disc_color,
-                      theme = theme)
+                      p_threshold = p_threshold,
+                      logfc_threshold = logfc_threshold,
+                      disc_color = disc_color, theme = theme,
+                      label_mode = label_mode, label_n = label_n,
+                      label_rank_by = label_rank_by, label_genes = label_genes,
+                      p_method = p_method)
     }),
     contrast
   )

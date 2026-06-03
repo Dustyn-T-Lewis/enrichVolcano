@@ -9,6 +9,7 @@ reference:
       - ev_app
   - title: "Pipeline steps"
     contents:
+      - ev_read_contrasts
       - ev_validate
       - pi_score
       - adjust_p
@@ -21,6 +22,7 @@ reference:
     contents:
       - list_databases
       - database_info
+      - ev_idmap_report
   - title: "Styling"
     contents:
       - ev_theme

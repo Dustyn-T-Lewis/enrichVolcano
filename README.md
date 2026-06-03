@@ -15,15 +15,18 @@ MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.or
 ## Overview
 
 enrichVolcano builds composite volcano + enrichment ring plots from
-differential abundance results. Volcano on top, enrichment terms as
-labeled arcs underneath, both stitched as a single annotated patchwork.
-Returns a ggplot-compatible object that `ggsave()` saves directly.
+differential abundance results. The volcano sits at the centre and the
+enrichment terms wrap around it as NES-coloured arcs, one figure per
+contrast. Returns a ggplot-compatible object that `ggsave()` saves
+directly.
 
-The package accepts ten common input formats (tidy, wide-suffix, DEP,
+The package accepts twelve common input formats (tidy, wide-suffix, DEP,
 proteoDA, limma, DESeq2, edgeR, MSstats, proDA, DEqMS, MaxQuant,
-Perseus) via `ev_validate()`, supports two pi-score variants (Xiao 2014
-Eq.1 and Eq.2), four p-adjustment methods (BH, Bonferroni, q-value,
-IHW), and 21 registered gene-set databases across seven species.
+Perseus) via `ev_validate()`, and reads UniProt-keyed per-contrast CSVs
+via `ev_read_contrasts()` (accessions are mapped to gene symbols for
+enrichment). It supports two pi-score variants (Xiao 2014 Eq.1 and
+Eq.2), four p-adjustment methods (BH, Bonferroni, q-value, IHW), and 21
+registered gene-set databases across seven species.
 
 ## Installation
 
@@ -80,21 +83,27 @@ These let you rebuild any panel without re-running the pipeline.
 
 ## Pipeline functions
 
-`enrich_volcano()` orchestrates eight composable steps, all exported:
+`enrich_volcano()` runs the pipeline below and draws the composite with
+`ev_volcano_ring()`. Every stage is exported, so you can run or swap any
+one yourself:
 
 ``` r
-ev_validate()   # input adapter (10 sources)
-pi_score()   # Xiao 2014 Eq.1 or Eq.2
-adjust_p()   # BH / Bonferroni / qvalue / IHW
-ev_enrich()     # fgsea + ORA
-ev_collapse()   # Jaccard pathway dedup
-ev_volcano()    # volcano-only ggplot
-ring_plot()       # enrichment ring ggplot
-ev_compose()    # patchwork composition
+ev_read_contrasts() # optional: load UniProt-keyed per-contrast CSVs
+ev_validate()       # input adapter (12 sources + UniProt accessions)
+pi_score()          # Xiao 2014 Eq.1 or Eq.2
+adjust_p()          # BH / Bonferroni / qvalue / IHW
+ev_enrich()         # fgsea + ORA
+ev_collapse()       # Jaccard / collapsePathways dedup
+ev_volcano_ring()   # the volcano-in-ring composite
 ```
 
-Plus `list_databases()` / `database_info()` for the registry and
-`ev_theme()` for styling.
+For building panels by hand there are also `ev_volcano()` (volcano
+only), `ring_plot()` (ring only), and `ev_compose()` (patchwork stitch),
+plus `list_databases()` / `database_info()` for the registry,
+`ev_idmap_report()` for the UniProt-to-symbol mapping summary, and
+`ev_theme()` for styling. Volcano labelling is rule-driven via
+`label_mode` (`none` by default, `top_per_direction`, `top_total`,
+`all_significant`, or `explicit`).
 
 ## Learn more
 
