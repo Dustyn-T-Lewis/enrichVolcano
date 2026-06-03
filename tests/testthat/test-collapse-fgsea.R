@@ -148,6 +148,149 @@ test_that("ev_collapse_fgsea: returns TRUE for groups with no fgsea rows", {
   expect_true(all(out$dedup_kept))
 })
 
+test_that("jaccard_then_collapse never produces empty redundancy clusters", {
+  # Regression for the AND-merge defect: the old code passed the full sig_idx
+  # (not just Jaccard survivors) to ev_collapse_fgsea and ANDed the result
+  # against the existing dedup_kept flags. When collapsePathways and Jaccard's
+  # keep_by tie-breaker disagreed on which member represents a redundant
+  # cluster, the AND zeroed out both, producing clusters with no kept rows.
+  # After the fix, collapse runs only on Jaccard survivors and writes back
+  # positionally, so every redundancy cluster keeps >= 1 representative.
+  skip_if_not_installed("fgsea")
+  enrich <- tibble::tibble(
+    contrast = "c", database = "db", mode = "fgsea",
+    pathway = c("PW_A_small_pval", "PW_B_large_NES",
+                "PW_C_small_pval", "PW_D_large_NES"),
+    # Pval ordering disagrees with NES ordering on which row represents each
+    # redundant cluster (A-B share a leading edge; C-D share another).
+    pval = c(0.0001, 0.002, 0.0002, 0.003),
+    padj = c(0.001, 0.02, 0.002, 0.03),
+    NES = c(2.0, 3.0, 2.1, 3.2),
+    size = c(20, 20, 20, 20),
+    direction = "up",
+    leading_edge = c(
+      # A and B share 9/10 leading-edge genes (Jaccard ~ 0.82 > 0.5).
+      paste(paste0("G", 1:10), collapse = ";"),
+      paste(c(paste0("G", 1:9), "G11"), collapse = ";"),
+      # C and D share 9/10 leading-edge genes (Jaccard ~ 0.82 > 0.5).
+      paste(paste0("G", 50:59), collapse = ";"),
+      paste(c(paste0("G", 50:58), "G60"), collapse = ";")
+    )
+  )
+  pw_list <- list(
+    db = list(
+      PW_A_small_pval = paste0("G", 1:20),
+      PW_B_large_NES  = paste0("G", 1:20),
+      PW_C_small_pval = paste0("G", 50:70),
+      PW_D_large_NES  = paste0("G", 50:70)
+    )
+  )
+  ranks <- c(
+    stats::setNames(seq(3, 1, length.out = 20), paste0("G", 1:20)),
+    stats::setNames(rnorm(29, 0, 0.1), paste0("G", 21:49)),
+    stats::setNames(seq(3, 1, length.out = 21), paste0("G", 50:70))
+  )
+  attr(enrich, "ev_pathways") <- pw_list
+  attr(enrich, "ev_stats") <- list(c = ranks)
+
+  out <- suppressWarnings(
+    ev_collapse(enrich, method = "jaccard_then_collapse",
+                cutoff = 0.5, scope = "within_db",
+                sig_threshold = 0.05, keep_by = "NES")
+  )
+  # Both redundancy clusters must keep at least one representative — the
+  # previous AND-merge could leave both clusters empty when keep_by ranking
+  # and pval ranking disagreed.
+  expect_gte(sum(out$dedup_kept), 2)
+})
+
+test_that("ev_collapse_fgsea resolves pathway-name collisions across databases", {
+  # Regression for the flatten defect: two databases each define a pathway
+  # called "GLYCOLYSIS" but with disjoint gene members. The old flatten
+  # (do.call(c, unname(pathway_list))) preserved duplicate names, so name-based
+  # lookup returned db1's genes for both rows. db-aware lookup must return the
+  # correct member of each pair.
+  skip_if_not_installed("fgsea")
+  set.seed(7)
+  enrich <- tibble::tibble(
+    contrast = "c", database = c("db1", "db2"), mode = "fgsea",
+    pathway = c("GLYCOLYSIS", "GLYCOLYSIS"),
+    pval = c(0.001, 0.002), padj = c(0.01, 0.02),
+    NES = c(2.5, -2.0), size = c(20, 20),
+    direction = c("up", "down"),
+    leading_edge = c(
+      paste0("G", 1:10, collapse = ";"),
+      paste0("G", 91:100, collapse = ";")
+    )
+  )
+  # Disjoint gene sets — collapsePathways must NOT collapse them when each
+  # row is paired with its real gene set, regardless of name collision.
+  db_keyed <- list(
+    db1 = list(GLYCOLYSIS = paste0("G", 1:20)),
+    db2 = list(GLYCOLYSIS = paste0("G", 81:100))
+  )
+  ranks <- c(
+    stats::setNames(seq(3, 1, length.out = 40), paste0("G", 1:40)),
+    stats::setNames(rnorm(20, 0, 0.1), paste0("G", 41:60)),
+    stats::setNames(seq(-1, -3, length.out = 40), paste0("G", 61:100))
+  )
+  attr(enrich, "ev_pathways") <- db_keyed
+  attr(enrich, "ev_stats") <- list(c = ranks)
+
+  out <- ev_collapse(enrich, method = "collapse_fgsea", cutoff = 0.5,
+                     scope = "within_db", sig_threshold = 0.05,
+                     keep_by = "padj")
+  # Both pathways should survive because their real gene sets are disjoint.
+  # Under the pre-fix flatten the second row's row was scored against db1's
+  # gene set and the test would have dropped one or both rows.
+  expect_true(all(out$dedup_kept))
+})
+
+test_that("ev_collapse_fgsea scores each contrast against its own stats vector", {
+  # Regression for scope='global' + multi-contrast: ev_collapse_fgsea must
+  # partition fg_subset by contrast and re-run collapsePathways per contrast
+  # with the matching stats. Previously it pulled stats for contrast[1] only,
+  # so contrast 2's pathway rows were scored against contrast 1's ranks.
+  skip_if_not_installed("fgsea")
+  enrich <- tibble::tibble(
+    contrast = c("ctr_up", "ctr_dn"),
+    database = c("db", "db"),
+    mode = "fgsea",
+    pathway = c("PW_X", "PW_Y"),
+    pval = c(0.001, 0.001), padj = c(0.01, 0.01),
+    NES = c(2.5, -2.5), size = c(20, 20),
+    direction = c("up", "down"),
+    leading_edge = c(
+      paste0("G", 1:10, collapse = ";"),
+      paste0("G", 81:90, collapse = ";")
+    )
+  )
+  attr(enrich, "ev_pathways") <- list(
+    db = list(PW_X = paste0("G", 1:20),
+              PW_Y = paste0("G", 81:100))
+  )
+  # ctr_up ranks PW_X at the top, ctr_dn ranks PW_Y at the top. If the loop
+  # erroneously scored both contrasts against ctr_up's stats, PW_Y would land
+  # at the bottom (negative ES) and collapsePathways behavior would differ.
+  ranks_up <- c(
+    stats::setNames(seq(3, 1, length.out = 20), paste0("G", 1:20)),
+    stats::setNames(rnorm(60, 0, 0.1), paste0("G", 21:80)),
+    stats::setNames(seq(-1, -3, length.out = 20), paste0("G", 81:100))
+  )
+  ranks_dn <- c(
+    stats::setNames(seq(3, 1, length.out = 20), paste0("G", 81:100)),
+    stats::setNames(rnorm(60, 0, 0.1), paste0("G", 21:80)),
+    stats::setNames(seq(-1, -3, length.out = 20), paste0("G", 1:20))
+  )
+  attr(enrich, "ev_stats") <- list(ctr_up = ranks_up, ctr_dn = ranks_dn)
+
+  out <- ev_collapse(enrich, method = "collapse_fgsea", cutoff = 0.5,
+                     scope = "global", sig_threshold = 0.05,
+                     keep_by = "padj")
+  # Each contrast has a single pathway in its partition; both must survive.
+  expect_true(all(out$dedup_kept))
+})
+
 test_that("ev_collapse_fgsea: catches errors from fgsea::collapsePathways", {
   # Triggers lines 196-203 (tryCatch error path). Force an error by handing
   # collapsePathways a stats vector containing NAs, which it rejects.

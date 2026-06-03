@@ -32,7 +32,10 @@ ev_collapse(
 rows always retain \code{dedup_kept = TRUE}. NA disables the gate.
 Default 0.05.}
 
-\item{collapse_pval_threshold}{For \code{collapse_fgsea}.}
+\item{collapse_pval_threshold}{\code{pval.threshold} forwarded to
+\code{fgsea::collapsePathways}. Used by every method that invokes the fgsea
+collapse step: \code{collapse_fgsea}, \code{jaccard_then_collapse}, and the
+default \code{collapse_then_jaccard}. Default 0.05.}
 
 \item{keep_by}{Tie-breaking column ("padj", "size", "NES").}
 }

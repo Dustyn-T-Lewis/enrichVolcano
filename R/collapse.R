@@ -45,7 +45,10 @@ ev_sig_idx <- function(idx, padj, sig_threshold) {
 #'   \code{padj < sig_threshold} are considered for dedup; non-significant
 #'   rows always retain \code{dedup_kept = TRUE}. NA disables the gate.
 #'   Default 0.05.
-#' @param collapse_pval_threshold For `collapse_fgsea`.
+#' @param collapse_pval_threshold `pval.threshold` forwarded to
+#'   `fgsea::collapsePathways`. Used by every method that invokes the fgsea
+#'   collapse step: `collapse_fgsea`, `jaccard_then_collapse`, and the
+#'   default `collapse_then_jaccard`. Default 0.05.
 #' @param keep_by Tie-breaking column ("padj", "size", "NES").
 #' @return Tibble with `dedup_kept` logical column (TRUE = retained).
 #' @export
@@ -95,9 +98,17 @@ ev_collapse <- function(enrich_result,
     if (method %in% c("collapse_fgsea", "jaccard_then_collapse")) {
       kept_sig <- sig_idx[enrich_result$dedup_kept[sig_idx]]
       if (length(kept_sig) >= 2) {
-        enrich_result$dedup_kept[sig_idx] <- enrich_result$dedup_kept[sig_idx] &
-          ev_collapse_fgsea(ev_subset_preserve_attr(enrich_result, sig_idx),
-                            collapse_pval_threshold)
+        # Pass only the Jaccard survivors (not the full sig_idx) and write
+        # back positionally — mirroring the collapse_then_jaccard branch
+        # below. The previous code ANDed the collapse result over sig_idx,
+        # which silently dropped both members of a redundant cluster when
+        # collapsePathways and Jaccard's keep_by tie-breaker disagreed on
+        # which pathway represents the cluster.
+        survive <- ev_collapse_fgsea(
+          ev_subset_preserve_attr(enrich_result, kept_sig),
+          collapse_pval_threshold
+        )
+        enrich_result$dedup_kept[kept_sig] <- survive
       }
     }
     if (identical(method, "collapse_then_jaccard")) {
@@ -143,15 +154,6 @@ ev_jaccard_dedup <- function(df, cutoff, keep_by) {
 ev_collapse_fgsea <- function(df, pval_threshold) {
   pathway_list <- attr(df, "ev_pathways")
   stats_list   <- attr(df, "ev_stats")
-  # ev_enrich stores ev_pathways as a list keyed by database, each value
-  # itself a named list of pathways. Test fixtures sometimes store a flat
-  # name-keyed list. Detect and flatten — fgsea::collapsePathways needs the
-  # latter to look up pathway names directly.
-  flat_paths <- if (length(pathway_list) > 0 && is.list(pathway_list[[1]])) {
-    do.call(c, unname(pathway_list))
-  } else {
-    pathway_list
-  }
   if (is.null(pathway_list) || is.null(stats_list)) {
     ev_warn(
       c("ev_collapse(method = 'collapse_fgsea') requires the 'ev_pathways' and",
@@ -160,50 +162,75 @@ ev_collapse_fgsea <- function(df, pval_threshold) {
     )
     return(rep(TRUE, nrow(df)))
   }
-  fg_subset <- df[df$mode == "fgsea", , drop = FALSE]
-  if (nrow(fg_subset) == 0) return(rep(TRUE, nrow(df)))
-  ctr   <- fg_subset$contrast[1]
-  stats <- stats_list[[ctr]]
-  if (is.null(stats) || length(stats) == 0) {
-    ev_warn(
-      "No gene-level stats for contrast {.val {ctr}}; keeping all pathways.",
-      class = "ev_collapse_no_pathways"
-    )
-    return(rep(TRUE, nrow(df)))
+  kept <- rep(TRUE, nrow(df))
+  fg_mask <- df$mode == "fgsea"
+  if (!any(fg_mask)) return(kept)
+
+  # ev_enrich attaches ev_pathways keyed by database, each value itself a
+  # named list of pathway -> gene character vectors. Test fixtures sometimes
+  # attach a flat name-keyed list. Detect the shape and look up by
+  # (database, pathway) when db-keyed so cross-DB pathway-name collisions
+  # resolve to the correct gene set rather than to the first matching name.
+  db_keyed <- length(pathway_list) > 0 &&
+    all(vapply(pathway_list, is.list, logical(1)))
+  resolve_pw <- function(db, pw) {
+    if (db_keyed) pathway_list[[db]][[pw]] else pathway_list[[pw]]
   }
-  fg_input <- data.table::data.table(
-    pathway     = fg_subset$pathway,
-    pval        = fg_subset$pval,
-    padj        = fg_subset$padj,
-    log2err     = if ("log2err" %in% colnames(fg_subset)) fg_subset$log2err else NA_real_,
-    ES          = if ("ES" %in% colnames(fg_subset)) fg_subset$ES else fg_subset$NES,
-    NES         = fg_subset$NES,
-    size        = fg_subset$size,
-    leadingEdge = strsplit(fg_subset$leading_edge, ";", fixed = TRUE)
-  )
-  # collapsePathways internally re-runs fgsea on residual gene lists and
-  # is RNG-sensitive. Pin the seed so dedup is reproducible across calls.
-  collapsed <- tryCatch(
-    withr::with_seed(42, {
-      fgsea::collapsePathways(
-        fgseaRes       = fg_input,
-        pathways       = flat_paths[fg_subset$pathway],
-        stats          = stats,
-        pval.threshold = pval_threshold
-      )
-    }),
-    error = function(e) {
+
+  # collapsePathways is RNG-sensitive and consumes a single per-contrast rank
+  # vector. Partition by contrast so each subset is scored against the
+  # matching stats; under scope = "global" with multiple contrasts the prior
+  # implementation silently scored every pathway against contrast[1]'s ranks.
+  fg_contrasts <- unique(df$contrast[fg_mask])
+  for (ctr in fg_contrasts) {
+    ctr_mask <- fg_mask & df$contrast == ctr
+    ctr_rows <- df[ctr_mask, , drop = FALSE]
+    stats <- stats_list[[ctr]]
+    if (is.null(stats) || length(stats) == 0) {
       ev_warn(
-        "fgsea::collapsePathways failed: {conditionMessage(e)}; keeping all pathways.",
-        class = "ev_collapse_fgsea_error"
+        "No gene-level stats for contrast {.val {ctr}}; keeping all pathways.",
+        class = "ev_collapse_no_pathways"
       )
-      NULL
+      next
     }
-  )
-  if (is.null(collapsed)) return(rep(TRUE, nrow(df)))
-  main   <- collapsed$mainPathways
-  kept   <- rep(TRUE, nrow(df))
-  fg_idx <- which(df$mode == "fgsea")
-  kept[fg_idx] <- df$pathway[fg_idx] %in% main
+    pw_for_fg <- Map(resolve_pw, ctr_rows$database, ctr_rows$pathway)
+    has_paths <- !vapply(pw_for_fg, is.null, logical(1))
+    if (!any(has_paths)) next
+    eval_rows <- ctr_rows[has_paths, , drop = FALSE]
+    pw_for_fg <- pw_for_fg[has_paths]
+    names(pw_for_fg) <- eval_rows$pathway
+    fg_input <- data.table::data.table(
+      pathway     = eval_rows$pathway,
+      pval        = eval_rows$pval,
+      padj        = eval_rows$padj,
+      log2err     = if ("log2err" %in% colnames(eval_rows)) eval_rows$log2err else NA_real_,
+      ES          = if ("ES" %in% colnames(eval_rows)) eval_rows$ES else eval_rows$NES,
+      NES         = eval_rows$NES,
+      size        = eval_rows$size,
+      leadingEdge = strsplit(eval_rows$leading_edge, ";", fixed = TRUE)
+    )
+    # collapsePathways re-runs fgsea on residual gene lists; pin the seed so
+    # dedup is reproducible across calls.
+    collapsed <- tryCatch(
+      withr::with_seed(42, {
+        fgsea::collapsePathways(
+          fgseaRes       = fg_input,
+          pathways       = pw_for_fg,
+          stats          = stats,
+          pval.threshold = pval_threshold
+        )
+      }),
+      error = function(e) {
+        ev_warn(
+          "fgsea::collapsePathways failed: {conditionMessage(e)}; keeping all pathways.",
+          class = "ev_collapse_fgsea_error"
+        )
+        NULL
+      }
+    )
+    if (is.null(collapsed)) next
+    eval_df_idx <- which(ctr_mask)[has_paths]
+    kept[eval_df_idx] <- eval_rows$pathway %in% collapsed$mainPathways
+  }
   kept
 }
