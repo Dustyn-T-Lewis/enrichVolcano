@@ -48,8 +48,11 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #'   `abs(logFC) >= logfc_threshold`.
 #' @param enrich_mode `c("fgsea", "ora")` - either or both.
 #' @param enrich_padj Pathway significance cutoff (default 0.05).
-#' @param dedup List with `method` (`"jaccard"`, `"collapse_fgsea"`, or
-#'   `"both"`), `cutoff`, and `scope`. See [ev_collapse()].
+#' @param dedup List with `method`, `cutoff`, and `scope`. `method` may be
+#'   `"collapse_then_jaccard"` (default), `"jaccard_then_collapse"`,
+#'   `"jaccard"`, or `"collapse_fgsea"`; `"both"` is a deprecated alias for
+#'   `"jaccard_then_collapse"`. When `method` is omitted, the default from
+#'   [ev_collapse()] is used. See [ev_collapse()] for the full semantics.
 #' @param ring List controlling the ring. Honoured fields: `max_terms` (cap on
 #'   pathways drawn in the ring); `show_databases` (default NULL = all enriched
 #'   databases; pass a character vector to restrict the ring to those named
@@ -80,8 +83,7 @@ enrich_volcano <- function(data, contrast,
                            enrich_mode = c("fgsea", "ora"),
                            enrich_padj = 0.05,
                            rank_by = "signed_p",
-                           dedup = list(method = "jaccard", cutoff = 0.5,
-                                        scope = "within_db"),
+                           dedup = list(cutoff = 0.5, scope = "within_db"),
                            ring = list(max_terms = 10),
                            facet = list(nrow = NULL, ncol = NULL),
                            disc_color = NULL,
@@ -121,10 +123,15 @@ enrich_volcano <- function(data, contrast,
   }
 
   dedup_res <- if (nrow(enrich) > 0) {
-    ev_collapse(
-      enrich,
-      method = dedup$method, cutoff = dedup$cutoff,
-      scope = dedup$scope
+    # Forward only the fields the caller actually supplied so ev_collapse()
+    # owns the canonical method default; omitting method here lets a future
+    # default change in ev_collapse() propagate without touching the hero.
+    do.call(
+      ev_collapse,
+      c(list(enrich_result = enrich),
+        dedup[intersect(names(dedup),
+                        c("method", "cutoff", "scope", "sig_threshold",
+                          "collapse_pval_threshold", "keep_by"))])
     )
   } else {
     enrich$dedup_kept <- logical(0)
