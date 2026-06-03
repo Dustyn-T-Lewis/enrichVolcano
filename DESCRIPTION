@@ -15,6 +15,7 @@ Depends: R (>= 4.2)
 URL: https://github.com/Dustyn-T-Lewis/enrichVolcano
 BugReports: https://github.com/Dustyn-T-Lewis/enrichVolcano/issues
 Encoding: UTF-8
+Language: en-GB
 Roxygen: list(markdown = TRUE)
 Imports:
     cli,
