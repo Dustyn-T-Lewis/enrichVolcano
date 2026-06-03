@@ -240,6 +240,11 @@ ev_tick_data <- function(ring_data, volc_df,
 #' @param enrich_df Enrichment tibble for the same contrast (`pathway`, `padj`,
 #'   `NES`, `size`, `leading_edge`).
 #' @param title Plot title (defaults to the contrast name).
+#' @param subtitle Optional plot subtitle. Rendered below the title in bold
+#'   italic at 65% of the title size, matching the journal-panel convention
+#'   used by the canonical YvO 2026 figure pipeline.
+#' @param tag Optional panel tag (e.g. `"A"`), placed top-left in bold; mirrors
+#'   `ggplot2::labs(tag = ...)` and is hidden by default.
 #' @param volcano_radius Inner volcano radius.
 #' @param p_threshold Significance cutoff applied to `pi_eq2` for up/down calls.
 #' @param logfc_threshold Effect-size cutoff; a point is called up/down only when
@@ -247,6 +252,10 @@ ev_tick_data <- function(ring_data, volc_df,
 #'   every significant point; `enrich_volcano()` passes its own default.
 #' @param point_size,point_alpha Volcano point aesthetics.
 #' @param label_size Pathway-label text size.
+#' @param count_x_mult,count_y_mult Position of the up/down count boxes, given
+#'   as multiples of the volcano radius `vr`. Defaults `(0.5, 1.0)` place them
+#'   at the top edge of the volcano; the YvO 2026 figure pipeline uses
+#'   `(0.85, 0.75)` to embed them inside the disc.
 #' @param label_mode,label_n,label_rank_by,label_genes Volcano point labeling,
 #'   passed to the shared selector; default `label_mode = "none"`.
 #' @param p_method Significance column used for BOTH point coloring and label
@@ -257,11 +266,15 @@ ev_tick_data <- function(ring_data, volc_df,
 #' @return A ggplot object (class `c("enrichVolcano", ...)`).
 #' @export
 ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
+                            subtitle = NULL,
+                            tag = NULL,
                             volcano_radius = 3.5, p_threshold = 0.05,
                             logfc_threshold = 0,
                             disc_color = NULL,
                             point_size = 0.9, point_alpha = 0.6,
                             label_size = 2.6,
+                            count_x_mult = 0.5,
+                            count_y_mult = 1.0,
                             label_mode = c("none", "top_per_direction",
                                            "top_total", "all_significant",
                                            "explicit"),
@@ -355,17 +368,20 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
                                              length = ggplot2::unit(1.2, "mm"),
                                              type = "closed")) +
     ggplot2::annotate("text", x = 0, y = vr * 1.05,
-                      label = "-log10 p", size = 2.4, colour = "grey40") +
+                      label = "-log10 p", size = 2.4, colour = "grey40",
+                      parse = FALSE) +
     ggplot2::annotate("text", x = vr * 0.45, y = -vr, label = "up",
                       size = 2.6, colour = pal$up,
                       fontface = "bold.italic", hjust = 0) +
     ggplot2::annotate("text", x = -vr * 0.45, y = -vr, label = "down",
                       size = 2.6, colour = pal$down,
                       fontface = "bold.italic", hjust = 1) +
-    ggplot2::annotate("label", x = vr * 0.5, y = vr, label = n_up,
+    ggplot2::annotate("label", x = vr * count_x_mult, y = vr * count_y_mult,
+                      label = n_up,
                       size = 3.2, colour = "white", fill = pal$up,
                       fontface = "bold", linewidth = 0.3) +
-    ggplot2::annotate("label", x = -vr * 0.5, y = vr, label = n_down,
+    ggplot2::annotate("label", x = -vr * count_x_mult, y = vr * count_y_mult,
+                      label = n_down,
                       size = 3.2, colour = "white", fill = pal$down,
                       fontface = "bold", linewidth = 0.3)
 
@@ -432,14 +448,21 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
   }
 
   p <- p +
-    ggplot2::labs(title = title %||% "") +
+    ggplot2::labs(title = title %||% "",
+                  subtitle = subtitle %||% NULL,
+                  tag = tag %||% NULL) +
     ggplot2::coord_fixed(
       xlim = c(-(max_r + 0.6), max_r + 0.6),
       ylim = c(-(max_r + 0.6), max_r + 0.6), clip = "off"
     ) +
     ggplot2::theme_void(base_size = theme$base_size) +
     ggplot2::theme(
-      plot.title = ggplot2::element_text(face = "bold", hjust = 0.5),
+      plot.title    = ggplot2::element_text(face = "bold", hjust = 0.5),
+      plot.subtitle = ggplot2::element_text(face = "bold.italic", hjust = 0.5,
+                                            colour = "grey30",
+                                            size = ggplot2::rel(0.65)),
+      plot.tag      = ggplot2::element_text(face = "bold"),
+      plot.tag.position = c(0.02, 0.99),
       legend.position = "right",
       legend.key.height = ggplot2::unit(10, "mm"),
       legend.key.width = ggplot2::unit(2.5, "mm")

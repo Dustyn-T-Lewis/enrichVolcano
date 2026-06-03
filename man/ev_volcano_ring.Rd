@@ -8,6 +8,8 @@ ev_volcano_ring(
   volc_df,
   enrich_df,
   title = NULL,
+  subtitle = NULL,
+  tag = NULL,
   volcano_radius = 3.5,
   p_threshold = 0.05,
   logfc_threshold = 0,
@@ -15,6 +17,8 @@ ev_volcano_ring(
   point_size = 0.9,
   point_alpha = 0.6,
   label_size = 2.6,
+  count_x_mult = 0.5,
+  count_y_mult = 1,
   label_mode = c("none", "top_per_direction", "top_total", "all_significant", "explicit"),
   label_n = 10,
   label_rank_by = c("significance", "logfc"),
@@ -32,6 +36,13 @@ ev_volcano_ring(
 
 \item{title}{Plot title (defaults to the contrast name).}
 
+\item{subtitle}{Optional plot subtitle. Rendered below the title in bold
+italic at 65\% of the title size, matching the journal-panel convention
+used by the canonical YvO 2026 figure pipeline.}
+
+\item{tag}{Optional panel tag (e.g. \code{"A"}), placed top-left in bold; mirrors
+\code{ggplot2::labs(tag = ...)} and is hidden by default.}
+
 \item{volcano_radius}{Inner volcano radius.}
 
 \item{p_threshold}{Significance cutoff applied to \code{pi_eq2} for up/down calls.}
@@ -45,6 +56,11 @@ every significant point; \code{enrich_volcano()} passes its own default.}
 \item{point_size, point_alpha}{Volcano point aesthetics.}
 
 \item{label_size}{Pathway-label text size.}
+
+\item{count_x_mult, count_y_mult}{Position of the up/down count boxes, given
+as multiples of the volcano radius \code{vr}. Defaults \verb{(0.5, 1.0)} place them
+at the top edge of the volcano; the YvO 2026 figure pipeline uses
+\verb{(0.85, 0.75)} to embed them inside the disc.}
 
 \item{label_mode, label_n, label_rank_by, label_genes}{Volcano point labeling,
 passed to the shared selector; default \code{label_mode = "none"}.}
