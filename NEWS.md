@@ -30,6 +30,11 @@
 
 ## New features
 
+* `ev_collapse(scope = ...)` accepts a vector of stages run in order, e.g.
+  `c("within_db", "cross_db")`: each stage collapses only the survivors of the
+  previous, so redundancy can be cleaned within each database first and then
+  merged across databases. `cutoff` may be one value per stage. (Within/across
+  database redundancy control follows Vivar 2013 ReCiPa, PMID 23758478.)
 * `ev_volcano_ring()` and `enrich_volcano()` gain `nes_limits` (default
   `c(-3, 3)`) to widen the NES colour scale when enrichment exceeds |NES| = 3.
 * `ev_collapse()` gains a `similarity` argument selecting the gene-overlap metric

@@ -39,8 +39,17 @@ ev_sig_idx <- function(idx, padj, sig_threshold) {
 #'   \code{"jaccard_then_collapse"}, \code{"jaccard"}, or
 #'   \code{"collapse_fgsea"}. \code{"both"} is a deprecated alias for
 #'   \code{"jaccard_then_collapse"}.
-#' @param cutoff Jaccard similarity cutoff.
-#' @param scope `"within_db"`, `"cross_db"`, or `"global"`.
+#' @param cutoff Similarity cutoff. Length 1 (shared by all `scope` stages) or
+#'   one value per stage.
+#' @param scope `"within_db"` (collapse inside each database), `"cross_db"`
+#'   (collapse across databases of a contrast), or `"global"`. May be a vector
+#'   of stages run in order, e.g. `c("within_db", "cross_db")`: each stage
+#'   collapses only the survivors of the previous, so you can clean each
+#'   database's own hierarchy first and then merge the same concept across
+#'   databases (optionally with a different `cutoff` per stage). Note `cross_db`
+#'   alone already compares every pathway pairwise within a contrast, so it
+#'   subsumes `within_db`; staging mainly matters when you want a tighter
+#'   within-database cutoff than the cross-database one.
 #' @param sig_threshold Numeric in \[0, 1\] or NA. Only rows with
 #'   \code{padj < sig_threshold} are considered for dedup; non-significant
 #'   rows always retain \code{dedup_kept = TRUE}. NA disables the gate.
@@ -69,16 +78,28 @@ ev_collapse <- function(enrich_result,
                                    "collapse_fgsea",
                                    "both"),
                         cutoff = 0.5,
-                        scope = c("within_db", "cross_db", "global"),
+                        scope = "within_db",
                         sig_threshold = 0.05,
                         collapse_pval_threshold = 0.05,
                         keep_by = c("padj", "size", "NES"),
                         similarity = c("jaccard", "overlap", "combined"),
                         combined_weight = 0.5) {
   method <- match.arg(method)
-  scope <- match.arg(scope)
   keep_by <- match.arg(keep_by)
   similarity <- match.arg(similarity)
+  # `scope` may be a vector of stages run in order (e.g. c("within_db",
+  # "cross_db")): each stage collapses the survivors of the previous one.
+  # `cutoff` is length 1 (shared) or one per stage.
+  valid_scope <- c("within_db", "cross_db", "global")
+  if (!all(scope %in% valid_scope)) {
+    ev_abort("`scope` must be one or more of {.val {valid_scope}}.",
+             class = "ev_bad_scope")
+  }
+  if (length(cutoff) == 1L) cutoff <- rep(cutoff, length(scope))
+  if (length(cutoff) != length(scope)) {
+    ev_abort("`cutoff` must be length 1 or match the number of `scope` stages.",
+             class = "ev_bad_cutoff")
+  }
   if (combined_weight < 0 || combined_weight > 1) {
     ev_abort("`combined_weight` must be in [0, 1]; got {combined_weight}.",
              class = "ev_bad_combined_weight")
@@ -91,12 +112,25 @@ ev_collapse <- function(enrich_result,
     )
     method <- "jaccard_then_collapse"
   }
+  enrich_result$dedup_kept <- TRUE
+  for (s in seq_along(scope)) {
+    enrich_result <- ev_collapse_stage(
+      enrich_result, method, cutoff[s], scope[s], sig_threshold,
+      collapse_pval_threshold, keep_by, similarity, combined_weight)
+  }
+  enrich_result
+}
+
+# One dedup stage at a single scope. Respects any existing `dedup_kept` so
+# stages chain: later scopes only consider rows still kept by earlier ones.
+ev_collapse_stage <- function(enrich_result, method, cutoff, scope,
+                              sig_threshold, collapse_pval_threshold,
+                              keep_by, similarity, combined_weight) {
   group_cols <- switch(scope,
     within_db = c("contrast", "database"),
     cross_db  = "contrast",
     global    = character(0)
   )
-  enrich_result$dedup_kept <- TRUE
   if (length(group_cols) > 0) {
     keys <- do.call(paste, c(enrich_result[group_cols], sep = "::"))
   } else {
@@ -106,6 +140,7 @@ ev_collapse <- function(enrich_result,
     idx <- which(keys == k)
     if (length(idx) < 2) next
     sig_idx <- ev_sig_idx(idx, enrich_result$padj, sig_threshold)
+    sig_idx <- sig_idx[enrich_result$dedup_kept[sig_idx]]   # survivors of prior stages
     if (length(sig_idx) < 2) next
     if (method %in% c("jaccard", "jaccard_then_collapse")) {
       enrich_result$dedup_kept[sig_idx] <- ev_setsim_dedup(
