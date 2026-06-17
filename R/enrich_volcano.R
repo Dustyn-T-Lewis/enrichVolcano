@@ -72,6 +72,8 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #' @param label_mode,label_n,label_rank_by,label_genes Volcano point labeling,
 #'   passed to the shared selector; default `label_mode = "none"`.
 #' @param disc_color Optional contrast-tint for the ring's central disc.
+#' @param nes_limits Length-2 NES colour-scale limits (default `c(-3, 3)`);
+#'   widen when enrichment exceeds |NES| = 3 to avoid saturating the scale.
 #' @param subtitle Optional subtitle. When `contrast` is a single name, the
 #'   string is rendered verbatim; for multi-contrast input, pass a named
 #'   character vector or NULL.
@@ -100,6 +102,7 @@ enrich_volcano <- function(data, contrast,
                            ring = list(max_terms = 10),
                            facet = list(nrow = NULL, ncol = NULL),
                            disc_color = NULL,
+                           nes_limits = c(-3, 3),
                            subtitle = NULL,
                            tag = NULL,
                            count_x_mult = 0.5,
@@ -185,7 +188,7 @@ enrich_volcano <- function(data, contrast,
                       count_y_mult = count_y_mult,
                       label_mode = label_mode, label_n = label_n,
                       label_rank_by = label_rank_by, label_genes = label_genes,
-                      p_method = p_method)
+                      p_method = p_method, nes_limits = nes_limits)
     }),
     contrast
   )

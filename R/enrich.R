@@ -2,8 +2,9 @@
 #'
 #' @details
 #' Each entry in `databases` (or each registered name) produces fgsea and/or
-#' ORA results. fgsea ranks genes by `rank_by` (default `"signed_p"` =
-#' sign(logFC) * -log10(P), a signed statistic). ORA uses
+#' ORA results. fgsea ranks genes by `rank_by` (default `"t"`, the moderated
+#' t-statistic; falls back to `sign(logFC) * -log10(P)` when no `t` column is
+#' present — both are signed statistics). ORA uses
 #' significant genes (`pi_eq2 < 0.05` if present, else `adj.P.Val < 0.05`)
 #' against the supplied or inferred background.
 #'
@@ -184,6 +185,7 @@ ev_fgsea_one <- function(sub, paths, db_name, ctr, rank_by,
       stats = stats,
       minSize = min_size,
       maxSize = max_size,
+      nPermSimple = nperm,
       eps = 0
     )
   })

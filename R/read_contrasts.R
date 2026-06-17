@@ -46,6 +46,9 @@ ev_read_contrasts <- function(path, species, p_adjust = "BH",
   }, files, labels)
   combined <- dplyr::bind_rows(parts)
   if (!is.null(padj) && padj %in% colnames(combined)) {
+    # Drop any pre-existing adj.P.Val first so the rename can't create a
+    # duplicate column name (which breaks downstream [[ / dplyr access).
+    if (padj != "adj.P.Val") combined[["adj.P.Val"]] <- NULL
     names(combined)[names(combined) == padj] <- "adj.P.Val"
   }
   validated <- ev_validate(combined, x = x, y = y,

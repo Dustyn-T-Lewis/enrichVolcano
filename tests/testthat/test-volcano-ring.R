@@ -96,3 +96,8 @@ test_that("ev_clean_label strips the GOSLIM_ prefix", {
   expect_equal(enrichVolcano:::ev_clean_label("GOSLIM_MUSCLE_SYSTEM_PROCESS"),
                "Muscle System\nProcess")
 })
+
+test_that("nes_limits is exposed and overridable on ev_volcano_ring and the hero", {
+  expect_equal(eval(formals(ev_volcano_ring)$nes_limits), c(-3, 3))
+  expect_equal(eval(formals(enrich_volcano)$nes_limits), c(-3, 3))
+})

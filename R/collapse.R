@@ -162,11 +162,23 @@ ev_setsim_dedup <- function(df, cutoff, keep_by,
   sets <- strsplit(df$leading_edge, ";", fixed = TRUE)
   n <- length(sets)
   kept <- rep(TRUE, n)
-  ord <- order(df[[keep_by]], decreasing = keep_by != "padj")
+  # Rank best-first: smallest padj, but LARGEST size and largest |NES| (a strong
+  # down-regulated term must outrank a weak up-regulated one — signed NES would
+  # invert that).
+  rank_key <- switch(keep_by,
+    padj = df$padj,
+    size = -df$size,
+    NES  = -abs(df$NES)
+  )
+  ord <- order(rank_key)
+  # Only collapse pathways of the SAME direction — an up- and a down-regulated
+  # term that happen to share leading-edge genes are distinct biology.
+  dir <- if ("direction" %in% names(df)) df$direction else rep(NA_character_, n)
   for (i in ord) {
     if (!kept[i]) next
     for (j in ord) {
       if (i == j || !kept[j]) next
+      if (!is.na(dir[i]) && !is.na(dir[j]) && dir[i] != dir[j]) next
       inter <- length(intersect(sets[[i]], sets[[j]]))
       uni <- length(union(sets[[i]], sets[[j]]))
       min_n <- min(length(sets[[i]]), length(sets[[j]]))

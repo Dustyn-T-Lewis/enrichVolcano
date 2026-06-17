@@ -10,8 +10,28 @@
   automatically, so only limma-family results change. Pass `rank_by = "signed_p"`
   to restore the previous behaviour.
 
+## Bug fixes
+
+* `ev_enrich(nperm = ...)` now actually takes effect — it is passed to
+  `fgsea::fgseaMultilevel()` as `nPermSimple` (previously a no-op).
+* `ev_collapse(keep_by = "NES")` now ranks representatives by **|NES|**, so a
+  strongly down-regulated pathway is no longer dropped in favour of a weakly
+  up-regulated one.
+* `ev_collapse()` no longer collapses an up- and a down-regulated pathway that
+  share leading-edge genes — dedup is now within-direction.
+* `adjust_p(method = "qvalue")` falls back to BH (with a warning) instead of
+  erroring when a contrast has too few p-values to estimate pi0.
+* `ev_validate()` guards MaxQuant ratios `<= 0` (set to `NA` with a warning)
+  instead of producing `-Inf`/`NaN` log2 values.
+* `ev_read_contrasts()` no longer creates a duplicate `adj.P.Val` column when
+  `padj` collides with an existing one.
+* `ev_compose()` matches volcano/ring lists by name (order-insensitive) rather
+  than requiring identical name order.
+
 ## New features
 
+* `ev_volcano_ring()` and `enrich_volcano()` gain `nes_limits` (default
+  `c(-3, 3)`) to widen the NES colour scale when enrichment exceeds |NES| = 3.
 * `ev_collapse()` gains a `similarity` argument selecting the gene-overlap metric
   for the Jaccard-family steps: `"jaccard"` (default), `"overlap"`
   (\eqn{|A\cap B|/\min(|A|,|B|)}, catches a small set contained in a larger one),

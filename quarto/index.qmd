@@ -13,9 +13,13 @@ the focus is *rationale and intent*, not argument-by-argument syntax.
 exported so you can run, inspect, or swap any stage.
 
 ```
-ev_read_contrasts ─▶ ev_validate ─▶ pi_score ─▶ adjust_p ─▶ ev_enrich ─▶ ev_collapse ─▶ ev_volcano_ring ─▶ ev_compose
-   (read CSVs)       (canonicalise)  (Xiao π)   (FDR)       (fgsea/ORA)   (dedup)       (volcano+ring)     (layout)
+ev_read_contrasts ─▶ ev_validate ─▶ pi_score ─▶ adjust_p ─▶ ev_enrich ─▶ ev_collapse ─▶ ev_volcano_ring ─▶ wrap_plots
+   (read CSVs)       (canonicalise)  (Xiao π)   (FDR)       (fgsea/ORA)   (dedup)       (volcano+ring)     (layout*)
 ```
+
+*`enrich_volcano()` lays panels out with `patchwork::wrap_plots()` directly;
+`ev_compose()` is the exported standalone equivalent for assembling
+volcano + ring lists yourself.
 
 | Stage | Function | What it decides | Key reference |
 |---|---|---|---|

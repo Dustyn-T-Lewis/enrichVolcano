@@ -157,7 +157,14 @@ ev_pivot_maxquant <- function(data) {
     long$P.Value <- long[[sig_col[1]]]
     long[[sig_col[1]]] <- NULL
   }
-  long$logFC <- log2(long$logFC)
+  ratio <- long$logFC
+  n_bad <- sum(ratio <= 0, na.rm = TRUE)
+  ratio[!is.na(ratio) & ratio <= 0] <- NA_real_   # log2 of <=0 is -Inf/NaN
+  if (n_bad > 0) {
+    ev_warn("Dropped {n_bad} non-positive MaxQuant ratio(s) (cannot log2-transform).",
+            class = "ev_maxquant_nonpositive")
+  }
+  long$logFC <- log2(ratio)
   long$adj.P.Val <- stats::p.adjust(long$P.Value, method = "BH")
   ev_inform("MaxQuant ratios detected; computing BH adjustment.",
             class = "ev_maxquant_bh")

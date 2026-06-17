@@ -262,6 +262,9 @@ ev_tick_data <- function(ring_data, volc_df,
 #'   selection (`"pi_eq2"`, `"pi_eq1"`, `"raw_p"`, `"adj_p"`); defaults to
 #'   `"pi_eq2"`.
 #' @param disc_color Optional fill for a tinted central disc (default NULL = none).
+#' @param nes_limits Length-2 numeric giving the NES colour-scale limits
+#'   (default `c(-3, 3)`); values beyond are squished. Widen when enrichment is
+#'   stronger than |NES| = 3 so the scale does not saturate.
 #' @param theme Output of `ev_theme()`.
 #' @return A ggplot object (class `c("enrichVolcano", ...)`).
 #' @export
@@ -282,6 +285,7 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
                             label_rank_by = c("significance", "logfc"),
                             label_genes = NULL,
                             p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
+                            nes_limits = c(-3, 3),
                             theme = ev_theme()) {
   label_mode <- match.arg(label_mode)
   label_rank_by <- match.arg(label_rank_by)
@@ -406,7 +410,7 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
       ggplot2::scale_fill_gradientn(
         colours = ev_nes_colours,
         values = scales::rescale(ev_nes_values),
-        limits = c(-3, 3), oob = scales::squish, name = "NES"
+        limits = nes_limits, oob = scales::squish, name = "NES"
       )
 
     lbl <- ring
