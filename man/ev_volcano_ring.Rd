@@ -24,6 +24,7 @@ ev_volcano_ring(
   label_rank_by = c("significance", "logfc"),
   label_genes = NULL,
   p_method = c("pi_eq2", "pi_eq1", "raw_p", "adj_p"),
+  nes_limits = c(-3, 3),
   theme = ev_theme()
 )
 }
@@ -68,6 +69,10 @@ passed to the shared selector; default \code{label_mode = "none"}.}
 \item{p_method}{Significance column used for BOTH point coloring and label
 selection (\code{"pi_eq2"}, \code{"pi_eq1"}, \code{"raw_p"}, \code{"adj_p"}); defaults to
 \code{"pi_eq2"}.}
+
+\item{nes_limits}{Length-2 numeric giving the NES colour-scale limits
+(default \code{c(-3, 3)}); values beyond are squished. Widen when enrichment is
+stronger than |NES| = 3 so the scale does not saturate.}
 
 \item{theme}{Output of \code{ev_theme()}.}
 }

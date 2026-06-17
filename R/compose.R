@@ -11,10 +11,12 @@ ev_compose <- function(volcano_plots, ring_plots,
                        nrow = NULL, ncol = NULL,
                        guides = "collect",
                        data = NULL) {
-  if (!identical(names(volcano_plots), names(ring_plots))) {
-    ev_abort("volcano_plots and ring_plots must have identical names.",
+  if (!setequal(names(volcano_plots), names(ring_plots)) ||
+      anyNA(names(volcano_plots)) || is.null(names(volcano_plots))) {
+    ev_abort("volcano_plots and ring_plots must have the same set of names.",
              class = "ev_compose_name_mismatch")
   }
+  ring_plots <- ring_plots[names(volcano_plots)]   # align by name, not position
   per_contrast <- purrr::map2(volcano_plots, ring_plots, function(v, r) {
     patchwork::wrap_plots(v, r, ncol = 1)
   })

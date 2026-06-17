@@ -18,8 +18,10 @@ enrichment in one figure; compose several across contrasts with `ev_compose()`.
 No `coord_polar()` — everything lives in one `coord_fixed()` panel. The volcano
 is rescaled into a disc of radius `volcano_radius`; significant points are
 coloured up / down (others grey). Enrichment arcs are drawn with
-`ggforce::geom_arc_bar()`: **up** pathways cluster at the top (90°), **down** at
-the bottom (270°), ordered by FDR. Arc outer radius encodes $-\log_{10}(padj)$
+`ggforce::geom_arc_bar()`: angle 0 is at 12 o'clock and increases clockwise, so
+**up** pathways cluster on the right (90°) and **down** on the left (270°),
+ordered by FDR. The up/down count boxes and axis labels sit on the matching
+sides. Arc outer radius encodes $-\log_{10}(padj)$
 (magnitude) and arc fill encodes NES on the diverging blue–white–red scale.
 Per-gene radial ticks cross the grey track, coloured by each gene's logFC sign,
 and leader lines connect arcs to cleaned pathway labels. Up/down counts are

@@ -43,7 +43,16 @@ adjust_p <- function(data,
     df$adj.P.Val <- switch(method,
       BH         = stats::p.adjust(p, method = "BH"),
       bonferroni = stats::p.adjust(p, method = "bonferroni"),
-      qvalue     = qvalue::qvalue(p)$qvalues,
+      qvalue     = tryCatch(
+        qvalue::qvalue(p)$qvalues,
+        error = function(e) {
+          # qvalue's pi0 spline fails on few / narrow-range p-values (small
+          # contrasts). Fall back to BH rather than surfacing a raw error.
+          ev_warn(c("qvalue failed ({conditionMessage(e)}); falling back to BH.",
+                    i = "Too few p-values or insufficient range to estimate pi0."),
+                  class = "ev_qvalue_fallback")
+          stats::p.adjust(p, method = "BH")
+        }),
       IHW        = IHW::adj_pvalues(IHW::ihw(p, df[[covariate]], alpha = alpha))
     )
     df

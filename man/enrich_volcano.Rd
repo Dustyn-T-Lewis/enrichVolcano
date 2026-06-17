@@ -24,6 +24,7 @@ enrich_volcano(
   ring = list(max_terms = 10),
   facet = list(nrow = NULL, ncol = NULL),
   disc_color = NULL,
+  nes_limits = c(-3, 3),
   subtitle = NULL,
   tag = NULL,
   count_x_mult = 0.5,
@@ -97,6 +98,9 @@ tunable \code{order_by}/\code{magnitude}/\code{color} encodings use the standalo
 \item{facet}{List with \code{nrow}, \code{ncol} for patchwork outer layout.}
 
 \item{disc_color}{Optional contrast-tint for the ring's central disc.}
+
+\item{nes_limits}{Length-2 NES colour-scale limits (default \code{c(-3, 3)});
+widen when enrichment exceeds |NES| = 3 to avoid saturating the scale.}
 
 \item{subtitle}{Optional subtitle. When \code{contrast} is a single name, the
 string is rendered verbatim; for multi-contrast input, pass a named

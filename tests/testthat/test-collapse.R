@@ -45,6 +45,35 @@ test_that("combined coefficient = weighted Jaccard + overlap (Merico 2010)", {
   expect_equal(sum(cmb_j$dedup_kept), 2)
 })
 
+test_that("keep_by='NES' keeps the strongest term by magnitude, not signed NES", {
+  # Two redundant DOWN pathways; the strongly-down one (NES -3) must be the
+  # representative, not the weakly-down one (NES -0.5).
+  enr <- tibble::tibble(
+    contrast = "c", database = "db", mode = "fgsea",
+    pathway = c("STRONG_DOWN", "WEAK_DOWN"),
+    pval = c(0.001, 0.04), padj = c(0.01, 0.04),
+    NES = c(-3, -0.5), size = c(10, 10), direction = c("down", "down"),
+    leading_edge = c("A;B;C;D;E;F;G;H;I;J", "A;B;C;D;E;F;G;H;I;K")
+  )
+  res <- ev_collapse(enr, method = "jaccard", keep_by = "NES",
+                     cutoff = 0.5, sig_threshold = NA)
+  expect_equal(sum(res$dedup_kept), 1)
+  expect_true(res$dedup_kept[res$pathway == "STRONG_DOWN"])
+})
+
+test_that("dedup never collapses an up- and a down-regulated pathway together", {
+  # Identical leading edge but opposite direction = distinct biology; keep both.
+  enr <- tibble::tibble(
+    contrast = "c", database = "db", mode = "fgsea",
+    pathway = c("UP", "DOWN"),
+    pval = c(0.001, 0.01), padj = c(0.01, 0.02),
+    NES = c(2, -2), size = c(10, 10), direction = c("up", "down"),
+    leading_edge = c("A;B;C;D;E", "A;B;C;D;E")
+  )
+  res <- ev_collapse(enr, method = "jaccard", cutoff = 0.5, sig_threshold = NA)
+  expect_equal(sum(res$dedup_kept), 2)
+})
+
 test_that("ev_collapse jaccard drops near-duplicate pathway", {
   enrich <- tibble::tibble(
     contrast = "c", database = "db", mode = "fgsea",
