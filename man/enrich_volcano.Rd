@@ -19,7 +19,7 @@ enrich_volcano(
   logfc_threshold = log2(1.5),
   enrich_mode = c("fgsea", "ora"),
   enrich_padj = 0.05,
-  rank_by = "signed_p",
+  rank_by = "t",
   dedup = list(cutoff = 0.5, scope = "within_db"),
   ring = list(max_terms = 10),
   facet = list(nrow = NULL, ncol = NULL),
@@ -68,15 +68,20 @@ coloured up/down only when it clears both \code{p_threshold} and
 
 \item{enrich_padj}{Pathway significance cutoff (default 0.05).}
 
-\item{rank_by}{Signed statistic fgsea ranks genes by. \code{"signed_p"}
-(default, \code{sign(logFC) * -log10(P)}), \code{"t"}, \code{"logFC"}, or any signed
-column. Unsigned pi-score columns are rejected.}
+\item{rank_by}{Signed statistic fgsea ranks genes by. \code{"t"} (default, the
+limma / proteoDA moderated t-statistic; falls back to \code{"signed_p"} when no
+\code{t} column is present), \code{"signed_p"} (\code{sign(logFC) * -log10(P)}), \code{"logFC"},
+or any signed column. Unsigned pi-score columns are rejected.}
 
-\item{dedup}{List with \code{method}, \code{cutoff}, and \code{scope}. \code{method} may be
+\item{dedup}{List forwarded to \code{\link[=ev_collapse]{ev_collapse()}}; recognised fields are
+\code{method}, \code{cutoff}, \code{scope}, \code{sig_threshold}, \code{collapse_pval_threshold},
+\code{keep_by}, \code{similarity}, and \code{combined_weight}. \code{method} may be
 \code{"collapse_then_jaccard"} (default), \code{"jaccard_then_collapse"},
 \code{"jaccard"}, or \code{"collapse_fgsea"}; \code{"both"} is a deprecated alias for
-\code{"jaccard_then_collapse"}. When \code{method} is omitted, the default from
-\code{\link[=ev_collapse]{ev_collapse()}} is used. See \code{\link[=ev_collapse]{ev_collapse()}} for the full semantics.}
+\code{"jaccard_then_collapse"}. \code{similarity} selects the gene-overlap metric
+(\code{"jaccard"}, \code{"overlap"}, \code{"combined"}; Merico 2010). When a field is
+omitted, the \code{\link[=ev_collapse]{ev_collapse()}} default is used. See \code{\link[=ev_collapse]{ev_collapse()}} for the
+full semantics.}
 
 \item{ring}{List controlling the ring. Honoured fields: \code{max_terms} (cap on
 pathways drawn in the ring); \code{show_databases} (default NULL = all enriched

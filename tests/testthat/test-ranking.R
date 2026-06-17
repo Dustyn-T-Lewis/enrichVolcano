@@ -45,3 +45,20 @@ test_that("a missing rank_by column falls back to the signed default", {
     ev_rank_stats(data, "signed_p")
   )
 })
+
+test_that("the default ranking statistic is the moderated t", {
+  # limma/proteoDA carry a moderated-t column; GSEA should rank by it by default
+  # (Subramanian 2005 PNAS; Reimand 2019 Nat Protoc — a signed test statistic).
+  expect_identical(formals(ev_enrich)$rank_by, "t")
+  expect_identical(formals(enrich_volcano)$rank_by, "t")
+})
+
+test_that("default rank_by='t' uses the moderated t when present, signed_p when absent", {
+  data <- make_ranked_input()
+  data$t <- data$logFC * 2 + rnorm(nrow(data), sd = 0.1)  # signed, distinct from signed_p
+  expect_identical(ev_rank_stats(data, "t"), ev_rank_stats(data, "t"))
+  expect_false(identical(ev_rank_stats(data, "t"), ev_rank_stats(data, "signed_p")))
+
+  no_t <- data[setdiff(names(data), "t")]                 # edgeR-style input: no t column
+  expect_identical(ev_rank_stats(no_t, "t"), ev_rank_stats(no_t, "signed_p"))
+})

@@ -10,7 +10,7 @@ ev_enrich(
   databases,
   species = "human",
   enrich_mode = c("fgsea", "ora"),
-  rank_by = "signed_p",
+  rank_by = "t",
   min_size = 15,
   max_size = 500,
   background = NULL,
@@ -33,7 +33,11 @@ via the registry), a named list of pathway lists, or path(s) to GMT files.}
 
 \item{enrich_mode}{\code{c("fgsea", "ora")} — either or both.}
 
-\item{rank_by}{Column to rank genes by for fgsea.}
+\item{rank_by}{Column to rank genes by for fgsea. Default \code{"t"}, the limma /
+proteoDA moderated t-statistic — the recommended signed GSEA statistic for
+moderated linear models (Subramanian 2005 PNAS; Reimand 2019 Nat Protoc).
+When the input has no \code{t} column (e.g. edgeR), it falls back to \code{"signed_p"}
+= \code{sign(logFC) * -log10(P)}.}
 
 \item{min_size, max_size}{Gene-set size filters. Defaults \code{15}/\code{500} follow
 Reimand et al. 2019 (\emph{Nat Protoc} §S3.4): sets below ~15 genes are

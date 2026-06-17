@@ -50,6 +50,16 @@ ev_sig_idx <- function(idx, padj, sig_threshold) {
 #'   collapse step: `collapse_fgsea`, `jaccard_then_collapse`, and the
 #'   default `collapse_then_jaccard`. Default 0.05.
 #' @param keep_by Tie-breaking column ("padj", "size", "NES").
+#' @param similarity Gene-set similarity metric for the Jaccard-family steps,
+#'   computed on leading-edge genes (Merico 2010, EnrichmentMap):
+#'   \code{"jaccard"} (default, \eqn{|A\cap B|/|A\cup B|}; EM cutoff 0.25),
+#'   \code{"overlap"} (\eqn{|A\cap B|/\min(|A|,|B|)}, catches a small set
+#'   contained in a larger one; EM cutoff 0.5), or \code{"combined"}
+#'   (\eqn{w\cdot Jaccard + (1-w)\cdot Overlap}; the Cytoscape EnrichmentMap
+#'   default, cutoff 0.375). \code{cutoff} is interpreted on the chosen metric.
+#' @param combined_weight Weight \eqn{w} on the Jaccard term for
+#'   \code{similarity = "combined"} (default 0.5, per EnrichmentMap). The
+#'   overlap term gets \eqn{1 - w}.
 #' @return Tibble with `dedup_kept` logical column (TRUE = retained).
 #' @export
 ev_collapse <- function(enrich_result,
@@ -62,10 +72,17 @@ ev_collapse <- function(enrich_result,
                         scope = c("within_db", "cross_db", "global"),
                         sig_threshold = 0.05,
                         collapse_pval_threshold = 0.05,
-                        keep_by = c("padj", "size", "NES")) {
+                        keep_by = c("padj", "size", "NES"),
+                        similarity = c("jaccard", "overlap", "combined"),
+                        combined_weight = 0.5) {
   method <- match.arg(method)
   scope <- match.arg(scope)
   keep_by <- match.arg(keep_by)
+  similarity <- match.arg(similarity)
+  if (combined_weight < 0 || combined_weight > 1) {
+    ev_abort("`combined_weight` must be in [0, 1]; got {combined_weight}.",
+             class = "ev_bad_combined_weight")
+  }
   if (identical(method, "both")) {
     lifecycle::deprecate_warn(
       when = "0.2.0",
@@ -91,8 +108,9 @@ ev_collapse <- function(enrich_result,
     sig_idx <- ev_sig_idx(idx, enrich_result$padj, sig_threshold)
     if (length(sig_idx) < 2) next
     if (method %in% c("jaccard", "jaccard_then_collapse")) {
-      enrich_result$dedup_kept[sig_idx] <- ev_jaccard_dedup(
-        ev_subset_preserve_attr(enrich_result, sig_idx), cutoff, keep_by
+      enrich_result$dedup_kept[sig_idx] <- ev_setsim_dedup(
+        ev_subset_preserve_attr(enrich_result, sig_idx), cutoff, keep_by,
+        similarity, combined_weight
       )
     }
     if (method %in% c("collapse_fgsea", "jaccard_then_collapse")) {
@@ -118,9 +136,9 @@ ev_collapse <- function(enrich_result,
       )
       kept_after_collapse <- sig_idx[survive_collapse]
       if (length(kept_after_collapse) >= 2) {
-        survive_jaccard <- ev_jaccard_dedup(
+        survive_jaccard <- ev_setsim_dedup(
           ev_subset_preserve_attr(enrich_result, kept_after_collapse),
-          cutoff, keep_by
+          cutoff, keep_by, similarity, combined_weight
         )
         survive_final <- rep(FALSE, length(sig_idx))
         survive_final[survive_collapse] <- survive_jaccard
@@ -133,7 +151,14 @@ ev_collapse <- function(enrich_result,
   enrich_result
 }
 
-ev_jaccard_dedup <- function(df, cutoff, keep_by) {
+# Set-similarity dedup on leading-edge gene sets (Merico 2010 PMID:21085593).
+#   jaccard  = |A∩B| / |A∪B|              symmetric overlap
+#   overlap  = |A∩B| / min(|A|, |B|)      catches asymmetric containment
+#   combined = w*Jaccard + (1-w)*Overlap  EnrichmentMap default (w = 0.5)
+# Iterate best-first by keep_by; a later set is dropped if its similarity to a
+# retained set exceeds cutoff.
+ev_setsim_dedup <- function(df, cutoff, keep_by,
+                            similarity = "jaccard", combined_weight = 0.5) {
   sets <- strsplit(df$leading_edge, ";", fixed = TRUE)
   n <- length(sets)
   kept <- rep(TRUE, n)
@@ -144,8 +169,15 @@ ev_jaccard_dedup <- function(df, cutoff, keep_by) {
       if (i == j || !kept[j]) next
       inter <- length(intersect(sets[[i]], sets[[j]]))
       uni <- length(union(sets[[i]], sets[[j]]))
+      min_n <- min(length(sets[[i]]), length(sets[[j]]))
       jac <- if (uni > 0) inter / uni else 0
-      if (jac > cutoff) kept[j] <- FALSE
+      ovl <- if (min_n > 0) inter / min_n else 0
+      sim <- switch(similarity,
+        jaccard  = jac,
+        overlap  = ovl,
+        combined = combined_weight * jac + (1 - combined_weight) * ovl
+      )
+      if (sim > cutoff) kept[j] <- FALSE
     }
   }
   kept
