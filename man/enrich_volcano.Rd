@@ -33,6 +33,9 @@ enrich_volcano(
   label_n = 10,
   label_rank_by = c("significance", "logfc"),
   label_genes = NULL,
+  label_size = 2.6,
+  point_size = 0.9,
+  point_alpha = 0.6,
   theme = ev_theme()
 )
 }
@@ -114,7 +117,13 @@ forwarded to \code{\link[=ev_volcano_ring]{ev_volcano_ring()}}. Defaults \verb{(
 panel layout uses \verb{(0.85, 0.75)}.}
 
 \item{label_mode, label_n, label_rank_by, label_genes}{Volcano point labeling,
-passed to the shared selector; default \code{label_mode = "none"}.}
+passed to the shared selector. \code{label_mode = "none"} (default) draws no
+protein labels; \code{"top_per_direction"} / \code{"top_total"} label the top
+\code{label_n} by \code{label_rank_by}; \code{"all_significant"} labels every hit;
+\code{"explicit"} labels only \code{label_genes}.}
+
+\item{label_size, point_size, point_alpha}{Volcano text and point aesthetics
+(defaults \code{2.6}, \code{0.9}, \code{0.6}). Shrink \code{label_size} for a dense top-N.}
 
 \item{theme}{Output of \code{ev_theme()}.}
 }

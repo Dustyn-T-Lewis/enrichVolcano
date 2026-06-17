@@ -70,7 +70,12 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #'   [ring_plot()].
 #' @param facet List with `nrow`, `ncol` for patchwork outer layout.
 #' @param label_mode,label_n,label_rank_by,label_genes Volcano point labeling,
-#'   passed to the shared selector; default `label_mode = "none"`.
+#'   passed to the shared selector. `label_mode = "none"` (default) draws no
+#'   protein labels; `"top_per_direction"` / `"top_total"` label the top
+#'   `label_n` by `label_rank_by`; `"all_significant"` labels every hit;
+#'   `"explicit"` labels only `label_genes`.
+#' @param label_size,point_size,point_alpha Volcano text and point aesthetics
+#'   (defaults `2.6`, `0.9`, `0.6`). Shrink `label_size` for a dense top-N.
 #' @param disc_color Optional contrast-tint for the ring's central disc.
 #' @param nes_limits Length-2 NES colour-scale limits (default `c(-3, 3)`);
 #'   widen when enrichment exceeds |NES| = 3 to avoid saturating the scale.
@@ -113,6 +118,9 @@ enrich_volcano <- function(data, contrast,
                            label_n = 10,
                            label_rank_by = c("significance", "logfc"),
                            label_genes = NULL,
+                           label_size = 2.6,
+                           point_size = 0.9,
+                           point_alpha = 0.6,
                            theme = ev_theme()) {
   call <- match.call()
   p_method <- match.arg(p_method)
@@ -188,6 +196,8 @@ enrich_volcano <- function(data, contrast,
                       count_y_mult = count_y_mult,
                       label_mode = label_mode, label_n = label_n,
                       label_rank_by = label_rank_by, label_genes = label_genes,
+                      label_size = label_size,
+                      point_size = point_size, point_alpha = point_alpha,
                       p_method = p_method, nes_limits = nes_limits)
     }),
     contrast

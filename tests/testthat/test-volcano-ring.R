@@ -101,3 +101,10 @@ test_that("nes_limits is exposed and overridable on ev_volcano_ring and the hero
   expect_equal(eval(formals(ev_volcano_ring)$nes_limits), c(-3, 3))
   expect_equal(eval(formals(enrich_volcano)$nes_limits), c(-3, 3))
 })
+
+test_that("enrich_volcano exposes label/point aesthetics with sensible defaults", {
+  expect_equal(formals(enrich_volcano)$label_size, 2.6)
+  expect_equal(formals(enrich_volcano)$point_size, 0.9)
+  expect_equal(formals(enrich_volcano)$point_alpha, 0.6)
+  expect_equal(eval(formals(enrich_volcano)$label_mode)[1], "none")  # default: no labels
+})
