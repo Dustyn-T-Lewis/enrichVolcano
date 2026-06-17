@@ -1,0 +1,124 @@
+---
+title: "Methods: scoring, ranking, enrichment, dedup"
+---
+
+This page walks through every analytical decision the package makes, the default
+it ships, and the study that validates it. Defaults are chosen to match
+community practice; every one can be overridden.
+
+## Significance scoring {#scoring}
+
+`pi_score()` implements the π-score of Xiao et al. (2014), which ranks hits by
+**both** statistical significance and effect size rather than a p-value alone.
+
+| Variant | Formula | Direction | Default cutoff |
+|---|---|---|---|
+| `eq2` (default) | $\pi = P^{|\log_2 FC|}$ | smaller = stronger | 0.05 |
+| `eq1` | $\pi = |\log_2 FC|\cdot(-\log_{10}P)$ | larger = stronger | — |
+
+The two are monotone-equivalent: $-\log_{10}(P^{|\log_2 FC|}) = |\log_2 FC|\cdot(-\log_{10}P)$,
+so `eq2 < 0.05` is exactly `eq1 > 1.301`. `eq2` is reported on the familiar
+p-scale.
+
+- Xiao Y, *et al.* "A novel significance score for gene selection and ranking."
+  *Bioinformatics* 2014;30(6):801–7. PMID:22321699.
+
+## Multiple-testing correction {#adjustment}
+
+`adjust_p()` defaults to **Benjamini–Hochberg** FDR, applied per contrast.
+Alternatives: `bonferroni` (FWER), `qvalue` (Storey), `IHW` (independent
+hypothesis weighting).
+
+- Benjamini Y, Hochberg Y. *J R Stat Soc B* 1995;57(1):289–300.
+- Storey JD, Tibshirani R. *PNAS* 2003;100(16):9440–5. PMID:12883005.
+- Ignatiadis N, *et al.* "Data-driven hypothesis weighting (IHW)." *Nat Methods*
+  2016;13:577–80. PMID:27240256.
+
+## Gene ranking for GSEA {#ranking}
+
+fgsea needs a **signed** per-gene statistic so up- and down-regulated genes sit
+at opposite ends of the ranked list. The default is the limma/proteoDA
+**moderated t-statistic** (`rank_by = "t"`).
+
+| `rank_by` | Statistic | Use when |
+|---|---|---|
+| `"t"` (default) | moderated t (limma/proteoDA/DEqMS/proDA) | the input carries a `t` column |
+| `"signed_p"` (fallback) | $\text{sign}(\log FC)\cdot-\log_{10}P$ | no test statistic available (e.g. edgeR) |
+| `"logFC"` | effect size only | ranking by magnitude |
+
+Why moderated t: it is the test statistic GSEA-style analyses are meant to
+consume for moderated linear models, and it is what the hand-written source
+pipelines use. Unsigned π-score columns are **rejected** — ranking by them
+collapses the list to one tail.
+
+- Subramanian A, *et al.* "GSEA." *PNAS* 2005;102(43):15545–50. PMID:16199517.
+- Reimand J, *et al.* "Pathway enrichment analysis ... (g:Profiler, GSEA,
+  Cytoscape, EnrichmentMap)." *Nat Protoc* 2019;14:482–517. PMID:30664679.
+- Korotkevich G, *et al.* "Fast gene set enrichment analysis." bioRxiv 2021.
+  doi:10.1101/060012.
+
+## Enrichment {#enrichment}
+
+`ev_enrich()` runs **fgsea** (ranked) and/or **ORA** (hypergeometric) against
+registered databases. Gene-set size filters default to `min_size = 15`,
+`max_size = 500` (Reimand 2019 §S3.4: sets below ~15 are noise-prone, above ~500
+non-specific). `eps = 0` gives exact fgsea p-values.
+
+## Pathway deduplication {#deduplication}
+
+Enrichment returns many overlapping terms. `ev_collapse()` reduces redundancy
+with **collection-agnostic** methods only — see the [survey](#dedup-survey) for
+why GO-semantic methods are excluded.
+
+### Methods
+
+| `method` | What it does | Basis | Reference |
+|---|---|---|---|
+| `collapse_then_jaccard` (default) | `fgsea::collapsePathways`, then set-similarity on survivors | conditional permutation + gene overlap | Korotkevich 2021; Merico 2010 |
+| `collapse_fgsea` | `fgsea::collapsePathways` only | conditional permutation independence | Korotkevich 2021 |
+| `jaccard` / `jaccard_then_collapse` | set-similarity (see `similarity`) | gene overlap | Merico 2010 |
+
+### Set-similarity metric (`similarity`)
+
+For the gene-overlap steps, choose the metric on leading-edge gene sets $A,B$:
+
+| `similarity` | Formula | Catches | EnrichmentMap cutoff |
+|---|---|---|---|
+| `jaccard` (default) | $\dfrac{|A\cap B|}{|A\cup B|}$ | symmetric overlap | 0.25 |
+| `overlap` | $\dfrac{|A\cap B|}{\min(|A|,|B|)}$ | a small set contained in a larger one | 0.5 |
+| `combined` | $w\cdot\text{Jaccard} + (1-w)\cdot\text{Overlap}$ | both (Cytoscape default) | 0.375 |
+
+`combined_weight` ($w$) defaults to 0.5. The package's `cutoff` default is 0.5
+for all metrics (backward compatible); set it to the EnrichmentMap canonical
+values above to match Cytoscape exactly.
+
+`fgsea::collapsePathways` is a **conditional permutation independence test**
+(re-runs fgsea conditioning on each candidate parent's genes; "main pathways"
+are those not explained by a parent). `pval.threshold` defaults to 0.05.
+
+### Why GO-semantic methods are not core {#dedup-survey}
+
+| Method | Similarity basis | Works on any gene set? | Needs GO/OrgDb? |
+|---|---|---|---|
+| fgsea `collapsePathways` | conditional permutation | **yes** | no |
+| Jaccard / Overlap / combined | gene overlap | **yes** | no |
+| `clusterProfiler::simplify` | GO Wang semantic | no (hard-stops off-GO) | **yes** |
+| `rrvgo` | GO Resnik/Wang semantic | no | **yes** |
+| `GOSemSim`, `simplifyEnrichment` | GO semantic similarity | no / tuned-for-GO | **yes** |
+
+`enrichVolcano` spans Hallmark, Reactome, KEGG, MitoCarta, CORUM and GO across
+seven species and does **not** assume a GO OrgDb is installed, so it ships only
+the collection-agnostic methods (rows 1–2). GO-semantic collapse remains an
+optional, GO-only enhancement.
+
+- Merico D, *et al.* "Enrichment Map." *PLoS One* 2010;5(11):e13984. PMID:21085593.
+- Yu G, *et al.* "clusterProfiler." *OMICS* 2012;16(5):284–7. PMID:22455463.
+- Yu G, *et al.* "GOSemSim." *Bioinformatics* 2010;26(7):976–8. PMID:20179076.
+- Gu Z, Hübschmann D. "simplifyEnrichment." *GPB* 2022. PMID:37670900.
+
+## Databases {#databases}
+
+`list_databases()` enumerates the registered collections; `database_info(name)`
+prints provenance, license and citation. Hallmark is the curated,
+minimally-redundant collection recommended as a first lens (Liberzon 2015,
+PMID:26771021).

@@ -1,0 +1,49 @@
+---
+title: "`list_databases()` — enumerate gene-set collections"
+---
+
+## Purpose
+
+Return a tibble of metadata for every registered gene-set collection — name,
+species, license and citation — so you can pick the right database before
+enrichment.
+
+## When to use
+
+Whenever you need the exact `name` token to pass to `ev_enrich()` or want to
+confirm a collection's species and license before using it in a figure.
+
+## How it works
+
+Reads the bundled registry CSV (`inst/extdata/db_registry.csv`) and returns it
+as a tibble, one row per collection. Each row carries `name`, `display_name`,
+`type`, `species`, `source`, `license`, `citation_key`, and
+`description_short`. If the registry is not installed the call aborts with a
+clear error.
+
+For provenance and licensing of a single collection, pass a `name` to
+[`database_info`](database_info.qmd).
+
+## Parameters & defaults
+
+| Argument | Default | Rationale |
+|---|---|---|
+| *(none)* | — | no arguments; returns the full registry tibble |
+
+## Literature
+
+No method-specific citation; see [methods](../methods.qmd). Per-database
+citations live in the registry's `citation_key` column.
+
+## Example
+
+```r
+db <- list_databases()
+db[, c("name", "species", "license")]            # all registered collections
+subset(db, species == "rat")$name                # rat-compatible sets
+```
+
+## See also
+
+[`database_info`](database_info.qmd) · [`ev_enrich`](ev_enrich.qmd) ·
+[methods: databases](../methods.qmd#databases)

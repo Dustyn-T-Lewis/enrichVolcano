@@ -1,0 +1,45 @@
+---
+title: "`database_info()` — provenance for one collection"
+---
+
+## Purpose
+
+Print the source, license and description for a single registered gene-set
+collection, and return its registry row invisibly for programmatic use.
+
+## When to use
+
+Before committing a database to a published figure: check its license terms and
+source, or confirm the species and type match your design.
+
+## How it works
+
+Looks up `name` in the registry returned by
+[`list_databases`](list_databases.qmd). If no row matches it aborts and points
+you back to `list_databases()`. Otherwise it prints a `cli` header and a
+definition list of Type, Species, Source, License and Description, then returns
+the matching registry row invisibly so it can be captured in code.
+
+## Parameters & defaults
+
+| Argument | Default | Rationale |
+|---|---|---|
+| `name` | *(required)* | database token; one of `list_databases()$name` |
+
+## Literature
+
+No method-specific citation; see [methods](../methods.qmd). The per-collection
+reference is in the registry's `citation_key` field.
+
+## Example
+
+```r
+database_info("hallmark")                  # prints provenance + license
+row <- database_info("reactome")           # also returns the row invisibly
+row$license
+```
+
+## See also
+
+[`list_databases`](list_databases.qmd) · [`ev_enrich`](ev_enrich.qmd) ·
+[methods: databases](../methods.qmd#databases)

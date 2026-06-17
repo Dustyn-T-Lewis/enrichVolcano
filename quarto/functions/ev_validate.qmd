@@ -1,0 +1,59 @@
+---
+title: "`ev_validate()` — detect format & canonicalise"
+---
+
+## Purpose
+
+Take a differential-abundance table from almost any tool and return a tidy long
+tibble with canonical columns, so every downstream stage can assume one schema.
+
+## When to use
+
+The first stage of the pipeline; `enrich_volcano()` calls it for you. Call it
+directly to inspect what was detected (`attr(., "ev_source")`) or to debug a
+column-detection surprise before plotting.
+
+## How it works
+
+A single detector inspects column patterns and routes to the right adapter.
+Twelve input shapes are recognised: **limma**, **proteoDA**, **DESeq2**,
+**edgeR**, **MSstats**, **proDA**, **DEqMS**, **MaxQuant**, **Perseus**,
+**DEP** (`*_diff`/`*_p.val`/`*_p.adj`), generic **wide-suffix**, and **tidy
+long** as the fallback. Wide formats (DEP, Perseus, MaxQuant, wide-suffix) are
+pivoted to long first.
+
+Columns are then renamed to the canonical set —
+`gene` / `contrast` / `logFC` / `P.Value` / `adj.P.Val` — via an alias table,
+with `x`/`y`/`lab` overriding auto-detection. A few format quirks are repaired:
+MSstats `log10FC` is rescaled to log2 (`× log2(10)`), and a missing `P.Value`
+is derived from a `t`/`df` pair. Finally `ev_apply_uniprot()` maps accessions
+to symbols when `species` is given, and the minimum-column assertion guards the
+output.
+
+## Parameters & defaults
+
+| Argument | Default | Rationale |
+|---|---|---|
+| `x` | `NULL` | logFC column override; else auto-detect |
+| `y` | `NULL` | p-value column override; else auto-detect |
+| `lab` | `NULL` | gene-label column override; else auto-detect |
+| `uniprot` | `NULL` | accession column; auto-detected when accession-shaped |
+| `species` | `NULL` | required only for UniProt input (`human`/`mouse`/`rat`) |
+
+## Literature
+
+No method-specific citation; see [methods](../methods.qmd).
+
+## Example
+
+```r
+v <- ev_validate(deseq2_res, species = "human")
+attr(v, "ev_source")        # "DESeq2"
+head(v[, c("gene", "contrast", "logFC", "P.Value", "adj.P.Val")])
+```
+
+## See also
+
+[`ev_read_contrasts`](ev_read_contrasts.qmd) ·
+[`ev_idmap_report`](ev_idmap_report.qmd) ·
+[`enrich_volcano`](enrich_volcano.qmd) · [methods](../methods.qmd)
