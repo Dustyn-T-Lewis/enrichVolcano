@@ -1,0 +1,53 @@
+---
+title: "`ev_theme()` — locked palette & ggplot theme"
+---
+
+## Purpose
+
+Return the package's locked colour palette and ggplot2 theme as one list, so
+every volcano and ring shares identical colours and styling.
+
+## How it works
+
+Builds a named palette and a `theme_minimal()`-based theme. The palette hex codes
+are **locked** in source so a ggplot2 update can never silently shift the
+up/down/ns colours or the NES scale. The returned list has three elements:
+
+- `base_size` — the numeric base font size
+- `theme` — `theme_minimal(base_size)` with minor grid removed and the legend at
+  the bottom
+- `palette` — `up = #D6604D` (red), `down = #4393C3` (blue), `ns = grey70`, and
+  `nes_scale = c("#08306B", "white", "#67000D")` (diverging blue → white → red
+  for NES)
+
+Only the `"default"` palette exists in v1; any other name aborts.
+
+## When to use
+
+You rarely call it directly — every plotting function takes `theme = ev_theme()`
+as a default. Call it to inspect the locked hex codes or to pass a larger
+`base_size` to all panels at once.
+
+## Parameters & defaults
+
+| Argument | Default | Rationale |
+|---|---|---|
+| `base_size` | `11` | readable default; raise for large figures |
+| `palette` | `"default"` | the only locked palette in v1; unknown names abort |
+
+## Literature
+
+No method-specific citation; see [methods](../methods.qmd).
+
+## Example
+
+```r
+th <- ev_theme(base_size = 13)
+th$palette$up        # "#D6604D"
+ev_volcano(dep, "CTLvMITO", theme = th)
+```
+
+## See also
+
+[`ev_volcano`](ev_volcano.qmd) · [`ev_volcano_ring`](ev_volcano_ring.qmd) ·
+[`ring_plot`](ring_plot.qmd) · [methods](../methods.qmd)

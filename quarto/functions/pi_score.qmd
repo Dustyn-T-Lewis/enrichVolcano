@@ -1,0 +1,58 @@
+---
+title: "`pi_score()` — significance × effect size"
+---
+
+## Purpose
+
+Add a π-score column that ranks proteins by **both** statistical significance
+and fold-change magnitude, instead of a p-value (which ignores effect size) or a
+fold-change (which ignores noise).
+
+## When to use
+
+Whenever you want a single ordering for volcano colouring or hit selection that
+rewards large, confident changes. Used by `enrich_volcano(p_method = "pi_eq2")`
+for the volcano significance call.
+
+## How it works
+
+For each protein with p-value $P$ and $\log_2$ fold-change:
+
+$$\pi_{eq2} = P^{|\log_2 FC|} \qquad \pi_{eq1} = |\log_2 FC|\cdot(-\log_{10}P)$$
+
+The two are monotone-equivalent — $-\log_{10}(\pi_{eq2}) = \pi_{eq1}$ — so a
+cutoff of `eq2 < 0.05` is identical to `eq1 > 1.301`. `eq2` lives on the
+familiar [0,1] p-scale (smaller = stronger); `eq1` is unbounded (larger =
+stronger).
+
+::: {.callout-important}
+π-score is **unsigned** and must not be used as a GSEA ranking statistic — it
+collapses the ranked list to one tail. `ev_enrich()` rejects it. Rank by the
+moderated `t` instead.
+:::
+
+## Parameters & defaults
+
+| Argument | Default | Rationale |
+|---|---|---|
+| `variant` | `"eq2"` | p-scale form; reported significance call |
+| `p_col` | `"P.Value"` | limma/proteoDA p-value column |
+| `logfc_col` | `"logFC"` | canonical effect-size column |
+| `out_col` | `pi_<variant>` | non-destructive: adds a column |
+
+## Literature
+
+- Xiao Y, *et al.* "A novel significance score for gene selection and ranking."
+  *Bioinformatics* 2014;30(6):801–7. PMID:22321699.
+
+## Example
+
+```r
+res <- pi_score(dep, variant = "eq2")   # adds pi_eq2 = P.Value^|logFC|
+sum(res$pi_eq2 < 0.05, na.rm = TRUE)
+```
+
+## See also
+
+[`adjust_p`](adjust_p.qmd) · [`ev_enrich`](ev_enrich.qmd) ·
+[methods: scoring](../methods.qmd#scoring)

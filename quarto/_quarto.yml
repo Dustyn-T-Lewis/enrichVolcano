@@ -1,0 +1,42 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "enrichVolcano — rationale & methods"
+  description: "Why each function exists, the method it implements, its defaults, and the literature behind them."
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - section: "Overview"
+        contents:
+          - index.qmd
+          - methods.qmd
+      - section: "Pipeline functions"
+        contents:
+          - functions/enrich_volcano.qmd
+          - functions/ev_read_contrasts.qmd
+          - functions/ev_validate.qmd
+          - functions/pi_score.qmd
+          - functions/adjust_p.qmd
+          - functions/ev_enrich.qmd
+          - functions/ev_collapse.qmd
+          - functions/ev_volcano.qmd
+          - functions/ev_volcano_ring.qmd
+          - functions/ring_plot.qmd
+          - functions/ev_compose.qmd
+      - section: "Helpers & infrastructure"
+        contents:
+          - functions/ev_theme.qmd
+          - functions/list_databases.qmd
+          - functions/database_info.qmd
+          - functions/ev_idmap_report.qmd
+          - functions/ev_app.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-copy: true
+    code-overflow: wrap

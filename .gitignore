@@ -35,3 +35,7 @@ Rplots.pdf
 
 # raw licensed source downloads (not redistributed; GMTs are built from these)
 data-raw/raw/
+
+# Quarto rendered output
+quarto/_site/
+quarto/.quarto/
