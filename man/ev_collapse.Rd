@@ -9,7 +9,7 @@ ev_collapse(
   method = c("collapse_then_jaccard", "jaccard_then_collapse", "jaccard",
     "collapse_fgsea", "both"),
   cutoff = 0.5,
-  scope = c("within_db", "cross_db", "global"),
+  scope = "within_db",
   sig_threshold = 0.05,
   collapse_pval_threshold = 0.05,
   keep_by = c("padj", "size", "NES"),
@@ -25,9 +25,18 @@ ev_collapse(
 \code{"collapse_fgsea"}. \code{"both"} is a deprecated alias for
 \code{"jaccard_then_collapse"}.}
 
-\item{cutoff}{Jaccard similarity cutoff.}
+\item{cutoff}{Similarity cutoff. Length 1 (shared by all \code{scope} stages) or
+one value per stage.}
 
-\item{scope}{\code{"within_db"}, \code{"cross_db"}, or \code{"global"}.}
+\item{scope}{\code{"within_db"} (collapse inside each database), \code{"cross_db"}
+(collapse across databases of a contrast), or \code{"global"}. May be a vector
+of stages run in order, e.g. \code{c("within_db", "cross_db")}: each stage
+collapses only the survivors of the previous, so you can clean each
+database's own hierarchy first and then merge the same concept across
+databases (optionally with a different \code{cutoff} per stage). Note \code{cross_db}
+alone already compares every pathway pairwise within a contrast, so it
+subsumes \code{within_db}; staging mainly matters when you want a tighter
+within-database cutoff than the cross-database one.}
 
 \item{sig_threshold}{Numeric in [0, 1] or NA. Only rows with
 \code{padj < sig_threshold} are considered for dedup; non-significant

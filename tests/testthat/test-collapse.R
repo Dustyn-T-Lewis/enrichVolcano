@@ -45,6 +45,37 @@ test_that("combined coefficient = weighted Jaccard + overlap (Merico 2010)", {
   expect_equal(sum(cmb_j$dedup_kept), 2)
 })
 
+test_that("staged scope runs within_db then cross_db on survivors", {
+  # P1/P2 are redundant WITHIN db1; P1/P3 are redundant ACROSS db1/db2.
+  enr <- tibble::tibble(
+    contrast = "c", database = c("db1", "db1", "db2"), mode = "fgsea",
+    pathway = c("P1", "P2", "P3"),
+    pval = c(0.001, 0.01, 0.02), padj = c(0.005, 0.01, 0.02),
+    NES = c(2, 1.8, 1.6), size = c(10, 10, 10), direction = "up",
+    leading_edge = c("A;B;C;D;E", "A;B;C;D;F", "A;B;C;D;G")
+  )
+  staged <- ev_collapse(enr, method = "jaccard", scope = c("within_db", "cross_db"),
+                        cutoff = 0.5, sig_threshold = NA)
+  # within_db drops P2 (vs P1 in db1); cross_db then drops P3 (vs P1) -> only P1.
+  expect_equal(sum(staged$dedup_kept), 1)
+  expect_true(staged$dedup_kept[staged$pathway == "P1"])
+
+  # within_db alone keeps P1 and the cross-db P3 (different DBs, never compared).
+  within_only <- ev_collapse(enr, method = "jaccard", scope = "within_db",
+                             cutoff = 0.5, sig_threshold = NA)
+  expect_equal(sum(within_only$dedup_kept), 2)
+})
+
+test_that("per-stage cutoff vector is accepted and validated", {
+  enr <- make_containment_pair()
+  expect_silent(ev_collapse(enr, method = "jaccard", scope = c("within_db", "cross_db"),
+                            cutoff = c(0.9, 0.375), sig_threshold = NA))
+  expect_error(
+    ev_collapse(enr, method = "jaccard", scope = c("within_db", "cross_db"),
+                cutoff = c(0.5, 0.5, 0.5), sig_threshold = NA),
+    class = "ev_bad_cutoff")
+})
+
 test_that("keep_by='NES' keeps the strongest term by magnitude, not signed NES", {
   # Two redundant DOWN pathways; the strongly-down one (NES -3) must be the
   # representative, not the weakly-down one (NES -0.5).
