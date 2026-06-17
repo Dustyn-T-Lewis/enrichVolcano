@@ -39,20 +39,25 @@ ev_select_ring_terms <- function(enr, max_terms, show_databases = NULL,
 #' @param uniprot Column name holding UniProt accessions (auto-detected by default).
 #' @param p_method Y-axis transform: `"pi_eq2"` (default), `"pi_eq1"`,
 #'   `"raw_p"`, `"adj_p"`.
-#' @param rank_by Signed statistic fgsea ranks genes by. `"signed_p"`
-#'   (default, `sign(logFC) * -log10(P)`), `"t"`, `"logFC"`, or any signed
-#'   column. Unsigned pi-score columns are rejected.
+#' @param rank_by Signed statistic fgsea ranks genes by. `"t"` (default, the
+#'   limma / proteoDA moderated t-statistic; falls back to `"signed_p"` when no
+#'   `t` column is present), `"signed_p"` (`sign(logFC) * -log10(P)`), `"logFC"`,
+#'   or any signed column. Unsigned pi-score columns are rejected.
 #' @param p_adjust Method: `"BH"` (default), `"bonferroni"`, `"qvalue"`, `"IHW"`.
 #' @param p_threshold,logfc_threshold Volcano significance cutoffs. A point is
 #'   coloured up/down only when it clears both `p_threshold` and
 #'   `abs(logFC) >= logfc_threshold`.
 #' @param enrich_mode `c("fgsea", "ora")` - either or both.
 #' @param enrich_padj Pathway significance cutoff (default 0.05).
-#' @param dedup List with `method`, `cutoff`, and `scope`. `method` may be
+#' @param dedup List forwarded to [ev_collapse()]; recognised fields are
+#'   `method`, `cutoff`, `scope`, `sig_threshold`, `collapse_pval_threshold`,
+#'   `keep_by`, `similarity`, and `combined_weight`. `method` may be
 #'   `"collapse_then_jaccard"` (default), `"jaccard_then_collapse"`,
 #'   `"jaccard"`, or `"collapse_fgsea"`; `"both"` is a deprecated alias for
-#'   `"jaccard_then_collapse"`. When `method` is omitted, the default from
-#'   [ev_collapse()] is used. See [ev_collapse()] for the full semantics.
+#'   `"jaccard_then_collapse"`. `similarity` selects the gene-overlap metric
+#'   (`"jaccard"`, `"overlap"`, `"combined"`; Merico 2010). When a field is
+#'   omitted, the [ev_collapse()] default is used. See [ev_collapse()] for the
+#'   full semantics.
 #' @param ring List controlling the ring. Honoured fields: `max_terms` (cap on
 #'   pathways drawn in the ring); `show_databases` (default NULL = all enriched
 #'   databases; pass a character vector to restrict the ring to those named
@@ -90,7 +95,7 @@ enrich_volcano <- function(data, contrast,
                            logfc_threshold = log2(1.5),
                            enrich_mode = c("fgsea", "ora"),
                            enrich_padj = 0.05,
-                           rank_by = "signed_p",
+                           rank_by = "t",
                            dedup = list(cutoff = 0.5, scope = "within_db"),
                            ring = list(max_terms = 10),
                            facet = list(nrow = NULL, ncol = NULL),
@@ -143,7 +148,8 @@ enrich_volcano <- function(data, contrast,
       c(list(enrich_result = enrich),
         dedup[intersect(names(dedup),
                         c("method", "cutoff", "scope", "sig_threshold",
-                          "collapse_pval_threshold", "keep_by"))])
+                          "collapse_pval_threshold", "keep_by",
+                          "similarity", "combined_weight"))])
     )
   } else {
     enrich$dedup_kept <- logical(0)

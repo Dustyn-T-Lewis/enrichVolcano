@@ -1,3 +1,50 @@
+# Set-similarity metrics (Merico 2010 PMID:21085593, EnrichmentMap): a small set
+# fully contained in a large one has low Jaccard but Overlap = 1. The combined
+# coefficient (0.5*Jaccard + 0.5*Overlap) is the Cytoscape EnrichmentMap default.
+make_containment_pair <- function() {
+  tibble::tibble(
+    contrast = "c", database = "db", mode = "fgsea",
+    pathway = c("BIG", "SUBSET"),
+    pval = c(0.001, 0.01), padj = c(0.01, 0.02),
+    NES = c(2, 1.8), size = c(10, 3), direction = c("up", "up"),
+    # SUBSET (A;B;C) ⊂ BIG: Jaccard = 3/10 = 0.30; Overlap = 3/3 = 1.00
+    leading_edge = c("A;B;C;D;E;F;G;H;I;J", "A;B;C")
+  )
+}
+
+test_that("similarity defaults to jaccard and is exposed as a parameter", {
+  expect_identical(eval(formals(ev_collapse)$similarity), c("jaccard", "overlap", "combined"))
+  enr <- make_containment_pair()
+  expect_identical(
+    ev_collapse(enr, method = "jaccard", cutoff = 0.5, sig_threshold = NA),
+    ev_collapse(enr, method = "jaccard", similarity = "jaccard",
+                cutoff = 0.5, sig_threshold = NA)
+  )
+})
+
+test_that("overlap coefficient drops a contained set that Jaccard keeps", {
+  enr <- make_containment_pair()
+  jac <- ev_collapse(enr, method = "jaccard", similarity = "jaccard",
+                     cutoff = 0.5, sig_threshold = NA)
+  ovl <- ev_collapse(enr, method = "jaccard", similarity = "overlap",
+                     cutoff = 0.5, sig_threshold = NA)
+  expect_equal(sum(jac$dedup_kept), 2)          # Jaccard 0.30 < 0.5 -> keep both
+  expect_equal(sum(ovl$dedup_kept), 1)          # Overlap 1.00 > 0.5 -> drop SUBSET
+  expect_true(ovl$dedup_kept[ovl$pathway == "BIG"])
+})
+
+test_that("combined coefficient = weighted Jaccard + overlap (Merico 2010)", {
+  enr <- make_containment_pair()
+  # combined = 0.5*0.30 + 0.5*1.00 = 0.65 > 0.5 -> drop SUBSET
+  cmb <- ev_collapse(enr, method = "jaccard", similarity = "combined",
+                     cutoff = 0.5, sig_threshold = NA)
+  expect_equal(sum(cmb$dedup_kept), 1)
+  # weight entirely on Jaccard reproduces the Jaccard-only verdict (0.30 < 0.5)
+  cmb_j <- ev_collapse(enr, method = "jaccard", similarity = "combined",
+                       combined_weight = 1, cutoff = 0.5, sig_threshold = NA)
+  expect_equal(sum(cmb_j$dedup_kept), 2)
+})
+
 test_that("ev_collapse jaccard drops near-duplicate pathway", {
   enrich <- tibble::tibble(
     contrast = "c", database = "db", mode = "fgsea",

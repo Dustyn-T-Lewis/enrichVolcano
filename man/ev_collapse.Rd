@@ -12,7 +12,9 @@ ev_collapse(
   scope = c("within_db", "cross_db", "global"),
   sig_threshold = 0.05,
   collapse_pval_threshold = 0.05,
-  keep_by = c("padj", "size", "NES")
+  keep_by = c("padj", "size", "NES"),
+  similarity = c("jaccard", "overlap", "combined"),
+  combined_weight = 0.5
 )
 }
 \arguments{
@@ -38,6 +40,18 @@ collapse step: \code{collapse_fgsea}, \code{jaccard_then_collapse}, and the
 default \code{collapse_then_jaccard}. Default 0.05.}
 
 \item{keep_by}{Tie-breaking column ("padj", "size", "NES").}
+
+\item{similarity}{Gene-set similarity metric for the Jaccard-family steps,
+computed on leading-edge genes (Merico 2010, EnrichmentMap):
+\code{"jaccard"} (default, \eqn{|A\cap B|/|A\cup B|}; EM cutoff 0.25),
+\code{"overlap"} (\eqn{|A\cap B|/\min(|A|,|B|)}, catches a small set
+contained in a larger one; EM cutoff 0.5), or \code{"combined"}
+(\eqn{w\cdot Jaccard + (1-w)\cdot Overlap}; the Cytoscape EnrichmentMap
+default, cutoff 0.375). \code{cutoff} is interpreted on the chosen metric.}
+
+\item{combined_weight}{Weight \eqn{w} on the Jaccard term for
+\code{similarity = "combined"} (default 0.5, per EnrichmentMap). The
+overlap term gets \eqn{1 - w}.}
 }
 \value{
 Tibble with \code{dedup_kept} logical column (TRUE = retained).

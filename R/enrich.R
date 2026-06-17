@@ -13,7 +13,11 @@
 #'   via the registry), a named list of pathway lists, or path(s) to GMT files.
 #' @param species Character (for registered DBs).
 #' @param enrich_mode `c("fgsea", "ora")` — either or both.
-#' @param rank_by Column to rank genes by for fgsea.
+#' @param rank_by Column to rank genes by for fgsea. Default `"t"`, the limma /
+#'   proteoDA moderated t-statistic — the recommended signed GSEA statistic for
+#'   moderated linear models (Subramanian 2005 PNAS; Reimand 2019 Nat Protoc).
+#'   When the input has no `t` column (e.g. edgeR), it falls back to `"signed_p"`
+#'   = `sign(logFC) * -log10(P)`.
 #' @param min_size,max_size Gene-set size filters. Defaults `15`/`500` follow
 #'   Reimand et al. 2019 (*Nat Protoc* §S3.4): sets below ~15 genes are
 #'   noise-prone and sets above ~500 are non-specific. (clusterProfiler defaults
@@ -55,7 +59,7 @@ ev_enrich <- function(data, contrast,
                       databases,
                       species = "human",
                       enrich_mode = c("fgsea", "ora"),
-                      rank_by = "signed_p",
+                      rank_by = "t",
                       min_size = 15, max_size = 500,
                       background = NULL,
                       include_terms = NULL,

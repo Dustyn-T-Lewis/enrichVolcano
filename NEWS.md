@@ -1,7 +1,24 @@
 # enrichVolcano 0.2.0
 
+## Breaking changes
+
+* The default fgsea ranking statistic (`rank_by`) is now `"t"`, the limma /
+  proteoDA moderated t-statistic, instead of `"signed_p"`. This is the
+  recommended signed GSEA statistic for moderated linear models (Subramanian
+  2005 PNAS; Reimand 2019 Nat Protoc) and matches the hand-written source
+  pipelines. Inputs without a `t` column (e.g. edgeR) fall back to `"signed_p"`
+  automatically, so only limma-family results change. Pass `rank_by = "signed_p"`
+  to restore the previous behaviour.
+
 ## New features
 
+* `ev_collapse()` gains a `similarity` argument selecting the gene-overlap metric
+  for the Jaccard-family steps: `"jaccard"` (default), `"overlap"`
+  (\eqn{|A\cap B|/\min(|A|,|B|)}, catches a small set contained in a larger one),
+  or `"combined"` (the Cytoscape EnrichmentMap coefficient
+  \eqn{w\cdot Jaccard + (1-w)\cdot Overlap}; Merico 2010, PMID 21085593), with
+  `combined_weight` (default 0.5). Forwarded through `enrich_volcano(dedup = ...)`.
+  Default behaviour is unchanged (`similarity = "jaccard"`).
 * `ev_collapse()` default method is now `"collapse_then_jaccard"`, matching the
   source pipeline that generated the YvO 2025 figures. The previous default
   `"jaccard"` remains available; the alias `"both"` is deprecated and will be

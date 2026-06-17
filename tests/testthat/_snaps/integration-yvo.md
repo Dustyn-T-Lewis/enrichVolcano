@@ -3,6 +3,6 @@
     {
       "type": "character",
       "attributes": {},
-      "value": ["go_bp::GOBP_CELLULAR_COMPONENT_ASSEMBLY_INVOLVED_IN_MORPHOGENESIS"]
+      "value": ["go_bp::GOBP_CYTOSKELETON_ORGANIZATION", "go_bp::GOBP_MUSCLE_ORGAN_DEVELOPMENT"]
     }
 
