@@ -3,7 +3,7 @@
 # the A_Proteomics_Analysis shared volcano_ring.R design. No coord_polar(); arcs
 # are drawn with ggforce::geom_arc_bar() in a coord_fixed() panel.
 
-# ---- label cleaning ----
+# Label cleaning.
 
 #' Clean a pathway name for ring display
 #'
@@ -112,11 +112,7 @@ ev_clean_label_mitocarta <- function(name) {
   stringr::str_wrap(leaf, width = 15)
 }
 
-# ---- ring geometry ----
-
-# NES fill gradient (blue -> white -> red), shared by arcs and legend.
-ev_nes_colours <- c("#08306B", "#4393C3", "white", "#D6604D", "#67000D")
-ev_nes_values  <- c(-3, -1.5, 0, 1.5, 3)
+# Ring geometry.
 
 # Radii (in the coord_fixed panel's data units) of the grey pathway track that
 # rings the volcano. The central disc fills to the inner edge, the per-gene
@@ -146,7 +142,7 @@ ev_ring_geometry <- function(enrich_df,
   if (nrow(ring) == 0) return(ring)
   ring$clean_label <- ev_clean_label(ring$pathway)
   ring$gene_list <- strsplit(ring$leading_edge, ";", fixed = TRUE)
-  ring$is_up <- !is.na(ring$NES) & ring$NES > 0
+  ring$is_up <- ring$NES > 0
 
   up <- ring[ring$is_up, , drop = FALSE]
   dn <- ring[!ring$is_up, , drop = FALSE]
@@ -212,7 +208,7 @@ ev_tick_data <- function(ring_data, volc_df,
   gene_lfc <- gene_lfc[!duplicated(gene_lfc$gene), , drop = FALSE]
   pad <- 0.5 * pi / 180
 
-  purrr::map_dfr(seq_len(nrow(ring_data)), function(i) {
+  purrr::list_rbind(purrr::map(seq_len(nrow(ring_data)), function(i) {
     row <- ring_data[i, ]
     genes <- intersect(row$gene_list[[1]], gene_lfc$gene)
     if (length(genes) == 0) return(tibble::tibble())
@@ -228,10 +224,10 @@ ev_tick_data <- function(ring_data, volc_df,
       x0 = tick_r0 * sin(ang), y0 = tick_r0 * cos(ang),
       x1 = tick_r1 * sin(ang), y1 = tick_r1 * cos(ang)
     )
-  })
+  }))
 }
 
-# ---- the composite ----
+# Composite assembly.
 
 #' Build a volcano-in-ring composite for one contrast
 #'
@@ -292,6 +288,7 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
   p_method <- match.arg(p_method)
   ev_assert_colour(disc_color)
   pal <- theme$palette
+  # 8% inset so the y-axis arrow and "-log10 p" label clear the inner ring.
   vr <- volcano_radius * 0.92
 
   v <- volc_df[!is.na(volc_df$logFC) & !is.na(volc_df$P.Value), , drop = FALSE]
@@ -299,6 +296,7 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
   v <- v[is.finite(v$neg_log10p), , drop = FALSE]
   p_col <- switch(p_method, pi_eq2 = "pi_eq2", pi_eq1 = "pi_eq1",
                   raw_p = "P.Value", adj_p = "adj.P.Val")
+  # Fallback for inputs that bypassed pi_score() / adjust_p() (e.g. raw limma).
   if (!p_col %in% colnames(v)) p_col <- "P.Value"
   score <- v[[p_col]]
   sig <- score < p_threshold
@@ -408,8 +406,8 @@ ev_volcano_ring <- function(volc_df, enrich_df, title = NULL,
         colour = "grey40", linewidth = 0.2, inherit.aes = FALSE
       ) +
       ggplot2::scale_fill_gradientn(
-        colours = ev_nes_colours,
-        values = scales::rescale(ev_nes_values),
+        colours = pal$nes_scale,
+        values = scales::rescale(pal$nes_values),
         limits = nes_limits, oob = scales::squish, name = "NES"
       )
 

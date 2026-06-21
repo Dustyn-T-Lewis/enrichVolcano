@@ -65,7 +65,7 @@ ring_plot <- function(enrich_result, contrast,
   sub$label <- if (!is.null(label_clean_fn)) {
     label_clean_fn(sub$pathway)
   } else {
-    ev_default_clean_label(sub$pathway)
+    ev_clean_label(sub$pathway)
   }
   sub$mag <- switch(magnitude,
     neg_log_padj = -log10(sub$padj),
@@ -107,21 +107,10 @@ ring_plot <- function(enrich_result, contrast,
                    fill = .data$col_val)
     ) +
     ggplot2::scale_fill_gradient2(
-      low = pal$nes_scale[1], mid = pal$nes_scale[2],
-      high = pal$nes_scale[3], midpoint = 0
+      low = pal$nes_scale[1], mid = pal$nes_scale[3],
+      high = pal$nes_scale[5], midpoint = 0
     ) +
     ggplot2::coord_fixed() +
     ggplot2::theme_void() +
     ggplot2::labs(title = contrast, fill = color)
-}
-
-#' @keywords internal
-#' @noRd
-ev_default_clean_label <- function(x) {
-  x |>
-    sub("^HALLMARK_", "", x = _) |>
-    sub("^REACTOME_", "", x = _) |>
-    sub("^KEGG_(MEDICUS|LEGACY)_", "", x = _) |>
-    gsub("_", " ", x = _) |>
-    tools::toTitleCase()
 }
