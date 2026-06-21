@@ -110,18 +110,36 @@ test_that("ev_parse_uniprot_cc reduces CC text to top-level compartments", {
   )
 })
 
-test_that("go_slim is registered and its bundled GMTs are valid", {
+test_that("go_slim is registered with the canonical OBO loader", {
   reg <- list_databases()
   expect_true("go_slim" %in% reg$name)
-  for (sp in c("human", "mouse", "rat")) {
-    f <- system.file("extdata", "gmt", paste0("go_slim_", sp, ".gmt"),
+  expect_identical(reg$source[reg$name == "go_slim"], "go_slim_obo")
+})
+
+test_that("go_slim OBO file is shipped and parses cleanly", {
+  obo <- system.file("extdata", "goslim_generic.obo",
                      package = "enrichVolcano")
-    skip_if(!nzchar(f), paste("go_slim GMT not bundled:", sp))
-    p <- fgsea::gmtPathways(f)
-    # Sets are size-filtered to 10-500 genes at build (broad GO categories
-    # excluded), leaving ~27-30 per species.
-    expect_gt(length(p), 20)
-    expect_true(all(lengths(p) >= 10 & lengths(p) <= 500))
-    expect_true(all(grepl("^GOSLIM_", names(p))))
+  skip_if(!nzchar(obo), "goslim_generic.obo not installed")
+  bp <- enrichVolcano:::ev_parse_goslim_obo(obo)
+  # The published GO generic slim BP subset has dozens of terms; we don't
+  # pin a brittle count, only that the parser finds a reasonable number.
+  expect_gt(nrow(bp), 30L)
+  expect_true(all(grepl("^GO:\\d{7}$", bp$go_id)))
+  expect_true(all(nzchar(bp$term)))
+})
+
+test_that("load_go_slim builds size-filtered GOSLIM_ sets per species", {
+  for (sp in c("human", "mouse", "rat")) {
+    orgdb <- switch(sp,
+      human = "org.Hs.eg.db",
+      mouse = "org.Mm.eg.db",
+      rat   = "org.Rn.eg.db")
+    skip_if_not_installed("GO.db")
+    skip_if_not_installed("AnnotationDbi")
+    skip_if_not_installed(orgdb)
+    sets <- load_go_slim(species = sp)
+    expect_gt(length(sets), 20L)
+    expect_true(all(lengths(sets) >= 10L & lengths(sets) <= 500L))
+    expect_true(all(grepl("^GOSLIM_", names(sets))))
   }
 })

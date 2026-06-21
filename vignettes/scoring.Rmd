@@ -154,6 +154,40 @@ for the volcano; the signed statistic answers "which direction and how
 strongly?" for the ring. They are different questions and must use
 different scores.
 
+## Pi-Eq.2 as the significance gate, and a note on naming
+
+Some papers write pi-Eq.2 as capital pi (\eqn{\Pi = P^{|\log_2 \mathrm{FC}|}})
+to distinguish it from the unbounded ranking score (lowercase \eqn{\pi},
+our Eq.1). In this package the column is always `pi_eq2`, and the
+convention — following Xiao 2014 — is to use it **directly as an
+adjusted-p-like value, not to BH-correct it**. Π is more stringent than
+nominal p (it penalises small-effect genes), but it is not a true FDR
+estimate; thresholding `pi_eq2 < 0.05` controls no formal error rate.
+Treat it as a pragmatic significance heuristic that bakes in fold
+change, useful when you want the volcano y-axis and the up/down call to
+agree.
+
+`apply_gate()` is the verb that turns a chosen significance value into
+the `sig` and `direction` columns the volcano and ring code consume:
+
+```{r show-gate, eval = FALSE}
+yvo |>
+  pi_score(variant = "eq2") |>
+  apply_gate(value = "pi_eq2", p_cut = 0.05)
+# or, with BH:
+yvo |>
+  adjust_p(method = "BH") |>
+  apply_gate(value = "adj.P.Val", p_cut = 0.05, fc_cut = log2(1.5))
+```
+
+When the gate value is `"pi_eq2"`, `apply_gate()` thresholds Pi alone —
+no second `|logFC|` gate, since Pi already folds in fold change. When
+the gate is on `"adj.P.Val"` or `"P.Value"`, the second `fc_cut` gate
+applies, which is the reviewer-safe default. Pi-Eq.1 is *not* accepted
+as a gate value; it is a ranking statistic, used by
+`ev_enrich(rank_by = "signed_pi")` for fgsea or by sorting on `pi_eq1`
+when you want an unbounded ordering.
+
 ## Multiple-testing correction overview
 
 `adjust_p()` accepts four methods. They differ in what they

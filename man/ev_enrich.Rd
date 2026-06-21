@@ -33,11 +33,15 @@ via the registry), a named list of pathway lists, or path(s) to GMT files.}
 
 \item{enrich_mode}{\code{c("fgsea", "ora")} — either or both.}
 
-\item{rank_by}{Column to rank genes by for fgsea. Default \code{"t"}, the limma /
-proteoDA moderated t-statistic — the recommended signed GSEA statistic for
-moderated linear models (Subramanian 2005 PNAS; Reimand 2019 Nat Protoc).
-When the input has no \code{t} column (e.g. edgeR), it falls back to \code{"signed_p"}
-= \code{sign(logFC) * -log10(P)}.}
+\item{rank_by}{Column or computed metric to rank genes by for fgsea. Default
+\code{"t"}, the limma / proteoDA moderated t-statistic — the recommended signed
+GSEA statistic for moderated linear models (Subramanian 2005 PNAS; Reimand
+2019 Nat Protoc). When the input has no \code{t} column (e.g. edgeR) the
+default falls back to \code{"signed_p"}. Other built-in computed metrics:
+\code{"signed_p"} = \code{sign(logFC) * -log10(P)} and \code{"signed_pi"} =
+\verb{sign(logFC) * |logFC| * -log10(P)} (a signed pi-Eq.1; folds in fold change
+so large-effect genes dominate the tails). Any signed numeric column in
+\code{data} (e.g. \code{"logFC"}) also works.}
 
 \item{min_size, max_size}{Gene-set size filters. Defaults \code{15}/\code{500} follow
 Reimand et al. 2019 (\emph{Nat Protoc} §S3.4): sets below ~15 genes are

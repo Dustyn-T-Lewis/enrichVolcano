@@ -37,6 +37,7 @@ Imports:
     tidyselect,
     withr
 Suggests:
+    AnnotationDbi,
     covr,
     GO.db,
     IHW,

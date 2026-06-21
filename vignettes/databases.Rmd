@@ -60,8 +60,11 @@ cross-reference. PID covers cancer-relevant signalling specifically.
 ### Ontology
 
 Controlled vocabulary trees from the Gene Ontology and HPO projects.
-Examples: `go_bp`, `go_cc`, `go_mf`, `hpo`, and `go_slim` (a bundled
-generic-BP slim that trades GO_BP's depth for a compact, readable set).
+Examples: `go_bp`, `go_cc`, `go_mf`, `hpo`, and `go_slim` (the canonical
+GO Consortium generic-BP slim, loaded at runtime from the shipped
+`inst/extdata/goslim_generic.obo` via `GO.db` offspring expansion — see
+`load_go_slim()` and `inst/extdata/goslim_generic.PROVENANCE.md` for the
+exact GO release that is frozen in this package).
 Use for fine-grained term enrichment when you want to drill into a
 specific functional axis.
 Expect heavy parent-child redundancy: GO_BP can return 30 enriched
@@ -230,12 +233,19 @@ counterpart, and a few rare paralog-only genes will appear in rat
 but not human. This is normal and rarely changes top-line
 enrichment.
 
-For bundled GMT files (MitoCarta3, CORUM, GO Slim, HPA Subcellular,
-UniProt Subcellular), the package selects the species-specific file
-from `inst/extdata/gmt/`. The
-naming convention is `<db>_<species>.gmt`. If a species file is
-missing, `enrich_volcano()` aborts with a clear message rather than
-silently falling back to human.
+For bundled GMT files (MitoCarta3, CORUM, HPA Subcellular, UniProt
+Subcellular), the package selects the species-specific file from
+`inst/extdata/gmt/`. The naming convention is `<db>_<species>.gmt`. If
+a species file is missing, `enrich_volcano()` aborts with a clear
+message rather than silently falling back to human.
+
+GO Slim is no longer a bundled GMT. It is built at runtime by
+`load_go_slim()` from the shipped OBO file plus the species-specific
+Bioconductor annotation package (`org.Hs.eg.db`, `org.Mm.eg.db`, or
+`org.Rn.eg.db`). This means the term set comes directly from the GO
+Consortium release frozen with the package, not from a hand-curated
+list — see `inst/extdata/goslim_generic.PROVENANCE.md` for the GO
+release and download date.
 
 A practical implication: if your gene symbols are not in the
 canonical species namespace (rat symbols for a mouse study, for

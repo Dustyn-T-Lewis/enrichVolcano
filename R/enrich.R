@@ -14,11 +14,15 @@
 #'   via the registry), a named list of pathway lists, or path(s) to GMT files.
 #' @param species Character (for registered DBs).
 #' @param enrich_mode `c("fgsea", "ora")` — either or both.
-#' @param rank_by Column to rank genes by for fgsea. Default `"t"`, the limma /
-#'   proteoDA moderated t-statistic — the recommended signed GSEA statistic for
-#'   moderated linear models (Subramanian 2005 PNAS; Reimand 2019 Nat Protoc).
-#'   When the input has no `t` column (e.g. edgeR), it falls back to `"signed_p"`
-#'   = `sign(logFC) * -log10(P)`.
+#' @param rank_by Column or computed metric to rank genes by for fgsea. Default
+#'   `"t"`, the limma / proteoDA moderated t-statistic — the recommended signed
+#'   GSEA statistic for moderated linear models (Subramanian 2005 PNAS; Reimand
+#'   2019 Nat Protoc). When the input has no `t` column (e.g. edgeR) the
+#'   default falls back to `"signed_p"`. Other built-in computed metrics:
+#'   `"signed_p"` = `sign(logFC) * -log10(P)` and `"signed_pi"` =
+#'   `sign(logFC) * |logFC| * -log10(P)` (a signed pi-Eq.1; folds in fold change
+#'   so large-effect genes dominate the tails). Any signed numeric column in
+#'   `data` (e.g. `"logFC"`) also works.
 #' @param min_size,max_size Gene-set size filters. Defaults `15`/`500` follow
 #'   Reimand et al. 2019 (*Nat Protoc* §S3.4): sets below ~15 genes are
 #'   noise-prone and sets above ~500 are non-specific. (clusterProfiler defaults
@@ -162,7 +166,11 @@ ev_rank_stats <- function(sub, rank_by) {
       class = "ev_unsigned_ranking"
     )
   }
-  vals <- if (identical(rank_by, "signed_p") || !(rank_by %in% colnames(sub))) {
+  vals <- if (identical(rank_by, "signed_pi")) {
+    # Computed metric: signed pi-Eq.1 (signed fold-weighted -log10 p).
+    sign(sub$logFC) * abs(sub$logFC) *
+      -log10(pmax(sub$P.Value, .Machine$double.xmin))
+  } else if (identical(rank_by, "signed_p") || !(rank_by %in% colnames(sub))) {
     sign(sub$logFC) * -log10(pmax(sub$P.Value, .Machine$double.xmin))
   } else {
     sub[[rank_by]]
@@ -275,6 +283,8 @@ ev_fetch_pathways <- function(db_name, species, source) {
       subcollection = cat_info$subcollection
     )
     split(df$gene_symbol, df$gs_name)
+  } else if (source == "go_slim_obo") {
+    load_go_slim(species = species)
   } else if (source == "bundled_gmt") {
     fn <- paste0(db_name, "_", species, ".gmt")
     path <- system.file("extdata", "gmt", fn, package = "enrichVolcano")
