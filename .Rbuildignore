@@ -17,3 +17,4 @@
 ^.*\.Rcheck$
 ^Rplots\.pdf$
 ^\.githooks$
+^quarto$
