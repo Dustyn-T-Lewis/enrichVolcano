@@ -41,7 +41,8 @@ library(enrichVolcano)
 
 # Load a bundled YvO subsample
 data <- readRDS(system.file("extdata", "examples", "yvo_tidy.rds",
-                            package = "enrichVolcano"))
+  package = "enrichVolcano"
+))
 
 # Mock pathway sets (skip msigdbr in this demo)
 paths <- list(
@@ -50,7 +51,8 @@ paths <- list(
 )
 
 p <- enrich_volcano(
-  data, contrast = "Aging",
+  data,
+  contrast = "Aging",
   databases = list(test = paths),
   p_method = "pi_eq2", p_adjust = "BH",
   enrich_padj = 0.5
@@ -105,7 +107,9 @@ For building panels by hand there are also `ev_volcano()` (volcano only), `ring_
 citation("enrichVolcano")
 ```
 
-The package implements the pi-score from Xiao Y et al. (2014) *Bioinformatics* 30(6):801, fgsea from Korotkevich G et al. (2021) bioRxiv 060012, and Benjamini-Hochberg FDR from Benjamini & Hochberg (1995) JRSS B 57(1):289.
+The package implements the pi-score from Xiao Y et al. (2014, *Bioinformatics* 30(6):801, PMID 22321699), fgsea from Korotkevich G et al. (2021, bioRxiv doi:10.1101/060012), and Benjamini-Hochberg FDR from Benjamini & Hochberg (1995, *JRSS B* 57(1):289).
+
+Defaults follow the Reimand 2019 ORA/GSEA protocol (Reimand J et al. 2019, *Nat Protoc* 14:482-517, PMID 30664679). The enrichment universe is the set of proteins quantified in each contrast, not the whole proteome — Timmons et al. (2015, *Genome Biol* 16:186, PMID 26346307) and Wijesooriya et al. (2022, *PLoS Comput Biol* 18:e1009935, PMID 35263338) document the inflation of false positives when a whole-genome / whole-UniProt background is used in -omics enrichment.
 
 ## License
 
