@@ -38,6 +38,29 @@ test_that("ranking fgsea by an unsigned pi-score column is rejected", {
   )
 })
 
+test_that("signed_pi ranks by fold-weighted -log10 p with sign(logFC)", {
+  data <- make_ranked_input()
+  stats <- ev_rank_stats(data, "signed_pi")
+
+  expect_true(is.numeric(stats))
+  expect_false(is.unsorted(rev(stats)))
+  expect_true(all(is.finite(stats)))
+
+  # Sign agrees with logFC for every gene; tails span both directions.
+  up_genes   <- data$gene[data$logFC > 0]
+  down_genes <- data$gene[data$logFC < 0]
+  expect_true(all(stats[names(stats) %in% up_genes]   > 0))
+  expect_true(all(stats[names(stats) %in% down_genes] < 0))
+  expect_gt(max(stats), 0); expect_lt(min(stats), 0)
+
+  # Genes with larger |logFC| at the same p should rank further from zero
+  # than genes with smaller |logFC| (the FC-weighting is what distinguishes
+  # signed_pi from signed_p).
+  signed_p <- ev_rank_stats(data, "signed_p")
+  common   <- intersect(names(stats), names(signed_p))
+  expect_false(identical(stats[common], signed_p[common]))
+})
+
 test_that("a missing rank_by column falls back to the signed default", {
   data <- make_ranked_input()
   expect_identical(

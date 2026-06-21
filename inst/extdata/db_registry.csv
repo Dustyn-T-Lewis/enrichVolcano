@@ -19,4 +19,4 @@ mitocarta3,MitoCarta 3.0,organelle,human;mouse,bundled_gmt,CC BY-NC 4.0,mitocart
 hpa_subcellular,HPA Subcellular,organelle,human,bundled_gmt,CC BY-SA 4.0,hpa_thul_2017,Human Protein Atlas subcellular localization (Main location)
 uniprot_subcellular,UniProt Subcellular,organelle,human;mouse;rat,bundled_gmt,CC BY 4.0,uniprot_2024,UniProt top-level subcellular compartments (reviewed)
 corum,CORUM 5.0,complex,human;mouse;rat,bundled_gmt,CC BY 4.0,corum_tschen_2023,Mammalian protein complexes (proteomics-native gene sets)
-go_slim,GO Slim (generic BP),ontology,human;mouse;rat,bundled_gmt,CC BY 4.0,go_consortium,Generic GO Slim BP categories (sets filtered to 10-500 genes)
+go_slim,GO Slim (generic BP),ontology,human;mouse;rat,go_slim_obo,CC BY 4.0,go_consortium,"Generic GO Slim BP (canonical OBO + GO.db offspring, 10-500 genes)"
