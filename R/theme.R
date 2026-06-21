@@ -16,7 +16,11 @@ ev_theme <- function(base_size = 11, palette = "default") {
       up = "#D6604D",
       down = "#4393C3",
       ns = "grey70",
-      nes_scale = c("#08306B", "white", "#67000D")
+      # Single source of truth for the NES diverging ramp.
+      # `ring_plot()` uses indices 1, 3, 5 in scale_fill_gradient2();
+      # `ev_volcano_ring()` uses the full 5 stops in scale_fill_gradientn().
+      nes_scale  = c("#08306B", "#4393C3", "white", "#D6604D", "#67000D"),
+      nes_values = c(-3, -1.5, 0, 1.5, 3)
     )
   )
   if (!palette %in% names(palettes)) {
