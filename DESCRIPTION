@@ -1,6 +1,6 @@
 Package: enrichVolcano
 Title: Volcano-in-Ring Composite Plots from Differential Abundance and Enrichment
-Version: 0.3.0
+Version: 0.3.0.9000
 Authors@R:
     person("Dustyn", "Tubbs", , "dtlts14@gmail.com", role = c("aut", "cre"))
 Description: Draws a single composite figure that combines a differential
