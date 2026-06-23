@@ -394,6 +394,43 @@ them has to be renamed at the boundary — <code>padj_col</code> is a
 single shared argument by design.</p>
 </div>
 <div class="section level2">
+<h2 id="worked-example-dep-fgsea">Worked example: DEP + fgsea<a class="anchor" aria-label="anchor" href="#worked-example-dep-fgsea"></a>
+</h2>
+<p><code>DEP::get_results()</code> returns a wide tibble with one row
+per protein and one group of columns per contrast
+(<code>&lt;contrast&gt;_ratio</code>,
+<code>&lt;contrast&gt;_p.val</code>,
+<code>&lt;contrast&gt;_p.adj</code>). <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> wants
+one row per protein <strong>per contrast</strong>, so a single
+<code><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">tidyr::pivot_longer()</a></code> reshapes it:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">da</span> <span class="op">&lt;-</span> <span class="fu">DEP</span><span class="fu">::</span><span class="fu">get_results</span><span class="op">(</span><span class="va">dep</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">name</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">ends_with</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"_ratio"</span>, <span class="st">"_p.val"</span>, <span class="st">"_p.adj"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
+<span>    <span class="op">-</span><span class="va">name</span>,</span>
+<span>    names_to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"contrast"</span>, <span class="st">".value"</span><span class="op">)</span>,</span>
+<span>    names_pattern <span class="op">=</span> <span class="st">"(.*)_(ratio|p\\.val|p\\.adj)"</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>gene <span class="op">=</span> <span class="va">name</span>, logFC <span class="op">=</span> <span class="va">ratio</span>, P.Value <span class="op">=</span> <span class="va">p.val</span>, padj <span class="op">=</span> <span class="va">p.adj</span><span class="op">)</span></span></code></pre></div>
+<p>Enrichment from <code>fgsea</code> is already in the shape
+<code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> expects — no reshape, no rename:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ranks</span> <span class="op">&lt;-</span> <span class="va">da</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">contrast</span> <span class="op">==</span> <span class="st">"treated_vs_control"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">logFC</span>, <span class="va">gene</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">en</span> <span class="op">&lt;-</span> <span class="fu">fgsea</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html" class="external-link">fgseaMultilevel</a></span><span class="op">(</span>pathways <span class="op">=</span> <span class="va">msigdbr_list</span>, stats <span class="op">=</span> <span class="va">ranks</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>contrast <span class="op">=</span> <span class="st">"treated_vs_control"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span></span>
+<span>  volc_df   <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">da</span>, <span class="va">contrast</span> <span class="op">==</span> <span class="st">"treated_vs_control"</span><span class="op">)</span>,</span>
+<span>  enrich_df <span class="op">=</span> <span class="va">en</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="na-edge-case-policy">NA + edge-case policy<a class="anchor" aria-label="anchor" href="#na-edge-case-policy"></a>
 </h2>
 <table class="table">
