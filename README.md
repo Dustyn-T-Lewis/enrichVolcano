@@ -14,18 +14,18 @@ tidy tables to `volcano_ring()`.
 
 ## What the plot encodes
 
-One figure carries four layers of the same contrast:
+A single figure shows, for one contrast:
 
-- **Centre** — the differential-abundance volcano: `logFC` on x,
+- **Centre:** the differential-abundance volcano. `logFC` on x,
   `-log10(p)` on y, points coloured up / down / non-significant.
-- **Ring** — one arc per enriched pathway. Arc **fill** is the NES (red
-  up, blue down by default); arc **thickness** is a magnitude you pick
+- **Ring:** one arc per enriched pathway. Arc fill is the NES (red up,
+  blue down by default); arc thickness is a magnitude you pick
   (`-log10(padj)` or gene-set size).
-- **Split** — up-regulated pathways sit on the top semicircle,
+- **Split:** up-regulated pathways sit on the top semicircle,
   down-regulated on the bottom, so direction reads at a glance.
-- **Tick lines** — thin spokes drop from each arc to its leading-edge
-  genes inside the volcano, tying a pathway to the proteins driving it.
-- **Badges** — running counts of significant up / down proteins.
+- **Tick lines:** thin spokes from each arc to its leading-edge genes
+  inside the volcano, tying a pathway to the proteins driving it.
+- **Badges:** running counts of significant up / down proteins.
 
 `volcano_ring_grid()` composes several contrasts into a labelled grid
 with a shared NES legend.
@@ -75,10 +75,11 @@ edgeR / DEP / fgsea / clusterProfiler / enrichR cross-walk.
 
 ## Customizing
 
-Looks live in `volcano_ring_theme()` (palette presets, or your own `up`
-/ `down` / `ns` / `nes_colors`); layout lives in `volcano_ring()`
-arguments (`arc_order`, `arc_height_range`, `show_counts`, `magnitude`,
-`label_mode`, …). Everything defaults to a sensible figure:
+Colours come from `volcano_ring_theme()` (the palette presets, or your
+own `up` / `down` / `ns` / `nes_colors`). Layout comes from
+`volcano_ring()` arguments such as `arc_order`, `arc_height_range`,
+`show_counts`, `magnitude`, and `label_mode`. Everything has a sensible
+default:
 
 ``` r
 volcano_ring(da1, en1,
@@ -127,7 +128,7 @@ stay installable from the `v0.2.0` tag.
 
 ## Shiny front-end
 
-A graphical front-end (`enrichVolcanoApp`) is **TBD** — under
+A graphical front-end (`enrichVolcanoApp`) is **TBD**: under
 construction in a sibling repo and not yet released. Status and install
 details will land here once it stabilises.
 
