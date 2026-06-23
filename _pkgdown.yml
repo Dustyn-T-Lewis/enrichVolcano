@@ -10,3 +10,11 @@ reference:
   - title: internal
     contents:
       - enrichVolcano-package
+articles:
+  - title: "Get started"
+    navbar: ~
+    contents:
+      - getting-started
+  - title: "Reference"
+    contents:
+      - input-contract
