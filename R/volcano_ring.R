@@ -361,6 +361,8 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #'   when `abs(logFC) >= logfc_threshold` as well as significant.
 #' @param title,subtitle,tag Plot text.
 #' @param volcano_radius Inner volcano radius.
+#' @param ring_radius Inner radius of the enrichment ring (default 4.4). Raise it
+#'   to push the ring further out from the volcano / enlarge the ring.
 #' @param disc_color Optional fill for a tinted central disc.
 #' @param nes_limits Length-2 numeric or `NULL`; defaults to `c(-3, 3)`.
 #' @param magnitude `"neg_log_padj"` (default) or `"size"`; controls arc
@@ -393,6 +395,7 @@ volcano_ring <- function(volc_df, enrich_df,
                          subtitle = NULL,
                          tag = NULL,
                          volcano_radius = 3.5,
+                         ring_radius = 4.4,
                          disc_color = NULL,
                          nes_limits = NULL,
                          magnitude = c("neg_log_padj", "size"),
@@ -445,6 +448,8 @@ volcano_ring <- function(volc_df, enrich_df,
   pal <- theme$palette
   nes_limits <- nes_limits %||% theme$nes_limits %||% c(-3, 3)
   vr <- volcano_radius * 0.92
+  ring_r0 <- ring_radius
+  ring_r1 <- ring_radius + 0.4
 
   v <- volc_df[!is.na(volc_df[[logfc_col]]) & !is.na(volc_df[[pval_col]]), ,
     drop = FALSE
@@ -498,17 +503,20 @@ volcano_ring <- function(volc_df, enrich_df,
   ring <- ev_ring_geometry(enrich_df,
     term_col = term_col, padj_col = padj_col,
     nes_col = nes_col, magnitude_col = mag_vec,
-    genes_list = genes_list, order_by = arc_order,
+    genes_list = genes_list, order_by = arc_order, arc_r0 = ring_r1,
     min_height = arc_height_range[1], max_height = arc_height_range[2]
   )
-  ticks <- ev_tick_data(ring, v, gene_col = gene_col, logfc_col = logfc_col)
+  ticks <- ev_tick_data(ring, v,
+    gene_col = gene_col, logfc_col = logfc_col,
+    tick_r0 = ring_r0, tick_r1 = ring_r1
+  )
 
   p <- ggplot2::ggplot()
 
   if (!is.null(disc_color)) {
     disc <- data.frame(
-      x = ev_ring_r_inner * cos(seq(0, 2 * pi, length.out = 200)),
-      y = ev_ring_r_inner * sin(seq(0, 2 * pi, length.out = 200))
+      x = ring_r0 * cos(seq(0, 2 * pi, length.out = 200)),
+      y = ring_r0 * sin(seq(0, 2 * pi, length.out = 200))
     )
     p <- p + ggplot2::geom_polygon(
       data = disc, ggplot2::aes(.data$x, .data$y),
@@ -520,7 +528,7 @@ volcano_ring <- function(volc_df, enrich_df,
     p <- p + ggforce::geom_arc_bar(
       data = ring,
       ggplot2::aes(
-        x0 = 0, y0 = 0, r0 = ev_ring_r_inner, r = ev_ring_r_outer,
+        x0 = 0, y0 = 0, r0 = ring_r0, r = ring_r1,
         start = .data$.ev_start_rad, end = .data$.ev_end_rad
       ),
       fill = "grey93", colour = "grey78", linewidth = 0.15,
@@ -607,7 +615,7 @@ volcano_ring <- function(volc_df, enrich_df,
       ggforce::geom_arc_bar(
         data = ring,
         ggplot2::aes(
-          x0 = 0, y0 = 0, r0 = ev_ring_r_outer, r = .data$arc_r1_var,
+          x0 = 0, y0 = 0, r0 = ring_r1, r = .data$arc_r1_var,
           start = .data$.ev_start_rad, end = .data$.ev_end_rad,
           fill = .data[[nes_col]]
         ),
