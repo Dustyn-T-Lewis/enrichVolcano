@@ -183,7 +183,7 @@ ev_ring_r_outer <- 4.8
 #' @keywords internal
 #' @noRd
 ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
-                             magnitude_col, genes_list,
+                             magnitude_col, genes_list, order_by = "padj",
                              gap_intra = 3, gap_split = 8,
                              arc_r0 = ev_ring_r_outer,
                              min_height = 0.05, max_height = 1.6) {
@@ -205,8 +205,14 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
 
   up <- ring[ring$.ev_is_up, , drop = FALSE]
   dn <- ring[!ring$.ev_is_up, , drop = FALSE]
-  up <- up[order(up[[padj_col]]), , drop = FALSE]
-  dn <- dn[order(dn[[padj_col]]), , drop = FALSE]
+  ord_key <- function(df) {
+    switch(order_by,
+      padj = df[[padj_col]],
+      nes  = -abs(df[[nes_col]])
+    )
+  }
+  up <- up[order(ord_key(up)), , drop = FALSE]
+  dn <- dn[order(ord_key(dn)), , drop = FALSE]
   n_up <- nrow(up)
   n_dn <- nrow(dn)
 
@@ -334,6 +340,12 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' @param nes_limits Length-2 numeric or `NULL`; defaults to `c(-3, 3)`.
 #' @param magnitude `"neg_log_padj"` (default) or `"size"`; controls arc
 #'   thickness encoding.
+#' @param arc_order Angular order of arcs within each up/down half:
+#'   `"padj"` (default, lowest FDR first) or `"nes"` (strongest `abs(NES)`
+#'   first). The up/down split itself is always by NES sign.
+#' @param arc_height_range Length-2 numeric `c(min, max)` for the shortest
+#'   and tallest arc; widen it to exaggerate the magnitude encoding.
+#' @param show_counts Draw the up/down significant-point count badges.
 #' @param point_size,point_alpha,label_size,count_x_mult,count_y_mult
 #'   Aesthetic controls for the volcano interior.
 #' @param label_mode,label_n,label_rank_by,label_genes Volcano point labels.
@@ -359,6 +371,9 @@ volcano_ring <- function(volc_df, enrich_df,
                          disc_color = NULL,
                          nes_limits = NULL,
                          magnitude = c("neg_log_padj", "size"),
+                         arc_order = c("padj", "nes"),
+                         arc_height_range = c(0.05, 1.6),
+                         show_counts = TRUE,
                          point_size = 1.6,
                          point_alpha = 0.85,
                          label_size = 2.8,
@@ -373,6 +388,7 @@ volcano_ring <- function(volc_df, enrich_df,
                          label_genes = NULL,
                          theme = volcano_ring_theme()) {
   magnitude <- match.arg(magnitude)
+  arc_order <- match.arg(arc_order)
   label_mode <- match.arg(label_mode)
   label_rank_by <- match.arg(label_rank_by)
   ev_assert_colour(disc_color)
@@ -457,7 +473,8 @@ volcano_ring <- function(volc_df, enrich_df,
   ring <- ev_ring_geometry(enrich_df,
     term_col = term_col, padj_col = padj_col,
     nes_col = nes_col, magnitude_col = mag_vec,
-    genes_list = genes_list
+    genes_list = genes_list, order_by = arc_order,
+    min_height = arc_height_range[1], max_height = arc_height_range[2]
   )
   ticks <- ev_tick_data(ring, v, gene_col = gene_col, logfc_col = logfc_col)
 
@@ -531,19 +548,23 @@ volcano_ring <- function(volc_df, enrich_df,
       x = -vr * 0.45, y = -vr, label = "down",
       size = 2.6, colour = pal$down,
       fontface = "bold.italic", hjust = 1
-    ) +
-    ggplot2::annotate("label",
-      x = vr * count_x_mult, y = vr * count_y_mult,
-      label = n_up,
-      size = 3.2, colour = "white", fill = pal$up,
-      fontface = "bold", linewidth = 0.3
-    ) +
-    ggplot2::annotate("label",
-      x = -vr * count_x_mult, y = vr * count_y_mult,
-      label = n_down,
-      size = 3.2, colour = "white", fill = pal$down,
-      fontface = "bold", linewidth = 0.3
     )
+
+  if (show_counts) {
+    p <- p +
+      ggplot2::annotate("label",
+        x = vr * count_x_mult, y = vr * count_y_mult,
+        label = n_up,
+        size = 3.2, colour = "white", fill = pal$up,
+        fontface = "bold", linewidth = 0.3
+      ) +
+      ggplot2::annotate("label",
+        x = -vr * count_x_mult, y = vr * count_y_mult,
+        label = n_down,
+        size = 3.2, colour = "white", fill = pal$down,
+        fontface = "bold", linewidth = 0.3
+      )
+  }
 
   max_r <- 5.6
   if (nrow(ring) > 0) {

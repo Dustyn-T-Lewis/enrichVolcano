@@ -54,6 +54,52 @@ test_that("volcano_ring runs against the bundled YvO fixture", {
   expect_s3_class(p, "ggplot")
 })
 
+test_that("arc_order = 'nes' reorders arcs by absolute NES within a half", {
+  # P: most significant, weakest NES; Q: least significant, strongest NES.
+  e <- data.frame(
+    pathway = c("P", "Q"), NES = c(1.2, 3.0),
+    padj = c(0.001, 0.04), size = c(20L, 20L),
+    stringsAsFactors = FALSE
+  )
+  gl <- replicate(nrow(e), character(0), simplify = FALSE)
+  mag <- -log10(e$padj)
+  by_padj <- ev_ring_geometry(e, "pathway", "padj", "NES", mag, gl,
+    order_by = "padj"
+  )
+  by_nes <- ev_ring_geometry(e, "pathway", "padj", "NES", mag, gl,
+    order_by = "nes"
+  )
+  expect_equal(by_padj$pathway, c("P", "Q"))
+  expect_equal(by_nes$pathway, c("Q", "P"))
+})
+
+test_that("arc_height_range sets the shortest and tallest arc extent", {
+  e <- make_toy_enrich()
+  gl <- replicate(nrow(e), character(0), simplify = FALSE)
+  mag <- -log10(pmax(e$padj, 1e-300))
+  wide <- ev_ring_geometry(e, "pathway", "padj", "NES", mag, gl,
+    min_height = 0.1, max_height = 3
+  )
+  heights <- wide$arc_r1_var - ev_ring_r_outer
+  expect_lte(max(heights), 3)
+  expect_gte(min(heights), 0.1 - 1e-8)
+})
+
+test_that("show_counts = FALSE drops the up/down count badges", {
+  v <- make_toy_volc()
+  e <- make_toy_enrich()
+  labels_of <- function(p) {
+    unlist(lapply(ggplot2::ggplot_build(p)$data, function(d) {
+      if ("label" %in% names(d)) as.character(d$label) else character(0)
+    }))
+  }
+  with_counts <- labels_of(suppressMessages(volcano_ring(v, e, show_counts = TRUE)))
+  without <- labels_of(suppressMessages(volcano_ring(v, e, show_counts = FALSE)))
+  n_up <- as.character(sum(v$logFC > 0))
+  expect_true(n_up %in% with_counts)
+  expect_false(n_up %in% without)
+})
+
 test_that("volcano_ring_grid composes a 2-panel layout from named lists", {
   v1 <- make_toy_volc(seed = 1L)
   v2 <- make_toy_volc(seed = 2L)

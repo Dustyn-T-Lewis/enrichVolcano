@@ -25,6 +25,9 @@ volcano_ring(
   disc_color = NULL,
   nes_limits = NULL,
   magnitude = c("neg_log_padj", "size"),
+  arc_order = c("padj", "nes"),
+  arc_height_range = c(0.05, 1.6),
+  show_counts = TRUE,
   point_size = 1.6,
   point_alpha = 0.85,
   label_size = 2.8,
@@ -68,6 +71,15 @@ when \code{abs(logFC) >= logfc_threshold} as well as significant.}
 
 \item{magnitude}{\code{"neg_log_padj"} (default) or \code{"size"}; controls arc
 thickness encoding.}
+
+\item{arc_order}{Angular order of arcs within each up/down half:
+\code{"padj"} (default, lowest FDR first) or \code{"nes"} (strongest \code{abs(NES)}
+first). The up/down split itself is always by NES sign.}
+
+\item{arc_height_range}{Length-2 numeric \code{c(min, max)} for the shortest
+and tallest arc; widen it to exaggerate the magnitude encoding.}
+
+\item{show_counts}{Draw the up/down significant-point count badges.}
 
 \item{point_size, point_alpha, label_size, count_x_mult, count_y_mult}{Aesthetic controls for the volcano interior.}
 

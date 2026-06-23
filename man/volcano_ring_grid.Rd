@@ -8,6 +8,7 @@ volcano_ring_grid(
   volc_dfs,
   enrich_dfs,
   contrasts = NULL,
+  subtitles = NULL,
   nrow = NULL,
   ncol = NULL,
   tag_levels = "A",
@@ -24,6 +25,9 @@ Same split convenience as \code{volc_dfs}.}
 
 \item{contrasts}{Character vector of contrast names to include and the
 order in which to draw them. Defaults to \code{names(volc_dfs)}.}
+
+\item{subtitles}{Optional per-ring subtitles. Either a vector parallel to
+\code{contrasts}, or a vector named by contrast. \code{NULL} draws no subtitles.}
 
 \item{nrow, ncol}{Outer layout dims; forwarded to \code{patchwork::wrap_plots()}.}
 
