@@ -30,6 +30,7 @@ ev_clean_label <- function(name) {
     sub("^REACTOME_", "", x = _) |>
     sub("^GOSLIM_", "", x = _) |>
     sub("^KEGG_(MEDICUS|LEGACY)_", "", x = _) |>
+    sub("^KEGG_", "", x = _) |>
     sub("^GO(BP|CC|MF)_", "", x = _) |>
     sub("^WP_", "", x = _) |>
     sub("^CORUM_", "", x = _) |>
@@ -39,8 +40,45 @@ ev_clean_label <- function(name) {
 
   out <- ev_expand_acronyms(out)
   out <- ev_shorten_phrases(out)
+  out <- ev_collapse_repeats(out)
   out <- stringr::str_wrap(out, width = 15)
-  trimws(out)
+  ev_post_wrap_overrides(trimws(out))
+}
+
+#' Collapse adjacent duplicate words left by overlapping MSigDB hierarchies
+#' ("OXPHOS OXPHOS Subunits" -> "OXPHOS Subunits").
+#' @keywords internal
+#' @noRd
+ev_collapse_repeats <- function(x) {
+  repeat {
+    y <- gsub("\\b([A-Za-z][A-Za-z0-9.]*)\\b\\s+\\1\\b", "\\1", x,
+      perl = TRUE, ignore.case = TRUE
+    )
+    if (identical(y, x)) break
+    x <- y
+  }
+  trimws(gsub("\\s+", " ", x))
+}
+
+#' Manual line-break overrides applied after wrapping, for a handful of names
+#' that otherwise wrap awkwardly on the ring.
+#' @keywords internal
+#' @noRd
+ev_post_wrap_overrides <- function(x) {
+  x <- sub("Protein\nLocalization To\nPlasma Membrane",
+    "Protein Localiz.\nto Plasma\nMem.", x,
+    fixed = TRUE
+  )
+  x <- sub("(?s).*Maintenance.*Cell.*Polarity.*", "Maintenance\nof Polarity",
+    x,
+    perl = TRUE
+  )
+  x <- sub("^Heme Metabolism$", "Heme\nMetabolism", x)
+  x <- sub("^tRNA Metabolism$", "tRNA\nMetabolism", x)
+  x <- sub("^Mitotic Spindle$", "Mitotic\nSpindle", x)
+  x <- sub("^MYC Targets V1$", "MYC Targets\nV1", x)
+  x <- sub("^UV Response Dn$", "UV Response\nDn", x)
+  x
 }
 
 #' @keywords internal
@@ -56,9 +94,11 @@ ev_expand_acronyms <- function(x) {
     "\\bRos\\b" = "ROS", "\\bIfn\\b" = "IFN", "\\bIl-?(\\d+)\\b" = "IL\\1",
     "\\bPi3k\\b" = "PI3K", "\\bAkt\\b" = "AKT", "\\bMtor\\b" = "mTOR",
     "\\bMtorc1\\b" = "MTORC1", "\\bE2f\\b" = "E2F", "\\bMyc\\b" = "MYC",
-    "\\bKras\\b" = "KRAS", "\\bTnfa\\b" = "TNFA", "\\bNfkb\\b" = "NFkB",
+    "\\bKras\\b" = "KRAS", "\\bTnfa\\b" = "TNFA", "\\bNfkb\\b" = "NF-kB",
     "\\bG2m\\b" = "G2M", "\\bUv\\b" = "UV", "\\bWnt\\b" = "WNT",
     "\\bStat(\\d)\\b" = "STAT\\1", "\\bJak\\b" = "JAK", "\\bTgf\\b" = "TGF",
+    "\\bPirnas?\\b" = "piRNAs", "\\bDgc\\b" = "DGC", "\\bMpc\\b" = "MPC",
+    "\\bP53\\b" = "p53", "\\bSlc25a\\b" = "SLC25A",
     "Trna " = "tRNA "
   )
   for (pat in names(reps)) x <- gsub(pat, reps[[pat]], x, perl = TRUE)
@@ -69,21 +109,39 @@ ev_expand_acronyms <- function(x) {
 #' @noRd
 ev_shorten_phrases <- function(x) {
   reps <- c(
+    "Oxidative Phosphorylation" = "OXPHOS",
     "Unfolded Protein Response" = "UPR", "Fatty Acid" = "FA",
     "Amino Acid" = "AA", "Generation Of" = "Gen. of", " And " = " & ",
     "Mitochondrion" = "Mito.", "Mitochondrial" = "Mito.",
     "Ubiquinone" = "UQ", "Organization" = "Org.",
     "Cytoskeleton" = "Cytoskel.", "Microtubule" = "MT",
     "Respiratory" = "Resp.", "Electron Transport" = "ETC",
-    "Ubiquitin Dependent" = "Ub-Dep.", "Phosphorylation" = "Phosph.",
+    "Synthesis Coupled" = "Synth.-Coupled",
+    "Ubiquitin Dependent" = "Ub-Dep.",
+    "Proteasome Mediated" = "Proteasome-Med.", "Proteasomal" = "Proteas.",
+    "Phosphorylation" = "Phosph.",
     "Modification" = "Mod.", "Intracellular" = "Intracell.",
     "Regulation Of" = "Reg.", "Signaling Pathway" = "Signaling",
     "Biosynthetic Process" = "Biosynthesis",
     "Catabolic Process" = "Catabolism", "Metabolic Process" = "Metabolism",
-    "Response To" = "Resp. to", "Extracellular Matrix" = "ECM",
-    "Epithelial Mesenchymal Transition" = "EMT"
+    "Based Process" = "Process", "Response To" = "Resp. to",
+    "Establishment Or Maintenance Of" = "Maintenance of",
+    "Extracellular Matrix" = "ECM",
+    "Epithelial Mesenchymal Transition" = "EMT",
+    "Precursor Metabolites & Energy" = "Precursor Metabolites",
+    "Citric Acid Cycle TCA Cycle" = "TCA Cycle",
+    "Aerobic Respiration & Resp. ETC" = "Aerobic Resp. + ETC"
   )
   for (pat in names(reps)) x <- gsub(pat, reps[[pat]], x, fixed = TRUE)
+  # variable-suffix MSigDB names that title-case to a long phrase
+  x <- sub(
+    "External Encapsulating Structure Or.*",
+    "Extracellular Matrix Org.", x
+  )
+  x <- sub(
+    "Enzyme Linked Receptor Protein Signaling.*",
+    "Receptor Protein Signaling", x
+  )
   x
 }
 
