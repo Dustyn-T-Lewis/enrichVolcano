@@ -28,8 +28,15 @@ example (Young vs Old human plasma; one contrast, `Training_Young`).
 
 ## Install
 
+If you do not have remotes installed:
+
+```{r install-remotes, eval = FALSE}
+install.packages("remotes")
+```
+
+Then:
+
 ```{r install, eval = FALSE}
-# install.packages("remotes")
 remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
 ```
 

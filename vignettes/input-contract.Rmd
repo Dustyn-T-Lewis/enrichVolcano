@@ -35,8 +35,6 @@ volcano_ring(
   size_col = "size", # only required when magnitude = "size"
   genes_col = NULL, # NULL triggers tick auto-detect (Q4)
   genes_sep = NULL, # NULL defers to the auto-detected default
-
-  # thresholds + encoding
   p_threshold = 0.05,
   logfc_threshold = 0,
   magnitude = c("neg_log_padj", "size")
