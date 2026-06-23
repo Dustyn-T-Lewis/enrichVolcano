@@ -683,20 +683,20 @@ volcano_ring <- function(volc_df, enrich_df,
     ggplot2::theme_void(base_size = theme$base_size) +
     ggplot2::theme(
       plot.title = ggplot2::element_text(
-        face = "bold", hjust = 0.5, margin = ggplot2::margin(b = 0.5)
+        face = "bold", hjust = 0.5, margin = ggplot2::margin(b = 0)
       ),
       plot.subtitle = ggplot2::element_text(
         face = "bold.italic", hjust = 0.5,
         colour = "grey30",
         size = ggplot2::rel(0.65),
-        margin = ggplot2::margin(t = 0, b = 0.5)
+        margin = ggplot2::margin(t = 0, b = 0)
       ),
       plot.tag = ggplot2::element_text(face = "bold"),
       plot.tag.position = c(0.02, 0.99),
       plot.margin = ggplot2::margin(1, 1, 1, 1, "mm"),
       legend.position = "right",
-      legend.key.height = ggplot2::unit(10, "mm"),
-      legend.key.width = ggplot2::unit(2.5, "mm")
+      legend.key.height = ggplot2::unit(8, "mm"),
+      legend.key.width = ggplot2::unit(2, "mm")
     ) +
     ggplot2::guides(fill = ggplot2::guide_colorbar(direction = "vertical"))
 }
