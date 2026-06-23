@@ -1,5 +1,5 @@
 #!/bin/sh
-# Strip any AI/assistant attribution from commit messages.
+# Strip machine-generated attribution trailers from commit messages.
 # Activate once per clone with: git config core.hooksPath .githooks
 f="$1"
 sed -i.bak -E \

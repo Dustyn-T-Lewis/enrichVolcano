@@ -1,13 +1,13 @@
-name: ai-vocab-check
+name: vocab-check
 on: [push, pull_request]
 jobs:
   grep:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Forbid AI-vocabulary
+      - name: Forbid banned vocabulary
         run: |
           if grep -rE 'leverage|robust|comprehensive|seamless|streamline|delve|utilize|harness' R/ man/ vignettes/ README.md ; then
-            echo "::error::AI-vocabulary patterns detected. Re-word the flagged passages."
+            echo "::error::Banned vocabulary patterns detected. Re-word the flagged passages."
             exit 1
           fi
