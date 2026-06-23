@@ -81,6 +81,17 @@ nrow(da1)
 nrow(en1)
 ```
 
+The enrichment slice spans many databases, far more terms than read
+cleanly as a ring. Curation is yours to do: keep the significant terms
+and take the top few per direction.
+
+```{r curate}
+sig <- en1[en1$padj < 0.05 & is.finite(en1$NES), , drop = FALSE]
+sig <- sig[order(sig$padj), ]
+en1 <- rbind(head(sig[sig$NES > 0, ], 7), head(sig[sig$NES < 0, ], 7))
+nrow(en1)
+```
+
 ## Map column names
 
 The YvO DA carries `adj.P.Val`, not `padj`. The shared `padj_col`
@@ -161,6 +172,9 @@ constantly:
   `"by_genes"` — controls which volcano points are labelled.
 - `theme = volcano_ring_theme(palette = "viridis")` — swap the palette
   without re-passing every aesthetic.
+
+`vignette("customizing")` walks the colours, volcano, ring, and layout
+knobs section by section.
 
 ## What this package does not do
 

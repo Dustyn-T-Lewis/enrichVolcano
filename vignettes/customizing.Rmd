@@ -1,0 +1,149 @@
+---
+title: "Customizing the composite"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Customizing the composite}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 6,
+  dpi = 96,
+  message = FALSE
+)
+```
+
+Every composite comes from one call to `volcano_ring()`. The defaults are
+chosen to read well, and you reach everything else through two places:
+
+- **`volcano_ring_theme()`** controls the *looks* — point colours and the
+  NES ramp.
+- **`volcano_ring()` arguments** control the *data mapping and layout* —
+  what counts as significant, how arcs are ordered and sized, what gets
+  labelled.
+
+This vignette walks the knobs section by section on the bundled YvO
+example.
+
+```{r data}
+library(enrichVolcano)
+
+da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
+  package = "enrichVolcano"
+))
+en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
+  package = "enrichVolcano"
+))
+ctr <- "Training_Young"
+da1 <- da[da$contrast == ctr, , drop = FALSE]
+names(da1)[names(da1) == "adj.P.Val"] <- "padj"
+
+# The bundled table spans many databases; ring the top 7 per direction so
+# the arcs stay legible. Which pathways appear is always your choice.
+sig <- en[en$contrast == ctr & en$padj < 0.05 & is.finite(en$NES), , drop = FALSE]
+sig <- sig[order(sig$padj), ]
+en1 <- rbind(head(sig[sig$NES > 0, ], 7), head(sig[sig$NES < 0, ], 7))
+```
+
+The starting point, all defaults:
+
+```{r baseline, fig.alt = "Default volcano-in-ring"}
+volcano_ring(da1, en1, title = "YvO", subtitle = ctr)
+```
+
+## Colours
+
+Three presets ship: `"default"` (red/blue diverging), `"viridis"`, and
+`"okabe"` (colour-blind-safe). Swap one in through `theme`:
+
+```{r palette, fig.alt = "Okabe-Ito palette"}
+volcano_ring(da1, en1, theme = volcano_ring_theme(palette = "okabe"))
+```
+
+To set your own colours, pass them straight to `volcano_ring_theme()` —
+`up`, `down`, `ns` for the points, `nes_colors` (with optional
+`nes_limits`) for the arc ramp:
+
+```{r colours, fig.alt = "Custom point and arc colours"}
+my_theme <- volcano_ring_theme(
+  up = "#B2182B", down = "#2166AC", ns = "grey80",
+  nes_colors = c("#053061", "white", "#67001F"),
+  nes_limits = c(-2.5, 2.5)
+)
+volcano_ring(da1, en1, theme = my_theme)
+```
+
+## The volcano
+
+The centre is an ordinary volcano. `p_threshold` and `logfc_threshold`
+define the up/down call; `point_size` and `point_alpha` size the cloud;
+`label_mode` decides which proteins get text.
+
+```{r volcano, fig.alt = "Bigger points, labelled top hits"}
+volcano_ring(da1, en1,
+  p_threshold = 0.01, logfc_threshold = log2(1.5),
+  point_size = 2.2, point_alpha = 0.6,
+  label_mode = "top_per_direction", label_n = 4
+)
+```
+
+## The ring
+
+Arc **fill** is NES; arc **thickness** is a magnitude you choose with
+`magnitude` — `"neg_log_padj"` (default) or `"size"` (the gene-set size).
+`arc_height_range` sets how short the smallest arc and how tall the
+largest arc get, so you can flatten or exaggerate that encoding.
+
+```{r ring, fig.alt = "Size-driven, exaggerated arc heights"}
+volcano_ring(da1, en1,
+  magnitude = "size",
+  arc_height_range = c(0.1, 2.2)
+)
+```
+
+`arc_order` sets where each arc sits within its half. The up/down split
+is always by NES sign; within each half you order by FDR (`"padj"`,
+the default) or by enrichment strength (`"nes"`):
+
+```{r order, fig.alt = "Arcs ordered by absolute NES"}
+volcano_ring(da1, en1, arc_order = "nes")
+```
+
+## Layout
+
+The up/down badges count significant points; turn them off with
+`show_counts = FALSE`, or nudge them with `count_x_mult` / `count_y_mult`.
+`title`, `subtitle`, and `tag` set the text.
+
+```{r layout, fig.alt = "Counts hidden, custom text"}
+volcano_ring(da1, en1,
+  show_counts = FALSE,
+  title = "Young vs Old", subtitle = "trained", tag = "A"
+)
+```
+
+## Putting it together in a grid
+
+`volcano_ring_grid()` forwards every one of these arguments to each
+panel, so a styled grid is the same knobs passed once:
+
+```{r grid, fig.width = 12, fig.height = 6, fig.alt = "Two styled panels"}
+da2 <- da1
+en2 <- en1
+g <- volcano_ring_grid(
+  list(Young = da1, `Young (size)` = da2),
+  list(Young = en1, `Young (size)` = en2),
+  ncol = 2,
+  theme = my_theme, arc_order = "nes", show_counts = FALSE
+)
+g$plot
+```
+
+For the column conventions and a limma / DESeq2 / edgeR / fgsea /
+clusterProfiler / enrichR cross-walk, see
+`vignette("input-contract")`.
