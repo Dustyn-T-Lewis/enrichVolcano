@@ -36,7 +36,7 @@ ev_clean_label <- function(name) {
     sub("^CORUM_", "", x = _) |>
     gsub("_", " ", x = _) |>
     tolower() |>
-    tools::toTitleCase()
+    stringr::str_to_title()
 
   out <- ev_expand_acronyms(out)
   out <- ev_shorten_phrases(out)
@@ -109,6 +109,12 @@ ev_expand_acronyms <- function(x) {
 #' @noRd
 ev_shorten_phrases <- function(x) {
   reps <- c(
+    # whole-name overrides for a few terms that stay unwieldy after shortening
+    "Immunoregulatory Interactions Between A Lymphoid And A Non Lymphoid Cell" =
+      "Lymphoid Cell Interactions",
+    "Transcriptional And Post Translational Regulation Of Mitf M Expression And Activity" =
+      "MITF-M Regulation",
+    "Arrhythmogenic Right Ventricular Cardiomyopathy Arvc" = "ARVC",
     "Oxidative Phosphorylation" = "OXPHOS",
     "Unfolded Protein Response" = "UPR", "Fatty Acid" = "FA",
     "Amino Acid" = "AA", "Generation Of" = "Gen. of", " And " = " & ",
