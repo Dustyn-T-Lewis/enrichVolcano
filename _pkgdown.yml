@@ -15,6 +15,7 @@ articles:
     navbar: ~
     contents:
       - getting-started
+      - customizing
   - title: "Reference"
     contents:
       - input-contract
