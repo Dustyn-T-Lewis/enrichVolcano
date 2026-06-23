@@ -1,31 +1,14 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/404.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/LICENSE-text.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customising.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/databases.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/enrichVolcano-faq.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/enrichVolcano.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/index.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/pathway-dedup.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/scoring.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/authors.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/index.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/adjust_p.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/database_info.html</loc></url>
+<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/news/index.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrichVolcano-imports.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_app.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_collapse.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_compose.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_enrich.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_theme.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_validate.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano_ring.html</loc></url>
+<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrichVolcano-package.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/index.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/list_databases.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/pi_score.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/print.enrichVolcano.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.html</loc></url>
+<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.html</loc></url>
+<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.html</loc></url>
+<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.html</loc></url>
 </urlset>
 

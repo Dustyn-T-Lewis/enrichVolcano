@@ -3,17 +3,18 @@
 ## Overview
 
 enrichVolcano builds composite volcano + enrichment ring plots from
-differential abundance results. Volcano on top, enrichment terms as
-labeled arcs underneath, both stitched as a single annotated patchwork.
-Returns a ggplot-compatible object that `ggsave()` saves directly.
+differential abundance results. The volcano sits at the centre and the
+enrichment terms wrap around it as NES-coloured arcs, one figure per
+contrast. Returns a ggplot-compatible object that `ggsave()` saves
+directly.
 
-The package accepts ten common input formats (tidy, wide-suffix, DEP,
+The package accepts twelve common input formats (tidy, wide-suffix, DEP,
 proteoDA, limma, DESeq2, edgeR, MSstats, proDA, DEqMS, MaxQuant,
-Perseus) via
-[`ev_validate()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_validate.md),
-supports two pi-score variants (Xiao 2014 Eq.1 and Eq.2), four
-p-adjustment methods (BH, Bonferroni, q-value, IHW), and 21 registered
-gene-set databases across seven species.
+Perseus) via `ev_validate()`, and reads UniProt-keyed per-contrast CSVs
+via `ev_read_contrasts()` (accessions are mapped to gene symbols for
+enrichment). It supports two pi-score variants (Xiao 2014 Eq.1 and
+Eq.2), four p-adjustment methods (BH, Bonferroni, q-value, IHW), and 21
+registered gene-set databases across seven species.
 
 ## Installation
 
@@ -31,7 +32,8 @@ library(enrichVolcano)
 
 # Load a bundled YvO subsample
 data <- readRDS(system.file("extdata", "examples", "yvo_tidy.rds",
-                            package = "enrichVolcano"))
+  package = "enrichVolcano"
+))
 
 # Mock pathway sets (skip msigdbr in this demo)
 paths <- list(
@@ -40,7 +42,8 @@ paths <- list(
 )
 
 p <- enrich_volcano(
-  data, contrast = "Aging",
+  data,
+  contrast = "Aging",
   databases = list(test = paths),
   p_method = "pi_eq2", p_adjust = "BH",
   enrich_padj = 0.5
@@ -74,43 +77,38 @@ These let you rebuild any panel without re-running the pipeline.
 
 ## Pipeline functions
 
-[`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
-orchestrates eight composable steps, all exported:
+`enrich_volcano()` runs the pipeline below and draws the composite with
+`ev_volcano_ring()`. Every stage is exported, so you can run or swap any
+one yourself:
 
 ``` r
 
-ev_validate()   # input adapter (10 sources)
-pi_score()   # Xiao 2014 Eq.1 or Eq.2
-adjust_p()   # BH / Bonferroni / qvalue / IHW
-ev_enrich()     # fgsea + ORA
-ev_collapse()   # Jaccard pathway dedup
-ev_volcano()    # volcano-only ggplot
-ring_plot()       # enrichment ring ggplot
-ev_compose()    # patchwork composition
+ev_read_contrasts() # optional: load UniProt-keyed per-contrast CSVs
+ev_validate()       # input adapter (12 sources + UniProt accessions)
+pi_score()          # Xiao 2014 Eq.1 or Eq.2
+adjust_p()          # BH / Bonferroni / qvalue / IHW
+ev_enrich()         # fgsea + ORA
+ev_collapse()       # Jaccard / collapsePathways dedup
+ev_volcano_ring()   # the volcano-in-ring composite
 ```
 
-Plus
-[`list_databases()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/list_databases.md)
-/
-[`database_info()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/database_info.md)
-for the registry and
-[`ev_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_theme.md)
-for styling.
+For building panels by hand there are also `ev_volcano()` (volcano
+only), `ring_plot()` (ring only), and `ev_compose()` (patchwork stitch),
+plus `list_databases()` / `database_info()` for the registry,
+`ev_idmap_report()` for the UniProt-to-symbol mapping summary, and
+`ev_theme()` for styling. Volcano labelling is rule-driven via
+`label_mode` (`none` by default, `top_per_direction`, `top_total`,
+`all_significant`, or `explicit`).
 
 ## Learn more
 
-- [`vignette("enrichVolcano")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/enrichVolcano.md)
-  — 30-second example + pipeline anatomy
-- [`vignette("scoring")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/scoring.md)
-  — pi-score variants, p-value adjustment methods
-- [`vignette("pathway-dedup")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/pathway-dedup.md)
-  — Jaccard vs collapsePathways, scope choices
-- [`vignette("databases")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/databases.md)
-  — 21 databases compared, decision flowchart
-- [`vignette("customising")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customising.md)
-  — themes, palettes, multi-contrast layouts
-- [`vignette("enrichVolcano-faq")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/enrichVolcano-faq.md)
-  — common questions
+- `vignette("enrichVolcano")` — 30-second example + pipeline anatomy
+- `vignette("scoring")` — pi-score variants, p-value adjustment methods
+- `vignette("pathway-dedup")` — Jaccard vs collapsePathways, scope
+  choices
+- `vignette("databases")` — 21 databases compared, decision flowchart
+- `vignette("customising")` — themes, palettes, multi-contrast layouts
+- `vignette("enrichVolcano-faq")` — common questions
 
 ## Citation
 
@@ -119,10 +117,18 @@ for styling.
 citation("enrichVolcano")
 ```
 
-The package implements the pi-score from Xiao Y et al. (2014)
-*Bioinformatics* 30(6):801, fgsea from Korotkevich G et al. (2021)
-bioRxiv 060012, and Benjamini-Hochberg FDR from Benjamini & Hochberg
-(1995) JRSS B 57(1):289.
+The package implements the pi-score from Xiao Y et al. (2014,
+*Bioinformatics* 30(6):801, PMID 22321699), fgsea from Korotkevich G et
+al. (2021, bioRxiv <doi:10.1101/060012>), and Benjamini-Hochberg FDR
+from Benjamini & Hochberg (1995, *JRSS B* 57(1):289).
+
+Defaults follow the Reimand 2019 ORA/GSEA protocol (Reimand J et
+al. 2019, *Nat Protoc* 14:482-517, PMID 30664679). The enrichment
+universe is the set of proteins quantified in each contrast, not the
+whole proteome — Timmons et al. (2015, *Genome Biol* 16:186, PMID
+26346307) and Wijesooriya et al. (2022, *PLoS Comput Biol* 18:e1009935,
+PMID 35263338) document the inflation of false positives when a
+whole-genome / whole-UniProt background is used in -omics enrichment.
 
 ## License
 
@@ -130,64 +136,21 @@ MIT
 
 # Package index
 
-## Hero function
+## Plotting
 
-- [`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
-  : Build a composite volcano + enrichment ring plot
-- [`ev_volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano_ring.md)
-  : Build a volcano-in-ring composite for one contrast
-- [`ev_app()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_app.md)
-  : Launch the interactive enrichVolcano GUI
+- [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
+  : Volcano-in-ring composite for one contrast
 
-## Pipeline steps
+- [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
+  :
 
-- [`ev_validate()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_validate.md)
-  : Validate and canonicalize input from any supported source
-- [`pi_score()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/pi_score.md)
-  : Compute pi-score (Xiao 2014)
-- [`adjust_p()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/adjust_p.md)
-  : Adjust p-values
-- [`ev_enrich()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_enrich.md)
-  : Run enrichment (fgsea + ORA) against one or many databases
-- [`ev_collapse()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_collapse.md)
-  : Deduplicate enrichment results
-- [`ev_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.md)
-  : Build a volcano ggplot for one contrast
-- [`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md)
-  : Build an enrichment ring ggplot for one contrast
-- [`ev_compose()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_compose.md)
-  : Compose volcano and ring panels into a patchwork
+  Compose a grid of
+  [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
+  plots, one per contrast
 
-## Databases
+- [`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md)
+  :
 
-- [`list_databases()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/list_databases.md)
-  : List supported gene-set databases
-- [`database_info()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/database_info.md)
-  : Print extended description for one database
+  Theme + palette for
+  [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
 
-## Styling
-
-- [`ev_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_theme.md)
-  : enrichVolcano theme and palette
-
-# Articles
-
-### Get started
-
-- [Introduction to
-  enrichVolcano](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/enrichVolcano.md):
-
-### Methods
-
-- [Pi-score and p-value
-  adjustment](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/scoring.md):
-- [Pathway
-  deduplication](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/pathway-dedup.md):
-
-### Reference
-
-- [Choosing an enrichment
-  database](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/databases.md):
-- [Customising enrichVolcano
-  plots](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customising.md):
-- [FAQ](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/enrichVolcano-faq.md):
