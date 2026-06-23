@@ -81,6 +81,33 @@ test_that("volcano_ring_grid splits a single data.frame by contrast", {
   expect_equal(names(g$data), c("A", "B"))
 })
 
+test_that("volcano_ring_grid aborts when a contrast is missing in volc_dfs", {
+  expect_error(
+    volcano_ring_grid(
+      list(A = make_toy_volc(seed = 1L)),
+      list(A = make_toy_enrich(seed = 1L), B = make_toy_enrich(seed = 2L)),
+      contrasts = c("A", "B")
+    ),
+    class = "enrichVolcano_input_error"
+  )
+})
+
+test_that("volcano_ring_grid aborts when contrasts cannot be inferred", {
+  expect_error(
+    volcano_ring_grid(list(make_toy_volc()), list(make_toy_enrich())),
+    class = "enrichVolcano_input_error"
+  )
+})
+
+test_that("volcano_ring_grid aborts when split-by-contrast has no column", {
+  v <- make_toy_volc()
+  v$contrast <- NULL
+  expect_error(
+    volcano_ring_grid(v, make_toy_enrich()),
+    class = "enrichVolcano_input_error"
+  )
+})
+
 test_that("print.volcano_ring_grid returns the object invisibly", {
   d <- rbind(
     transform(make_toy_volc(seed = 1L), contrast = "A"),

@@ -66,6 +66,53 @@ test_that("validate_enrich_df warns on duplicate terms", {
   )
 })
 
+test_that("validate_enrich_df rejects non-data.frame input", {
+  expect_error(
+    validate_enrich_df(list(), ecols_default()),
+    class = "enrichVolcano_input_error"
+  )
+})
+
+test_that("validate_enrich_df rejects an empty frame", {
+  e <- make_toy_enrich()[0, ]
+  expect_error(
+    validate_enrich_df(e, ecols_default()),
+    class = "enrichVolcano_input_error"
+  )
+})
+
+test_that("validate_enrich_df rejects non-numeric NES", {
+  e <- make_toy_enrich()
+  e$NES <- as.character(e$NES)
+  expect_error(
+    validate_enrich_df(e, ecols_default()),
+    class = "enrichVolcano_column_error"
+  )
+})
+
+test_that("validate_enrich_df rejects non-numeric padj", {
+  e <- make_toy_enrich()
+  e$padj <- as.character(e$padj)
+  expect_error(
+    validate_enrich_df(e, ecols_default()),
+    class = "enrichVolcano_column_error"
+  )
+})
+
+test_that("validate_enrich_df rejects padj outside [0, 1]", {
+  e <- make_toy_enrich()
+  e$padj[1] <- 1.5
+  expect_error(
+    validate_enrich_df(e, ecols_default()),
+    class = "enrichVolcano_data_error"
+  )
+})
+
+test_that("dedup_by_term passes through when no duplicates exist", {
+  e <- make_toy_enrich()
+  expect_identical(dedup_by_term(e, ecols_default()), e)
+})
+
 test_that("dedup_by_term keeps the lowest-padj row per term", {
   e <- make_toy_enrich()
   e2 <- rbind(e, transform(e[1, ], padj = 0.5))
