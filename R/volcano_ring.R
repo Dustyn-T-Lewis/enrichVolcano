@@ -313,6 +313,19 @@ volcano_ring <- function(volc_df, enrich_df,
   label_rank_by <- match.arg(label_rank_by)
   ev_assert_colour(disc_color)
 
+  if (!is.data.frame(volc_df)) {
+    ev_abort(
+      "{.arg volc_df} must be a data.frame, not {.cls {class(volc_df)[1]}}.",
+      class = "enrichVolcano_input_error"
+    )
+  }
+  if (!is.data.frame(enrich_df)) {
+    ev_abort(
+      "{.arg enrich_df} must be a data.frame, not {.cls {class(enrich_df)[1]}}.",
+      class = "enrichVolcano_input_error"
+    )
+  }
+
   vcols <- resolve_volc_cols(volc_df, gene_col, logfc_col, pval_col, padj_col)
   ecols <- resolve_enrich_cols(
     enrich_df, term_col, nes_col, padj_col,
