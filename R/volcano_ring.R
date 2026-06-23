@@ -232,7 +232,11 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
       stringsAsFactors = FALSE
     )
   })
-  do.call(rbind, Filter(Negate(is.null), out))
+  rows <- Filter(Negate(is.null), out)
+  if (length(rows) == 0) {
+    return(data.frame())
+  }
+  do.call(rbind, rows)
 }
 
 
@@ -317,6 +321,7 @@ volcano_ring <- function(volc_df, enrich_df,
   validate_volc_df(volc_df, vcols)
   validate_enrich_df(enrich_df, ecols)
   enrich_df <- dedup_by_term(enrich_df, ecols)
+  enrich_df <- enrich_df[!is.na(enrich_df[[ecols$term]]), , drop = FALSE]
   has_padj <- vcols$has_padj
 
   pal <- theme$palette
