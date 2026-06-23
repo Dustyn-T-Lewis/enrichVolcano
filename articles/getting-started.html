@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started</a></li>
+    <li><a class="dropdown-item" href="../articles/customizing.html">Customizing the composite</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -142,6 +143,15 @@ for.</p>
 <span><span class="co">#&gt; [1] 2113</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">en1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 1382</span></span></code></pre></div>
+<p>The enrichment slice spans many databases, far more terms than read
+cleanly as a ring. Curation is yours to do: keep the significant terms
+and take the top few per direction.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sig</span> <span class="op">&lt;-</span> <span class="va">en1</span><span class="op">[</span><span class="va">en1</span><span class="op">$</span><span class="va">padj</span> <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/is.finite.html" class="external-link">is.finite</a></span><span class="op">(</span><span class="va">en1</span><span class="op">$</span><span class="va">NES</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span><span class="va">sig</span> <span class="op">&lt;-</span> <span class="va">sig</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">sig</span><span class="op">$</span><span class="va">padj</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="va">en1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sig</span><span class="op">[</span><span class="va">sig</span><span class="op">$</span><span class="va">NES</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span>, <span class="fl">7</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sig</span><span class="op">[</span><span class="va">sig</span><span class="op">$</span><span class="va">NES</span> <span class="op">&lt;</span> <span class="fl">0</span>, <span class="op">]</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">en1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 14</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="map-column-names">Map column names<a class="anchor" aria-label="anchor" href="#map-column-names"></a>
@@ -153,18 +163,16 @@ so they need to agree. Two options: pass
 <code>padj_col = "adj.P.Val"</code> (but then the enrichment side needs
 that column too), or rename the DA column to <code>padj</code> once at
 the boundary. The second is simpler.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">da1</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">da1</span><span class="op">)</span> <span class="op">==</span> <span class="st">"adj.P.Val"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"padj"</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="draw-the-composite">Draw the composite<a class="anchor" aria-label="anchor" href="#draw-the-composite"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">da1</span>, <span class="va">en1</span>, title <span class="op">=</span> <span class="st">"YvO"</span>, subtitle <span class="op">=</span> <span class="va">ctr</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Duplicate values in <span style="color: #0000BB;">"pathway"</span>; keeping the row with the lowest padj per term.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> 494 duplicate rows dropped.</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started_files/figure-html/ring-1.png" class="r-plt" alt="Volcano in ring for YvO Training_Young" width="576"></p>
 <p>The figure puts the volcano in the centre. NES-coloured arcs around
 it encode each enriched pathway: arc fill is NES (red up, blue down by
@@ -180,7 +188,7 @@ becomes one arc.</p>
 lists to <code><a href="../reference/volcano_ring_grid.html">volcano_ring_grid()</a></code>. The function calls
 <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> once per panel and composes them with
 <code><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html" class="external-link">patchwork::wrap_plots()</a></code>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">toy_volc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">seed</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="va">seed</span><span class="op">)</span></span>
@@ -221,28 +229,30 @@ come up constantly:</p>
 <ul>
 <li>
 <code>magnitude = "neg_log_padj"</code> (default) or
-<code>"size"</code> — what controls arc thickness.</li>
+<code>"size"</code> sets what controls arc thickness.</li>
 <li>
-<code>genes_col</code> and <code>genes_sep</code> — override the
+<code>genes_col</code> and <code>genes_sep</code> override the
 tick-line auto-detect. Auto-detect walks <code>leading_edge</code>,
 <code>leadingEdge</code>, <code>core_enrichment</code>,
 <code>Genes</code> in that order.</li>
 <li>
-<code>label_mode</code> — <code>"none"</code>,
+<code>label_mode</code> (<code>"none"</code>,
 <code>"top_per_direction"</code>, <code>"by_significance"</code>,
-<code>"by_genes"</code> — controls which volcano points are
+<code>"by_genes"</code>) controls which volcano points are
 labelled.</li>
 <li>
-<code>theme = volcano_ring_theme(palette = "viridis")</code> — swap
+<code>theme = volcano_ring_theme(palette = "viridis")</code> swaps
 the palette without re-passing every aesthetic.</li>
 </ul>
+<p><code><a href="../articles/customizing.html">vignette("customizing")</a></code> walks the colours, volcano,
+ring, and layout knobs section by section.</p>
 </div>
 <div class="section level2">
 <h2 id="what-this-package-does-not-do">What this package does not do<a class="anchor" aria-label="anchor" href="#what-this-package-does-not-do"></a>
 </h2>
 <p><code>enrichVolcano</code> does not run the enrichment for you. If
 you need to compute it, here are the canonical paths:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># fgsea (Korotkevich 2021, DOI 10.1101/060012):</span></span>
 <span><span class="va">ranks</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">$</span><span class="va">t</span>; <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ranks</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">$</span><span class="va">gene</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">fgsea</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html" class="external-link">fgseaMultilevel</a></span><span class="op">(</span><span class="va">pathways</span>, stats <span class="op">=</span> <span class="va">ranks</span><span class="op">)</span></span>

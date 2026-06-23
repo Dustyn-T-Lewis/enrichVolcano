@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,6 +19,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started</a></li>
+    <li><a class="dropdown-item" href="../articles/customizing.html">Customizing the composite</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
@@ -49,6 +50,7 @@
 <span>  <span class="va">volc_dfs</span>,</span>
 <span>  <span class="va">enrich_dfs</span>,</span>
 <span>  contrasts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  subtitles <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nrow <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ncol <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tag_levels <span class="op">=</span> <span class="st">"A"</span>,</span>
@@ -74,6 +76,11 @@ Same split convenience as <code>volc_dfs</code>.</p></dd>
 <dt id="arg-contrasts">contrasts<a class="anchor" aria-label="anchor" href="#arg-contrasts"></a></dt>
 <dd><p>Character vector of contrast names to include and the
 order in which to draw them. Defaults to <code>names(volc_dfs)</code>.</p></dd>
+
+
+<dt id="arg-subtitles">subtitles<a class="anchor" aria-label="anchor" href="#arg-subtitles"></a></dt>
+<dd><p>Optional per-ring subtitles. Either a vector parallel to
+<code>contrasts</code>, or a vector named by contrast. <code>NULL</code> draws no subtitles.</p></dd>
 
 
 <dt id="arg-nrow-ncol">nrow, ncol<a class="anchor" aria-label="anchor" href="#arg-nrow-ncol"></a></dt>

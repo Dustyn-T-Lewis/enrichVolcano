@@ -88,6 +88,19 @@ nrow(en1)
 #> [1] 1382
 ```
 
+The enrichment slice spans many databases, far more terms than read
+cleanly as a ring. Curation is yours to do: keep the significant terms
+and take the top few per direction.
+
+``` r
+
+sig <- en1[en1$padj < 0.05 & is.finite(en1$NES), , drop = FALSE]
+sig <- sig[order(sig$padj), ]
+en1 <- rbind(head(sig[sig$NES > 0, ], 7), head(sig[sig$NES < 0, ], 7))
+nrow(en1)
+#> [1] 14
+```
+
 ## Map column names
 
 The YvO DA carries `adj.P.Val`, not `padj`. The shared `padj_col`
@@ -109,8 +122,6 @@ names(da1)[names(da1) == "adj.P.Val"] <- "padj"
 suppressMessages(
   volcano_ring(da1, en1, title = "YvO", subtitle = ctr)
 )
-#> Warning: Duplicate values in "pathway"; keeping the row with the lowest padj per term.
-#> ℹ 494 duplicate rows dropped.
 ```
 
 ![Volcano in ring for YvO
@@ -174,15 +185,18 @@ The full argument list is in
 [`?volcano_ring`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md),
 but four come up constantly:
 
-- `magnitude = "neg_log_padj"` (default) or `"size"` — what controls arc
-  thickness.
-- `genes_col` and `genes_sep` — override the tick-line auto-detect.
+- `magnitude = "neg_log_padj"` (default) or `"size"` sets what controls
+  arc thickness.
+- `genes_col` and `genes_sep` override the tick-line auto-detect.
   Auto-detect walks `leading_edge`, `leadingEdge`, `core_enrichment`,
   `Genes` in that order.
-- `label_mode` — `"none"`, `"top_per_direction"`, `"by_significance"`,
-  `"by_genes"` — controls which volcano points are labelled.
-- `theme = volcano_ring_theme(palette = "viridis")` — swap the palette
+- `label_mode` (`"none"`, `"top_per_direction"`, `"by_significance"`,
+  `"by_genes"`) controls which volcano points are labelled.
+- `theme = volcano_ring_theme(palette = "viridis")` swaps the palette
   without re-passing every aesthetic.
+
+[`vignette("customizing")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customizing.md)
+walks the colours, volcano, ring, and layout knobs section by section.
 
 ## What this package does not do
 

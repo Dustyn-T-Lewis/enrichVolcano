@@ -1,5 +1,22 @@
 # Changelog
 
+## enrichVolcano 0.3.0.9000 (development version)
+
+### New features
+
+- [`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md)
+  takes direct colour overrides: `up`, `down`, `ns` for the points and
+  `nes_colors` for the arc ramp, so custom palettes no longer need
+  editing the returned list by hand.
+- [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
+  gains three layout controls: `arc_order` (`"padj"` or `"nes"`) sets
+  the angular order of arcs within each half, `arc_height_range` sets
+  the shortest and tallest arc, and `show_counts` toggles the up/down
+  count badges.
+- New
+  [`vignette("customizing")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customizing.md)
+  walks the colour, volcano, ring, and layout knobs section by section.
+
 ## enrichVolcano 0.3.0
 
 ### Breaking changes

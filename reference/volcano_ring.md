@@ -28,6 +28,9 @@ volcano_ring(
   disc_color = NULL,
   nes_limits = NULL,
   magnitude = c("neg_log_padj", "size"),
+  arc_order = c("padj", "nes"),
+  arc_height_range = c(0.05, 1.6),
+  show_counts = TRUE,
   point_size = 1.6,
   point_alpha = 0.85,
   label_size = 2.8,
@@ -99,6 +102,21 @@ volcano_ring(
 
   `"neg_log_padj"` (default) or `"size"`; controls arc thickness
   encoding.
+
+- arc_order:
+
+  Angular order of arcs within each up/down half: `"padj"` (default,
+  lowest FDR first) or `"nes"` (strongest `abs(NES)` first). The up/down
+  split itself is always by NES sign.
+
+- arc_height_range:
+
+  Length-2 numeric `c(min, max)` for the shortest and tallest arc; widen
+  it to exaggerate the magnitude encoding.
+
+- show_counts:
+
+  Draw the up/down significant-point count badges.
 
 - point_size, point_alpha, label_size, count_x_mult, count_y_mult:
 

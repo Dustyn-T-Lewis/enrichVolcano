@@ -4,6 +4,8 @@
 
 - [Getting
   started](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/getting-started.md):
+- [Customizing the
+  composite](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customizing.md):
 
 ### Reference
 

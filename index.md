@@ -1,24 +1,36 @@
 # enrichVolcano
 
-> Draw a volcano-in-ring composite from any DA table + any enrichment
-> table you’ve already computed.
+> Draw a volcano-in-ring composite from any differential-abundance table
+> plus any enrichment table you’ve already computed.
 
-`enrichVolcano` is a plotting-only R package. It does not run
-differential abundance, it does not run enrichment, and it does not ship
-gene-set databases. Compute those upstream with the tool that fits your
-study — `fgsea`, `clusterProfiler`, `enrichR`, anything that returns a
-tidy frame — and pass the two tables to
+![A volcano plot ringed by NES-coloured enrichment
+arcs](reference/figures/README-hero-1.png)
+
+`enrichVolcano` is a plotting-only package. It does **not** run
+differential abundance, it does **not** run enrichment, and it ships no
+gene-set databases. Compute those upstream with whatever fits your study
+— `fgsea`, `clusterProfiler`, `enrichR`, or your own — and hand the two
+tidy tables to
 [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md).
 
-## What it draws
+## What the plot encodes
 
-- the differential-abundance volcano in the centre
-- one NES-coloured arc per enriched pathway in a ring around the volcano
-- tick lines from each pathway arc to its leading-edge genes inside the
-  volcano
-- a multi-contrast grid composer
-  ([`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md))
-  for side-by-side panels
+A single figure shows, for one contrast:
+
+- **Centre:** the differential-abundance volcano. `logFC` on x,
+  `-log10(p)` on y, points coloured up / down / non-significant.
+- **Ring:** one arc per enriched pathway. Arc fill is the NES (red up,
+  blue down by default); arc thickness is a magnitude you pick
+  (`-log10(padj)` or gene-set size).
+- **Split:** up-regulated pathways sit on the top semicircle,
+  down-regulated on the bottom, so direction reads at a glance.
+- **Tick lines:** thin spokes from each arc to its leading-edge genes
+  inside the volcano, tying a pathway to the proteins driving it.
+- **Badges:** running counts of significant up / down proteins.
+
+[`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
+composes several contrasts into a labelled grid with a shared NES
+legend.
 
 ## Install
 
@@ -28,7 +40,7 @@ tidy frame — and pass the two tables to
 remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
 ```
 
-## Minimum example
+## Quick start
 
 ``` r
 
@@ -43,40 +55,71 @@ en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
 
 ctr <- "Training_Young"
 da1 <- da[da$contrast == ctr, ]
-en1 <- en[en$contrast == ctr, ]
 names(da1)[names(da1) == "adj.P.Val"] <- "padj"
 
-volcano_ring(da1, en1, title = "YvO", subtitle = ctr)
+# Pick the pathways to ring the volcano (the table holds many databases).
+sig <- en[en$contrast == ctr & en$padj < 0.05 & is.finite(en$NES), ]
+sig <- sig[order(sig$padj), ]
+top <- rbind(head(sig[sig$NES > 0, ], 7), head(sig[sig$NES < 0, ], 7))
+
+volcano_ring(da1, top, title = "YvO", subtitle = ctr)
 ```
 
-See
-[`vignette("getting-started")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/getting-started.md)
-for the full walkthrough and
-[`vignette("input-contract")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/input-contract.md)
-for the column conventions plus a limma / DESeq2 / edgeR / DEP / fgsea /
-clusterProfiler / enrichR cross-walk.
+## Input contract, in brief
 
-## Public API (v0.3.0)
+| Side | Needs | Default column |
+|----|----|----|
+| DA (`volc_df`) | gene id, effect, p, adjusted p | `gene`, `logFC`, `P.Value`, `padj` |
+| Enrichment (`enrich_df`) | term, NES, adjusted p, size | `pathway`, `NES`, `padj`, `size` |
+| Tick lines (optional) | leading-edge genes | auto-detected from `leading_edge` / `leadingEdge` / `core_enrichment` / `Genes` |
+
+Every column name is an argument, so non-default schemas work without
+renaming. See
+[`vignette("input-contract")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/input-contract.md)
+for the limma / DESeq2 / edgeR / DEP / fgsea / clusterProfiler / enrichR
+cross-walk.
+
+## Customizing
+
+Colours come from
+[`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md)
+(the palette presets, or your own `up` / `down` / `ns` / `nes_colors`).
+Layout comes from
+[`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
+arguments such as `arc_order`, `arc_height_range`, `show_counts`,
+`magnitude`, and `label_mode`. Everything has a sensible default:
+
+``` r
+
+volcano_ring(da1, en1,
+  theme = volcano_ring_theme(palette = "okabe"),
+  arc_order = "nes", show_counts = FALSE
+)
+```
+
+[`vignette("customizing")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customizing.md)
+walks every knob section by section.
+
+## Public API
 
 | Function | Role |
 |----|----|
 | [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md) | one composite for one contrast — returns a `ggplot` |
 | [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md) | a grid of composites, one per contrast |
-| [`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md) | theme + palette factory (`default`, `viridis`, `okabe`) |
+| [`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md) | theme + palette factory, with colour overrides |
 | `print.volcano_ring_grid()` | print method for the grid object |
 
-## Upstream tools we consume
+## Cite the upstream tools
 
-`enrichVolcano` is a thin wrapper around outputs from existing
-enrichment tooling. When you cite the figure, the methodological credit
-belongs upstream:
+`enrichVolcano` only draws; the methodological credit belongs to the
+enrichment tool you ran:
 
 - `fgsea` — Korotkevich G et al. 2021, DOI 10.1101/060012
 - `clusterProfiler` — Wu T et al. 2021 *Innovation*
 - `enrichR` — Chen EY et al. 2013 *BMC Bioinformatics*; Kuleshov MV et
   al. 2016 *Nucleic Acids Res*
 
-Useful references when choosing what to run and how to interpret it:
+Useful when choosing what to run and how to read it:
 
 - Xiao Y et al. 2014 *Bioinformatics* 30(6):801-7, PMID 22321699 —
   π-value
@@ -89,13 +132,15 @@ Useful references when choosing what to run and how to interpret it:
 
 ## Versioning
 
-v0.3.0 is a breaking release: the v0.2.x enrichment engine, the Shiny
-app, and the standalone volcano / ring functions are gone. v0.2.0 stays
-installable from the `v0.2.0` tag if you need the old hero
-`enrich_volcano()` wrapper or the GUI.
+Current release is v0.3.0. The pre-0.3 enrichment engine and standalone
+volcano / ring wrappers are gone; the old `enrich_volcano()` and GUI
+stay installable from the `v0.2.0` tag.
 
-The Shiny app moves to a sibling repo (`enrichVolcanoApp`) and depends
-on `enrichVolcano >= 0.3.0`.
+## Shiny front-end
+
+A graphical front-end (`enrichVolcanoApp`) is **TBD**: under
+construction in a sibling repo and not yet released. Status and install
+details will land here once it stabilises.
 
 ## License
 

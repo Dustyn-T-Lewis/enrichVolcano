@@ -11,7 +11,7 @@ arcs to each pathway's leading-edge genes inside the volcano."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,6 +23,7 @@ arcs to each pathway's leading-edge genes inside the volcano."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started</a></li>
+    <li><a class="dropdown-item" href="../articles/customizing.html">Customizing the composite</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
@@ -72,6 +73,9 @@ arcs to each pathway's leading-edge genes inside the volcano.</p>
 <span>  disc_color <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nes_limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  magnitude <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"neg_log_padj"</span>, <span class="st">"size"</span><span class="op">)</span>,</span>
+<span>  arc_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"padj"</span>, <span class="st">"nes"</span><span class="op">)</span>,</span>
+<span>  arc_height_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">1.6</span><span class="op">)</span>,</span>
+<span>  show_counts <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  point_size <span class="op">=</span> <span class="fl">1.6</span>,</span>
 <span>  point_alpha <span class="op">=</span> <span class="fl">0.85</span>,</span>
 <span>  label_size <span class="op">=</span> <span class="fl">2.8</span>,</span>
@@ -144,6 +148,21 @@ when <code>abs(logFC) &gt;= logfc_threshold</code> as well as significant.</p></
 <dt id="arg-magnitude">magnitude<a class="anchor" aria-label="anchor" href="#arg-magnitude"></a></dt>
 <dd><p><code>"neg_log_padj"</code> (default) or <code>"size"</code>; controls arc
 thickness encoding.</p></dd>
+
+
+<dt id="arg-arc-order">arc_order<a class="anchor" aria-label="anchor" href="#arg-arc-order"></a></dt>
+<dd><p>Angular order of arcs within each up/down half:
+<code>"padj"</code> (default, lowest FDR first) or <code>"nes"</code> (strongest <code>abs(NES)</code>
+first). The up/down split itself is always by NES sign.</p></dd>
+
+
+<dt id="arg-arc-height-range">arc_height_range<a class="anchor" aria-label="anchor" href="#arg-arc-height-range"></a></dt>
+<dd><p>Length-2 numeric <code>c(min, max)</code> for the shortest
+and tallest arc; widen it to exaggerate the magnitude encoding.</p></dd>
+
+
+<dt id="arg-show-counts">show_counts<a class="anchor" aria-label="anchor" href="#arg-show-counts"></a></dt>
+<dd><p>Draw the up/down significant-point count badges.</p></dd>
 
 
 <dt id="arg-point-size-point-alpha-label-size-count-x-mult-count-y-mult">point_size, point_alpha, label_size, count_x_mult, count_y_mult<a class="anchor" aria-label="anchor" href="#arg-point-size-point-alpha-label-size-count-x-mult-count-y-mult"></a></dt>

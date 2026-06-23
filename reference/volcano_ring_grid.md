@@ -11,6 +11,7 @@ volcano_ring_grid(
   volc_dfs,
   enrich_dfs,
   contrasts = NULL,
+  subtitles = NULL,
   nrow = NULL,
   ncol = NULL,
   tag_levels = "A",
@@ -35,6 +36,11 @@ volcano_ring_grid(
 
   Character vector of contrast names to include and the order in which
   to draw them. Defaults to `names(volc_dfs)`.
+
+- subtitles:
+
+  Optional per-ring subtitles. Either a vector parallel to `contrasts`,
+  or a vector named by contrast. `NULL` draws no subtitles.
 
 - nrow, ncol:
 
