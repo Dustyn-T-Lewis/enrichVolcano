@@ -78,9 +78,12 @@ example (Young vs Old human plasma; one contrast,
 <div class="section level2">
 <h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
 </h2>
+<p>If you do not have remotes installed:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"Dustyn-T-Lewis/enrichVolcano"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span></code></pre></div>
+<p>Then:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"Dustyn-T-Lewis/enrichVolcano"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="read-the-two-tables">Read the two tables<a class="anchor" aria-label="anchor" href="#read-the-two-tables"></a>
@@ -88,7 +91,7 @@ example (Young vs Old human plasma; one contrast,
 <p>The package ships small slices of four datasets under
 <code>inst/extdata/examples/</code>. <code><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file()</a></code> resolves
 to the install path.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Dustyn-T-Lewis/enrichVolcano" class="external-link">enrichVolcano</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">da_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"examples"</span>, <span class="st">"yvo_da.csv"</span>,</span>
@@ -131,7 +134,7 @@ the fgsea schema with a per-row contrast column: <code>contrast</code>,
 <p><code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> draws one composite per call.
 Multi-contrast composing is what <code><a href="../reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> is
 for.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctr</span> <span class="op">&lt;-</span> <span class="st">"Training_Young"</span></span>
 <span><span class="va">da1</span> <span class="op">&lt;-</span> <span class="va">da</span><span class="op">[</span><span class="va">da</span><span class="op">$</span><span class="va">contrast</span> <span class="op">==</span> <span class="va">ctr</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
 <span><span class="va">en1</span> <span class="op">&lt;-</span> <span class="va">en</span><span class="op">[</span><span class="va">en</span><span class="op">$</span><span class="va">contrast</span> <span class="op">==</span> <span class="va">ctr</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
@@ -150,13 +153,13 @@ so they need to agree. Two options: pass
 <code>padj_col = "adj.P.Val"</code> (but then the enrichment side needs
 that column too), or rename the DA column to <code>padj</code> once at
 the boundary. The second is simpler.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">da1</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">da1</span><span class="op">)</span> <span class="op">==</span> <span class="st">"adj.P.Val"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"padj"</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="draw-the-composite">Draw the composite<a class="anchor" aria-label="anchor" href="#draw-the-composite"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">da1</span>, <span class="va">en1</span>, title <span class="op">=</span> <span class="st">"YvO"</span>, subtitle <span class="op">=</span> <span class="va">ctr</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -177,7 +180,7 @@ becomes one arc.</p>
 lists to <code><a href="../reference/volcano_ring_grid.html">volcano_ring_grid()</a></code>. The function calls
 <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> once per panel and composes them with
 <code><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html" class="external-link">patchwork::wrap_plots()</a></code>.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">toy_volc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">seed</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="va">seed</span><span class="op">)</span></span>
@@ -239,7 +242,7 @@ the palette without re-passing every aesthetic.</li>
 </h2>
 <p><code>enrichVolcano</code> does not run the enrichment for you. If
 you need to compute it, here are the canonical paths:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># fgsea (Korotkevich 2021, DOI 10.1101/060012):</span></span>
 <span><span class="va">ranks</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">$</span><span class="va">t</span>; <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ranks</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">$</span><span class="va">gene</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">fgsea</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html" class="external-link">fgseaMultilevel</a></span><span class="op">(</span><span class="va">pathways</span>, stats <span class="op">=</span> <span class="va">ranks</span><span class="op">)</span></span>
