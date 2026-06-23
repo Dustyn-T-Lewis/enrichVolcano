@@ -235,44 +235,6 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
   do.call(rbind, Filter(Negate(is.null), out))
 }
 
-# Tick-column auto-detect (Q4). Walks the four conventional column names in
-# order and returns a list of character vectors, one per enrich_df row. NULL
-# return means no column matched.
-ev_resolve_genes_col <- function(enrich_df, genes_col, genes_sep) {
-  if (!is.null(genes_col)) {
-    if (!genes_col %in% names(enrich_df)) {
-      ev_abort_missing_column(enrich_df, genes_col, "genes_col", "enrich_df")
-    }
-    col <- enrich_df[[genes_col]]
-    sep <- genes_sep %||% ";"
-    if (is.list(col)) {
-      return(col)
-    }
-    return(strsplit(as.character(col), sep, fixed = TRUE))
-  }
-  candidates <- list(
-    list(name = "leading_edge", sep = ";"),
-    list(name = "leadingEdge", sep = NULL),
-    list(name = "core_enrichment", sep = "/"),
-    list(name = "Genes", sep = ";")
-  )
-  for (c in candidates) {
-    if (c$name %in% names(enrich_df)) {
-      col <- enrich_df[[c$name]]
-      ev_inform("Reading tick lines from {.field {c$name}}.",
-        class = "enrichVolcano_tick_resolution"
-      )
-      if (is.list(col)) {
-        return(col)
-      }
-      return(strsplit(as.character(col), c$sep, fixed = TRUE))
-    }
-  }
-  ev_inform("No tick-line column found; tick lines off.",
-    class = "enrichVolcano_tick_resolution"
-  )
-  NULL
-}
 
 # Composite assembly.
 
@@ -347,20 +309,15 @@ volcano_ring <- function(volc_df, enrich_df,
   label_rank_by <- match.arg(label_rank_by)
   ev_assert_colour(disc_color)
 
-  for (cn in c(gene_col, logfc_col, pval_col)) {
-    if (!cn %in% names(volc_df)) {
-      ev_abort_missing_column(volc_df, cn, deparse(substitute(volc_df)), "volc_df")
-    }
-  }
-  has_padj <- padj_col %in% names(volc_df)
-  for (cn in c(term_col, padj_col, nes_col)) {
-    if (!cn %in% names(enrich_df)) {
-      ev_abort_missing_column(
-        enrich_df, cn, deparse(substitute(enrich_df)),
-        "enrich_df"
-      )
-    }
-  }
+  vcols <- resolve_volc_cols(volc_df, gene_col, logfc_col, pval_col, padj_col)
+  ecols <- resolve_enrich_cols(
+    enrich_df, term_col, nes_col, padj_col,
+    size_col, magnitude
+  )
+  validate_volc_df(volc_df, vcols)
+  validate_enrich_df(enrich_df, ecols)
+  enrich_df <- dedup_by_term(enrich_df, ecols)
+  has_padj <- vcols$has_padj
 
   pal <- theme$palette
   nes_limits <- nes_limits %||% theme$nes_limits %||% c(-3, 3)
@@ -408,14 +365,10 @@ volcano_ring <- function(volc_df, enrich_df,
   )
 
   mag_vec <- switch(magnitude,
-    neg_log_padj = -log10(pmax(enrich_df[[padj_col]], .Machine$double.xmin)),
-    size = if (size_col %in% names(enrich_df)) {
-      as.numeric(enrich_df[[size_col]])
-    } else {
-      ev_abort_missing_column(enrich_df, size_col, "size_col", "enrich_df")
-    }
+    neg_log_padj = -log10(pmax(enrich_df[[ecols$padj]], .Machine$double.xmin)),
+    size         = as.numeric(enrich_df[[ecols$size]])
   )
-  genes_list <- ev_resolve_genes_col(enrich_df, genes_col, genes_sep)
+  genes_list <- resolve_genes_col(enrich_df, genes_col, genes_sep)
   if (is.null(genes_list)) {
     genes_list <- replicate(nrow(enrich_df), character(0), simplify = FALSE)
   }
