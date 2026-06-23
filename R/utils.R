@@ -50,6 +50,25 @@ ev_warn <- function(message, ..., class = NULL,
   )
 }
 
+#' Standard abort for a missing column on a user data.frame
+#'
+#' @keywords internal
+#' @noRd
+ev_abort_missing_column <- function(df, col_name, col_arg, df_name) {
+  numeric_cols <- names(df)[vapply(df, is.numeric, logical(1))]
+  hints <- c(
+    "i" = "Available columns: {.val {names(df)}}.",
+    if (length(numeric_cols)) {
+      c("i" = "Numeric columns: {.val {numeric_cols}}.")
+    },
+    "i" = "Pass {.code {col_arg} = \"<name>\"} or rename your column."
+  )
+  ev_abort(
+    c(paste0("Column {.val {col_name}} not found in {.arg {df_name}}."), hints),
+    class = "enrichVolcano_column_error"
+  )
+}
+
 #' Assert that a value is a single recognisable colour
 #'
 #' `grDevices::col2rgb()` accepts names ("red"), hex ("#1B9E77"), and the
@@ -58,15 +77,21 @@ ev_warn <- function(message, ..., class = NULL,
 #' @keywords internal
 #' @noRd
 ev_assert_colour <- function(x, arg = "disc_color") {
-  if (is.null(x)) return(invisible(NULL))
+  if (is.null(x)) {
+    return(invisible(NULL))
+  }
   ok <- is.character(x) && length(x) == 1L && !is.na(x) &&
-    tryCatch({
-      grDevices::col2rgb(x)
-      TRUE
-    }, error = function(e) FALSE)
+    tryCatch(
+      {
+        grDevices::col2rgb(x)
+        TRUE
+      },
+      error = function(e) FALSE
+    )
   if (!ok) {
     ev_abort("{.arg {arg}} must be a single colour name or hex code; got {.val {x}}.",
-             class = "ev_invalid_colour")
+      class = "ev_invalid_colour"
+    )
   }
   invisible(x)
 }
