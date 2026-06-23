@@ -2,45 +2,11 @@ url: https://Dustyn-T-Lewis.github.io/enrichVolcano/
 template:
   bootstrap: 5
 reference:
-  - title: "Hero function"
+  - title: "Plotting"
     contents:
-      - enrich_volcano
-      - ev_volcano_ring
-      - ev_app
-  - title: "Pipeline steps"
-    contents:
-      - ev_read_contrasts
-      - ev_validate
-      - pi_score
-      - adjust_p
-      - ev_enrich
-      - ev_collapse
-      - ev_volcano
-      - ring_plot
-      - ev_compose
-  - title: "Databases"
-    contents:
-      - list_databases
-      - database_info
-      - ev_idmap_report
-  - title: "Styling"
-    contents:
-      - ev_theme
+      - volcano_ring
+      - volcano_ring_grid
+      - volcano_ring_theme
   - title: internal
     contents:
-      - print.enrichVolcano
-      - enrichVolcano-imports
-articles:
-  - title: "Get started"
-    navbar: ~
-    contents:
-      - enrichVolcano
-  - title: "Methods"
-    contents:
-      - scoring
-      - pathway-dedup
-  - title: "Reference"
-    contents:
-      - databases
-      - customising
-      - enrichVolcano-faq
+      - enrichVolcano-package
