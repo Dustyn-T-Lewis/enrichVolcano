@@ -16,4 +16,3 @@
 ^.*\.tar\.gz$
 ^.*\.Rcheck$
 ^Rplots\.pdf$
-^\.githooks$
