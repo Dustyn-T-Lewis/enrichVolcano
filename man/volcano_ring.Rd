@@ -22,6 +22,7 @@ volcano_ring(
   subtitle = NULL,
   tag = NULL,
   volcano_radius = 3.5,
+  ring_radius = 4.4,
   disc_color = NULL,
   nes_limits = NULL,
   magnitude = c("neg_log_padj", "size"),
@@ -64,6 +65,9 @@ when \code{abs(logFC) >= logfc_threshold} as well as significant.}
 \item{title, subtitle, tag}{Plot text.}
 
 \item{volcano_radius}{Inner volcano radius.}
+
+\item{ring_radius}{Inner radius of the enrichment ring (default 4.4). Raise it
+to push the ring further out from the volcano / enlarge the ring.}
 
 \item{disc_color}{Optional fill for a tinted central disc.}
 
