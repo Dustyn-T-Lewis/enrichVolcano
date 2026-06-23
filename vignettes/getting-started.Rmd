@@ -163,14 +163,14 @@ g$plot
 The full argument list is in `?volcano_ring`, but four come up
 constantly:
 
-- `magnitude = "neg_log_padj"` (default) or `"size"` — what controls arc
-  thickness.
-- `genes_col` and `genes_sep` — override the tick-line auto-detect.
+- `magnitude = "neg_log_padj"` (default) or `"size"` sets what controls
+  arc thickness.
+- `genes_col` and `genes_sep` override the tick-line auto-detect.
   Auto-detect walks `leading_edge`, `leadingEdge`, `core_enrichment`,
   `Genes` in that order.
-- `label_mode` — `"none"`, `"top_per_direction"`, `"by_significance"`,
-  `"by_genes"` — controls which volcano points are labelled.
-- `theme = volcano_ring_theme(palette = "viridis")` — swap the palette
+- `label_mode` (`"none"`, `"top_per_direction"`, `"by_significance"`,
+  `"by_genes"`) controls which volcano points are labelled.
+- `theme = volcano_ring_theme(palette = "viridis")` swaps the palette
   without re-passing every aesthetic.
 
 `vignette("customizing")` walks the colours, volcano, ring, and layout
