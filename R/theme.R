@@ -8,21 +8,36 @@
 #' @param base_family Character base font family; `""` defers to ggplot2.
 #' @param palette One of `"default"` (red-blue diverging, the YvO 2026 lock),
 #'   `"viridis"` (5-stop magma cuts), or `"okabe"` (Okabe-Ito CB-safe pair).
+#'   Sets the starting up / down / non-significant colours and NES ramp; any
+#'   of `up`, `down`, `ns`, `nes_colors` below override it.
+#' @param up,down,ns Optional single colours overriding the palette's
+#'   up-regulated, down-regulated, and non-significant point colours.
+#' @param nes_colors Optional colour vector overriding the diverging NES ramp.
+#'   When supplied without `nes_stops`, stops spread evenly across
+#'   `nes_limits` (or `c(-3, 3)`).
 #' @param nes_limits Optional length-2 numeric. When `NULL`, the colour scale
 #'   in `volcano_ring()` uses its own default.
-#' @param nes_stops Optional numeric vector matching `palette`'s `nes_scale`
-#'   length, overriding the palette's `nes_values`.
+#' @param nes_stops Optional numeric vector matching the NES ramp length,
+#'   overriding the palette's `nes_values`.
 #' @return A list `list(base_size, base_family, theme, palette)`.
 #' @export
 #' @examples
 #' th <- volcano_ring_theme(base_size = 11)
 #' th$palette$up
+#'
+#' # Custom point and arc colours, no list-poking needed:
+#' th <- volcano_ring_theme(up = "#B2182B", down = "#2166AC", ns = "grey80")
 volcano_ring_theme <- function(base_size = 11,
                                base_family = "",
                                palette = c("default", "viridis", "okabe"),
+                               up = NULL,
+                               down = NULL,
+                               ns = NULL,
+                               nes_colors = NULL,
                                nes_limits = NULL,
                                nes_stops = NULL) {
   palette <- match.arg(palette)
+  for (col in list(up, down, ns)) ev_assert_colour(col, "colour override")
   palettes <- list(
     default = list(
       up = "#D6604D", down = "#4393C3", ns = "grey70",
@@ -41,6 +56,14 @@ volcano_ring_theme <- function(base_size = 11,
     )
   )
   pal <- palettes[[palette]]
+  if (!is.null(up)) pal$up <- up
+  if (!is.null(down)) pal$down <- down
+  if (!is.null(ns)) pal$ns <- ns
+  if (!is.null(nes_colors)) {
+    pal$nes_scale <- nes_colors
+    span <- nes_limits %||% c(-3, 3)
+    pal$nes_values <- seq(span[1], span[2], length.out = length(nes_colors))
+  }
   if (!is.null(nes_stops)) {
     if (length(nes_stops) != length(pal$nes_scale)) {
       ev_abort(

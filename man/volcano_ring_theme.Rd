@@ -8,6 +8,10 @@ volcano_ring_theme(
   base_size = 11,
   base_family = "",
   palette = c("default", "viridis", "okabe"),
+  up = NULL,
+  down = NULL,
+  ns = NULL,
+  nes_colors = NULL,
   nes_limits = NULL,
   nes_stops = NULL
 )
@@ -18,13 +22,22 @@ volcano_ring_theme(
 \item{base_family}{Character base font family; \code{""} defers to ggplot2.}
 
 \item{palette}{One of \code{"default"} (red-blue diverging, the YvO 2026 lock),
-\code{"viridis"} (5-stop magma cuts), or \code{"okabe"} (Okabe-Ito CB-safe pair).}
+\code{"viridis"} (5-stop magma cuts), or \code{"okabe"} (Okabe-Ito CB-safe pair).
+Sets the starting up / down / non-significant colours and NES ramp; any
+of \code{up}, \code{down}, \code{ns}, \code{nes_colors} below override it.}
+
+\item{up, down, ns}{Optional single colours overriding the palette's
+up-regulated, down-regulated, and non-significant point colours.}
+
+\item{nes_colors}{Optional colour vector overriding the diverging NES ramp.
+When supplied without \code{nes_stops}, stops spread evenly across
+\code{nes_limits} (or \code{c(-3, 3)}).}
 
 \item{nes_limits}{Optional length-2 numeric. When \code{NULL}, the colour scale
 in \code{volcano_ring()} uses its own default.}
 
-\item{nes_stops}{Optional numeric vector matching \code{palette}'s \code{nes_scale}
-length, overriding the palette's \code{nes_values}.}
+\item{nes_stops}{Optional numeric vector matching the NES ramp length,
+overriding the palette's \code{nes_values}.}
 }
 \value{
 A list \code{list(base_size, base_family, theme, palette)}.
@@ -37,4 +50,7 @@ the diverging NES ramp.
 \examples{
 th <- volcano_ring_theme(base_size = 11)
 th$palette$up
+
+# Custom point and arc colours, no list-poking needed:
+th <- volcano_ring_theme(up = "#B2182B", down = "#2166AC", ns = "grey80")
 }
