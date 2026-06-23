@@ -1,3 +1,55 @@
+# enrichVolcano 0.3.0
+
+## Breaking changes
+
+* enrichVolcano is now a plotting-only package. Enrichment computation has
+  been removed. Compute your enrichment with `fgsea::fgseaMultilevel()`,
+  `clusterProfiler::gseGO()`, `enrichR::enrichr()`, or any tool you like,
+  and pass the resulting tidy table to `volcano_ring()`.
+
+## Removed (use v0.2.0 to recover)
+
+* Enrichment engine: `ev_enrich()`, `ev_collapse()`, `list_databases()`,
+  `database_info()`, `load_go_slim()`, `apply_gate()`.
+* Scoring + adjustment: `pi_score()`, `adjust_p()`.
+* Input layer: `ev_read_contrasts()`, `ev_validate()`, `ev_idmap_report()`.
+* Hero wrapper: `enrich_volcano()`.
+* Shiny app: `ev_app()` (relocated to the sibling `enrichVolcanoApp` repo).
+
+## Renamed
+
+* `ev_volcano_ring()` -> `volcano_ring()`
+* `ev_compose()` -> `volcano_ring_grid()` (signature changed; now takes
+  paired lists of tidy DA + enrichment frames keyed by contrast, and returns
+  an S3 `volcano_ring_grid` object carrying `$plot` and `$data`).
+* `ev_theme()` -> `volcano_ring_theme()` (new args: `base_family`,
+  `nes_limits`, `nes_stops`; palettes: `"default"`, `"viridis"`, `"okabe"`).
+* `print.enrichVolcano()` -> `print.volcano_ring_grid()`.
+* `ev_volcano()` and `ring_plot()` removed entirely — the composite is the
+  plot.
+
+## New
+
+* Column-naming arguments on `volcano_ring()`: `gene_col`, `logfc_col`,
+  `pval_col`, `padj_col`, `term_col`, `nes_col`, `size_col`, `genes_col`,
+  `genes_sep`. Defaults assume limma + fgsea conventional names.
+* Tick-line column auto-detect: `leading_edge` (`;`-string),
+  `leadingEdge` (list-col), `core_enrichment` (`/`-string), and `Genes`
+  (`;`-string) all work out of the box. Override via `genes_col`.
+* Structured error classes: `enrichVolcano_input_error`,
+  `enrichVolcano_column_error`, `enrichVolcano_data_error`,
+  `enrichVolcano_param_error` — all under the parent
+  `enrichVolcano_error`.
+* `magnitude = c("neg_log_padj", "size")` controls the arc-thickness
+  encoding on the ring.
+
+## Dependencies
+
+* Imports trimmed from 18 to 8 (kept: cli, ggforce, ggplot2, ggrepel,
+  patchwork, rlang, scales, stringr).
+* Suggests trimmed from 15 to 6 (kept: covr, knitr, pkgdown, rmarkdown,
+  testthat, vdiffr).
+
 # enrichVolcano 0.2.0
 
 ## Breaking changes

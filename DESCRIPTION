@@ -1,15 +1,14 @@
 Package: enrichVolcano
-Title: Composite Volcano and Enrichment Ring Plots for Proteomics
-Version: 0.2.0
-Authors@R: 
+Title: Volcano-in-Ring Composite Plots from Differential Abundance and Enrichment
+Version: 0.3.0
+Authors@R:
     person("Dustyn", "Tubbs", , "dtlts14@gmail.com", role = c("aut", "cre"))
-Description: Builds composite volcano and enrichment ring plots from
-    differential abundance results. Accepts UniProt-keyed per-contrast CSVs
-    plus tidy, wide, DEP, proteoDA, limma, DESeq2, edgeR, MSstats, proDA,
-    DEqMS, MaxQuant, and Perseus inputs. Supports pi-score variants (Xiao
-    2014), several p-value adjustment methods, and fgsea or ORA enrichment
-    against MSigDB, Reactome, KEGG, Gene Ontology, MitoCarta, CORUM, and GO
-    Slim gene sets across seven species.
+Description: Draws a single composite figure that combines a differential
+    abundance volcano in the centre with a ring of enrichment terms around it,
+    using NES-coloured arcs and tick lines from significant volcano points to
+    the pathways they drive. Accepts any tidy differential abundance table
+    and any tidy enrichment table (fgsea, clusterProfiler, enrichR, custom)
+    via configurable column arguments.
 License: MIT + file LICENSE
 Depends: R (>= 4.2)
 URL: https://github.com/Dustyn-T-Lewis/enrichVolcano
@@ -19,37 +18,18 @@ Language: en-GB
 Roxygen: list(markdown = TRUE)
 Imports:
     cli,
-    data.table,
-    dplyr,
-    fgsea (>= 1.24),
-    lifecycle,
     ggforce,
     ggplot2,
     ggrepel,
-    msigdbr (>= 10.0),
     patchwork,
-    purrr,
     rlang,
     scales,
-    stringr,
-    tibble,
-    tidyr,
-    tidyselect,
-    withr
+    stringr
 Suggests:
-    AnnotationDbi,
     covr,
-    GO.db,
-    IHW,
     knitr,
-    mockery,
-    org.Hs.eg.db,
-    org.Mm.eg.db,
-    org.Rn.eg.db,
     pkgdown,
-    qvalue,
     rmarkdown,
-    shiny,
     testthat (>= 3.0.0),
     vdiffr
 Config/testthat/edition: 3
