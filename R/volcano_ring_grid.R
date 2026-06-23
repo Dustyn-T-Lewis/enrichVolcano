@@ -6,6 +6,8 @@
 #'   Same split convenience as `volc_dfs`.
 #' @param contrasts Character vector of contrast names to include and the
 #'   order in which to draw them. Defaults to `names(volc_dfs)`.
+#' @param subtitles Optional per-ring subtitles. Either a vector parallel to
+#'   `contrasts`, or a vector named by contrast. `NULL` draws no subtitles.
 #' @param nrow,ncol Outer layout dims; forwarded to `patchwork::wrap_plots()`.
 #' @param tag_levels Panel-tag scheme; forwarded to `patchwork::plot_annotation()`.
 #' @param guides Patchwork `guides` argument; default `"collect"` collects the
@@ -17,6 +19,7 @@
 #' @export
 volcano_ring_grid <- function(volc_dfs, enrich_dfs,
                               contrasts = NULL,
+                              subtitles = NULL,
                               nrow = NULL,
                               ncol = NULL,
                               tag_levels = "A",
@@ -44,8 +47,18 @@ volcano_ring_grid <- function(volc_dfs, enrich_dfs,
     )
   }
 
-  panels <- lapply(contrasts, function(cn) {
-    volcano_ring(volc_list[[cn]], enrich_list[[cn]], title = cn, ...)
+  panels <- lapply(seq_along(contrasts), function(i) {
+    cn <- contrasts[[i]]
+    sub <- if (is.null(subtitles)) {
+      NULL
+    } else if (!is.null(names(subtitles))) {
+      subtitles[[cn]]
+    } else {
+      subtitles[[i]]
+    }
+    volcano_ring(volc_list[[cn]], enrich_list[[cn]],
+      title = cn, subtitle = sub, ...
+    )
   })
   names(panels) <- contrasts
 
