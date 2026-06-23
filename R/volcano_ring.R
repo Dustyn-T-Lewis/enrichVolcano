@@ -115,6 +115,15 @@ ev_shorten_phrases <- function(x) {
     "Transcriptional And Post Translational Regulation Of Mitf M Expression And Activity" =
       "MITF-M Regulation",
     "Arrhythmogenic Right Ventricular Cardiomyopathy Arvc" = "ARVC",
+    "Cargo Recognition For Clathrin Mediated Endocytosis" = "Clathrin Endocytosis",
+    "Assembly Of Collagen Fibrils And Other Multimeric Structures" =
+      "Collagen Fibril Assembly",
+    "Collagen Chain Trimerization" = "Collagen Trimerization",
+    "Processing Of Capped Intron Containing Pre mRNA" = "Pre-mRNA Processing",
+    "Respiratory Chain Complex I (Holoenzyme), Mitochondrial" = "Respiratory Complex I",
+    "Respiratory Chain Complex I, Mitochondrial" = "Respiratory Complex I",
+    "Mitochondrial Ribosome, Large Subunit" = "Mitoribosome (Large)",
+    "Mitochondrial Ribosome, Small Subunit" = "Mitoribosome (Small)",
     "Oxidative Phosphorylation" = "OXPHOS",
     "Unfolded Protein Response" = "UPR", "Fatty Acid" = "FA",
     "Amino Acid" = "AA", "Generation Of" = "Gen. of", " And " = " & ",
