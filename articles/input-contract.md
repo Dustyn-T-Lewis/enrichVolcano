@@ -130,50 +130,6 @@ When the DA and enrichment sides disagree on the `padj` column name
 (e.g. `adj.P.Val` vs `padj`), one of them has to be renamed at the
 boundary — `padj_col` is a single shared argument by design.
 
-## Worked example: DEP + fgsea
-
-`DEP::get_results()` returns a wide tibble with one row per protein and
-one group of columns per contrast (`<contrast>_ratio`,
-`<contrast>_p.val`, `<contrast>_p.adj`).
-[`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-wants one row per protein **per contrast**, so a single
-[`tidyr::pivot_longer()`](https://tidyr.tidyverse.org/reference/pivot_longer.html)
-reshapes it:
-
-``` r
-
-library(tidyr)
-library(dplyr)
-
-da <- DEP::get_results(dep) |>
-  select(name, ends_with(c("_ratio", "_p.val", "_p.adj"))) |>
-  pivot_longer(
-    -name,
-    names_to = c("contrast", ".value"),
-    names_pattern = "(.*)_(ratio|p\\.val|p\\.adj)"
-  ) |>
-  rename(gene = name, logFC = ratio, P.Value = p.val, padj = p.adj)
-```
-
-Enrichment from `fgsea` is already in the shape
-[`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-expects — no reshape, no rename:
-
-``` r
-
-ranks <- da |>
-  filter(contrast == "treated_vs_control") |>
-  with(setNames(logFC, gene))
-
-en <- fgsea::fgseaMultilevel(pathways = msigdbr_list, stats = ranks) |>
-  mutate(contrast = "treated_vs_control")
-
-volcano_ring(
-  volc_df   = filter(da, contrast == "treated_vs_control"),
-  enrich_df = en
-)
-```
-
 ## NA + edge-case policy
 
 | Case                  | Behaviour                          |
