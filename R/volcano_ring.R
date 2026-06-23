@@ -189,6 +189,22 @@ ev_clean_label_mitocarta <- function(name) {
 ev_ring_r_inner <- 4.4
 ev_ring_r_outer <- 4.8
 
+#' Stagger labels into two radial lanes so wide boxes on adjacent (evenly
+#' spaced) arcs don't collide. Only kicks in once a ring is dense enough that a
+#' label box is wider than its angular slot; sparse rings are left flat.
+#' @keywords internal
+#' @noRd
+ev_spread_label_radii <- function(mid_deg, label_r, dense_n = 8, offset = 1.1) {
+  n <- length(label_r)
+  if (n < dense_n) {
+    return(label_r)
+  }
+  ord <- order(mid_deg)
+  outer <- ord[seq(2, n, by = 2)]
+  label_r[outer] <- label_r[outer] + offset
+  label_r
+}
+
 #' @keywords internal
 #' @noRd
 ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
@@ -605,6 +621,7 @@ volcano_ring <- function(volc_df, enrich_df,
 
     lbl <- ring
     lbl$.ev_label_r <- lbl$arc_r1_var + 1.4
+    lbl$.ev_label_r <- ev_spread_label_radii(lbl$.ev_mid_deg, lbl$.ev_label_r)
     lbl$.ev_lbl_x <- lbl$.ev_label_r * sin(lbl$.ev_mid_rad)
     lbl$.ev_lbl_y <- lbl$.ev_label_r * cos(lbl$.ev_mid_rad)
     lbl$.ev_lead_x <- (lbl$arc_r1_var + 0.1) * sin(lbl$.ev_mid_rad)
@@ -652,19 +669,23 @@ volcano_ring <- function(volc_df, enrich_df,
       tag = tag %||% NULL
     ) +
     ggplot2::coord_fixed(
-      xlim = c(-(max_r + 0.6), max_r + 0.6),
-      ylim = c(-(max_r + 0.6), max_r + 0.6), clip = "off"
+      xlim = c(-(max_r + 0.3), max_r + 0.3),
+      ylim = c(-(max_r + 0.3), max_r + 0.3), clip = "off"
     ) +
     ggplot2::theme_void(base_size = theme$base_size) +
     ggplot2::theme(
-      plot.title = ggplot2::element_text(face = "bold", hjust = 0.5),
+      plot.title = ggplot2::element_text(
+        face = "bold", hjust = 0.5, margin = ggplot2::margin(b = 0.5)
+      ),
       plot.subtitle = ggplot2::element_text(
         face = "bold.italic", hjust = 0.5,
         colour = "grey30",
-        size = ggplot2::rel(0.65)
+        size = ggplot2::rel(0.65),
+        margin = ggplot2::margin(t = 0, b = 0.5)
       ),
       plot.tag = ggplot2::element_text(face = "bold"),
       plot.tag.position = c(0.02, 0.99),
+      plot.margin = ggplot2::margin(1, 1, 1, 1, "mm"),
       legend.position = "right",
       legend.key.height = ggplot2::unit(10, "mm"),
       legend.key.width = ggplot2::unit(2.5, "mm")
