@@ -1,135 +1,102 @@
 # enrichVolcano
 
-## Overview
+> Draw a volcano-in-ring composite from any DA table + any enrichment
+> table you’ve already computed.
 
-enrichVolcano builds composite volcano + enrichment ring plots from
-differential abundance results. The volcano sits at the centre and the
-enrichment terms wrap around it as NES-coloured arcs, one figure per
-contrast. Returns a ggplot-compatible object that `ggsave()` saves
-directly.
+`enrichVolcano` is a plotting-only R package. It does not run
+differential abundance, it does not run enrichment, and it does not ship
+gene-set databases. Compute those upstream with the tool that fits your
+study — `fgsea`, `clusterProfiler`, `enrichR`, anything that returns a
+tidy frame — and pass the two tables to
+[`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md).
 
-The package accepts twelve common input formats (tidy, wide-suffix, DEP,
-proteoDA, limma, DESeq2, edgeR, MSstats, proDA, DEqMS, MaxQuant,
-Perseus) via `ev_validate()`, and reads UniProt-keyed per-contrast CSVs
-via `ev_read_contrasts()` (accessions are mapped to gene symbols for
-enrichment). It supports two pi-score variants (Xiao 2014 Eq.1 and
-Eq.2), four p-adjustment methods (BH, Bonferroni, q-value, IHW), and 21
-registered gene-set databases across seven species.
+## What it draws
 
-## Installation
+- the differential-abundance volcano in the centre
+- one NES-coloured arc per enriched pathway in a ring around the volcano
+- tick lines from each pathway arc to its leading-edge genes inside the
+  volcano
+- a multi-contrast grid composer
+  ([`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md))
+  for side-by-side panels
+
+## Install
 
 ``` r
 
-# Development version
+# install.packages("remotes")
 remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
 ```
 
-## A 30-second example
+## Minimum example
 
 ``` r
 
 library(enrichVolcano)
 
-# Load a bundled YvO subsample
-data <- readRDS(system.file("extdata", "examples", "yvo_tidy.rds",
+da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
+  package = "enrichVolcano"
+))
+en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
   package = "enrichVolcano"
 ))
 
-# Mock pathway sets (skip msigdbr in this demo)
-paths <- list(
-  UP_GENES = head(data$gene[data$logFC > 0], 30),
-  DN_GENES = head(data$gene[data$logFC < 0], 30)
-)
+ctr <- "Training_Young"
+da1 <- da[da$contrast == ctr, ]
+en1 <- en[en$contrast == ctr, ]
+names(da1)[names(da1) == "adj.P.Val"] <- "padj"
 
-p <- enrich_volcano(
-  data,
-  contrast = "Aging",
-  databases = list(test = paths),
-  p_method = "pi_eq2", p_adjust = "BH",
-  enrich_padj = 0.5
-)
-
-p
+volcano_ring(da1, en1, title = "YvO", subtitle = ctr)
 ```
 
-The output prints the reconstructible call plus a one-line data summary,
-then renders the patchwork. Both panels share the contrast title.
+See
+[`vignette("getting-started")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/getting-started.md)
+for the full walkthrough and
+[`vignette("input-contract")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/input-contract.md)
+for the column conventions plus a limma / DESeq2 / edgeR / DEP / fgsea /
+clusterProfiler / enrichR cross-walk.
 
-## Why a composed plot
+## Public API (v0.3.0)
 
-Volcano panels show per-protein effects. Enrichment plots show
-per-pathway aggregates. Drawing them separately loses the connection
-between a hit and the pathway it drives. The composite preserves the
-hit-to-pathway lineage and produces one figure per contrast instead of
-two.
+| Function | Role |
+|----|----|
+| [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md) | one composite for one contrast — returns a `ggplot` |
+| [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md) | a grid of composites, one per contrast |
+| [`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md) | theme + palette factory (`default`, `viridis`, `okabe`) |
+| `print.volcano_ring_grid()` | print method for the grid object |
 
-## Reproducibility
+## Upstream tools we consume
 
-Every output carries two attributes:
+`enrichVolcano` is a thin wrapper around outputs from existing
+enrichment tooling. When you cite the figure, the methodological credit
+belongs upstream:
 
-- `attr(p, "ev_call")` —
-  [`match.call()`](https://rdrr.io/r/base/match.call.html) for exact
-  reconstruction
-- `attr(p, "ev_data")` — list of intermediate tibbles: validated input,
-  pi-scores, enrichment, dedup result
+- `fgsea` — Korotkevich G et al. 2021, DOI 10.1101/060012
+- `clusterProfiler` — Wu T et al. 2021 *Innovation*
+- `enrichR` — Chen EY et al. 2013 *BMC Bioinformatics*; Kuleshov MV et
+  al. 2016 *Nucleic Acids Res*
 
-These let you rebuild any panel without re-running the pipeline.
+Useful references when choosing what to run and how to interpret it:
 
-## Pipeline functions
+- Xiao Y et al. 2014 *Bioinformatics* 30(6):801-7, PMID 22321699 —
+  π-value
+- Timmons JA et al. 2015 *Genome Biol* 16:186, PMID 26346307 — ORA
+  universe
+- Reimand J et al. 2019 *Nat Protoc* 14:482-517, PMID 30664679 —
+  protocol
+- Wijesooriya K et al. 2022 *PLoS Comput Biol* 18:e1009935, PMID
+  35263338 — background bias
 
-`enrich_volcano()` runs the pipeline below and draws the composite with
-`ev_volcano_ring()`. Every stage is exported, so you can run or swap any
-one yourself:
+## Versioning
 
-``` r
+v0.3.0 is a breaking release: the v0.2.x enrichment engine, the Shiny
+app, and the standalone volcano / ring functions are gone. v0.2.0 stays
+installable from the `v0.2.0` tag if you need the old hero
+`enrich_volcano()` wrapper or the GUI.
 
-ev_read_contrasts() # optional: load UniProt-keyed per-contrast CSVs
-ev_validate()       # input adapter (12 sources + UniProt accessions)
-pi_score()          # Xiao 2014 Eq.1 or Eq.2
-adjust_p()          # BH / Bonferroni / qvalue / IHW
-ev_enrich()         # fgsea + ORA
-ev_collapse()       # Jaccard / collapsePathways dedup
-ev_volcano_ring()   # the volcano-in-ring composite
-```
-
-For building panels by hand there are also `ev_volcano()` (volcano
-only), `ring_plot()` (ring only), and `ev_compose()` (patchwork stitch),
-plus `list_databases()` / `database_info()` for the registry,
-`ev_idmap_report()` for the UniProt-to-symbol mapping summary, and
-`ev_theme()` for styling. Volcano labelling is rule-driven via
-`label_mode` (`none` by default, `top_per_direction`, `top_total`,
-`all_significant`, or `explicit`).
-
-## Learn more
-
-- `vignette("enrichVolcano")` — 30-second example + pipeline anatomy
-- `vignette("scoring")` — pi-score variants, p-value adjustment methods
-- `vignette("pathway-dedup")` — Jaccard vs collapsePathways, scope
-  choices
-- `vignette("databases")` — 21 databases compared, decision flowchart
-- `vignette("customising")` — themes, palettes, multi-contrast layouts
-- `vignette("enrichVolcano-faq")` — common questions
-
-## Citation
-
-``` r
-
-citation("enrichVolcano")
-```
-
-The package implements the pi-score from Xiao Y et al. (2014,
-*Bioinformatics* 30(6):801, PMID 22321699), fgsea from Korotkevich G et
-al. (2021, bioRxiv <doi:10.1101/060012>), and Benjamini-Hochberg FDR
-from Benjamini & Hochberg (1995, *JRSS B* 57(1):289).
-
-Defaults follow the Reimand 2019 ORA/GSEA protocol (Reimand J et
-al. 2019, *Nat Protoc* 14:482-517, PMID 30664679). The enrichment
-universe is the set of proteins quantified in each contrast, not the
-whole proteome — Timmons et al. (2015, *Genome Biol* 16:186, PMID
-26346307) and Wijesooriya et al. (2022, *PLoS Comput Biol* 18:e1009935,
-PMID 35263338) document the inflation of false positives when a
-whole-genome / whole-UniProt background is used in -omics enrichment.
+The Shiny app moves to a sibling repo (`enrichVolcanoApp`) and depends
+on `enrichVolcano >= 0.3.0`.
 
 ## License
 
-MIT
+MIT. See `LICENSE`.
