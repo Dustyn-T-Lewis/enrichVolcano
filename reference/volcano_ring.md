@@ -25,6 +25,7 @@ volcano_ring(
   subtitle = NULL,
   tag = NULL,
   volcano_radius = 3.5,
+  ring_radius = 4.4,
   disc_color = NULL,
   nes_limits = NULL,
   magnitude = c("neg_log_padj", "size"),
@@ -89,6 +90,11 @@ volcano_ring(
 - volcano_radius:
 
   Inner volcano radius.
+
+- ring_radius:
+
+  Inner radius of the enrichment ring (default 4.4). Raise it to push
+  the ring further out from the volcano / enlarge the ring.
 
 - disc_color:
 

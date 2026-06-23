@@ -70,6 +70,7 @@ arcs to each pathway's leading-edge genes inside the volcano.</p>
 <span>  subtitle <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tag <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  volcano_radius <span class="op">=</span> <span class="fl">3.5</span>,</span>
+<span>  ring_radius <span class="op">=</span> <span class="fl">4.4</span>,</span>
 <span>  disc_color <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nes_limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  magnitude <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"neg_log_padj"</span>, <span class="st">"size"</span><span class="op">)</span>,</span>
@@ -135,6 +136,11 @@ when <code>abs(logFC) &gt;= logfc_threshold</code> as well as significant.</p></
 
 <dt id="arg-volcano-radius">volcano_radius<a class="anchor" aria-label="anchor" href="#arg-volcano-radius"></a></dt>
 <dd><p>Inner volcano radius.</p></dd>
+
+
+<dt id="arg-ring-radius">ring_radius<a class="anchor" aria-label="anchor" href="#arg-ring-radius"></a></dt>
+<dd><p>Inner radius of the enrichment ring (default 4.4). Raise it
+to push the ring further out from the volcano / enlarge the ring.</p></dd>
 
 
 <dt id="arg-disc-color">disc_color<a class="anchor" aria-label="anchor" href="#arg-disc-color"></a></dt>
