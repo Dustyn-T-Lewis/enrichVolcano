@@ -5,12 +5,13 @@
 #' @keywords internal
 #' @noRd
 ev_label_text <- function(df) {
-  n       <- nrow(df)
-  symbol  <- if ("symbol"  %in% names(df)) df$symbol  else rep(NA_character_, n)
+  n <- nrow(df)
+  symbol <- if ("symbol" %in% names(df)) df$symbol else rep(NA_character_, n)
   uniprot <- if ("uniprot" %in% names(df)) df$uniprot else rep(NA_character_, n)
-  gene    <- if ("gene"    %in% names(df)) df$gene    else rep(NA_character_, n)
+  gene <- if ("gene" %in% names(df)) df$gene else rep(NA_character_, n)
   out <- ifelse(!is.na(symbol) & nzchar(symbol), symbol,
-                ifelse(!is.na(uniprot) & nzchar(uniprot), uniprot, gene))
+    ifelse(!is.na(uniprot) & nzchar(uniprot), uniprot, gene)
+  )
   as.character(out)
 }
 
@@ -40,11 +41,15 @@ ev_select_labels <- function(df, mode, n, rank_by, genes,
       in_genes("uniprot") | in_genes("gene")
     return(df[keep, , drop = FALSE])
   }
-  if (mode == "none") return(df[0, , drop = FALSE])
+  if (mode == "none") {
+    return(df[0, , drop = FALSE])
+  }
 
   sig <- df[[p_col]] < p_threshold & abs(df$logFC) >= logfc_threshold
   pool <- df[sig & !is.na(sig), , drop = FALSE]
-  if (nrow(pool) == 0) return(pool)
+  if (nrow(pool) == 0) {
+    return(pool)
+  }
 
   ord <- if (rank_by == "logfc") {
     order(-abs(pool$logFC))
