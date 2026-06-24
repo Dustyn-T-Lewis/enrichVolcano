@@ -7,6 +7,33 @@ test_that("input error class fires for non-data.frame volc_df", {
   )
 })
 
+test_that("ring_radius must be a single positive number", {
+  for (bad in list(0, -3, c(1, 2), "4", NA_real_)) {
+    expect_error(
+      volcano_ring(make_toy_volc(), make_toy_enrich(), ring_radius = bad),
+      class = "enrichVolcano_param_error"
+    )
+  }
+})
+
+test_that("arc_height_range must be c(min, max) with 0 <= min <= max", {
+  for (bad in list(1.6, c(1.6, 0.05), c(-1, 1), c(0.1, NA))) {
+    expect_error(
+      volcano_ring(make_toy_volc(), make_toy_enrich(), arc_height_range = bad),
+      class = "enrichVolcano_param_error"
+    )
+  }
+})
+
+test_that("ring_radius below volcano_radius warns about overflow", {
+  expect_warning(
+    volcano_ring(make_toy_volc(), make_toy_enrich(),
+      ring_radius = 2, volcano_radius = 3.5
+    ),
+    class = "enrichVolcano_param_warning"
+  )
+})
+
 test_that("input error class fires for non-data.frame enrich_df", {
   expect_error(
     volcano_ring(make_toy_volc(), list()),
