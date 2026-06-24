@@ -420,6 +420,7 @@ volcano_ring <- function(volc_df, enrich_df,
   label_mode <- match.arg(label_mode)
   label_rank_by <- match.arg(label_rank_by)
   ev_assert_colour(disc_color)
+  validate_ring_geometry(ring_radius, volcano_radius, arc_height_range)
 
   if (!is.data.frame(volc_df)) {
     ev_abort(
@@ -628,7 +629,7 @@ volcano_ring <- function(volc_df, enrich_df,
       )
 
     lbl <- ring
-    lbl$.ev_label_r <- lbl$arc_r1_var + 1.4
+    lbl$.ev_label_r <- lbl$arc_r1_var + 1.0
     lbl$.ev_label_r <- ev_spread_label_radii(lbl$.ev_mid_deg, lbl$.ev_label_r)
     lbl$.ev_lbl_x <- lbl$.ev_label_r * sin(lbl$.ev_mid_rad)
     lbl$.ev_lbl_y <- lbl$.ev_label_r * cos(lbl$.ev_mid_rad)
@@ -637,7 +638,7 @@ volcano_ring <- function(volc_df, enrich_df,
     lbl$.ev_lead_ex <- (lbl$.ev_label_r - 0.3) * sin(lbl$.ev_mid_rad)
     lbl$.ev_lead_ey <- (lbl$.ev_label_r - 0.3) * cos(lbl$.ev_mid_rad)
     lbl$.ev_lab_fill <- ifelse(lbl$.ev_is_up, pal$up, pal$down)
-    max_r <- max(lbl$.ev_label_r) + 1.2
+    max_r <- max(lbl$.ev_label_r) + 0.5
 
     p <- p +
       ggplot2::geom_segment(
@@ -677,8 +678,8 @@ volcano_ring <- function(volc_df, enrich_df,
       tag = tag %||% NULL
     ) +
     ggplot2::coord_fixed(
-      xlim = c(-(max_r + 0.3), max_r + 0.3),
-      ylim = c(-(max_r + 0.3), max_r + 0.3), clip = "off"
+      xlim = c(-(max_r + 0.1), max_r + 0.1),
+      ylim = c(-(max_r + 0.1), max_r + 0.1), clip = "off"
     ) +
     ggplot2::theme_void(base_size = theme$base_size) +
     ggplot2::theme(
