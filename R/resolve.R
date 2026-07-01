@@ -57,8 +57,9 @@ resolve_enrich_cols <- function(enrich_df, term_col, nes_col, padj_col,
 
 #' Resolve the leading-edge gene column (Q4 auto-detect)
 #'
-#' Walks `leading_edge` (`;`-string), `leadingEdge` (list-col),
-#' `core_enrichment` (`/`-string), `Genes` (`;`-string). First match wins.
+#' Walks `leading_edge` (`;`-string), `leadingEdge` (list-col in memory or
+#' `;`-string from a CSV), `core_enrichment` (`/`-string), `Genes`
+#' (`;`-string). First match wins.
 #' Emits one `cli_alert_info` naming the column + parser. No match -> `NULL`
 #' (caller silently turns tick lines off).
 #'
@@ -82,7 +83,7 @@ resolve_genes_col <- function(enrich_df, genes_col, genes_sep,
   }
   candidates <- list(
     list(name = "leading_edge", sep = ";"),
-    list(name = "leadingEdge", sep = NULL),
+    list(name = "leadingEdge", sep = ";"),
     list(name = "core_enrichment", sep = "/"),
     list(name = "Genes", sep = ";")
   )
