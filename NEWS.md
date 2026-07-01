@@ -11,6 +11,21 @@
   toggles the up/down count badges.
 * New `vignette("customizing")` walks the colour, volcano, ring, and layout
   knobs section by section.
+* `volcano_ring_grid()` exposes the composite-layout knobs: `panel_spacing`,
+  `panel_margin`, `label_headroom`, `legend_position` (`"bottom"`, `"right"`,
+  `"none"`), and `legend_width`. The shared NES legend now collects along the
+  bottom by default.
+* `volcano_ring()` gains `ring_thickness` and `tick_width` for the
+  leading-edge tick band, `label_gap` for the gap between each arc and its
+  label, and `count_size` / `axis_size` for the badge and axis-annotation
+  text. Pathway labels now sit a fixed distance above their own arc, so every
+  leader line is the same short length.
+
+## Internal
+
+* Pathway-name cleaning (`ev_clean_label()` and helpers) moved from
+  `volcano_ring.R` to `labels.R`; `volcano_ring_theme()` no longer returns an
+  unused theme element and now honours `base_family`. No behaviour change.
 
 # enrichVolcano 0.3.0
 

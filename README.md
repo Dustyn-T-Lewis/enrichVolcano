@@ -61,6 +61,24 @@ top <- rbind(head(sig[sig$NES > 0, ], 7), head(sig[sig$NES < 0, ], 7))
 volcano_ring(da1, top, title = "YvO", subtitle = ctr)
 ```
 
+## The whole figure, in one call
+
+`volcano_ring_grid()` takes a DA table and an enrichment table that each
+carry a `contrast` column, splits them, and lays out one composite per
+contrast with a shared NES legend along the bottom.
+
+``` r
+da$padj <- da$adj.P.Val
+en_sig <- en[en$padj < 0.05 & en$size >= 15, ]
+
+grid <- volcano_ring_grid(da, en_sig, contrasts = unique(da$contrast))
+grid$plot
+```
+
+Every spacing knob (`panel_spacing`, `panel_margin`, `label_headroom`,
+`legend_position`, `legend_width`) has a sensible default, so the call
+above is the whole figure.
+
 ## Input contract, in brief
 
 | Side | Needs | Default column |
