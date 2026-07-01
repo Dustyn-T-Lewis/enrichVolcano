@@ -40,7 +40,8 @@ in \code{volcano_ring()} uses its own default.}
 overriding the palette's \code{nes_values}.}
 }
 \value{
-A list \code{list(base_size, base_family, theme, palette)}.
+A list \code{list(base_size, base_family, palette, nes_limits)} consumed
+by \code{\link[=volcano_ring]{volcano_ring()}}.
 }
 \description{
 Returns a list with a \code{theme} element (ggplot2 theme additions) and a

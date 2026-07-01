@@ -13,6 +13,11 @@ volcano_ring_grid(
   ncol = NULL,
   tag_levels = "A",
   guides = "collect",
+  panel_spacing = 1.5,
+  panel_margin = 2,
+  label_headroom = 1.1,
+  legend_position = c("bottom", "right", "none"),
+  legend_width = 26,
   ...
 )
 }
@@ -35,6 +40,26 @@ order in which to draw them. Defaults to \code{names(volc_dfs)}.}
 
 \item{guides}{Patchwork \code{guides} argument; default \code{"collect"} collects the
 shared NES legend.}
+
+\item{panel_spacing}{Gutter between adjacent panels, in millimetres
+(default 1.5). Applied as half on each panel edge, so neighbours sit
+\code{panel_spacing} apart. Lower it to pack rings closer.}
+
+\item{panel_margin}{Outer margin around the whole grid, in millimetres
+(default 2). Trims the dead frame around the assembled figure.}
+
+\item{label_headroom}{Radial room reserved for pathway labels inside each
+panel (default 1.1, looser than the single-ring default of 0.5 so wide
+boxes stay enclosed when panels are packed tight). Forwarded to
+\code{volcano_ring()}; raise it if labels clip, lower it to enlarge the rings.}
+
+\item{legend_position}{Placement of the collected NES legend: \code{"bottom"}
+(default, recovers the right-hand gap), \code{"right"}, or \code{"none"}.}
+
+\item{legend_width}{Length of the NES colourbar long axis, in millimetres
+(default 26, tuned for the bottom bar). Sets the key width when the legend
+is horizontal, the key height when vertical; a side legend usually wants a
+larger value (~40).}
 
 \item{...}{Forwarded to each \code{volcano_ring()} call (e.g. \code{gene_col},
 \code{padj_col}, \code{magnitude}, \code{theme}).}

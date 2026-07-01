@@ -2,208 +2,10 @@
 # centre and enrichment pathways wrapped around it as an outer ring. Arcs are
 # drawn with ggforce::geom_arc_bar() in a coord_fixed() panel.
 
-# Label cleaning.
-
-#' Clean a pathway name for ring display
-#'
-#' Strips the database prefix, expands common acronyms, title-cases, wraps,
-#' and applies MitoCarta-hierarchy shortening for `MITOCARTA_` pathways.
-#'
-#' @param name Character vector of raw pathway names.
-#' @return Character vector of cleaned, wrapped labels.
-#' @keywords internal
-#' @noRd
-ev_clean_label <- function(name) {
-  if (length(name) > 1) {
-    return(vapply(name, ev_clean_label, character(1), USE.NAMES = FALSE))
-  }
-  if (is.na(name) || !nzchar(name)) {
-    return(name)
-  }
-
-  if (startsWith(name, "MITOCARTA_")) {
-    return(ev_clean_label_mitocarta(name))
-  }
-
-  out <- name |>
-    sub("^HALLMARK_", "", x = _) |>
-    sub("^REACTOME_", "", x = _) |>
-    sub("^GOSLIM_", "", x = _) |>
-    sub("^KEGG_(MEDICUS|LEGACY)_", "", x = _) |>
-    sub("^KEGG_", "", x = _) |>
-    sub("^GO(BP|CC|MF)_", "", x = _) |>
-    sub("^WP_", "", x = _) |>
-    sub("^CORUM_", "", x = _) |>
-    gsub("_", " ", x = _) |>
-    tolower() |>
-    stringr::str_to_title()
-
-  out <- ev_expand_acronyms(out)
-  out <- ev_shorten_phrases(out)
-  out <- ev_collapse_repeats(out)
-  out <- stringr::str_wrap(out, width = 15)
-  ev_post_wrap_overrides(trimws(out))
-}
-
-#' Collapse adjacent duplicate words left by overlapping MSigDB hierarchies
-#' ("OXPHOS OXPHOS Subunits" -> "OXPHOS Subunits").
-#' @keywords internal
-#' @noRd
-ev_collapse_repeats <- function(x) {
-  repeat {
-    y <- gsub("\\b([A-Za-z][A-Za-z0-9.]*)\\b\\s+\\1\\b", "\\1", x,
-      perl = TRUE, ignore.case = TRUE
-    )
-    if (identical(y, x)) break
-    x <- y
-  }
-  trimws(gsub("\\s+", " ", x))
-}
-
-#' Manual line-break overrides applied after wrapping, for a handful of names
-#' that otherwise wrap awkwardly on the ring.
-#' @keywords internal
-#' @noRd
-ev_post_wrap_overrides <- function(x) {
-  x <- sub("Protein\nLocalization To\nPlasma Membrane",
-    "Protein Localiz.\nto Plasma\nMem.", x,
-    fixed = TRUE
-  )
-  x <- sub("(?s).*Maintenance.*Cell.*Polarity.*", "Maintenance\nof Polarity",
-    x,
-    perl = TRUE
-  )
-  x <- sub("^Heme Metabolism$", "Heme\nMetabolism", x)
-  x <- sub("^tRNA Metabolism$", "tRNA\nMetabolism", x)
-  x <- sub("^Mitotic Spindle$", "Mitotic\nSpindle", x)
-  x <- sub("^MYC Targets V1$", "MYC Targets\nV1", x)
-  x <- sub("^UV Response Dn$", "UV Response\nDn", x)
-  x
-}
-
-#' @keywords internal
-#' @noRd
-ev_expand_acronyms <- function(x) {
-  reps <- c(
-    "\\bTca\\b" = "TCA", "\\bMapk(\\d?)\\b" = "MAPK\\1",
-    "\\bPtk(\\d?)\\b" = "PTK\\1", "\\bRhoa\\b" = "RhoA",
-    "\\bRhob\\b" = "RhoB", "\\bRhoc\\b" = "RhoC",
-    "\\bGtpase\\b" = "GTPase", "\\bGtp\\b" = "GTP", "\\bGdp\\b" = "GDP",
-    "\\bMrna\\b" = "mRNA", "\\bRna\\b" = "RNA", "\\bDna\\b" = "DNA",
-    "\\bAtp\\b" = "ATP", "\\bNadh\\b" = "NADH", "\\bFadh\\b" = "FADH",
-    "\\bRos\\b" = "ROS", "\\bIfn\\b" = "IFN", "\\bIl-?(\\d+)\\b" = "IL\\1",
-    "\\bPi3k\\b" = "PI3K", "\\bAkt\\b" = "AKT", "\\bMtor\\b" = "mTOR",
-    "\\bMtorc1\\b" = "MTORC1", "\\bE2f\\b" = "E2F", "\\bMyc\\b" = "MYC",
-    "\\bKras\\b" = "KRAS", "\\bTnfa\\b" = "TNFA", "\\bNfkb\\b" = "NF-kB",
-    "\\bG2m\\b" = "G2M", "\\bUv\\b" = "UV", "\\bWnt\\b" = "WNT",
-    "\\bStat(\\d)\\b" = "STAT\\1", "\\bJak\\b" = "JAK", "\\bTgf\\b" = "TGF",
-    "\\bPirnas?\\b" = "piRNAs", "\\bDgc\\b" = "DGC", "\\bMpc\\b" = "MPC",
-    "\\bP53\\b" = "p53", "\\bSlc25a\\b" = "SLC25A",
-    "Trna " = "tRNA "
-  )
-  for (pat in names(reps)) x <- gsub(pat, reps[[pat]], x, perl = TRUE)
-  x
-}
-
-#' @keywords internal
-#' @noRd
-ev_shorten_phrases <- function(x) {
-  reps <- c(
-    # whole-name overrides for a few terms that stay unwieldy after shortening
-    "Immunoregulatory Interactions Between A Lymphoid And A Non Lymphoid Cell" =
-      "Lymphoid Cell Interactions",
-    "Transcriptional And Post Translational Regulation Of Mitf M Expression And Activity" =
-      "MITF-M Regulation",
-    "Arrhythmogenic Right Ventricular Cardiomyopathy Arvc" = "ARVC",
-    "Cargo Recognition For Clathrin Mediated Endocytosis" = "Clathrin Endocytosis",
-    "Assembly Of Collagen Fibrils And Other Multimeric Structures" =
-      "Collagen Fibril Assembly",
-    "Collagen Chain Trimerization" = "Collagen Trimerization",
-    "Processing Of Capped Intron Containing Pre mRNA" = "Pre-mRNA Processing",
-    "Respiratory Chain Complex I (Holoenzyme), Mitochondrial" = "Respiratory Complex I",
-    "Respiratory Chain Complex I, Mitochondrial" = "Respiratory Complex I",
-    "Mitochondrial Ribosome, Large Subunit" = "Mitoribosome (Large)",
-    "Mitochondrial Ribosome, Small Subunit" = "Mitoribosome (Small)",
-    "Oxidative Phosphorylation" = "OXPHOS",
-    "Unfolded Protein Response" = "UPR", "Fatty Acid" = "FA",
-    "Amino Acid" = "AA", "Generation Of" = "Gen. of", " And " = " & ",
-    "Mitochondrion" = "Mito.", "Mitochondrial" = "Mito.",
-    "Ubiquinone" = "UQ", "Organization" = "Org.",
-    "Cytoskeleton" = "Cytoskel.", "Microtubule" = "MT",
-    "Respiratory" = "Resp.", "Electron Transport" = "ETC",
-    "Synthesis Coupled" = "Synth.-Coupled",
-    "Ubiquitin Dependent" = "Ub-Dep.",
-    "Proteasome Mediated" = "Proteasome-Med.", "Proteasomal" = "Proteas.",
-    "Phosphorylation" = "Phosph.",
-    "Modification" = "Mod.", "Intracellular" = "Intracell.",
-    "Regulation Of" = "Reg.", "Signaling Pathway" = "Signaling",
-    "Biosynthetic Process" = "Biosynthesis",
-    "Catabolic Process" = "Catabolism", "Metabolic Process" = "Metabolism",
-    "Based Process" = "Process", "Response To" = "Resp. to",
-    "Establishment Or Maintenance Of" = "Maintenance of",
-    "Extracellular Matrix" = "ECM",
-    "Epithelial Mesenchymal Transition" = "EMT",
-    "Precursor Metabolites & Energy" = "Precursor Metabolites",
-    "Citric Acid Cycle TCA Cycle" = "TCA Cycle",
-    "Aerobic Respiration & Resp. ETC" = "Aerobic Resp. + ETC"
-  )
-  for (pat in names(reps)) x <- gsub(pat, reps[[pat]], x, fixed = TRUE)
-  # variable-suffix MSigDB names that title-case to a long phrase
-  x <- sub(
-    "External Encapsulating Structure Or.*",
-    "Extracellular Matrix Org.", x
-  )
-  x <- sub(
-    "Enzyme Linked Receptor Protein Signaling.*",
-    "Receptor Protein Signaling", x
-  )
-  x
-}
-
-#' @keywords internal
-#' @noRd
-ev_clean_label_mitocarta <- function(name) {
-  n <- sub("^MITOCARTA_", "", name)
-  parts <- strsplit(n, "__|>", perl = TRUE)[[1]]
-  if (length(parts) == 1) parts <- strsplit(n, "_")[[1]]
-  leaf <- utils::tail(parts, 1)
-  leaf <- gsub("_", " ", leaf)
-  leaf <- tools::toTitleCase(tolower(leaf))
-  reps <- c(
-    "\\bOxphos\\b" = "OXPHOS", "\\bTca\\b" = "TCA", "\\bAa\\b" = "AA",
-    "\\bFa\\b" = "FA", "\\bRos\\b" = "ROS", "\\bImm\\b" = "IMM",
-    "\\bOmm\\b" = "OMM", "\\bIms\\b" = "IMS",
-    "\\bCi Subunits\\b" = "Complex I", "\\bCii Subunits\\b" = "Complex II",
-    "\\bCiii Subunits\\b" = "Complex III", "\\bCiv Subunits\\b" = "Complex IV",
-    "\\bCv Subunits\\b" = "Complex V", "\\bMitochondrial\\b" = "Mito.",
-    "\\bMitochondrion\\b" = "Mito.", "\\bAmino Acid\\b" = "AA",
-    "\\bFatty Acid\\b" = "FA"
-  )
-  for (pat in names(reps)) leaf <- gsub(pat, reps[[pat]], leaf, perl = TRUE)
-  leaf <- trimws(gsub("\\s+", " ", leaf))
-  stringr::str_wrap(leaf, width = 15)
-}
-
 # Ring geometry.
 
 ev_ring_r_inner <- 4.4
 ev_ring_r_outer <- 4.8
-
-#' Stagger labels into two radial lanes so wide boxes on adjacent (evenly
-#' spaced) arcs don't collide. Only kicks in once a ring is dense enough that a
-#' label box is wider than its angular slot; sparse rings are left flat.
-#' @keywords internal
-#' @noRd
-ev_spread_label_radii <- function(mid_deg, label_r, dense_n = 8, offset = 1.1) {
-  n <- length(label_r)
-  if (n < dense_n) {
-    return(label_r)
-  }
-  ord <- order(mid_deg)
-  outer <- ord[seq(2, n, by = 2)]
-  label_r[outer] <- label_r[outer] + offset
-  label_r
-}
 
 #' @keywords internal
 #' @noRd
@@ -350,6 +152,10 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' @param volc_df Tidy DA tibble for a single contrast.
 #' @param enrich_df Tidy enrichment tibble for the same contrast.
 #' @param gene_col,logfc_col,pval_col,padj_col Column names in `volc_df`.
+#' @param volc_sig_col Optional column in `volc_df` used to call point
+#'   significance (e.g. a pi-value), decoupled from the enrichment `padj_col`.
+#'   `NULL` falls back to `padj_col` then `pval_col`. The y-axis stays
+#'   `-log10(pval_col)` regardless.
 #' @param term_col,nes_col,size_col Column names in `enrich_df`. `padj_col`
 #'   is reused for the enrichment-side adjusted-p column.
 #' @param genes_col Optional column name in `enrich_df` carrying leading-edge
@@ -361,8 +167,18 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #'   when `abs(logFC) >= logfc_threshold` as well as significant.
 #' @param title,subtitle,tag Plot text.
 #' @param volcano_radius Inner volcano radius.
-#' @param ring_radius Inner radius of the enrichment ring (default 4.4). Raise it
-#'   to push the ring further out from the volcano / enlarge the ring.
+#' @param ring_radius Inner radius of the enrichment ring (default 4.8), where
+#'   the leading-edge tick band begins. Raise it to widen the central breathing
+#'   gap around the volcano, lower it to close it. Keep it above
+#'   `volcano_radius * 0.92` so the point cloud clears the ring.
+#' @param ring_thickness Radial width of the tick band between `ring_radius` and
+#'   the foot of the coloured arcs (default 0.55). This is the length of the
+#'   leading-edge ticks; widen it to make ticks easier to read.
+#' @param tick_width Line width of the leading-edge ticks (default 0.3).
+#' @param label_headroom Extra radial room (data units, default 0.5) reserved
+#'   beyond the outermost pathway label so its box stays enclosed within the
+#'   square panel rather than clipping or spilling into a neighbour. Raise it
+#'   when wide label boxes are clipped; lower it to pack the ring tighter.
 #' @param disc_color Optional fill for a tinted central disc.
 #' @param nes_limits Length-2 numeric or `NULL`; defaults to `c(-3, 3)`.
 #' @param magnitude `"neg_log_padj"` (default) or `"size"`; controls arc
@@ -373,8 +189,17 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' @param arc_height_range Length-2 numeric `c(min, max)` for the shortest
 #'   and tallest arc; widen it to exaggerate the magnitude encoding.
 #' @param show_counts Draw the up/down significant-point count badges.
-#' @param point_size,point_alpha,label_size,count_x_mult,count_y_mult
-#'   Aesthetic controls for the volcano interior.
+#' @param point_size,point_alpha Volcano point size (default 1.1) and opacity.
+#' @param label_size Pathway-label text size.
+#' @param label_gap Radial gap between each arc's outer top and its own label
+#'   (default 0.6). Anchoring per-arc keeps every leader line the same short
+#'   length regardless of arc height; the label box grows outward from this
+#'   point so it never overlaps the arc. Widen it to lengthen all leaders.
+#' @param count_size Text size of the up/down count badges (default 2.4).
+#' @param count_x_mult,count_y_mult Badge position as a fraction of the volcano
+#'   radius (default 0.7).
+#' @param axis_size Text size of the `up`/`down`/`log2 FC`/`-log10 p` axis
+#'   annotations (default 2.2).
 #' @param label_mode,label_n,label_rank_by,label_genes Volcano point labels.
 #' @param theme Output of `volcano_ring_theme()`.
 #' @return A ggplot.
@@ -384,6 +209,7 @@ volcano_ring <- function(volc_df, enrich_df,
                          logfc_col = "logFC",
                          pval_col = "P.Value",
                          padj_col = "padj",
+                         volc_sig_col = NULL,
                          term_col = "pathway",
                          nes_col = "NES",
                          size_col = "size",
@@ -394,19 +220,25 @@ volcano_ring <- function(volc_df, enrich_df,
                          title = NULL,
                          subtitle = NULL,
                          tag = NULL,
-                         volcano_radius = 3.5,
-                         ring_radius = 4.4,
+                         volcano_radius = 4.0,
+                         ring_radius = 4.8,
+                         ring_thickness = 0.55,
+                         tick_width = 0.3,
+                         label_headroom = 0.5,
                          disc_color = NULL,
                          nes_limits = NULL,
                          magnitude = c("neg_log_padj", "size"),
                          arc_order = c("padj", "nes"),
-                         arc_height_range = c(0.05, 1.6),
+                         arc_height_range = c(0.4, 1.6),
                          show_counts = TRUE,
-                         point_size = 1.6,
+                         point_size = 1.1,
                          point_alpha = 0.85,
                          label_size = 2.8,
-                         count_x_mult = 0.9,
-                         count_y_mult = 0.9,
+                         label_gap = 0.6,
+                         count_size = 2.4,
+                         count_x_mult = 0.7,
+                         count_y_mult = 0.7,
+                         axis_size = 2.2,
                          label_mode = c(
                            "none", "top_per_direction",
                            "by_significance", "by_genes"
@@ -420,7 +252,7 @@ volcano_ring <- function(volc_df, enrich_df,
   label_mode <- match.arg(label_mode)
   label_rank_by <- match.arg(label_rank_by)
   ev_assert_colour(disc_color)
-  validate_ring_geometry(ring_radius, volcano_radius, arc_height_range)
+  validate_ring_geometry(ring_radius, volcano_radius, arc_height_range, label_headroom)
 
   if (!is.data.frame(volc_df)) {
     ev_abort(
@@ -436,6 +268,9 @@ volcano_ring <- function(volc_df, enrich_df,
   }
 
   vcols <- resolve_volc_cols(volc_df, gene_col, logfc_col, pval_col, padj_col)
+  if (!is.null(volc_sig_col) && !volc_sig_col %in% names(volc_df)) {
+    ev_abort_missing_column(volc_df, volc_sig_col, "volc_sig_col", "volc_df")
+  }
   ecols <- resolve_enrich_cols(
     enrich_df, term_col, nes_col, padj_col,
     size_col, magnitude
@@ -450,7 +285,7 @@ volcano_ring <- function(volc_df, enrich_df,
   nes_limits <- nes_limits %||% theme$nes_limits %||% c(-3, 3)
   vr <- volcano_radius * 0.92
   ring_r0 <- ring_radius
-  ring_r1 <- ring_radius + 0.4
+  ring_r1 <- ring_radius + ring_thickness
 
   v <- volc_df[!is.na(volc_df[[logfc_col]]) & !is.na(volc_df[[pval_col]]), ,
     drop = FALSE
@@ -458,7 +293,13 @@ volcano_ring <- function(volc_df, enrich_df,
   v$.ev_neg_log10p <- -log10(v[[pval_col]])
   v <- v[is.finite(v$.ev_neg_log10p), , drop = FALSE]
 
-  sig_score <- if (has_padj) v[[padj_col]] else v[[pval_col]]
+  sig_score <- if (!is.null(volc_sig_col)) {
+    v[[volc_sig_col]]
+  } else if (has_padj) {
+    v[[padj_col]]
+  } else {
+    v[[pval_col]]
+  }
   sig <- sig_score < p_threshold
   lfc <- v[[logfc_col]]
   v$.ev_direction <- ifelse(sig & lfc >= logfc_threshold, "up",
@@ -570,34 +411,41 @@ volcano_ring <- function(volc_df, enrich_df,
     ) +
     ggplot2::annotate("text",
       x = 0, y = vr * 1.05,
-      label = "-log10 p", size = 2.4, colour = "grey40",
+      label = "-log10 p", size = axis_size, colour = "grey40",
       parse = FALSE
     ) +
     ggplot2::annotate("text",
       x = vr * 0.45, y = -vr, label = "up",
-      size = 2.6, colour = pal$up,
+      size = axis_size, colour = pal$up,
       fontface = "bold.italic", hjust = 0
     ) +
     ggplot2::annotate("text",
       x = -vr * 0.45, y = -vr, label = "down",
-      size = 2.6, colour = pal$down,
+      size = axis_size, colour = pal$down,
       fontface = "bold.italic", hjust = 1
+    ) +
+    ggplot2::annotate("text",
+      x = 0, y = -vr - 0.35, label = "log2 FC",
+      size = axis_size, colour = "grey40", fontface = "bold.italic"
     )
 
   if (show_counts) {
-    p <- p +
-      ggplot2::annotate("label",
-        x = vr * count_x_mult, y = vr * count_y_mult,
-        label = n_up,
-        size = 3.2, colour = "white", fill = pal$up,
-        fontface = "bold", linewidth = 0.3
-      ) +
-      ggplot2::annotate("label",
-        x = -vr * count_x_mult, y = vr * count_y_mult,
-        label = n_down,
-        size = 3.2, colour = "white", fill = pal$down,
-        fontface = "bold", linewidth = 0.3
-      )
+    count_badge <- function(p, x, fill) {
+      p +
+        ggplot2::annotate("label",
+          x = x, y = vr * count_y_mult, label = if (x > 0) n_up else n_down,
+          size = count_size, colour = "grey20", fill = fill, fontface = "bold",
+          linewidth = 0.3, label.r = ggplot2::unit(2, "pt"),
+          label.padding = ggplot2::unit(2, "pt")
+        ) +
+        ggplot2::annotate("text",
+          x = x, y = vr * count_y_mult, label = if (x > 0) n_up else n_down,
+          size = count_size, colour = "white", fontface = "bold"
+        )
+    }
+    p <- p |>
+      count_badge(vr * count_x_mult, pal$up) |>
+      count_badge(-vr * count_x_mult, pal$down)
   }
 
   max_r <- 5.6
@@ -609,7 +457,7 @@ volcano_ring <- function(volc_df, enrich_df,
           x = .data$x0, y = .data$y0, xend = .data$x1,
           yend = .data$y1, colour = .data$direction
         ),
-        linewidth = 0.15, alpha = 0.7, inherit.aes = FALSE
+        linewidth = tick_width, alpha = 0.8, inherit.aes = FALSE
       )
     }
     p <- p +
@@ -629,16 +477,17 @@ volcano_ring <- function(volc_df, enrich_df,
       )
 
     lbl <- ring
-    lbl$.ev_label_r <- lbl$arc_r1_var + 1.0
-    lbl$.ev_label_r <- ev_spread_label_radii(lbl$.ev_mid_deg, lbl$.ev_label_r)
+    lbl$.ev_label_r <- lbl$arc_r1_var + label_gap
+    lbl$.ev_hjust <- (1 - sin(lbl$.ev_mid_rad)) / 2
+    lbl$.ev_vjust <- (1 - cos(lbl$.ev_mid_rad)) / 2
     lbl$.ev_lbl_x <- lbl$.ev_label_r * sin(lbl$.ev_mid_rad)
     lbl$.ev_lbl_y <- lbl$.ev_label_r * cos(lbl$.ev_mid_rad)
     lbl$.ev_lead_x <- (lbl$arc_r1_var + 0.1) * sin(lbl$.ev_mid_rad)
     lbl$.ev_lead_y <- (lbl$arc_r1_var + 0.1) * cos(lbl$.ev_mid_rad)
-    lbl$.ev_lead_ex <- (lbl$.ev_label_r - 0.3) * sin(lbl$.ev_mid_rad)
-    lbl$.ev_lead_ey <- (lbl$.ev_label_r - 0.3) * cos(lbl$.ev_mid_rad)
+    lbl$.ev_lead_ex <- (lbl$.ev_label_r - 0.05) * sin(lbl$.ev_mid_rad)
+    lbl$.ev_lead_ey <- (lbl$.ev_label_r - 0.05) * cos(lbl$.ev_mid_rad)
     lbl$.ev_lab_fill <- ifelse(lbl$.ev_is_up, pal$up, pal$down)
-    max_r <- max(lbl$.ev_label_r) + 0.5
+    max_r <- max(lbl$.ev_label_r) + label_headroom
 
     p <- p +
       ggplot2::geom_segment(
@@ -655,6 +504,7 @@ volcano_ring <- function(volc_df, enrich_df,
           x = .data$.ev_lbl_x, y = .data$.ev_lbl_y,
           label = .data$.ev_clean_label, fill = NULL
         ),
+        hjust = lbl$.ev_hjust, vjust = lbl$.ev_vjust,
         fill = lbl$.ev_lab_fill, colour = "white", fontface = "bold",
         size = label_size, label.padding = ggplot2::unit(2, "pt"),
         label.r = ggplot2::unit(1.5, "pt"), lineheight = 0.85,
@@ -681,7 +531,9 @@ volcano_ring <- function(volc_df, enrich_df,
       xlim = c(-(max_r + 0.1), max_r + 0.1),
       ylim = c(-(max_r + 0.1), max_r + 0.1), clip = "off"
     ) +
-    ggplot2::theme_void(base_size = theme$base_size) +
+    ggplot2::theme_void(
+      base_size = theme$base_size, base_family = theme$base_family
+    ) +
     ggplot2::theme(
       plot.title = ggplot2::element_text(
         face = "bold", hjust = 0.5, margin = ggplot2::margin(b = 0)

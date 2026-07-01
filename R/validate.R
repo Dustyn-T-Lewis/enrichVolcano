@@ -116,11 +116,19 @@ dedup_by_term <- function(enrich_df, cols) {
 #' render an inverted or collapsed ring.
 #' @keywords internal
 #' @noRd
-validate_ring_geometry <- function(ring_radius, volcano_radius, arc_height_range) {
+validate_ring_geometry <- function(ring_radius, volcano_radius, arc_height_range,
+                                   label_headroom = 0.5) {
   if (!is.numeric(ring_radius) || length(ring_radius) != 1L ||
     !is.finite(ring_radius) || ring_radius <= 0) {
     ev_abort(
       "{.arg ring_radius} must be a single positive number; got {.val {ring_radius}}.",
+      class = "enrichVolcano_param_error"
+    )
+  }
+  if (!is.numeric(label_headroom) || length(label_headroom) != 1L ||
+    !is.finite(label_headroom) || label_headroom < 0) {
+    ev_abort(
+      "{.arg label_headroom} must be a single non-negative number; got {.val {label_headroom}}.",
       class = "enrichVolcano_param_error"
     )
   }
@@ -141,11 +149,37 @@ validate_ring_geometry <- function(ring_radius, volcano_radius, arc_height_range
   }
   if (ring_radius < volcano_radius) {
     ev_warn(
-      c("{.arg ring_radius} ({ring_radius}) is below {.arg volcano_radius} ({volcano_radius}); the volcano will spill over the ring.",
+      c(
+        paste(
+          "{.arg ring_radius} ({ring_radius}) is below {.arg volcano_radius}",
+          "({volcano_radius}); the volcano will spill over the ring."
+        ),
         "i" = "Raise {.arg ring_radius} or lower {.arg volcano_radius}."
       ),
       class = "enrichVolcano_param_warning"
     )
+  }
+  invisible(TRUE)
+}
+
+#' Validate the grid spacing knobs at the public boundary
+#'
+#' @keywords internal
+#' @noRd
+validate_grid_spacing <- function(panel_spacing, panel_margin, legend_width) {
+  knobs <- list(
+    panel_spacing = panel_spacing,
+    panel_margin = panel_margin,
+    legend_width = legend_width
+  )
+  for (nm in names(knobs)) {
+    v <- knobs[[nm]]
+    if (!is.numeric(v) || length(v) != 1L || !is.finite(v) || v < 0) {
+      ev_abort(
+        "{.arg {nm}} must be a single non-negative number (mm); got {.val {v}}.",
+        class = "enrichVolcano_param_error"
+      )
+    }
   }
   invisible(TRUE)
 }

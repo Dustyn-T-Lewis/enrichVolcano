@@ -12,6 +12,21 @@
 #' @param tag_levels Panel-tag scheme; forwarded to `patchwork::plot_annotation()`.
 #' @param guides Patchwork `guides` argument; default `"collect"` collects the
 #'   shared NES legend.
+#' @param panel_spacing Gutter between adjacent panels, in millimetres
+#'   (default 1.5). Applied as half on each panel edge, so neighbours sit
+#'   `panel_spacing` apart. Lower it to pack rings closer.
+#' @param panel_margin Outer margin around the whole grid, in millimetres
+#'   (default 2). Trims the dead frame around the assembled figure.
+#' @param label_headroom Radial room reserved for pathway labels inside each
+#'   panel (default 1.1, looser than the single-ring default of 0.5 so wide
+#'   boxes stay enclosed when panels are packed tight). Forwarded to
+#'   `volcano_ring()`; raise it if labels clip, lower it to enlarge the rings.
+#' @param legend_position Placement of the collected NES legend: `"bottom"`
+#'   (default, recovers the right-hand gap), `"right"`, or `"none"`.
+#' @param legend_width Length of the NES colourbar long axis, in millimetres
+#'   (default 26, tuned for the bottom bar). Sets the key width when the legend
+#'   is horizontal, the key height when vertical; a side legend usually wants a
+#'   larger value (~40).
 #' @param ... Forwarded to each `volcano_ring()` call (e.g. `gene_col`,
 #'   `padj_col`, `magnitude`, `theme`).
 #' @return An S3 object `c("volcano_ring_grid", "list")` with elements
@@ -24,7 +39,14 @@ volcano_ring_grid <- function(volc_dfs, enrich_dfs,
                               ncol = NULL,
                               tag_levels = "A",
                               guides = "collect",
+                              panel_spacing = 1.5,
+                              panel_margin = 2,
+                              label_headroom = 1.1,
+                              legend_position = c("bottom", "right", "none"),
+                              legend_width = 26,
                               ...) {
+  legend_position <- match.arg(legend_position)
+  validate_grid_spacing(panel_spacing, panel_margin, legend_width)
   volc_list <- split_by_contrast(volc_dfs, "volc_dfs")
   enrich_list <- split_by_contrast(enrich_dfs, "enrich_dfs")
 
@@ -57,13 +79,36 @@ volcano_ring_grid <- function(volc_dfs, enrich_dfs,
       subtitles[[i]]
     }
     volcano_ring(volc_list[[cn]], enrich_list[[cn]],
-      title = cn, subtitle = sub, ...
+      title = cn, subtitle = sub, label_headroom = label_headroom, ...
     )
   })
   names(panels) <- contrasts
 
+  horizontal <- legend_position %in% c("bottom", "top")
+  legend_theme <- ggplot2::theme(
+    legend.position = legend_position,
+    legend.direction = if (horizontal) "horizontal" else "vertical",
+    legend.box.spacing = ggplot2::unit(panel_spacing, "mm"),
+    legend.key.width = ggplot2::unit(if (horizontal) legend_width else 2, "mm"),
+    legend.key.height = ggplot2::unit(if (horizontal) 2 else legend_width, "mm"),
+    plot.margin = ggplot2::margin(
+      panel_spacing / 2, panel_spacing / 2,
+      panel_spacing / 2, panel_spacing / 2, "mm"
+    )
+  )
+  legend_dir <- if (horizontal) "horizontal" else "vertical"
+
   plot <- patchwork::wrap_plots(panels, nrow = nrow, ncol = ncol, guides = guides) +
-    patchwork::plot_annotation(tag_levels = tag_levels)
+    patchwork::plot_annotation(
+      tag_levels = tag_levels,
+      theme = ggplot2::theme(
+        plot.margin = ggplot2::margin(
+          panel_margin, panel_margin, panel_margin, panel_margin, "mm"
+        )
+      )
+    ) &
+    legend_theme &
+    ggplot2::guides(fill = ggplot2::guide_colorbar(direction = legend_dir))
 
   out <- list(
     plot = plot,

@@ -19,7 +19,8 @@
 #'   in `volcano_ring()` uses its own default.
 #' @param nes_stops Optional numeric vector matching the NES ramp length,
 #'   overriding the palette's `nes_values`.
-#' @return A list `list(base_size, base_family, theme, palette)`.
+#' @return A list `list(base_size, base_family, palette, nes_limits)` consumed
+#'   by [volcano_ring()].
 #' @export
 #' @examples
 #' th <- volcano_ring_theme(base_size = 11)
@@ -78,11 +79,6 @@ volcano_ring_theme <- function(base_size = 11,
   list(
     base_size = base_size,
     base_family = base_family,
-    theme = ggplot2::theme_minimal(base_size = base_size, base_family = base_family) +
-      ggplot2::theme(
-        panel.grid.minor = ggplot2::element_blank(),
-        legend.position  = "bottom"
-      ),
     palette = pal,
     nes_limits = nes_limits
   )

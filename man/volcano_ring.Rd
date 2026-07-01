@@ -11,6 +11,7 @@ volcano_ring(
   logfc_col = "logFC",
   pval_col = "P.Value",
   padj_col = "padj",
+  volc_sig_col = NULL,
   term_col = "pathway",
   nes_col = "NES",
   size_col = "size",
@@ -21,19 +22,25 @@ volcano_ring(
   title = NULL,
   subtitle = NULL,
   tag = NULL,
-  volcano_radius = 3.5,
-  ring_radius = 4.4,
+  volcano_radius = 4,
+  ring_radius = 4.8,
+  ring_thickness = 0.55,
+  tick_width = 0.3,
+  label_headroom = 0.5,
   disc_color = NULL,
   nes_limits = NULL,
   magnitude = c("neg_log_padj", "size"),
   arc_order = c("padj", "nes"),
-  arc_height_range = c(0.05, 1.6),
+  arc_height_range = c(0.4, 1.6),
   show_counts = TRUE,
-  point_size = 1.6,
+  point_size = 1.1,
   point_alpha = 0.85,
   label_size = 2.8,
-  count_x_mult = 0.9,
-  count_y_mult = 0.9,
+  label_gap = 0.6,
+  count_size = 2.4,
+  count_x_mult = 0.7,
+  count_y_mult = 0.7,
+  axis_size = 2.2,
   label_mode = c("none", "top_per_direction", "by_significance", "by_genes"),
   label_n = 5,
   label_rank_by = c("significance", "logfc"),
@@ -47,6 +54,11 @@ volcano_ring(
 \item{enrich_df}{Tidy enrichment tibble for the same contrast.}
 
 \item{gene_col, logfc_col, pval_col, padj_col}{Column names in \code{volc_df}.}
+
+\item{volc_sig_col}{Optional column in \code{volc_df} used to call point
+significance (e.g. a pi-value), decoupled from the enrichment \code{padj_col}.
+\code{NULL} falls back to \code{padj_col} then \code{pval_col}. The y-axis stays
+\code{-log10(pval_col)} regardless.}
 
 \item{term_col, nes_col, size_col}{Column names in \code{enrich_df}. \code{padj_col}
 is reused for the enrichment-side adjusted-p column.}
@@ -66,8 +78,21 @@ when \code{abs(logFC) >= logfc_threshold} as well as significant.}
 
 \item{volcano_radius}{Inner volcano radius.}
 
-\item{ring_radius}{Inner radius of the enrichment ring (default 4.4). Raise it
-to push the ring further out from the volcano / enlarge the ring.}
+\item{ring_radius}{Inner radius of the enrichment ring (default 4.8), where
+the leading-edge tick band begins. Raise it to widen the central breathing
+gap around the volcano, lower it to close it. Keep it above
+\code{volcano_radius * 0.92} so the point cloud clears the ring.}
+
+\item{ring_thickness}{Radial width of the tick band between \code{ring_radius} and
+the foot of the coloured arcs (default 0.55). This is the length of the
+leading-edge ticks; widen it to make ticks easier to read.}
+
+\item{tick_width}{Line width of the leading-edge ticks (default 0.3).}
+
+\item{label_headroom}{Extra radial room (data units, default 0.5) reserved
+beyond the outermost pathway label so its box stays enclosed within the
+square panel rather than clipping or spilling into a neighbour. Raise it
+when wide label boxes are clipped; lower it to pack the ring tighter.}
 
 \item{disc_color}{Optional fill for a tinted central disc.}
 
@@ -85,7 +110,22 @@ and tallest arc; widen it to exaggerate the magnitude encoding.}
 
 \item{show_counts}{Draw the up/down significant-point count badges.}
 
-\item{point_size, point_alpha, label_size, count_x_mult, count_y_mult}{Aesthetic controls for the volcano interior.}
+\item{point_size, point_alpha}{Volcano point size (default 1.1) and opacity.}
+
+\item{label_size}{Pathway-label text size.}
+
+\item{label_gap}{Radial gap between each arc's outer top and its own label
+(default 0.6). Anchoring per-arc keeps every leader line the same short
+length regardless of arc height; the label box grows outward from this
+point so it never overlaps the arc. Widen it to lengthen all leaders.}
+
+\item{count_size}{Text size of the up/down count badges (default 2.4).}
+
+\item{count_x_mult, count_y_mult}{Badge position as a fraction of the volcano
+radius (default 0.7).}
+
+\item{axis_size}{Text size of the \code{up}/\code{down}/\verb{log2 FC}/\verb{-log10 p} axis
+annotations (default 2.2).}
 
 \item{label_mode, label_n, label_rank_by, label_genes}{Volcano point labels.}
 
