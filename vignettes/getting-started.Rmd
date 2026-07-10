@@ -119,40 +119,59 @@ default), arc thickness is `-log10(padj)`, and the up/down split lives on
 the right vs left semicircle. The pre-filtering of which pathways appear
 is up to you — every row of `enrich_df` becomes one arc.
 
+## Tick lines to the leading edge
+
+A pathway earns its place because a handful of proteins drive it. When the
+enrichment table carries those leading-edge genes, `volcano_ring()` draws a
+thin tick from each arc to its genes inside the volcano, so a pathway reads
+back to the points that produced it. The YvO enrichment table above has no
+gene column, so the arcs above draw without ticks.
+
+Here the two example arcs carry the strongest up- and down-regulated
+proteins from `da1` as their leading edge, and the ticks appear:
+
+```{r ticks, fig.alt = "Volcano in ring with leading-edge tick lines"}
+strongest <- function(direction, n = 6) {
+  hits <- da1[da1$padj < 0.05 & sign(da1$logFC) == direction, ]
+  head(hits[order(hits$padj), "gene"], n)
+}
+en_ticks <- data.frame(
+  pathway = c("Up example set", "Down example set"),
+  NES = c(2.1, -1.9),
+  padj = c(0.002, 0.006),
+  size = c(6L, 6L),
+  leading_edge = c(
+    paste(strongest(1), collapse = ";"),
+    paste(strongest(-1), collapse = ";")
+  )
+)
+suppressMessages(volcano_ring(da1, en_ticks, title = "Leading-edge ticks"))
+```
+
+`genes_col` is auto-detected from `leading_edge`, `leadingEdge`,
+`core_enrichment`, or `Genes`; `vignette("input-contract")` lists the
+conventions each upstream tool uses.
+
 ## A multi-contrast grid
 
 When you have several contrasts to show side by side, pass two named
 lists to `volcano_ring_grid()`. The function calls `volcano_ring()` once
-per panel and composes them with `patchwork::wrap_plots()`.
+per panel and composes them with `patchwork::wrap_plots()`, collecting one
+shared NES legend. Here are the trained young and old contrasts, each
+curated to its top pathways:
 
-```{r grid, fig.width = 12, fig.height = 12, fig.alt = "Two-panel toy grid"}
-set.seed(1)
-toy_volc <- function(seed) {
-  set.seed(seed)
-  data.frame(
-    gene = paste0("G", 1:20),
-    contrast = "toy",
-    logFC = c(rnorm(10, 2), rnorm(10, -2)),
-    P.Value = c(runif(10, 0, 0.01), runif(10, 0, 0.01)),
-    padj = c(runif(10, 0, 0.04), runif(10, 0, 0.04))
-  )
+```{r grid, fig.width = 12, fig.height = 7, fig.alt = "Trained young and old panels"}
+curate <- function(contrast, n = 7) {
+  s <- en[en$contrast == contrast & en$padj < 0.05 & is.finite(en$NES), ]
+  s <- s[order(s$padj), ]
+  rbind(head(s[s$NES > 0, ], n), head(s[s$NES < 0, ], n))
 }
-toy_enrich <- function(seed) {
-  set.seed(seed)
-  data.frame(
-    pathway = paste0("HALLMARK_TOY_", LETTERS[1:5]),
-    NES = c(2.4, 1.8, -1.5, -2.1, 0.4),
-    padj = c(0.001, 0.02, 0.01, 0.005, 0.5),
-    size = c(40, 30, 25, 35, 18),
-    leading_edge = c(
-      "G1;G2;G3;G4", "G5;G6", "G11;G12",
-      "G13;G14;G15;G16", "G7;G17"
-    )
-  )
-}
+da_old <- da[da$contrast == "Training_Old", , drop = FALSE]
+names(da_old)[names(da_old) == "adj.P.Val"] <- "padj"
+
 g <- suppressMessages(volcano_ring_grid(
-  list(A = toy_volc(1), B = toy_volc(2)),
-  list(A = toy_enrich(1), B = toy_enrich(2)),
+  list(Young = da1, Old = da_old),
+  list(Young = en1, Old = curate("Training_Old")),
   ncol = 2
 ))
 g$plot
