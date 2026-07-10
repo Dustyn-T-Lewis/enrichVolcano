@@ -6,6 +6,8 @@
 \alias{enrichVolcano-package}
 \title{enrichVolcano: Volcano-in-Ring Composite Plots from Differential Abundance and Enrichment}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 Draws a single composite figure that combines a differential abundance volcano in the centre with a ring of enrichment terms around it, using NES-coloured arcs and tick lines from significant volcano points to the pathways they drive. Accepts any tidy differential abundance table and any tidy enrichment table (fgsea, clusterProfiler, enrichR, custom) via configurable column arguments.
 }
 \seealso{
@@ -17,11 +19,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Dustyn Tubbs \email{dtlts14@gmail.com}
+\strong{Maintainer}: Dustyn Lewis \email{dtlts14@gmail.com}
 
 Authors:
 \itemize{
-  \item Dustyn Tubbs \email{dtlts14@gmail.com}
+  \item Dustyn Lewis \email{dtlts14@gmail.com}
 }
 
 }
