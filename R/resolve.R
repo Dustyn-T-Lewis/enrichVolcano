@@ -1,9 +1,6 @@
-# Column resolution.
-#
-# Public functions take user-friendly column-name arguments and the surviving
-# helpers downstream of `resolve_*()` use a list of resolved names. Keeping
-# the lookup in one place avoids per-call grumbling about "what column was
-# that again?".
+# Column resolution. Public functions take user-facing column-name arguments;
+# helpers downstream of `resolve_*()` work from the resolved-name list these
+# return, so the name lookup lives in one place.
 
 #' Resolve volcano-frame columns
 #'
