@@ -23,6 +23,8 @@ volcano_ring(
   subtitle = NULL,
   tag = NULL,
   volcano_radius = 4,
+  x_scale = 1,
+  y_scale = 1,
   ring_radius = 4.8,
   ring_thickness = 0.55,
   tick_width = 0.3,
@@ -77,6 +79,14 @@ when \code{abs(logFC) >= logfc_threshold} as well as significant.}
 \item{title, subtitle, tag}{Plot text.}
 
 \item{volcano_radius}{Inner volcano radius.}
+
+\item{x_scale}{Horizontal compression of the point cloud (default 1). Values
+below 1 pull points toward the fold-change axis so the widest points clear
+the enrichment ring; the up/down axis annotations are unaffected.}
+
+\item{y_scale}{Vertical compression of the point cloud (default 1), anchored
+at the fold-change axis. Values below 1 lower the tallest points so they
+clear the \verb{-log10 p} label at the top of the volcano.}
 
 \item{ring_radius}{Inner radius of the enrichment ring (default 4.8), where
 the leading-edge tick band begins. Raise it to widen the central breathing

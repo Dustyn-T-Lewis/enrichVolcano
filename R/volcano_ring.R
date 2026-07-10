@@ -167,6 +167,12 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #'   when `abs(logFC) >= logfc_threshold` as well as significant.
 #' @param title,subtitle,tag Plot text.
 #' @param volcano_radius Inner volcano radius.
+#' @param x_scale Horizontal compression of the point cloud (default 1). Values
+#'   below 1 pull points toward the fold-change axis so the widest points clear
+#'   the enrichment ring; the up/down axis annotations are unaffected.
+#' @param y_scale Vertical compression of the point cloud (default 1), anchored
+#'   at the fold-change axis. Values below 1 lower the tallest points so they
+#'   clear the `-log10 p` label at the top of the volcano.
 #' @param ring_radius Inner radius of the enrichment ring (default 4.8), where
 #'   the leading-edge tick band begins. Raise it to widen the central breathing
 #'   gap around the volcano, lower it to close it. Keep it above
@@ -221,6 +227,8 @@ volcano_ring <- function(volc_df, enrich_df,
                          subtitle = NULL,
                          tag = NULL,
                          volcano_radius = 4.0,
+                         x_scale = 1,
+                         y_scale = 1,
                          ring_radius = 4.8,
                          ring_thickness = 0.55,
                          tick_width = 0.3,
@@ -312,8 +320,8 @@ volcano_ring <- function(volc_df, enrich_df,
   y_max <- max(v$.ev_neg_log10p, na.rm = TRUE)
   if (!is.finite(x_max) || x_max == 0) x_max <- 1
   if (!is.finite(y_max) || y_max == 0) y_max <- 1
-  v$.ev_x_plot <- lfc / x_max * vr
-  v$.ev_y_plot <- v$.ev_neg_log10p / y_max * 2 * vr - vr
+  v$.ev_x_plot <- lfc / x_max * vr * x_scale
+  v$.ev_y_plot <- v$.ev_neg_log10p / y_max * 2 * vr * y_scale - vr
   v_ns <- v[v$.ev_direction == "ns", , drop = FALSE]
   v_sig <- v[v$.ev_direction != "ns", , drop = FALSE]
 

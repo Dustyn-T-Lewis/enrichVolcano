@@ -54,6 +54,20 @@ test_that("volcano_ring runs against the bundled YvO fixture", {
   expect_s3_class(p, "ggplot")
 })
 
+test_that("x_scale and y_scale compress the volcano point cloud", {
+  v <- make_toy_volc()
+  e <- make_toy_enrich()
+  point_span <- function(p, axis) {
+    pts <- Filter(function(d) "shape" %in% names(d), ggplot2::ggplot_build(p)$data)
+    diff(range(unlist(lapply(pts, `[[`, axis)), na.rm = TRUE))
+  }
+  full <- suppressMessages(volcano_ring(v, e))
+  narrow <- suppressMessages(volcano_ring(v, e, x_scale = 0.5))
+  short <- suppressMessages(volcano_ring(v, e, y_scale = 0.5))
+  expect_lt(point_span(narrow, "x"), point_span(full, "x"))
+  expect_lt(point_span(short, "y"), point_span(full, "y"))
+})
+
 test_that("arc_order = 'nes' reorders arcs by absolute NES within a half", {
   # P: most significant, weakest NES; Q: least significant, strongest NES.
   e <- data.frame(
