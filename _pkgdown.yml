@@ -7,6 +7,9 @@ reference:
       - volcano_ring
       - volcano_ring_grid
       - volcano_ring_theme
+  - title: "Labels"
+    contents:
+      - ev_clean_label
   - title: internal
     contents:
       - enrichVolcano-package
