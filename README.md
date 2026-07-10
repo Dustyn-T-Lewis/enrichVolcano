@@ -1,5 +1,5 @@
 
-# enrichVolcano
+# enrichVolcano <a href="https://Dustyn-T-Lewis.github.io/enrichVolcano/"><img src="man/figures/logo.png" align="right" height="139" alt="enrichVolcano website" /></a>
 
 > Draw a volcano-in-ring composite from any differential-abundance table
 > plus any enrichment table you’ve already computed.
