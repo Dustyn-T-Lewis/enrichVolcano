@@ -210,6 +210,24 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' @param theme Output of `volcano_ring_theme()`.
 #' @return A ggplot.
 #' @export
+#' @examples
+#' da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
+#'   package = "enrichVolcano"
+#' ))
+#' en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
+#'   package = "enrichVolcano"
+#' ))
+#'
+#' ctr <- "Training_Young"
+#' da1 <- da[da$contrast == ctr, ]
+#' names(da1)[names(da1) == "adj.P.Val"] <- "padj"
+#'
+#' # ring the volcano with this contrast's ten strongest GO-BP terms
+#' en1 <- en[en$contrast == ctr & en$database == "GO_BP", ]
+#' en1 <- en1[order(en1$padj), ]
+#' en1 <- head(en1[!duplicated(en1$pathway), ], 10)
+#'
+#' volcano_ring(da1, en1, title = ctr)
 volcano_ring <- function(volc_df, enrich_df,
                          gene_col = "gene",
                          logfc_col = "logFC",

@@ -16,3 +16,6 @@ Character vector of cleaned, wrapped labels.
 Strips the database prefix, expands common acronyms, title-cases, wraps,
 and applies MitoCarta-hierarchy shortening for \code{MITOCARTA_} pathways.
 }
+\examples{
+ev_clean_label(c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "REACTOME_TCA_CYCLE"))
+}

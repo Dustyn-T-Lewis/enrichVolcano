@@ -32,6 +32,23 @@
 #' @return An S3 object `c("volcano_ring_grid", "list")` with elements
 #'   `$plot` (patchwork) and `$data` (list of `list(volc, enrich)` pairs).
 #' @export
+#' @examples
+#' da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
+#'   package = "enrichVolcano"
+#' ))
+#' en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
+#'   package = "enrichVolcano"
+#' ))
+#' names(da)[names(da) == "adj.P.Val"] <- "padj"
+#'
+#' # up to eight GO-BP terms per contrast, one composite each
+#' en_go <- en[en$database == "GO_BP" & en$padj < 0.01, ]
+#' en_go <- en_go[order(en_go$padj), ]
+#' en_go <- en_go[!duplicated(en_go[c("contrast", "pathway")]), ]
+#' en_go <- do.call(rbind, lapply(split(en_go, en_go$contrast), head, 8))
+#'
+#' g <- volcano_ring_grid(da, en_go, contrasts = c("Training_Young", "Training_Old"))
+#' g$plot
 volcano_ring_grid <- function(volc_dfs, enrich_dfs,
                               contrasts = NULL,
                               subtitles = NULL,

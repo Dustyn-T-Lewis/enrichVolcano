@@ -82,6 +82,8 @@ ev_select_labels <- function(df, mode, n, rank_by, genes,
 #' @param name Character vector of raw pathway names.
 #' @return Character vector of cleaned, wrapped labels.
 #' @export
+#' @examples
+#' ev_clean_label(c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "REACTOME_TCA_CYCLE"))
 ev_clean_label <- function(name) {
   if (length(name) > 1) {
     return(vapply(name, ev_clean_label, character(1), USE.NAMES = FALSE))

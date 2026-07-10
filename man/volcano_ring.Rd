@@ -154,3 +154,22 @@ Column-naming arguments default to limma + fgsea conventions. The tick
 column is auto-detected from \code{leading_edge} / \code{leadingEdge} /
 \code{core_enrichment} / \code{Genes} unless \code{genes_col} is supplied.
 }
+\examples{
+da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
+  package = "enrichVolcano"
+))
+en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
+  package = "enrichVolcano"
+))
+
+ctr <- "Training_Young"
+da1 <- da[da$contrast == ctr, ]
+names(da1)[names(da1) == "adj.P.Val"] <- "padj"
+
+# ring the volcano with this contrast's ten strongest GO-BP terms
+en1 <- en[en$contrast == ctr & en$database == "GO_BP", ]
+en1 <- en1[order(en1$padj), ]
+en1 <- head(en1[!duplicated(en1$pathway), ], 10)
+
+volcano_ring(da1, en1, title = ctr)
+}
