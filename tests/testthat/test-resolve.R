@@ -83,6 +83,13 @@ test_that("resolve_genes_col respects a user-supplied column + sep override", {
   expect_equal(out[[1]], c("G1", "G2", "G3", "G4"))
 })
 
+test_that("resolve_genes_col returns a user-supplied list-column as-is", {
+  e <- make_toy_enrich_listcol()
+  names(e)[names(e) == "leadingEdge"] <- "my_genes"
+  out <- resolve_genes_col(e, "my_genes", NULL)
+  expect_equal(out[[1]], c("G1", "G2", "G3", "G4"))
+})
+
 test_that("resolve_genes_col aborts when the override column is missing", {
   e <- make_toy_enrich()
   expect_error(

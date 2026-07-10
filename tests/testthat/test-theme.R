@@ -16,6 +16,11 @@ test_that("nes_colors replaces the ramp and spreads stops across the limits", {
   expect_equal(th$palette$nes_values, c(-2, 0, 2))
 })
 
+test_that("nes_stops of matching length overrides the ramp positions", {
+  th <- volcano_ring_theme(nes_stops = c(-3, -1, 0, 1, 3))
+  expect_equal(th$palette$nes_values, c(-3, -1, 0, 1, 3))
+})
+
 test_that("nes_stops must match the (possibly overridden) ramp length", {
   expect_error(
     volcano_ring_theme(

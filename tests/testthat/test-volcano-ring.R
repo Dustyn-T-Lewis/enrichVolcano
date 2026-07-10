@@ -54,6 +54,20 @@ test_that("volcano_ring runs against the bundled YvO fixture", {
   expect_s3_class(p, "ggplot")
 })
 
+test_that("disc_color draws a tinted central disc", {
+  p <- suppressMessages(volcano_ring(make_toy_volc(), make_toy_enrich(),
+    disc_color = "grey70"
+  ))
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("volc_sig_col drives point significance independently of padj", {
+  p <- suppressMessages(volcano_ring(make_toy_volc(), make_toy_enrich(),
+    volc_sig_col = "pi_eq2"
+  ))
+  expect_s3_class(p, "ggplot")
+})
+
 test_that("x_scale and y_scale compress the volcano point cloud", {
   v <- make_toy_volc()
   e <- make_toy_enrich()

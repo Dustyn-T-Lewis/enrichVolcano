@@ -66,6 +66,13 @@ test_that("column error class fires for a missing enrich column", {
   )
 })
 
+test_that("column error class fires for a missing volc_sig_col", {
+  expect_error(
+    volcano_ring(make_toy_volc(), make_toy_enrich(), volc_sig_col = "no_such_col"),
+    class = "enrichVolcano_column_error"
+  )
+})
+
 test_that("data error class fires for impossible padj", {
   v <- make_toy_volc()
   v$P.Value[1] <- 2
