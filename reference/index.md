@@ -17,3 +17,8 @@
 
   Theme + palette for
   [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
+
+## Labels
+
+- [`ev_clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_clean_label.md)
+  : Clean a pathway name for ring display

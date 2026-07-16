@@ -61,7 +61,8 @@ volcano_ring_theme(
 
 ## Value
 
-A list `list(base_size, base_family, theme, palette)`.
+A list `list(base_size, base_family, palette, nes_limits)` consumed by
+[`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md).
 
 ## Examples
 

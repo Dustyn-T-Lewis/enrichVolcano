@@ -96,6 +96,19 @@ volcano_ring(da1, en1,
 ![Bigger points, labelled top
 hits](customizing_files/figure-html/volcano-1.png)
 
+The cloud is scaled to fill the disc inside the ring. When the widest or
+tallest points crowd the arcs or the `-log10 p` label, `x_scale` and
+`y_scale` (both `1` by default) compress it toward the fold-change axis
+without moving the axis annotations:
+
+``` r
+
+volcano_ring(da1, en1, x_scale = 0.85, y_scale = 0.9)
+```
+
+![Compressed point cloud clearing the
+ring](customizing_files/figure-html/scale-1.png)
+
 ## The ring
 
 Arc **fill** is NES; arc **thickness** is a magnitude you choose with

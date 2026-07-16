@@ -74,7 +74,7 @@ the gene-set size used by the test.
 
 | Upstream | `term_col` | `nes_col` | `padj_col` | `size_col` | `genes_col` (Q4) |
 |----|----|----|----|----|----|
-| [`fgsea::fgseaMultilevel()`](https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html) | `pathway` | `NES` | `padj` | `size` | `leadingEdge` (list-col, auto) |
+| `fgsea::fgseaMultilevel()` | `pathway` | `NES` | `padj` | `size` | `leadingEdge` (list-col, auto) |
 | `clusterProfiler::gseGO()` | `Description` or `ID` | `NES` | `p.adjust` | `setSize` | `core_enrichment` (“/” sep, auto) |
 | `enrichR::enrichr()` | `Term` | derived from `Odds.Ratio` | `Adjusted.P.value` | none for ORA | `Genes` (“;” sep, auto) |
 | ORA via clusterProfiler | `Description` | derive from over/under | `p.adjust` | `Count` | `geneID` (“/” sep) |
@@ -137,8 +137,7 @@ one group of columns per contrast (`<contrast>_ratio`,
 `<contrast>_p.val`, `<contrast>_p.adj`).
 [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
 wants one row per protein **per contrast**, so a single
-[`tidyr::pivot_longer()`](https://tidyr.tidyverse.org/reference/pivot_longer.html)
-reshapes it:
+`tidyr::pivot_longer()` reshapes it:
 
 ``` r
 

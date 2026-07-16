@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Customizing the composite • enrichVolcano</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -58,8 +63,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Customizing the composite</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Customizing the composite</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/vignettes/customizing.Rmd" class="external-link"><code>vignettes/customizing.Rmd</code></a></small>
@@ -144,6 +148,14 @@ optional <code>nes_limits</code>) for the arc ramp.</p>
 <span>  label_mode <span class="op">=</span> <span class="st">"top_per_direction"</span>, label_n <span class="op">=</span> <span class="fl">4</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="customizing_files/figure-html/volcano-1.png" class="r-plt" alt="Bigger points, labelled top hits" width="576"></p>
+<p>The cloud is scaled to fill the disc inside the ring. When the widest
+or tallest points crowd the arcs or the <code>-log10 p</code> label,
+<code>x_scale</code> and <code>y_scale</code> (both <code>1</code> by
+default) compress it toward the fold-change axis without moving the axis
+annotations:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">da1</span>, <span class="va">en1</span>, x_scale <span class="op">=</span> <span class="fl">0.85</span>, y_scale <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></span></code></pre></div>
+<p><img src="customizing_files/figure-html/scale-1.png" class="r-plt" alt="Compressed point cloud clearing the ring" width="576"></p>
 </div>
 <div class="section level2">
 <h2 id="the-ring">The ring<a class="anchor" aria-label="anchor" href="#the-ring"></a>
@@ -154,7 +166,7 @@ magnitude you choose with <code>magnitude</code>, either
 gene-set size). <code>arc_height_range</code> sets how short the
 smallest arc and how tall the largest arc get, so you can flatten or
 exaggerate that encoding.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">da1</span>, <span class="va">en1</span>,</span>
 <span>  magnitude <span class="op">=</span> <span class="st">"size"</span>,</span>
 <span>  arc_height_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">2.2</span><span class="op">)</span></span>
@@ -164,7 +176,7 @@ exaggerate that encoding.</p>
 up/down split is always by NES sign; within each half you order by FDR
 (<code>"padj"</code>, the default) or by enrichment strength
 (<code>"nes"</code>):</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">da1</span>, <span class="va">en1</span>, arc_order <span class="op">=</span> <span class="st">"nes"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="customizing_files/figure-html/order-1.png" class="r-plt" alt="Arcs ordered by absolute NES" width="576"></p>
 </div>
@@ -176,7 +188,7 @@ up/down split is always by NES sign; within each half you order by FDR
 <code>count_x_mult</code> / <code>count_y_mult</code>.
 <code>title</code>, <code>subtitle</code>, and <code>tag</code> set the
 text.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">da1</span>, <span class="va">en1</span>,</span>
 <span>  show_counts <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  title <span class="op">=</span> <span class="st">"Young vs Old"</span>, subtitle <span class="op">=</span> <span class="st">"trained"</span>, tag <span class="op">=</span> <span class="st">"A"</span></span>
@@ -189,7 +201,7 @@ text.</p>
 <p><code><a href="../reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> forwards every one of these
 arguments to each panel, so a styled grid is the same knobs passed
 once:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">da_old</span> <span class="op">&lt;-</span> <span class="va">da</span><span class="op">[</span><span class="va">da</span><span class="op">$</span><span class="va">contrast</span> <span class="op">==</span> <span class="st">"Training_Old"</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">da_old</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">da_old</span><span class="op">)</span> <span class="op">==</span> <span class="st">"adj.P.Val"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"padj"</span></span>
 <span></span>
@@ -212,11 +224,11 @@ clusterProfiler / enrichR cross-walk, see
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Dustyn Tubbs.</p>
+  <p>Developed by Dustyn Lewis.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

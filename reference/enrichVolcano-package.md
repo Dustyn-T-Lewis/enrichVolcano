@@ -18,8 +18,8 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Dustyn Tubbs <dtlts14@gmail.com>
+**Maintainer**: Dustyn Lewis <dtlts14@gmail.com>
 
 Authors:
 
-- Dustyn Tubbs <dtlts14@gmail.com>
+- Dustyn Lewis <dtlts14@gmail.com>

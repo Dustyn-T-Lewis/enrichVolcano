@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Input contract • enrichVolcano</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -58,8 +63,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Input contract</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Input contract</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/vignettes/input-contract.Rmd" class="external-link"><code>vignettes/input-contract.Rmd</code></a></small>
@@ -294,7 +298,7 @@ down-regulated); <code>padj</code> is the multiple-testing-corrected p;
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><code><a href="https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html" class="external-link">fgsea::fgseaMultilevel()</a></code></td>
+<td><code>fgsea::fgseaMultilevel()</code></td>
 <td><code>pathway</code></td>
 <td><code>NES</code></td>
 <td><code>padj</code></td>
@@ -403,31 +407,31 @@ per protein and one group of columns per contrast
 <code>&lt;contrast&gt;_p.val</code>,
 <code>&lt;contrast&gt;_p.adj</code>). <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> wants
 one row per protein <strong>per contrast</strong>, so a single
-<code><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">tidyr::pivot_longer()</a></code> reshapes it:</p>
+<code>tidyr::pivot_longer()</code> reshapes it:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">da</span> <span class="op">&lt;-</span> <span class="fu">DEP</span><span class="fu">::</span><span class="fu">get_results</span><span class="op">(</span><span class="va">dep</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">name</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">ends_with</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"_ratio"</span>, <span class="st">"_p.val"</span>, <span class="st">"_p.adj"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">name</span>, <span class="fu">ends_with</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"_ratio"</span>, <span class="st">"_p.val"</span>, <span class="st">"_p.adj"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">pivot_longer</span><span class="op">(</span></span>
 <span>    <span class="op">-</span><span class="va">name</span>,</span>
 <span>    names_to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"contrast"</span>, <span class="st">".value"</span><span class="op">)</span>,</span>
 <span>    names_pattern <span class="op">=</span> <span class="st">"(.*)_(ratio|p\\.val|p\\.adj)"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>gene <span class="op">=</span> <span class="va">name</span>, logFC <span class="op">=</span> <span class="va">ratio</span>, P.Value <span class="op">=</span> <span class="va">p.val</span>, padj <span class="op">=</span> <span class="va">p.adj</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu">rename</span><span class="op">(</span>gene <span class="op">=</span> <span class="va">name</span>, logFC <span class="op">=</span> <span class="va">ratio</span>, P.Value <span class="op">=</span> <span class="va">p.val</span>, padj <span class="op">=</span> <span class="va">p.adj</span><span class="op">)</span></span></code></pre></div>
 <p>Enrichment from <code>fgsea</code> is already in the shape
 <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> expects — no reshape, no rename:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ranks</span> <span class="op">&lt;-</span> <span class="va">da</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">contrast</span> <span class="op">==</span> <span class="st">"treated_vs_control"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">contrast</span> <span class="op">==</span> <span class="st">"treated_vs_control"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="va">logFC</span>, <span class="va">gene</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">en</span> <span class="op">&lt;-</span> <span class="fu">fgsea</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html" class="external-link">fgseaMultilevel</a></span><span class="op">(</span>pathways <span class="op">=</span> <span class="va">msigdbr_list</span>, stats <span class="op">=</span> <span class="va">ranks</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>contrast <span class="op">=</span> <span class="st">"treated_vs_control"</span><span class="op">)</span></span>
+<span><span class="va">en</span> <span class="op">&lt;-</span> <span class="fu">fgsea</span><span class="fu">::</span><span class="fu">fgseaMultilevel</span><span class="op">(</span>pathways <span class="op">=</span> <span class="va">msigdbr_list</span>, stats <span class="op">=</span> <span class="va">ranks</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>contrast <span class="op">=</span> <span class="st">"treated_vs_control"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span></span>
-<span>  volc_df   <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">da</span>, <span class="va">contrast</span> <span class="op">==</span> <span class="st">"treated_vs_control"</span><span class="op">)</span>,</span>
+<span>  volc_df   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">da</span>, <span class="va">contrast</span> <span class="op">==</span> <span class="st">"treated_vs_control"</span><span class="op">)</span>,</span>
 <span>  enrich_df <span class="op">=</span> <span class="va">en</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -507,11 +511,11 @@ PMID 35263338 (background bias)</li>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Dustyn Tubbs.</p>
+  <p>Developed by Dustyn Lewis.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

@@ -16,6 +16,26 @@
 - New
   [`vignette("customizing")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customizing.md)
   walks the colour, volcano, ring, and layout knobs section by section.
+- [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
+  exposes the composite-layout knobs: `panel_spacing`, `panel_margin`,
+  `label_headroom`, `legend_position` (`"bottom"`, `"right"`, `"none"`),
+  and `legend_width`. The shared NES legend now collects along the
+  bottom by default.
+- [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
+  gains `ring_thickness` and `tick_width` for the leading-edge tick
+  band, `label_gap` for the gap between each arc and its label, and
+  `count_size` / `axis_size` for the badge and axis-annotation text.
+  Pathway labels now sit a fixed distance above their own arc, so every
+  leader line is the same short length.
+
+### Internal
+
+- Pathway-name cleaning
+  ([`ev_clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_clean_label.md)
+  and helpers) moved from `volcano_ring.R` to `labels.R`;
+  [`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md)
+  no longer returns an unused theme element and now honours
+  `base_family`. No behaviour change.
 
 ## enrichVolcano 0.3.0
 
@@ -23,9 +43,9 @@
 
 - enrichVolcano is now a plotting-only package. Enrichment computation
   has been removed. Compute your enrichment with
-  [`fgsea::fgseaMultilevel()`](https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html),
-  `clusterProfiler::gseGO()`, `enrichR::enrichr()`, or any tool you
-  like, and pass the resulting tidy table to
+  `fgsea::fgseaMultilevel()`, `clusterProfiler::gseGO()`,
+  `enrichR::enrichr()`, or any tool you like, and pass the resulting
+  tidy table to
   [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md).
 
 ### Removed (use v0.2.0 to recover)
@@ -96,8 +116,7 @@
 ### Bug fixes
 
 - `ev_enrich(nperm = ...)` now actually takes effect — it is passed to
-  [`fgsea::fgseaMultilevel()`](https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html)
-  as `nPermSimple` (previously a no-op).
+  `fgsea::fgseaMultilevel()` as `nPermSimple` (previously a no-op).
 - `ev_collapse(keep_by = "NES")` now ranks representatives by
   **\|NES\|**, so a strongly down-regulated pathway is no longer dropped
   in favour of a weakly up-regulated one.
@@ -159,10 +178,10 @@
   shared a pathway name would get the first database’s gene set for both
   rows.
 - `ev_collapse_fgsea()` now partitions its input by contrast and runs
-  [`fgsea::collapsePathways`](https://rdrr.io/pkg/fgsea/man/collapsePathways.html)
-  once per contrast against the matching gene-level rank vector.
-  Previously, under `scope = "global"` with multiple contrasts, every
-  pathway was silently scored against the first contrast’s ranks.
+  `fgsea::collapsePathways` once per contrast against the matching
+  gene-level rank vector. Previously, under `scope = "global"` with
+  multiple contrasts, every pathway was silently scored against the
+  first contrast’s ranks.
 - `ev_collapse(method = "jaccard_then_collapse")` (and the deprecated
   `"both"` alias) now passes only the Jaccard survivors to the collapse
   step and writes back positionally, mirroring
