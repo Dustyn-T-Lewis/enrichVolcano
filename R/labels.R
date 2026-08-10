@@ -136,10 +136,6 @@ ev_collapse_repeats <- function(x) {
 #' @keywords internal
 #' @noRd
 ev_post_wrap_overrides <- function(x) {
-  x <- sub("Protein\nLocalization To\nPlasma Membrane",
-    "Protein Localiz.\nto Plasma\nMem.", x,
-    fixed = TRUE
-  )
   x <- sub("(?s).*Maintenance.*Cell.*Polarity.*", "Maintenance\nof Polarity",
     x,
     perl = TRUE
@@ -170,6 +166,10 @@ ev_expand_acronyms <- function(x) {
     "\\bStat(\\d)\\b" = "STAT\\1", "\\bJak\\b" = "JAK", "\\bTgf\\b" = "TGF",
     "\\bPirnas?\\b" = "piRNAs", "\\bDgc\\b" = "DGC", "\\bMpc\\b" = "MPC",
     "\\bP53\\b" = "p53", "\\bSlc25a\\b" = "SLC25A",
+    "\\bRrna\\b" = "rRNA", "\\bTrna\\b" = "tRNA", "\\bSnrna\\b" = "snRNA",
+    "\\bEcm\\b" = "ECM", "\\bUch\\b" = "UCH", "\\bHmox(\\d)\\b" = "HMOX\\1",
+    "\\bPcp Ce\\b" = "PCP/CE", "\\bPd L1\\b" = "PD-L1",
+    "\\bCd(\\d+)\\b" = "CD\\1",
     "Trna " = "tRNA "
   )
   for (pat in names(reps)) x <- gsub(pat, reps[[pat]], x, perl = TRUE)
@@ -191,6 +191,22 @@ ev_shorten_phrases <- function(x) {
       "Collagen Fibril Assembly",
     "Collagen Chain Trimerization" = "Collagen Trimerization",
     "Processing Of Capped Intron Containing Pre mRNA" = "Pre-mRNA Processing",
+    "Reference Rab7 Regulated Microtubule Minus End Directed Transport" =
+      "Rab7 MT Transport",
+    "Regulation Of PD-L1 CD274 Post Translational Modification" =
+      "PD-L1 Regulation",
+    "Cellular Component Assembly Involved In Morphogenesis" =
+      "Assembly in Morphogenesis",
+    "Protein Localization To Plasma Membrane" = "PM Protein Localization",
+    "Ribosomal Small Subunit Biogenesis" = "Small Subunit Biogenesis",
+    "Striated Muscle Cell Differentiation" = "Striated Muscle Diff.",
+    "Membraneless Organelle Assembly" = "Membraneless Org. Assembly",
+    "Non Integrin Membrane ECM Interactions" = "Non-Integrin ECM",
+    "Separation Of Sister Chromatids" = "Chromatid Separation",
+    "Asparagine N Linked Glycosylation" = "N-Linked Glycosylation",
+    "Cytoprotection By HMOX1" = "HMOX1 Cytoprotection",
+    "Proton Transmembrane Transport" = "Proton Transport",
+    "Nucleoside Triphosphate" = "NTP",
     "Respiratory Chain Complex I (Holoenzyme), Mitochondrial" = "Respiratory Complex I",
     "Respiratory Chain Complex I, Mitochondrial" = "Respiratory Complex I",
     "Mitochondrial Ribosome, Large Subunit" = "Mitoribosome (Large)",
@@ -201,7 +217,8 @@ ev_shorten_phrases <- function(x) {
     "Mitochondrion" = "Mito.", "Mitochondrial" = "Mito.",
     "Ubiquinone" = "UQ", "Organization" = "Org.",
     "Cytoskeleton" = "Cytoskel.", "Microtubule" = "MT",
-    "Respiratory" = "Resp.", "Electron Transport" = "ETC",
+    "Respiratory" = "Resp.", "Electron Transport" = "ETC", "ETC Chain" = "ETC",
+    "G2 M Phases" = "G2/M Phases",
     "Synthesis Coupled" = "Synth.-Coupled",
     "Ubiquitin Dependent" = "Ub-Dep.",
     "Proteasome Mediated" = "Proteasome-Med.", "Proteasomal" = "Proteas.",

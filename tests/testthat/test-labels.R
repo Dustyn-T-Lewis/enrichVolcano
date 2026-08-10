@@ -98,6 +98,46 @@ test_that("ev_clean_label routes MITOCARTA_ names through the leaf shortener", {
   expect_true(grepl("Complex I", out))
 })
 
+# A ring arc has room for two lines. A third pushes the label box into its
+# neighbours, so verbose MSigDB names need a phrase entry, not a wider wrap.
+test_that("ev_clean_label keeps verbose MSigDB names within two lines", {
+  verbose <- c(
+    "GOBP_STRIATED_MUSCLE_CELL_DIFFERENTIATION",
+    "GOBP_MEMBRANELESS_ORGANELLE_ASSEMBLY",
+    "GOBP_CELLULAR_COMPONENT_ASSEMBLY_INVOLVED_IN_MORPHOGENESIS",
+    "GOBP_PROTON_TRANSMEMBRANE_TRANSPORT",
+    "GOBP_NUCLEOSIDE_TRIPHOSPHATE_BIOSYNTHETIC_PROCESS",
+    "GOBP_RIBOSOMAL_SMALL_SUBUNIT_BIOGENESIS",
+    "GOSLIM_PROTEIN_LOCALIZATION_TO_PLASMA_MEMBRANE",
+    "KEGG_MEDICUS_REFERENCE_RAB7_REGULATED_MICROTUBULE_MINUS_END_DIRECTED_TRANSPORT",
+    "REACTOME_SEPARATION_OF_SISTER_CHROMATIDS",
+    "REACTOME_NON_INTEGRIN_MEMBRANE_ECM_INTERACTIONS",
+    "REACTOME_REGULATION_OF_PD_L1_CD274_POST_TRANSLATIONAL_MODIFICATION",
+    "REACTOME_ASPARAGINE_N_LINKED_GLYCOSYLATION"
+  )
+  lines <- lengths(strsplit(ev_clean_label(verbose), "\n", fixed = TRUE))
+  expect_equal(lines, rep(2L, length(verbose)))
+})
+
+test_that("ev_clean_label capitalises gene and complex acronyms", {
+  expect_equal(ev_clean_label("REACTOME_RRNA_PROCESSING"), "rRNA Processing")
+  expect_equal(ev_clean_label("REACTOME_UCH_PROTEINASES"), "UCH Proteinases")
+  expect_match(ev_clean_label("REACTOME_ECM_PROTEOGLYCANS"), "^ECM")
+  expect_match(ev_clean_label("REACTOME_CYTOPROTECTION_BY_HMOX1"), "HMOX1")
+  expect_match(
+    ev_clean_label("REACTOME_REGULATION_OF_PD_L1_CD274_POST_TRANSLATIONAL_MODIFICATION"),
+    "PD-L1"
+  )
+})
+
+test_that("ev_clean_label does not repeat a word the acronym already carries", {
+  expect_equal(ev_clean_label("GOBP_ELECTRON_TRANSPORT_CHAIN"), "ETC")
+  expect_match(
+    ev_clean_label("REACTOME_MITOTIC_G2_G2_M_PHASES"), "G2/M",
+    fixed = TRUE
+  )
+})
+
 test_that("volcano_ring with label_mode = 'top_per_direction' runs", {
   p <- suppressMessages(volcano_ring(
     make_toy_volc(), make_toy_enrich(),
