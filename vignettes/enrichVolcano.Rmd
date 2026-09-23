@@ -17,16 +17,19 @@ knitr::opts_chunk$set(
 )
 ```
 
-enrichVolcano draws figures from enrichment results you have already
-computed. Every workflow has the same three steps:
+enrichVolcano turns differential-abundance results into enrichment figures.
+Every workflow has the same steps:
 
-1. `as_enrichment()` converts results from any supported tool into one
-   validated `enrichment` object.
-2. `dedup()` (optional) flags redundant terms so figures show each signal
+1. Read your results: `read_study()` for a set of study files, or `as_da()`
+   for one DA table from limma, limpa, proteoDA, MSstats, proDA, msqrob2,
+   prolfQua or ProtRank.
+2. Get enrichment: `run_enrichment()` runs fgsea, camera and fry, or
+   `as_enrichment()` converts results you already have. Both give one
+   validated `enrichment` object per test.
+3. `dedup()` (optional) flags redundant terms so figures show each signal
    once.
-3. A plot function draws from the object: `volcano_ring()` puts a
-   differential-abundance volcano inside a ring of enrichment terms, and
-   `nes_scatter()` compares two contrasts term by term.
+4. Plot: `volcano_ring()` puts the volcano inside a ring of enrichment terms,
+   and `nes_scatter()` compares two contrasts term by term.
 
 ## Install
 
@@ -37,34 +40,28 @@ remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
 
 ## Quick start
 
-The package ships one example study: fgsea results for four contrasts across
-five gene-set collections, and the matching limma differential-abundance
-table. The collections are MSigDB Hallmark, KEGG MEDICUS, Reactome and GO:BP
-from msigdbr 26.1.0, and the GO Consortium's generic GO slim (release
-2026-07-26).
+The `yvo` example study holds limma results for four contrasts (young and
+old muscle, before and after training). Its fgsea results cover five gene-set
+collections: MSigDB Hallmark, KEGG MEDICUS, Reactome and GO:BP from msigdbr
+26.1.0, and the GO Consortium's generic GO slim (release 2026-07-26).
 
 ```{r read}
 library(enrichVolcano)
 
-fgsea_path <- system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano")
-da_path <- system.file("extdata", "examples", "yvo_da.csv.gz", package = "enrichVolcano")
-
-ex <- as_enrichment(read.csv(fgsea_path))
+da <- example_study("yvo")$da
+ex <- as_enrichment(read.csv(
+  system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano")
+))
 ex
 ```
 
-`as_enrichment()` recognised fgsea output from its columns and split the
-table by its `contrast` column. The DA table needs one contrast and a `padj`
-column:
-
-```{r da}
-da <- read.csv(da_path)
-names(da)[names(da) == "adj.P.Val"] <- "padj"
-young <- da[da$contrast == "Training_Young", ]
-```
+`as_enrichment()` recognised fgsea output from its columns and split the table
+by its `contrast` column. `da` came through `as_da()`, which gives every DA
+table the same column names and looks up current gene symbols for the UniProt
+accessions.
 
 ```{r ring, fig.alt = "Volcano of Training_Young proteins inside a ring of enriched Hallmark and GO slim terms"}
-volcano_ring(young, ex,
+volcano_ring(da, ex,
   contrast = "Training_Young", databases = c("Hallmark", "GO Slim"),
   title = "Training, young"
 )
@@ -77,6 +74,77 @@ significant terms (padj < 0.05), in either direction. `databases` limits them
 to named collections, here Hallmark and GO slim; left at its default, `NULL`,
 every collection in the object competes. `term_threshold`, `n_terms` and
 `terms` change the selection further.
+
+## Your data
+
+A study is up to five tables, in one Excel workbook (one sheet each) or a
+folder of CSV files:
+
+| Sheet | Columns | Needed for |
+|---|---|---|
+| `da_results` | `protein`, `contrast`, `logFC`, `t` or `p`, `padj`, optional `abundance` | everything |
+| `matrix` | protein IDs, then one column per sample | camera, fry |
+| `samples` | `sample`, `group`, optional `subject`, optional covariates | camera, fry |
+| `contrasts` | `name`, `expression`, e.g. `Post - Pre` | camera, fry |
+| `weights` | shaped like `matrix` | optional precision weights |
+
+`read_study()` reads either form and checks that the sheets agree by name:
+matrix columns against `samples$sample`, every group in a contrast against
+`samples$group`, and the contrasts in `da_results` against the `contrasts`
+sheet. Group names must be plain names (letters, digits, `.` and `_`),
+because `-` inside one would read as subtraction. An interaction is a
+difference of differences: `(BFR_T2 - BFR_T1) - (HLRT_T2 - HLRT_T1)`.
+
+The `da_results` sheet can use each tool's own column names; `as_da()`
+recognises limma and limpa `topTable()`, proteoDA, MSstats, proDA, msqrob2,
+prolfQua and ProtRank output, and takes column arguments for anything else.
+Proteins are ranked by the moderated t where the table has one, otherwise by
+the signed \(-\log_{10}\) p-value.
+
+The package ships seven studies in this format:
+
+```{r studies}
+example_study()[c("name", "species")]
+```
+
+`bfr_limpa` and `mouse_pas` include every sheet; the others ship DA results
+only.
+
+## Run the enrichment
+
+`run_enrichment()` tests each contrast against gene-set collections from
+`load_gene_sets()`, which records the msigdbr version and GO slim release it
+used. The mouse study is small enough to run here:
+
+```{r run}
+mouse <- example_study("mouse_pas")
+sets <- load_gene_sets("Hallmark", species = "Mus musculus")
+set.seed(1)
+res <- run_enrichment(mouse, sets, inter_gene_cor = NA)
+names(res)
+res$camera
+```
+
+The three tests answer different questions. fgsea and camera are competitive:
+did a set move more than the other genes? fry is self-contained: did it move
+at all? fgsea ranks proteins by the DA results; camera and fry refit limma on
+the matrix, which must have no missing values, using the `samples` and
+`contrasts` sheets. When a gene has several proteins, the most abundant one
+represents it.
+
+A `subject` column marks repeated measures. By default the samples of one
+subject are treated as correlated (`subject_effect = "block"`); fry handles
+that directly, and camera, which cannot, is replaced by `cameraPR()` on the
+blocked fit. `subject_effect = "fixed"` puts subject in the design instead.
+camera assumes a correlation between genes in a set; limma's default is 0.01,
+and `inter_gene_cor = NA` estimates it from the data, which can change results
+substantially.
+
+Each result is an `enrichment` object, so the figures read it directly:
+
+```{r run-ring, fig.alt = "Volcano of the mouse treatment contrast ringed by Hallmark terms from fgsea"}
+volcano_ring(mouse$da, res$fgsea, contrast = "PAS_vs_VEH_female", title = "PAS vs vehicle, female")
+```
 
 ## Choose gene-set collections
 
@@ -110,7 +178,7 @@ data used sets of 15 to 500 genes. Test each collection as its own family, so
 padj is corrected within it, and record `packageVersion("msigdbr")` and the
 OBO file's `data-version` line with your methods.
 
-## Convert your results
+## Convert enrichment you already have
 
 Every tool below ends in the same object. Pass one table per contrast as a
 named list, or one table with a `contrast` column.
@@ -167,7 +235,7 @@ fry_x <- as_enrichment(list(Training_Young = fry_res), database = "Hallmark")
 ```
 
 ```{r fry-ring, fig.alt = "Volcano ring drawn from fry results, with arcs coloured by signed -log10 FDR and no tick lines"}
-volcano_ring(young, fry_x, title = "fry")
+volcano_ring(da, fry_x, contrast = "Training_Young", title = "fry")
 ```
 
 With no NES to encode, arc fill carries the signed \(-\log_{10}\)(FDR) and arc
@@ -264,7 +332,7 @@ Hallmark and GO slim lose nothing because both are built to be non-redundant.
 The flags matter once you draw from GO:BP or Reactome:
 
 ```{r reactome, fig.alt = "Volcano ring drawn from Reactome terms with redundant terms hidden"}
-volcano_ring(young, ex, contrast = "Training_Young", databases = "Reactome", title = "Reactome")
+volcano_ring(da, ex, contrast = "Training_Young", databases = "Reactome", title = "Reactome")
 ```
 
 ## Compare two contrasts
@@ -307,7 +375,7 @@ work as they do for the ring.
 `volcano_ring_theme()` holds the palette; the plot arguments hold the layout.
 
 ```{r palette, eval = FALSE}
-volcano_ring(young, ex,
+volcano_ring(da, ex,
   contrast = "Training_Young", databases = c("Hallmark", "GO Slim"),
   theme = volcano_ring_theme(palette = "okabe"),
   label_mode = "top_per_direction", label_n = 4

@@ -223,9 +223,7 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' @return A ggplot.
 #' @export
 #' @examples
-#' da <- as_da(read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
-#'   package = "enrichVolcano"
-#' )))
+#' da <- example_study("yvo")$da
 #' ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
 #'   package = "enrichVolcano"
 #' )))

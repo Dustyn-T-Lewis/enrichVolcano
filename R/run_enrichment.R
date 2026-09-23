@@ -111,15 +111,29 @@ run_fgsea <- function(study, collections, min_size, max_size) {
   rlang::check_installed("fgsea", reason = "to run fgsea.")
   da <- fill_abundance(study$da, study$matrix)
   da <- da[!is.na(da$gene) & !is.na(da$rank), , drop = FALSE]
+  ties <- 0
   per_contrast <- lapply(split(da, factor(da$contrast, unique(da$contrast))), function(d) {
     d <- one_per_gene(d)
     ranks <- stats::setNames(d$rank, d$gene)
+    tied <- duplicated(ranks) | duplicated(ranks, fromLast = TRUE)
+    if (sum(tied) > ties) ties <<- sum(tied)
     do.call(rbind, lapply(names(collections), function(db) {
-      res <- as.data.frame(fgsea::fgsea(collections[[db]], ranks, minSize = min_size, maxSize = max_size))
+      res <- withCallingHandlers(
+        as.data.frame(fgsea::fgsea(collections[[db]], ranks, minSize = min_size, maxSize = max_size)),
+        warning = function(w) {
+          if (grepl("ties in the preranked stats", conditionMessage(w))) invokeRestart("muffleWarning")
+        }
+      )
       res$database <- rep(db, nrow(res))
       res
     }))
   })
+  if (ties > 0) {
+    ev_inform(
+      "Up to {ties} of {length(unique(da$gene))} ranked genes tie; fgsea orders tied genes arbitrarily.",
+      class = "enrichVolcano_rank_ties"
+    )
+  }
   if (sum(vapply(per_contrast, nrow, integer(1))) == 0) {
     ev_abort(
       "There is no gene set with {min_size} to {max_size} genes present in the data.",

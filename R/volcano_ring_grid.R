@@ -34,9 +34,7 @@
 #'   `enrich` is that contrast's rows of `enrichment@results`).
 #' @export
 #' @examples
-#' da <- as_da(read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
-#'   package = "enrichVolcano"
-#' )))
+#' da <- example_study("yvo")$da
 #' ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
 #'   package = "enrichVolcano"
 #' )))

@@ -226,3 +226,15 @@ test_that("a blocked design cannot estimate the correlation, and says so", {
     class = "enrichVolcano_param_error"
   )
 })
+
+test_that("tied ranks are reported once as a message, not as fgsea warnings", {
+  skip_if_not_installed("fgsea")
+  skip_if_not_installed("org.Hs.eg.db")
+  da <- toy_study()$da
+  da$rank[1:2] <- da$rank[3]
+  expect_no_warning(expect_message(
+    run_enrichment(da, toy_sets(), tests = "fgsea", min_size = 5),
+    "3 of 20",
+    class = "enrichVolcano_rank_ties"
+  ))
+})

@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Draws figures from gene-set enrichment results computed elsewhere. Results from fgsea, clusterProfiler, limma's rotation and competitive gene-set tests, over-representation analysis or custom tables are converted into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or 'fgsea' conditional collapsing, without changing any p-value.
+Turns differential abundance results into gene-set enrichment figures. Reads results from common proteomics tools and study files with a sample sheet and contrasts, runs 'fgsea' and limma's camera and fry tests, or converts enrichment results computed elsewhere, into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or 'fgsea' conditional collapsing, without changing any p-value. Seven example proteomics studies are included.
 }
 \seealso{
 Useful links:

@@ -73,9 +73,7 @@ An S3 object \code{c("volcano_ring_grid", "list")} with elements
 Compose a grid of \code{volcano_ring()} plots, one per contrast
 }
 \examples{
-da <- as_da(read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
-  package = "enrichVolcano"
-)))
+da <- example_study("yvo")$da
 ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
   package = "enrichVolcano"
 )))

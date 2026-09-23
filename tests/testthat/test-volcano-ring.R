@@ -40,13 +40,12 @@ test_that("volcano_ring works with the okabe palette", {
 })
 
 test_that("volcano_ring runs on the bundled YvO example with default selection", {
-  da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz", package = "enrichVolcano"))
+  skip_if_not_installed("org.Hs.eg.db")
+  da <- suppressMessages(example_study("yvo"))$da
   ex <- suppressMessages(as_enrichment(read.csv(
     system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano")
   )))
-  da <- da[da$contrast == "Training_Young", ]
-  names(da)[names(da) == "adj.P.Val"] <- "padj"
-  p <- suppressWarnings(suppressMessages(volcano_ring(da, ex, contrast = "Training_Young")))
+  expect_no_warning(p <- suppressMessages(volcano_ring(da, ex, contrast = "Training_Young")))
   expect_s3_class(p, "ggplot")
   expect_identical(fill_title(p), "NES")
 })
