@@ -81,3 +81,34 @@ make_toy_results <- function() {
 make_toy_metadata <- function(enrichment_test = "fgsea", score_type = "NES") {
   list(enrichment_test = enrichment_test, score_type = score_type, dedup = NULL)
 }
+
+# Gene sets with hand-computable overlaps (A vs B: J = 8/12, overlap = 8/10;
+# A vs C: J = 4/10, overlap = 4/4; D is disjoint from everything).
+make_toy_gene_sets <- function() {
+  list(
+    SET_A = paste0("G", 1:10),
+    SET_B = paste0("G", c(1:8, 11:12)),
+    SET_C = paste0("G", 1:4),
+    SET_D = paste0("G", 20:29),
+    SET_E = paste0("G", 1:10),
+    SET_F = paste0("G", 1:10)
+  )
+}
+
+# One contrast "K" in padj order A < B < C < D within Hallmark; E is a copy of
+# A in another database; F is a copy of A that is not significant.
+make_toy_dedup_enrichment <- function() {
+  results <- data.frame(
+    contrast = "K",
+    database = c("Hallmark", "Hallmark", "Hallmark", "Hallmark", "Reactome", "Hallmark"),
+    term = paste0("SET_", LETTERS[1:6]),
+    score = c(2.5, 2.1, 1.9, -1.8, 2.4, 0.4),
+    p = NA_real_,
+    padj = c(0.001, 0.002, 0.003, 0.004, 0.0005, 0.5),
+    size = 10,
+    direction = c("up", "up", "up", "down", "up", "up"),
+    stringsAsFactors = FALSE
+  )
+  results$leading_edge <- rep(list(character(0)), nrow(results))
+  enrichment(results = results, metadata = make_toy_metadata())
+}

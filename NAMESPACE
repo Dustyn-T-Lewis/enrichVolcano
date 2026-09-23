@@ -2,6 +2,7 @@
 
 S3method(print,volcano_ring_grid)
 export(as_enrichment)
+export(dedup)
 export(enrichment)
 export(ev_clean_label)
 export(volcano_ring)
