@@ -211,10 +211,10 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' @return A ggplot.
 #' @export
 #' @examples
-#' da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
+#' da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
 #'   package = "enrichVolcano"
 #' ))
-#' en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
+#' en <- read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
 #'   package = "enrichVolcano"
 #' ))
 #'
@@ -223,7 +223,7 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' names(da1)[names(da1) == "adj.P.Val"] <- "padj"
 #'
 #' # ring the volcano with this contrast's ten strongest GO-BP terms
-#' en1 <- en[en$contrast == ctr & en$database == "GO_BP", ]
+#' en1 <- en[en$contrast == ctr & en$database == "GO:BP", ]
 #' en1 <- en1[order(en1$padj), ]
 #' en1 <- head(en1[!duplicated(en1$pathway), ], 10)
 #'

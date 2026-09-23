@@ -41,10 +41,10 @@ test_that("volcano_ring works with the okabe palette", {
 })
 
 test_that("volcano_ring runs against the bundled YvO fixture", {
-  da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
+  da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
     package = "enrichVolcano"
   ))
-  en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
+  en <- read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
     package = "enrichVolcano"
   ))
   da <- da[da$contrast == da$contrast[1], ]

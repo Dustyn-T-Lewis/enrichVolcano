@@ -33,10 +33,10 @@ example.
 ```{r data}
 library(enrichVolcano)
 
-da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
+da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
   package = "enrichVolcano"
 ))
-en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
+en <- read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
   package = "enrichVolcano"
 ))
 ctr <- "Training_Young"

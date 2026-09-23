@@ -48,10 +48,10 @@ The package ships small slices of four datasets under
 ```{r read}
 library(enrichVolcano)
 
-da_path <- system.file("extdata", "examples", "yvo_da.csv",
+da_path <- system.file("extdata", "examples", "yvo_da.csv.gz",
   package = "enrichVolcano"
 )
-en_path <- system.file("extdata", "examples", "yvo_enrichment.csv",
+en_path <- system.file("extdata", "examples", "yvo_fgsea.csv.gz",
   package = "enrichVolcano"
 )
 

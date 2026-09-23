@@ -72,16 +72,16 @@ An S3 object \code{c("volcano_ring_grid", "list")} with elements
 Compose a grid of \code{volcano_ring()} plots, one per contrast
 }
 \examples{
-da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
+da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
   package = "enrichVolcano"
 ))
-en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
+en <- read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
   package = "enrichVolcano"
 ))
 names(da)[names(da) == "adj.P.Val"] <- "padj"
 
 # up to eight GO-BP terms per contrast, one composite each
-en_go <- en[en$database == "GO_BP" & en$padj < 0.01, ]
+en_go <- en[en$database == "GO:BP" & en$padj < 0.01, ]
 en_go <- en_go[order(en_go$padj), ]
 en_go <- en_go[!duplicated(en_go[c("contrast", "pathway")]), ]
 en_go <- do.call(rbind, lapply(split(en_go, en_go$contrast), head, 8))

@@ -21,8 +21,8 @@ knitr::opts_chunk$set(
 
 ```{r hero, echo = FALSE, fig.alt = "A volcano plot ringed by NES-coloured enrichment arcs", fig.width = 7, fig.height = 7, dpi = 110}
 library(enrichVolcano)
-da <- read.csv(system.file("extdata", "examples", "yvo_da.csv", package = "enrichVolcano"))
-en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv", package = "enrichVolcano"))
+da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz", package = "enrichVolcano"))
+en <- read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano"))
 ctr <- "Training_Young"
 da1 <- da[da$contrast == ctr, , drop = FALSE]
 names(da1)[names(da1) == "adj.P.Val"] <- "padj"
@@ -71,10 +71,10 @@ remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
 ```{r example, eval = FALSE}
 library(enrichVolcano)
 
-da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
+da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
   package = "enrichVolcano"
 ))
-en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
+en <- read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
   package = "enrichVolcano"
 ))
 
