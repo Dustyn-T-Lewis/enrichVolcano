@@ -27,6 +27,7 @@ Imports:
     scales,
     stringr
 Suggests:
+    correlation,
     covr,
     data.table,
     fgsea,

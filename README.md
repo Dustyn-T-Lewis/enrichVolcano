@@ -24,7 +24,8 @@ volcano_ring(da_aging, x)
 2.  **`dedup()`** (optional) flags redundant terms so a figure shows
     each signal once. p-values are never changed.
 3.  **Plot**: `volcano_ring()` for one contrast, `volcano_ring_grid()`
-    for several.
+    for several, `nes_scatter()` to compare two contrasts term by term
+    (concordance or reversal).
 
 ## Install
 

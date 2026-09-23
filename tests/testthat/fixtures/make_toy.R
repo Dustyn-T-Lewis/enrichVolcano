@@ -98,3 +98,24 @@ make_toy_dedup_enrichment <- function() {
   results$leading_edge <- rep(list(character(0)), nrow(results))
   enrichment(results = results, metadata = make_toy_metadata())
 }
+
+# Two contrasts, 12 terms, significance at 0.05 designed by hand:
+# Both = T01 T03 T04 T10 T12; A only = T02 T09; B only = T05 T11; NS = T06-T08.
+# Significant quadrants: TR 4 (T01 T05 T09 T12), TL 1 (T04), BL 2 (T03 T10),
+# BR 2 (T02 T11); 6 of 9 concordant. T12 is below the default label size.
+make_toy_scatter_enrichment <- function() {
+  term <- sprintf("T%02d", 1:12)
+  score_a <- c(2.0, 1.5, -1.8, -2.2, 1.2, -1.0, 0.5, -0.4, 1.9, -1.6, 0.8, 2.4)
+  score_b <- c(1.8, -1.2, -2.0, 1.4, 1.1, -0.9, 0.3, -0.6, 2.1, -1.9, -0.7, 2.2)
+  padj_a <- c(.001, .01, .002, .02, .2, .3, .6, .7, .004, .03, .5, .0005)
+  padj_b <- c(.002, .4, .001, .03, .01, .5, .8, .6, .3, .001, .04, .001)
+  one <- function(contrast, score, padj) {
+    data.frame(
+      contrast = contrast, term = term, score = score, padj = padj,
+      database = rep(c("Hallmark", "GO Slim"), c(8, 4)),
+      size = c(rep(20, 11), 10), stringsAsFactors = FALSE
+    )
+  }
+  tbl <- rbind(one("A", score_a, padj_a), one("B", score_b, padj_b))
+  suppressMessages(as_enrichment(tbl, enrichment_test = "custom", score_type = "NES"))
+}
