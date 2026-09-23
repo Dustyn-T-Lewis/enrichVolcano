@@ -1,17 +1,19 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/404.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/LICENSE-text.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customizing.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/getting-started.html</loc></url>
+<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/enrichVolcano.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/index.html</loc></url>
-<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/input-contract.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/authors.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/index.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/news/index.html</loc></url>
+<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.html</loc></url>
+<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrichVolcano-imports.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrichVolcano-package.html</loc></url>
+<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrichment.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_clean_label.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/index.html</loc></url>
+<url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/nes_scatter.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.html</loc></url>
 <url><loc>https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.html</loc></url>

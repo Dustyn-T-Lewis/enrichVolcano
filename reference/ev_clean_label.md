@@ -1,4 +1,4 @@
-# Clean a pathway name for ring display
+# Clean a pathway name for display
 
 Strips the database prefix, expands common acronyms, title-cases, wraps,
 and applies MitoCarta-hierarchy shortening for `MITOCARTA_` pathways.
@@ -6,7 +6,7 @@ and applies MitoCarta-hierarchy shortening for `MITOCARTA_` pathways.
 ## Usage
 
 ``` r
-ev_clean_label(name)
+ev_clean_label(name, width = 15)
 ```
 
 ## Arguments
@@ -14,6 +14,11 @@ ev_clean_label(name)
 - name:
 
   Character vector of raw pathway names.
+
+- width:
+
+  Wrap width in characters. The default suits ring arcs; at 15 or
+  narrower a few short names also get hand-placed line breaks.
 
 ## Value
 

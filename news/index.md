@@ -1,8 +1,66 @@
 # Changelog
 
-## enrichVolcano 0.3.0.9000 (development version)
+## enrichVolcano 1.0.0
+
+### Breaking changes
+
+- Plots read an `enrichment` object built by
+  [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
+  instead of a data frame described by column-name arguments.
+  [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
+  loses `term_col`, `nes_col`, `size_col`, `genes_col` and `genes_sep`,
+  and gains `contrast`;
+  [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
+  takes one `enrichment` for all contrasts.
+- [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
+  now chooses its terms: the `n_terms` (12) most significant below
+  `term_threshold`, in either direction, from `databases` (all by
+  default), with redundant terms hidden (`collapse`). `terms` hand-picks
+  instead.
+- `magnitude` defaults to `"neg_log_padj"` for NES and `"size"` for
+  other scores; the legend is titled with the score type.
+- The three vignettes are merged into one,
+  [`vignette("enrichVolcano")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/enrichVolcano.md).
+- Example data: `yvo_fgsea.csv.gz` (fgsea output for four contrasts
+  across MSigDB Hallmark, KEGG MEDICUS, Reactome and <GO:BP> from
+  msigdbr 26.1.0, and the GO Consortium generic GO slim, release
+  2026-07-26) and `yvo_da.csv.gz` replace `yvo_enrichment.csv` and
+  `yvo_da.csv`. The unused mito and cvh examples are removed.
 
 ### New features
+
+- [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
+  converts fgsea, clusterProfiler `gseaResult`, limma `fry`, `mroast`,
+  `camera` and `cameraPR`, over-representation tables with a direction
+  column, and custom tables into one validated `enrichment` (an S7
+  class). The producing test is recognised from the columns and
+  recorded; camera and cameraPR, whose columns are identical, must be
+  named with `enrichment_test`. Tests without an effect size are scored
+  as signed -log10(FDR). clusterProfiler results are also read when
+  exported as a data frame; a long table of limma results needs a `term`
+  column, because row names do not survive stacking; `dedup_status`
+  flags carried in the input are kept and recorded as `precomputed`.
+- [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
+  flags redundant terms for display without dropping rows or changing
+  p-values: `method = "enrichmentmap"` (EnrichmentMap combined
+  coefficient at 0.375 by default, or Jaccard at 0.5) or
+  `method = "collapse_pathways"`
+  ([`fgsea::collapsePathways()`](https://rdrr.io/pkg/fgsea/man/collapsePathways.html)).
+- [`nes_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/nes_scatter.md)
+  plots two contrasts term by term, as concordance or, with
+  `comparison = "reversal"`, as reversal, with quadrant counts,
+  Spearman’s rho and the share of concordant or reversed terms.
+  `color_by` and `shape_by` map any per-term column.
+- [`ev_clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_clean_label.md)
+  gains `width`.
+- For scores other than NES, the ring’s fill scale spans the object’s
+  largest significant score rather than squishing at 3.
+
+### Dependencies
+
+- Imports S7. Suggests correlation, data.table, fgsea and withr.
+
+### Also in this release
 
 - [`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md)
   takes direct colour overrides: `up`, `down`, `ns` for the points and
@@ -13,9 +71,6 @@
   the angular order of arcs within each half, `arc_height_range` sets
   the shortest and tallest arc, and `show_counts` toggles the up/down
   count badges.
-- New
-  [`vignette("customizing")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customizing.md)
-  walks the colour, volcano, ring, and layout knobs section by section.
 - [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
   exposes the composite-layout knobs: `panel_spacing`, `panel_margin`,
   `label_headroom`, `legend_position` (`"bottom"`, `"right"`, `"none"`),
@@ -43,9 +98,9 @@
 
 - enrichVolcano is now a plotting-only package. Enrichment computation
   has been removed. Compute your enrichment with
-  `fgsea::fgseaMultilevel()`, `clusterProfiler::gseGO()`,
-  `enrichR::enrichr()`, or any tool you like, and pass the resulting
-  tidy table to
+  [`fgsea::fgseaMultilevel()`](https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html),
+  `clusterProfiler::gseGO()`, `enrichR::enrichr()`, or any tool you
+  like, and pass the resulting tidy table to
   [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md).
 
 ### Removed (use v0.2.0 to recover)
@@ -116,7 +171,8 @@
 ### Bug fixes
 
 - `ev_enrich(nperm = ...)` now actually takes effect — it is passed to
-  `fgsea::fgseaMultilevel()` as `nPermSimple` (previously a no-op).
+  [`fgsea::fgseaMultilevel()`](https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html)
+  as `nPermSimple` (previously a no-op).
 - `ev_collapse(keep_by = "NES")` now ranks representatives by
   **\|NES\|**, so a strongly down-regulated pathway is no longer dropped
   in favour of a weakly up-regulated one.
@@ -178,10 +234,10 @@
   shared a pathway name would get the first database’s gene set for both
   rows.
 - `ev_collapse_fgsea()` now partitions its input by contrast and runs
-  `fgsea::collapsePathways` once per contrast against the matching
-  gene-level rank vector. Previously, under `scope = "global"` with
-  multiple contrasts, every pathway was silently scored against the
-  first contrast’s ranks.
+  [`fgsea::collapsePathways`](https://rdrr.io/pkg/fgsea/man/collapsePathways.html)
+  once per contrast against the matching gene-level rank vector.
+  Previously, under `scope = "global"` with multiple contrasts, every
+  pathway was silently scored against the first contrast’s ranks.
 - `ev_collapse(method = "jaccard_then_collapse")` (and the deprecated
   `"both"` alias) now passes only the Jaccard survivors to the collapse
   step and writes back positionally, mirroring

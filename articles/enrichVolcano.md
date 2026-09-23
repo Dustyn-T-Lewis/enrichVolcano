@@ -1,211 +1,387 @@
-# Introduction to enrichVolcano
+# enrichVolcano
 
-## What this package does
+enrichVolcano draws figures from enrichment results you have already
+computed. Every workflow has the same three steps:
 
-`enrichVolcano` builds one figure with two panels: a volcano plot of
-differential abundance results and a ring plot of pathway enrichment for
-the same contrast. Input can come from `proteoDA`, `DEP`, `limma`,
-`DESeq2`, `edgeR`, `MSstats`, `proDA`, `DEqMS`, MaxQuant, or Perseus;
-[`ev_validate()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_validate.md)
-auto-detects the format and returns a tidy long tibble. The hero
-function
-[`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
-returns a `patchwork` object that you can save with
-[`ggplot2::ggsave()`](https://ggplot2.tidyverse.org/reference/ggsave.html)
-or further compose with other plots.
+1.  [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
+    converts results from any supported tool into one validated
+    `enrichment` object.
+2.  [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
+    (optional) flags redundant terms so figures show each signal once.
+3.  A plot function draws from the object:
+    [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
+    puts a differential-abundance volcano inside a ring of enrichment
+    terms, and
+    [`nes_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/nes_scatter.md)
+    compares two contrasts term by term.
+
+## Install
+
+``` r
+
+install.packages("remotes")
+remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
+```
+
+## Quick start
+
+The package ships one example study: fgsea results for four contrasts
+across five gene-set collections, and the matching limma
+differential-abundance table. The collections are MSigDB Hallmark, KEGG
+MEDICUS, Reactome and <GO:BP> from msigdbr 26.1.0, and the GO
+Consortium’s generic GO slim (release 2026-07-26).
 
 ``` r
 
 library(enrichVolcano)
+
+fgsea_path <- system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano")
+da_path <- system.file("extdata", "examples", "yvo_da.csv.gz", package = "enrichVolcano")
+
+ex <- as_enrichment(read.csv(fgsea_path))
+#> Reading "fgsea" results.
+ex
+#> <enrichment> fgsea, score: NES
+#> 4 contrasts: Aging, Training_Young, Training_Old, and Interaction
+#> 5570 rows: GO Slim (108), GO:BP (3946), Hallmark (144), KEGG (84), and Reactome
+#> (1288)
+#> Dedup: precomputed
 ```
 
-## A 30-second example
-
-Load the bundled YvO (young vs. old skeletal muscle) result set. It
-ships with the package after install; during development you can read it
-from the test fixtures.
+[`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
+recognised fgsea output from its columns and split the table by its
+`contrast` column. The DA table needs one contrast and a `padj` column:
 
 ``` r
 
-fixture <- system.file(
-  "extdata", "examples", "yvo_tidy.rds",
-  package = "enrichVolcano"
-)
-if (!nzchar(fixture)) {
-  fixture <- "../tests/testthat/fixtures/yvo_tidy.rds"
-}
-yvo <- readRDS(fixture)
-yvo <- yvo[!is.na(yvo$gene) & !is.na(yvo$contrast), ]
-head(yvo, 3)
-#>    gene contrast     logFC         t          B      P.Value   adj.P.Val
-#> 1 LMOD2    Aging -2.347025 -4.532596  2.1657602 3.645698e-05 0.001783001
-#> 2 MYBPH    Aging -2.271899 -4.048600  0.7482425 1.685745e-04 0.004726829
-#> 3 ACTN3    Aging -2.120998 -3.211231 -1.6316218 2.227110e-03 0.024142332
-#>       pi_score sig_pi
-#> 1 3.831672e-11     -1
-#> 2 2.677030e-09     -1
-#> 3 2.369003e-06     -1
-unique(yvo$contrast)
-#> [1] "Aging"          "Interaction"    "Training_Old"   "Training_Young"
+da <- read.csv(da_path)
+names(da)[names(da) == "adj.P.Val"] <- "padj"
+young <- da[da$contrast == "Training_Young", ]
 ```
-
-The fixture has 400 protein rows across four contrasts (Aging,
-Training_Young, Training_Old, Interaction). Each row already has
-`logFC`, `P.Value`, and `adj.P.Val`.
-
-The default registered databases (`hallmark`, `reactome`, `go_bp`) fetch
-from `msigdbr`, which needs an internet connection. For a self-contained
-example we build a small mock pathway list from the genes in the
-fixture.
 
 ``` r
 
-set.seed(42)
-genes <- unique(yvo$gene)
-mock_msigdb <- list(
-  HALLMARK_GLYCOLYSIS         = sample(genes, 30),
-  HALLMARK_OXIDATIVE_PHOS     = sample(genes, 25),
-  HALLMARK_APOPTOSIS          = sample(genes, 20),
-  HALLMARK_MYOGENESIS         = sample(genes, 35),
-  REACTOME_CITRIC_ACID_CYCLE  = sample(genes, 15)
+volcano_ring(young, ex,
+  contrast = "Training_Young", databases = c("Hallmark", "GO Slim"),
+  title = "Training, young"
 )
 ```
 
-Now call
-[`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
-with one contrast and the mock database:
+![Volcano of Training_Young proteins inside a ring of enriched Hallmark
+and GO slim terms](enrichVolcano_files/figure-html/ring-1.png)
+
+Arc fill is NES and arc height is $`-\log_{10}`$(padj). Up-regulated
+terms sit on the upper half, down-regulated ones on the lower. Ticks run
+from each arc to its leading-edge proteins in the volcano. The ring
+takes the twelve most significant terms (padj \< 0.05), in either
+direction. `databases` limits them to named collections, here Hallmark
+and GO slim; left at its default, `NULL`, every collection in the object
+competes. `term_threshold`, `n_terms` and `terms` change the selection
+further.
+
+## Choose gene-set collections
+
+Hallmark and GO slim make a good default pair for figures. The 50
+Hallmark sets each summarise one well-defined biological state, and the
+GO Consortium’s generic slim keeps a small set of broad GO terms. Both
+are built to avoid overlapping terms, so every arc says something
+different. Larger collections such as <GO:BP> or Reactome find more
+specific terms but need
+[`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md).
+
+Hallmark comes from msigdbr (CRAN). The GO slim is a list of GO IDs;
+mapping it to genes needs AnnotationDbi and org.Hs.eg.db (Bioconductor),
+counting genes annotated to each term or any of its descendants:
 
 ``` r
 
-fig <- enrich_volcano(
-  data       = yvo,
-  contrast   = "Aging",
-  databases  = list(mock = mock_msigdb),
-  enrich_padj = 1,
-  enrich_mode = "fgsea",
-  ring   = list(max_terms = 5)
+h <- msigdbr::msigdbr(species = "Homo sapiens", collection = "H")
+hallmark <- split(h$gene_symbol, h$gs_name)
+
+obo <- readLines("https://current.geneontology.org/ontology/subsets/goslim_generic.obo")
+slim <- sub("^id: ", "", grep("^id: GO:", obo, value = TRUE))
+entrez <- AnnotationDbi::mget(slim, org.Hs.eg.db::org.Hs.egGO2ALLEGS, ifnotfound = NA)
+entrez <- Filter(function(ids) !all(is.na(ids)), entrez)
+go_slim <- lapply(entrez, function(ids) {
+  unique(AnnotationDbi::mapIds(org.Hs.eg.db::org.Hs.eg.db, unique(ids), "SYMBOL", "ENTREZID"))
+})
+```
+
+The slim spans all three GO namespaces and its terms are broad (a median
+of about 570 human genes), so fgsea’s `maxSize` drops some of them; the
+example data used sets of 15 to 500 genes. Test each collection as its
+own family, so padj is corrected within it, and record
+`packageVersion("msigdbr")` and the OBO file’s `data-version` line with
+your methods.
+
+## Convert your results
+
+Every tool below ends in the same object. Pass one table per contrast as
+a named list, or one table with a `contrast` column.
+
+### fgsea
+
+``` r
+
+res <- fgsea::fgsea(pathways, stats = ranks)
+x <- as_enrichment(list(Aging = res), database = "Hallmark")
+```
+
+The score is the normalised enrichment score (NES): how far the gene set
+sits toward the top or bottom of the ranking, scaled so sets of
+different sizes compare. `database` labels every row when the table has
+no `database` column.
+
+### clusterProfiler
+
+``` r
+
+res <- clusterProfiler::gseGO(gene_list, ont = "BP", OrgDb = org.Hs.eg.db::org.Hs.eg.db)
+x <- as_enrichment(list(Aging = res), database = "GO:BP")
+```
+
+The `gseaResult` object is read directly. The score is NES and the
+leading edge comes from `core_enrichment`.
+
+### limma: fry and mroast
+
+``` r
+
+res <- limma::fry(y, index = gene_sets, design = design, contrast = contrast)
+x <- as_enrichment(list(Aging = res), database = "Hallmark")
+```
+
+fry and mroast are **self-contained** tests: they ask whether the genes
+in a set changed at all, without reference to genes outside it. Neither
+reports an effect size like NES, or a leading edge. The score is
+therefore $`-\log_{10}`$(FDR), signed by the reported direction, and the
+figure’s legend says so. The table below has fry’s shape; the numbers
+are invented to show the conversion.
+
+``` r
+
+fry_res <- data.frame(
+  NGenes = c(200, 150, 180, 160),
+  Direction = c("Up", "Up", "Down", "Down"),
+  PValue = c(1e-6, 4e-4, 2e-5, 3e-3),
+  FDR = c(4e-6, 8e-4, 4e-5, 4e-3),
+  PValue.Mixed = c(1e-7, 1e-4, 1e-5, 1e-3),
+  FDR.Mixed = c(4e-7, 2e-4, 2e-5, 1e-3),
+  row.names = c(
+    "HALLMARK_OXIDATIVE_PHOSPHORYLATION", "HALLMARK_MYOGENESIS",
+    "HALLMARK_INFLAMMATORY_RESPONSE", "HALLMARK_APOPTOSIS"
+  )
 )
-fig
-#> 
-#> ── enrichVolcano ──
-#> 
-#> Call: `enrich_volcano(data = yvo, contrast = "Aging", databases = list(mock =
-#> mock_msigdb), enrich_mode = "fgsea", enrich_padj = 1, ring = list(max_terms =
-#> 5))`
-#> Contrasts: 4
-#> Proteins: 400
-#> Significant pathways (post-dedup): 0
+fry_x <- as_enrichment(list(Training_Young = fry_res), database = "Hallmark")
+#> Reading "fry" results.
 ```
-
-![Volcano panel above an enrichment ring panel for the Aging
-contrast.](enrichVolcano_files/figure-html/hero-call-1.png)
-
-`enrich_padj = 1` keeps every pathway in the ring for the demo; in
-practice you would use the default 0.05. The `mock_msigdb` here stands
-in for the real Hallmark or Reactome collections.
-
-## Anatomy of the output
-
-The volcano sits at the centre: `logFC` on the x-axis, `-log10(pi_eq2)`
-on the y-axis. A point is called up or down when its pi-score clears
-`p_threshold` (default 0.05) and its `logFC` is positive or negative;
-the panel reports the up and down counts in coloured boxes rather than
-labelling individual genes. (For a labelled standalone volcano with
-`ggrepel`, call
-[`ev_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.md)
-— see
-[`vignette("customising")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customising.md).)
-
-The enrichment ring wraps the volcano, drawn with
-[`ggforce::geom_arc_bar`](https://ggforce.data-imaginist.com/reference/geom_arc_bar.html)
-in a fixed Cartesian layout (no `coord_polar`). Up-regulated pathways
-cluster on the right (centred at 90°) and down-regulated on the left
-(270°), so direction reads at a glance. Each arc’s outer radius encodes
-`-log10(padj)` (taller = more significant) and its fill encodes NES on a
-colourblind-safe blue-white-red diverging scale. Short radial ticks
-under each arc mark its leading-edge genes, coloured by the sign of
-their fold change.
-
-The contrast name is the title. The composite is a `patchwork` object,
-so it supports the `+`, `/`, and `|` operators for further layout.
-
-Two attributes hold the intermediate state:
 
 ``` r
 
-str(attr(fig, "ev_data"), max.level = 1)
-#> List of 4
-#>  $ validated_input: tibble [400 × 9] (S3: tbl_df/tbl/data.frame)
-#>   ..- attr(*, "ev_source")= chr "limma"
-#>  $ pi_scores      : tibble [400 × 10] (S3: tbl_df/tbl/data.frame)
-#>   ..- attr(*, "ev_source")= chr "limma"
-#>  $ enrichment     : tibble [0 × 13] (S3: tbl_df/tbl/data.frame)
-#>   ..- attr(*, "ev_pathways")=List of 1
-#>   ..- attr(*, "ev_stats")=List of 1
-#>  $ dedup_result   : tibble [0 × 13] (S3: tbl_df/tbl/data.frame)
-#>   ..- attr(*, "ev_pathways")=List of 1
-#>   ..- attr(*, "ev_stats")=List of 1
-attr(fig, "ev_call")
-#> enrich_volcano(data = yvo, contrast = "Aging", databases = list(mock = mock_msigdb), 
-#>     enrich_mode = "fgsea", enrich_padj = 1, ring = list(max_terms = 5))
+volcano_ring(young, fry_x, title = "fry")
 ```
 
-`ev_data` is a list with four tibbles: the validated input, the pi-score
-table, the raw
-[`ev_enrich()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_enrich.md)
-output, and the post-dedup enrichment table. `ev_call` is the literal
-[`match.call()`](https://rdrr.io/r/base/match.call.html), so a reviewer
-can re-run the exact figure from the object alone.
+![Volcano ring drawn from fry results, with arcs coloured by signed
+-log10 FDR and no tick
+lines](enrichVolcano_files/figure-html/fry-ring-1.png)
 
-## The pipeline under the hood
+With no NES to encode, arc fill carries the signed $`-\log_{10}`$(FDR)
+and arc height switches to set size, so the two channels show different
+facts.
 
-[`enrich_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrich_volcano.md)
-chains the exported pipeline stages and then draws the canonical
-composite:
+### limma: camera and cameraPR
 
-1.  `ev_validate(data)` detects the input format and renames columns to
-    `gene`, `contrast`, `logFC`, `P.Value`, `adj.P.Val`.
-2.  `pi_score(data, variant = "eq2")` computes the Xiao 2014 pi-score
-    and writes it to `pi_eq2`.
-3.  `adjust_p(data, method = "BH")` recomputes `adj.P.Val` from the raw
-    p-values within each contrast.
-4.  `ev_enrich(data, contrast, databases)` runs `fgsea` (and optionally
-    `fora`) against the requested pathway sets, ranking genes by the
-    signed statistic `sign(logFC) * -log10(P)`.
-5.  `ev_collapse(enrich, method = "jaccard")` removes redundant pathways
-    with overlapping leading-edge gene sets.
-6.  `ev_volcano_ring(volcano_sub, enrich_sub)` draws one volcano-in-ring
-    composite per contrast;
-    [`patchwork::wrap_plots()`](https://patchwork.data-imaginist.com/reference/wrap_plots.html)
-    arranges multiple contrasts and attaches `ev_data` and `ev_call`.
+``` r
 
-Stages 1-5 are exported, so a real analysis can stop between them — a
-common pattern is to compute pi-scores once, write the table to disk,
-and re-enter at
-[`ev_enrich()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_enrich.md)
-with different database choices. For a panel layout you assemble
-yourself, the package also ships the standalone trio
-[`ev_volcano()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_volcano.md) +
-[`ring_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ring_plot.md) +
-[`ev_compose()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_compose.md),
-which expose the tunable label and ring-encoding options the opinionated
-composite keeps fixed (see
-[`vignette("customising")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customising.md)).
+res <- limma::camera(y, index = gene_sets, design = design, contrast = contrast)
+x <- as_enrichment(list(Aging = res), enrichment_test = "camera", database = "Hallmark")
+```
 
-## What next
+camera and cameraPR are **competitive** tests, like fgsea: they ask
+whether a set changed more than the genes outside it. Their default
+output has identical columns, so
+[`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
+cannot tell them apart and asks you to name the test with
+`enrichment_test`. camera run with `inter.gene.cor = NA` adds a
+`Correlation` column and is recognised automatically.
 
-- [`vignette("scoring")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/scoring.md)
-  covers the pi-score variants and the four p-value adjustment methods.
-- [`vignette("pathway-dedup")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/pathway-dedup.md)
-  explains Jaccard collapsing, scope (within vs. across databases), and
-  when to use
-  [`fgsea::collapsePathways`](https://rdrr.io/pkg/fgsea/man/collapsePathways.html)
-  instead.
-- [`vignette("databases")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/databases.md)
-  lists the registered gene-set sources and shows how to add a custom
-  GMT.
-- [`vignette("customising")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/customising.md)
-  walks through theme overrides, palette swaps, and per-panel ggplot
-  edits.
-- `vignette("faq")` answers questions about MaxQuant ratios, contrast
-  naming, and large figure layouts.
+### Over-representation analysis
+
+``` r
+
+up <- enrichR::enrichr(up_genes, "GO_Biological_Process_2023")[[1]]
+down <- enrichR::enrichr(down_genes, "GO_Biological_Process_2023")[[1]]
+up$direction <- "up"
+down$direction <- "down"
+x <- as_enrichment(
+  list(Aging = rbind(up, down)),
+  enrichment_test = "ora",
+  term = "Term", padj = "Adjusted.P.value", p = "P.value", leading_edge = "Genes"
+)
+```
+
+Over-representation asks whether a gene list overlaps a set more than
+chance predicts; it has no direction of its own. Run it on up- and
+down-regulated genes separately and stack the two with a `direction`
+column. The score is signed $`-\log_{10}`$(padj).
+
+### Anything else
+
+``` r
+
+x <- as_enrichment(
+  list(Aging = my_table),
+  enrichment_test = "custom",
+  term = "set", score = "stat", padj = "q", size = "n", score_type = "z"
+)
+```
+
+Name the columns and, optionally, what the score is; `score_type`
+becomes the legend title.
+
+## Deduplicate
+
+Related gene sets often reach significance together. In <GO:BP> or
+Reactome, one biological signal can light up a dozen overlapping terms.
+[`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
+flags all but one per cluster as `"redundant"`, and plots hide redundant
+terms by default (`collapse = TRUE`). No row is removed and no p-value
+changes: the multiple-testing correction already covered every term, so
+redundancy is a display decision.
+
+``` r
+
+gene_sets <- split(msig$gene_symbol, msig$gs_name)
+x <- dedup(x, gene_sets)
+x <- dedup(x, gene_sets, similarity = "jaccard")
+x <- dedup(x, gene_sets, method = "collapse_pathways", stats = list(Aging = ranks))
+```
+
+Within each contrast and database, significant terms are walked from the
+smallest padj. A term is redundant when its gene set is similar enough
+to a term already kept:
+
+- `similarity = "combined"` (default, cutoff 0.375) is the EnrichmentMap
+  coefficient: the mean of the Jaccard index and the overlap
+  coefficient. The overlap coefficient catches a small set nested inside
+  a large one, which Jaccard alone misses.
+- `similarity = "jaccard"` (cutoff 0.5) is shared genes over all genes
+  in either set.
+
+`method = "collapse_pathways"` is a different kind of rule. It calls
+[`fgsea::collapsePathways()`](https://rdrr.io/pkg/fgsea/man/collapsePathways.html),
+which asks whether a term is still enriched once the genes of a more
+significant term are conditioned on. That is a new statistical test, so
+it needs the ranking each contrast was tested on, works only for ranked
+GSEA results, and should be reported as its own analysis. Call
+[`set.seed()`](https://rdrr.io/r/base/Random.html) first; it permutes.
+
+The example object carries flags computed upstream with the Jaccard
+rule.
+[`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
+keeps them and records the object as `precomputed`:
+
+``` r
+
+table(ex@results$dedup_status, ex@results$database, useNA = "ifany")
+#>            
+#>             GO Slim GO:BP Hallmark KEGG Reactome
+#>   kept           34   173       22   20      292
+#>   redundant       0    79        0   35      261
+#>   <NA>           74  3694      122   29      735
+```
+
+Hallmark and GO slim lose nothing because both are built to be
+non-redundant. The flags matter once you draw from <GO:BP> or Reactome:
+
+``` r
+
+volcano_ring(young, ex, contrast = "Training_Young", databases = "Reactome", title = "Reactome")
+```
+
+![Volcano ring drawn from Reactome terms with redundant terms
+hidden](enrichVolcano_files/figure-html/reactome-1.png)
+
+## Compare two contrasts
+
+[`nes_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/nes_scatter.md)
+plots every term’s score in one contrast against its score in another.
+It answers two kinds of question, set by `comparison`.
+
+The default, `comparison = "concordance"`, asks whether two conditions
+regulate the same pathways. Terms in the shaded top-right and
+bottom-left quadrants move the same way in both.
+
+``` r
+
+nes_scatter(ex, "Training_Young", "Training_Old", databases = c("Hallmark", "GO Slim"))
+```
+
+![Scatter of NES in trained young against trained old, with most
+significant terms in the concordant
+quadrants](enrichVolcano_files/figure-html/concordance-1.png)
+
+`comparison = "reversal"` asks whether one condition undoes another. The
+unshaded quadrants hold the answer: a pathway raised by aging and
+lowered by training, or the reverse. The reference line becomes
+$`y = -x`$.
+
+``` r
+
+nes_scatter(ex, "Aging", "Training_Old",
+  comparison = "reversal", databases = c("Hallmark", "GO Slim")
+)
+```
+
+![Scatter of NES in aging against trained old, with most significant
+terms in the reversed
+quadrants](enrichVolcano_files/figure-html/reversal-1.png)
+
+A term counts as significant in a contrast when its padj is below
+`p_threshold` (0.05); the colour says whether that holds in one contrast
+or both. Pathways are judged on the false discovery rate alone. Scores
+that combine effect size with p, such as the $`\pi`$-value, are defined
+for single proteins, not gene sets. The corner counts and the headline
+share use significant terms only; Spearman’s $`\rho`$ uses every plotted
+term, with a 95% interval when the correlation package is installed.
+
+`color_by` and `shape_by` take any per-term column, for example
+`color_by = "database"`, and `databases`, `collapse` and
+`label_min_size` work as they do for the ring.
+
+## Change the look
+
+[`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md)
+holds the palette; the plot arguments hold the layout.
+
+``` r
+
+volcano_ring(young, ex,
+  contrast = "Training_Young", databases = c("Hallmark", "GO Slim"),
+  theme = volcano_ring_theme(palette = "okabe"),
+  label_mode = "top_per_direction", label_n = 4
+)
+```
+
+The arguments you will reach for most:
+
+- `magnitude`: what arc height encodes, `"neg_log_padj"` or `"size"`.
+- `arc_height_range`: shortest and tallest arc.
+- `arc_order`: order arcs by `"padj"` or by absolute score within each
+  half.
+- `x_scale`, `y_scale`: compress the volcano when points crowd the ring.
+- `label_mode`, `label_n`, `label_genes`: which proteins get text.
+- `show_counts`, `disc_color`: count badges and a tinted central disc.
+
+[`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
+draws one ring per contrast and collects a shared legend; extra
+arguments pass to every ring.
+
+``` r
+
+g <- volcano_ring_grid(da, ex, contrasts = c("Training_Young", "Training_Old"), ncol = 2)
+g$plot
+```
+
+![Two volcano rings side by side for trained young and trained
+old](enrichVolcano_files/figure-html/grid-1.png)

@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Volcano-in-Ring Composite Plots from Differential Abundance and Enrichment • enrichVolcano</title>
+<title>Volcano-in-Ring and Concordance Plots from Enrichment Results • enrichVolcano</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -15,9 +15,9 @@
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Volcano-in-Ring Composite Plots from Differential Abundance and Enrichment">
-<meta name="description" content="Draws a single composite figure that combines a differential abundance volcano in the centre with a ring of enrichment terms around it, using NES-coloured arcs and tick lines from significant volcano points to the pathways they drive. Accepts any tidy differential abundance table and any tidy enrichment table (fgsea, clusterProfiler, enrichR, custom) via configurable column arguments.">
-<meta property="og:description" content="Draws a single composite figure that combines a differential abundance volcano in the centre with a ring of enrichment terms around it, using NES-coloured arcs and tick lines from significant volcano points to the pathways they drive. Accepts any tidy differential abundance table and any tidy enrichment table (fgsea, clusterProfiler, enrichR, custom) via configurable column arguments.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Volcano-in-Ring and Concordance Plots from Enrichment Results">
+<meta name="description" content="Draws figures from gene-set enrichment results computed elsewhere. Results from fgsea, clusterProfiler, limmas rotation and competitive gene-set tests, over-representation analysis or custom tables are converted into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or fgsea' conditional collapsing, without changing any p-value.">
+<meta property="og:description" content="Draws figures from gene-set enrichment results computed elsewhere. Results from fgsea, clusterProfiler, limmas rotation and competitive gene-set tests, over-representation analysis or custom tables are converted into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or fgsea' conditional collapsing, without changing any p-value.">
 <meta property="og:image" content="https://Dustyn-T-Lewis.github.io/enrichVolcano/logo.png">
 </head>
 <body>
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,16 +37,8 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/enrichVolcano.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/getting-started.html">Getting started</a></li>
-    <li><a class="dropdown-item" href="articles/customizing.html">Customizing the composite</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="articles/index.html">More articles...</a></li>
-  </ul>
-</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -68,73 +60,32 @@
 </h1>
 </div>
 <blockquote>
-<p>Draw a volcano-in-ring composite from any differential-abundance table plus any enrichment table you’ve already computed.</p>
+<p>Figures from enrichment results you have already computed: fgsea, clusterProfiler, limma’s fry and camera, over-representation, or your own.</p>
 </blockquote>
-<p><img src="reference/figures/README-hero-1.png" alt="A volcano plot ringed by NES-coloured enrichment arcs"></p>
-<p><code>enrichVolcano</code> is a plotting-only package. It does <strong>not</strong> run differential abundance, it does <strong>not</strong> run enrichment, and it ships no gene-set databases. Compute those upstream with whatever fits your study — <code>fgsea</code>, <code>clusterProfiler</code>, <code>enrichR</code>, or your own — and hand the two tidy tables to <code><a href="reference/volcano_ring.html">volcano_ring()</a></code>.</p>
-<div class="section level2">
-<h2 id="what-the-plot-encodes">What the plot encodes<a class="anchor" aria-label="anchor" href="#what-the-plot-encodes"></a>
-</h2>
-<p>A single figure shows, for one contrast:</p>
-<ul>
+<p><img src="reference/figures/README-hero-1.png" alt="A volcano plot ringed by enrichment arcs coloured by normalised enrichment score"></p>
+<p>enrichVolcano draws; it does not run differential abundance or enrichment. Every workflow has three steps:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Dustyn-T-Lewis/enrichVolcano" class="external-link">enrichVolcano</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aging <span class="op">=</span> <span class="va">fgsea_result</span><span class="op">)</span>, database <span class="op">=</span> <span class="st">"Hallmark"</span><span class="op">)</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/dedup.html">dedup</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">gene_sets</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">da_aging</span>, <span class="va">x</span><span class="op">)</span></span></code></pre></div>
+<ol style="list-style-type: decimal">
 <li>
-<strong>Centre:</strong> the differential-abundance volcano. <code>logFC</code> on x, <code>-log10(p)</code> on y, points coloured up / down / non-significant.</li>
+<code><a href="reference/as_enrichment.html">as_enrichment()</a></code> converts results from any supported tool into one validated <code>enrichment</code> object and records which test produced them.</li>
 <li>
-<strong>Ring:</strong> one arc per enriched pathway. Arc fill is the NES (red up, blue down by default); arc thickness is a magnitude you pick (<code>-log10(padj)</code> or gene-set size).</li>
-<li>
-<strong>Split:</strong> up-regulated pathways sit on the top semicircle, down-regulated on the bottom, so direction reads at a glance.</li>
-<li>
-<strong>Tick lines:</strong> thin spokes from each arc to its leading-edge genes inside the volcano, tying a pathway to the proteins driving it.</li>
-<li>
-<strong>Badges:</strong> running counts of significant up / down proteins.</li>
-</ul>
-<p><code><a href="reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> composes several contrasts into a labelled grid with a shared NES legend.</p>
-</div>
+<code><a href="reference/dedup.html">dedup()</a></code> (optional) flags redundant terms so a figure shows each signal once. p-values are never changed.</li>
+<li>A plot function draws from the object: <code><a href="reference/volcano_ring.html">volcano_ring()</a></code> for one contrast, <code><a href="reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> for several, <code><a href="reference/nes_scatter.html">nes_scatter()</a></code> to compare two contrasts term by term (concordance or reversal).</li>
+</ol>
 <div class="section level2">
 <h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
 </h2>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"Dustyn-T-Lewis/enrichVolcano"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
-</h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Dustyn-T-Lewis/enrichVolcano" class="external-link">enrichVolcano</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">da</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"examples"</span>, <span class="st">"yvo_da.csv"</span>,</span>
-<span>  package <span class="op">=</span> <span class="st">"enrichVolcano"</span></span>
-<span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">en</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"examples"</span>, <span class="st">"yvo_enrichment.csv"</span>,</span>
-<span>  package <span class="op">=</span> <span class="st">"enrichVolcano"</span></span>
-<span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">ctr</span> <span class="op">&lt;-</span> <span class="st">"Training_Young"</span></span>
-<span><span class="va">da1</span> <span class="op">&lt;-</span> <span class="va">da</span><span class="op">[</span><span class="va">da</span><span class="op">$</span><span class="va">contrast</span> <span class="op">==</span> <span class="va">ctr</span>, <span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">da1</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">da1</span><span class="op">)</span> <span class="op">==</span> <span class="st">"adj.P.Val"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"padj"</span></span>
-<span></span>
-<span><span class="co"># Pick the pathways to ring the volcano (the table holds many databases).</span></span>
-<span><span class="va">sig</span> <span class="op">&lt;-</span> <span class="va">en</span><span class="op">[</span><span class="va">en</span><span class="op">$</span><span class="va">contrast</span> <span class="op">==</span> <span class="va">ctr</span> <span class="op">&amp;</span> <span class="va">en</span><span class="op">$</span><span class="va">padj</span> <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/is.finite.html" class="external-link">is.finite</a></span><span class="op">(</span><span class="va">en</span><span class="op">$</span><span class="va">NES</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="va">sig</span> <span class="op">&lt;-</span> <span class="va">sig</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">sig</span><span class="op">$</span><span class="va">padj</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="va">top</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sig</span><span class="op">[</span><span class="va">sig</span><span class="op">$</span><span class="va">NES</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="op">]</span>, <span class="fl">7</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sig</span><span class="op">[</span><span class="va">sig</span><span class="op">$</span><span class="va">NES</span> <span class="op">&lt;</span> <span class="fl">0</span>, <span class="op">]</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">da1</span>, <span class="va">top</span>, title <span class="op">=</span> <span class="st">"YvO"</span>, subtitle <span class="op">=</span> <span class="va">ctr</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="the-whole-figure-in-one-call">The whole figure, in one call<a class="anchor" aria-label="anchor" href="#the-whole-figure-in-one-call"></a>
-</h2>
-<p><code><a href="reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> takes a DA table and an enrichment table that each carry a <code>contrast</code> column, splits them, and lays out one composite per contrast with a shared NES legend along the bottom.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">da</span><span class="op">$</span><span class="va">padj</span> <span class="op">&lt;-</span> <span class="va">da</span><span class="op">$</span><span class="va">adj.P.Val</span></span>
-<span><span class="va">en_sig</span> <span class="op">&lt;-</span> <span class="va">en</span><span class="op">[</span><span class="va">en</span><span class="op">$</span><span class="va">padj</span> <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="va">en</span><span class="op">$</span><span class="va">size</span> <span class="op">&gt;=</span> <span class="fl">15</span>, <span class="op">]</span></span>
-<span></span>
-<span><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/volcano_ring_grid.html">volcano_ring_grid</a></span><span class="op">(</span><span class="va">da</span>, <span class="va">en_sig</span>, contrasts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">da</span><span class="op">$</span><span class="va">contrast</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">grid</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
-<p>Every spacing knob (<code>panel_spacing</code>, <code>panel_margin</code>, <code>label_headroom</code>, <code>legend_position</code>, <code>legend_width</code>) has a sensible default, so the call above is the whole figure.</p>
-</div>
-<div class="section level2">
-<h2 id="input-contract-in-brief">Input contract, in brief<a class="anchor" aria-label="anchor" href="#input-contract-in-brief"></a>
+<h2 id="what-goes-in">What goes in<a class="anchor" aria-label="anchor" href="#what-goes-in"></a>
 </h2>
 <table class="table">
 <colgroup>
@@ -143,110 +94,83 @@
 <col width="33%">
 </colgroup>
 <thead><tr>
-<th>Side</th>
-<th>Needs</th>
-<th>Default column</th>
+<th>Tool</th>
+<th>Recognised by</th>
+<th>Score drawn</th>
 </tr></thead>
 <tbody>
 <tr>
-<td>DA (<code>volc_df</code>)</td>
-<td>gene id, effect, p, adjusted p</td>
-<td>
-<code>gene</code>, <code>logFC</code>, <code>P.Value</code>, <code>padj</code>
-</td>
+<td>fgsea</td>
+<td>its columns</td>
+<td>NES</td>
 </tr>
 <tr>
-<td>Enrichment (<code>enrich_df</code>)</td>
-<td>term, NES, adjusted p, size</td>
-<td>
-<code>pathway</code>, <code>NES</code>, <code>padj</code>, <code>size</code>
+<td>clusterProfiler <code>gseaResult</code>
 </td>
+<td>its class</td>
+<td>NES</td>
 </tr>
 <tr>
-<td>Tick lines (optional)</td>
-<td>leading-edge genes</td>
-<td>auto-detected from <code>leading_edge</code> / <code>leadingEdge</code> / <code>core_enrichment</code> / <code>Genes</code>
+<td>limma <code>fry</code>, <code>mroast</code>
 </td>
+<td>their columns</td>
+<td>signed −log10(FDR)</td>
+</tr>
+<tr>
+<td>limma <code>camera</code>, <code>cameraPR</code>
+</td>
+<td><code>enrichment_test =</code></td>
+<td>signed −log10(FDR)</td>
+</tr>
+<tr>
+<td>over-representation (enrichR, <code>enrichGO</code>, …)</td>
+<td>
+<code>enrichment_test = "ora"</code> + a direction column</td>
+<td>signed −log10(padj)</td>
+</tr>
+<tr>
+<td>anything else</td>
+<td>
+<code>enrichment_test = "custom"</code> + column names</td>
+<td>yours</td>
 </tr>
 </tbody>
 </table>
-<p>Every column name is an argument, so non-default schemas work without renaming. See <code><a href="articles/input-contract.html">vignette("input-contract")</a></code> for the limma / DESeq2 / edgeR / DEP / fgsea / clusterProfiler / enrichR cross-walk.</p>
+<p>fry, mroast and camera report no effect size or leading edge, so their score is the signed −log10(FDR) and the legend says so.</p>
 </div>
 <div class="section level2">
-<h2 id="customizing">Customizing<a class="anchor" aria-label="anchor" href="#customizing"></a>
+<h2 id="what-the-ring-shows">What the ring shows<a class="anchor" aria-label="anchor" href="#what-the-ring-shows"></a>
 </h2>
-<p>Colours come from <code><a href="reference/volcano_ring_theme.html">volcano_ring_theme()</a></code> (the palette presets, or your own <code>up</code> / <code>down</code> / <code>ns</code> / <code>nes_colors</code>). Layout comes from <code><a href="reference/volcano_ring.html">volcano_ring()</a></code> arguments such as <code>arc_order</code>, <code>arc_height_range</code>, <code>show_counts</code>, <code>magnitude</code>, and <code>label_mode</code>. Everything has a sensible default:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">da1</span>, <span class="va">en1</span>,</span>
-<span>  theme <span class="op">=</span> <span class="fu"><a href="reference/volcano_ring_theme.html">volcano_ring_theme</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"okabe"</span><span class="op">)</span>,</span>
-<span>  arc_order <span class="op">=</span> <span class="st">"nes"</span>, show_counts <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="articles/customizing.html">vignette("customizing")</a></code> walks every knob section by section.</p>
-</div>
-<div class="section level2">
-<h2 id="public-api">Public API<a class="anchor" aria-label="anchor" href="#public-api"></a>
-</h2>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Function</th>
-<th>Role</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/volcano_ring.html">volcano_ring()</a></code></td>
-<td>one composite for one contrast — returns a <code>ggplot</code>
-</td>
-</tr>
-<tr>
-<td><code><a href="reference/volcano_ring_grid.html">volcano_ring_grid()</a></code></td>
-<td>a grid of composites, one per contrast</td>
-</tr>
-<tr>
-<td><code><a href="reference/volcano_ring_theme.html">volcano_ring_theme()</a></code></td>
-<td>theme + palette factory, with colour overrides</td>
-</tr>
-<tr>
-<td><code>print.volcano_ring_grid()</code></td>
-<td>print method for the grid object</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level2">
-<h2 id="cite-the-upstream-tools">Cite the upstream tools<a class="anchor" aria-label="anchor" href="#cite-the-upstream-tools"></a>
-</h2>
-<p><code>enrichVolcano</code> only draws; the methodological credit belongs to the enrichment tool you ran:</p>
 <ul>
 <li>
-<code>fgsea</code> — Korotkevich G et al. 2021, DOI 10.1101/060012</li>
+<strong>Centre:</strong> the volcano, <code>logFC</code> against −log10(p).</li>
 <li>
-<code>clusterProfiler</code> — Wu T et al. 2021 <em>Innovation</em>
-</li>
+<strong>Ring:</strong> one arc per term, up-regulated on top and down-regulated below. Fill is the score; height is −log10(padj) for NES and set size otherwise.</li>
 <li>
-<code>enrichR</code> — Chen EY et al. 2013 <em>BMC Bioinformatics</em>; Kuleshov MV et al. 2016 <em>Nucleic Acids Res</em>
-</li>
+<strong>Ticks:</strong> spokes from each arc to its leading-edge genes in the volcano.</li>
 </ul>
-<p>Useful when choosing what to run and how to read it:</p>
+<p>By default the ring draws the twelve most significant terms, in either direction, from every collection in the object. For figures, <code>databases = c("Hallmark", "GO Slim")</code> is the recommended view; <code>n_terms</code>, <code>term_threshold</code> and <code>terms</code> change the selection further. <code><a href="articles/enrichVolcano.html">vignette("enrichVolcano")</a></code> walks every step on the bundled example, including how to get each gene-set collection.</p>
+</div>
+<div class="section level2">
+<h2 id="cite-the-methods-you-used">Cite the methods you used<a class="anchor" aria-label="anchor" href="#cite-the-methods-you-used"></a>
+</h2>
+<p>enrichVolcano only draws; the credit belongs to the analysis:</p>
 <ul>
-<li>Xiao Y et al. 2014 <em>Bioinformatics</em> 30(6):801-7, PMID 22321699 — π-value</li>
-<li>Timmons JA et al. 2015 <em>Genome Biol</em> 16:186, PMID 26346307 — ORA universe</li>
-<li>Reimand J et al. 2019 <em>Nat Protoc</em> 14:482-517, PMID 30664679 — protocol</li>
-<li>Wijesooriya K et al. 2022 <em>PLoS Comput Biol</em> 18:e1009935, PMID 35263338 — background bias</li>
+<li>fgsea: Korotkevich G et al., bioRxiv, <a href="doi:10.1101/060012" class="uri">doi:10.1101/060012</a>
+</li>
+<li>clusterProfiler: Wu T et al. 2021, <em>The Innovation</em> 2:100141</li>
+<li>camera: Wu D, Smyth GK 2012, <em>Nucleic Acids Res</em> 40(17), <a href="doi:10.1093/nar/gks461" class="uri">doi:10.1093/nar/gks461</a>
+</li>
+<li>fry and mroast (ROAST): Wu D et al. 2010, <em>Bioinformatics</em> 26(17), <a href="doi:10.1093/bioinformatics/btq401" class="uri">doi:10.1093/bioinformatics/btq401</a>
+</li>
+<li>EnrichmentMap (<code><a href="reference/dedup.html">dedup()</a></code>): Merico D et al. 2010, <em>PLoS ONE</em> 5(11):e13984</li>
+<li>Enrichment protocol: Reimand J et al. 2019, <em>Nat Protoc</em> 14:482-517</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="versioning">Versioning<a class="anchor" aria-label="anchor" href="#versioning"></a>
 </h2>
-<p>Current release is v0.3.0. The pre-0.3 enrichment engine and standalone volcano / ring wrappers are gone; the old <code>enrich_volcano()</code> and GUI stay installable from the <code>v0.2.0</code> tag.</p>
-</div>
-<div class="section level2">
-<h2 id="shiny-front-end">Shiny front-end<a class="anchor" aria-label="anchor" href="#shiny-front-end"></a>
-</h2>
-<p>A graphical front-end (<code>enrichVolcanoApp</code>) is <strong>TBD</strong>: under construction in a sibling repo and not yet released. Status and install details will land here once it stabilises.</p>
+<p>1.0.0 replaced the column-name arguments with the <code>enrichment</code> object; see <code>NEWS.md</code>. Earlier releases stay installable from their tags.</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>

@@ -9,7 +9,7 @@ plots, one per contrast
 ``` r
 volcano_ring_grid(
   volc_dfs,
-  enrich_dfs,
+  enrichment,
   contrasts = NULL,
   subtitles = NULL,
   nrow = NULL,
@@ -32,10 +32,11 @@ volcano_ring_grid(
   Named list of tidy DA tibbles, one per contrast. A single data.frame
   carrying a `contrast` column is also accepted and is split.
 
-- enrich_dfs:
+- enrichment:
 
-  Named list of tidy enrichment tibbles, one per contrast. Same split
-  convenience as `volc_dfs`.
+  An
+  [enrichment](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrichment.md)
+  object holding every contrast drawn.
 
 - contrasts:
 
@@ -60,7 +61,7 @@ volcano_ring_grid(
 - guides:
 
   Patchwork `guides` argument; default `"collect"` collects the shared
-  NES legend.
+  score legend.
 
 - panel_spacing:
 
@@ -83,12 +84,12 @@ volcano_ring_grid(
 
 - legend_position:
 
-  Placement of the collected NES legend: `"bottom"` (default, recovers
+  Placement of the collected score legend: `"bottom"` (default, recovers
   the right-hand gap), `"right"`, or `"none"`.
 
 - legend_width:
 
-  Length of the NES colourbar long axis, in millimetres (default 26,
+  Length of the score colourbar long axis, in millimetres (default 26,
   tuned for the bottom bar). Sets the key width when the legend is
   horizontal, the key height when vertical; a side legend usually wants
   a larger value (~40).
@@ -97,32 +98,26 @@ volcano_ring_grid(
 
   Forwarded to each
   [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-  call (e.g. `gene_col`, `padj_col`, `magnitude`, `theme`).
+  call (e.g. `databases`, `n_terms`, `padj_col`, `theme`).
 
 ## Value
 
 An S3 object `c("volcano_ring_grid", "list")` with elements `$plot`
-(patchwork) and `$data` (list of `list(volc, enrich)` pairs).
+(patchwork) and `$data` (list of `list(volc, enrich)` pairs, where
+`enrich` is that contrast's rows of `enrichment@results`).
 
 ## Examples
 
 ``` r
-da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
+da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
   package = "enrichVolcano"
 ))
-en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
+ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
   package = "enrichVolcano"
-))
+)))
+#> Reading "fgsea" results.
 names(da)[names(da) == "adj.P.Val"] <- "padj"
 
-# up to eight GO-BP terms per contrast, one composite each
-en_go <- en[en$database == "GO_BP" & en$padj < 0.01, ]
-en_go <- en_go[order(en_go$padj), ]
-en_go <- en_go[!duplicated(en_go[c("contrast", "pathway")]), ]
-en_go <- do.call(rbind, lapply(split(en_go, en_go$contrast), head, 8))
-
-g <- volcano_ring_grid(da, en_go, contrasts = c("Training_Young", "Training_Old"))
-#> No tick-line column found; tick lines off.
-#> No tick-line column found; tick lines off.
+g <- volcano_ring_grid(da, ex, contrasts = c("Training_Young", "Training_Old"))
 g$plot
 ```
