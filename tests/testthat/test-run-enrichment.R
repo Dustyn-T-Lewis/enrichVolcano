@@ -207,3 +207,22 @@ test_that("camera and fry say so when no set fits the size window", {
     class = "enrichVolcano_input_error"
   )
 })
+
+test_that("camera can estimate the inter-gene correlation instead of fixing it", {
+  e <- toy_expected(fixed = TRUE)
+  expected <- limma::camera(e$m, e$index, e$design, e$contrast, weights = e$w, inter.gene.cor = NA, sort = FALSE)
+  x <- run_limma("camera", subject_effect = "fixed", inter_gene_cor = NA)$camera
+  r <- x@results[x@results$database == "Hallmark", ]
+  expect_equal(r$p[match(rownames(expected), r$term)], expected$PValue)
+  expect_true(is.na(x@metadata$inter_gene_cor))
+})
+
+test_that("a blocked design cannot estimate the correlation, and says so", {
+  skip_if_not_installed("limma")
+  skip_if_not_installed("org.Hs.eg.db")
+  expect_error(
+    suppressMessages(run_enrichment(toy_study(), toy_sets(), tests = "camera", min_size = 5, inter_gene_cor = NA)),
+    "cameraPR",
+    class = "enrichVolcano_param_error"
+  )
+})

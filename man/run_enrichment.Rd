@@ -10,6 +10,7 @@ run_enrichment(
   tests = c("fgsea", "camera", "fry"),
   subject_effect = c("block", "fixed"),
   covariates = NULL,
+  inter_gene_cor = 0.01,
   min_size = 15,
   max_size = 500
 )
@@ -27,6 +28,9 @@ matrix runs fgsea only.}
 the camera and fry model.}
 
 \item{covariates}{Sample columns added to the camera and fry design.}
+
+\item{inter_gene_cor}{camera's inter-gene correlation: a number, or \code{NA} to
+estimate it (unblocked designs only).}
 
 \item{min_size, max_size}{Sets need this many genes present in the data.}
 }
@@ -60,6 +64,8 @@ samples from one subject are treated as correlated
 cannot block, so for a blocked design the package runs
 \code{limma::cameraPR()} on the moderated t of the blocked fit instead, and the
 result records \code{cameraPR} as its test. Precision weights are used when the
-study has them.
+study has them. camera assumes genes within a set correlate at
+\code{inter_gene_cor} (limma's default, 0.01); \code{NA} estimates it from the data,
+which can change results substantially and needs an unblocked design.
 }
 

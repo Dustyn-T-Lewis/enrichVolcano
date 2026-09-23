@@ -22,7 +22,9 @@
 #' cannot block, so for a blocked design the package runs
 #' `limma::cameraPR()` on the moderated t of the blocked fit instead, and the
 #' result records `cameraPR` as its test. Precision weights are used when the
-#' study has them.
+#' study has them. camera assumes genes within a set correlate at
+#' `inter_gene_cor` (limma's default, 0.01); `NA` estimates it from the data,
+#' which can change results substantially and needs an unblocked design.
 #'
 #' @param study Output of [read_study()], or of [as_da()] for fgsea alone.
 #' @param gene_sets Output of [load_gene_sets()], a named list of collections
@@ -32,13 +34,15 @@
 #' @param subject_effect `"block"` or `"fixed"`: how a `subject` column enters
 #'   the camera and fry model.
 #' @param covariates Sample columns added to the camera and fry design.
+#' @param inter_gene_cor camera's inter-gene correlation: a number, or `NA` to
+#'   estimate it (unblocked designs only).
 #' @param min_size,max_size Sets need this many genes present in the data.
 #' @return A named list with one [enrichment] object per test. Its metadata
 #'   records the ranking statistic and the gene-set versions.
 #' @export
 run_enrichment <- function(study, gene_sets, tests = c("fgsea", "camera", "fry"),
                            subject_effect = c("block", "fixed"), covariates = NULL,
-                           min_size = 15, max_size = 500) {
+                           inter_gene_cor = 0.01, min_size = 15, max_size = 500) {
   study <- as_study(study)
   tests_given <- !missing(tests)
   tests <- rlang::arg_match(tests, c("fgsea", "camera", "fry"), multiple = TRUE)
@@ -59,6 +63,16 @@ run_enrichment <- function(study, gene_sets, tests = c("fgsea", "camera", "fry")
   if ("fgsea" %in% tests) out$fgsea <- run_fgsea(study, collections, min_size, max_size)
   if (length(limma_tests) > 0) {
     model <- limma_model(study, subject_effect, covariates)
+    model$inter_gene_cor <- inter_gene_cor
+    if ("camera" %in% limma_tests && is.na(inter_gene_cor) && !is.null(model$block)) {
+      ev_abort(
+        c(
+          "A blocked design runs camera as {.fn limma::cameraPR}, which cannot estimate {.arg inter_gene_cor}.",
+          i = "Give a number, or use {.code subject_effect = \"fixed\"}."
+        ),
+        class = "enrichVolcano_param_error"
+      )
+    }
     for (test in limma_tests) out[[test]] <- run_limma_test(test, model, collections, min_size, max_size)
   }
   out
@@ -206,9 +220,11 @@ run_limma_test <- function(test, model, collections, min_size, max_size) {
           block = model$block, correlation = model$correlation, weights = model$w, sort = "none"
         )
       } else if (blocked_camera) {
-        limma::cameraPR(model$t[, contrast], index, sort = FALSE)
+        limma::cameraPR(model$t[, contrast], index, inter.gene.cor = model$inter_gene_cor, sort = FALSE)
       } else {
-        limma::camera(model$m, index, model$design, model$cm[, contrast], weights = model$w, sort = FALSE)
+        limma::camera(model$m, index, model$design, model$cm[, contrast],
+          weights = model$w, inter.gene.cor = model$inter_gene_cor, sort = FALSE
+        )
       }
       res$term <- rownames(res)
       res$database <- db
@@ -226,6 +242,7 @@ run_limma_test <- function(test, model, collections, min_size, max_size) {
   name <- if (blocked_camera) "cameraPR" else test
   x <- as_enrichment(per_contrast, enrichment_test = name)
   x@metadata$gene_sets <- attr(collections, "versions")
+  if (test == "camera") x@metadata$inter_gene_cor <- model$inter_gene_cor
   x@metadata$design <- list(
     columns = colnames(model$design), blocked = !is.null(model$block),
     correlation = model$correlation, weighted = !is.null(model$w)
