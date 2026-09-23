@@ -2,23 +2,20 @@ url: https://Dustyn-T-Lewis.github.io/enrichVolcano/
 template:
   bootstrap: 5
 reference:
-  - title: "Plotting"
+  - title: "Build"
+    contents:
+      - as_enrichment
+      - enrichment
+      - dedup
+  - title: "Plot"
     contents:
       - volcano_ring
       - volcano_ring_grid
-      - volcano_ring_theme
-  - title: "Labels"
+      - nes_scatter
+  - title: "Style"
     contents:
+      - volcano_ring_theme
       - ev_clean_label
   - title: internal
     contents:
       - enrichVolcano-package
-articles:
-  - title: "Get started"
-    navbar: ~
-    contents:
-      - getting-started
-      - customizing
-  - title: "Reference"
-    contents:
-      - input-contract

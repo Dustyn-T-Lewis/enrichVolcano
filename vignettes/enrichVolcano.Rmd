@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 6,
   fig.height = 6,
-  dpi = 96
+  dpi = 72
 )
 ```
 
@@ -266,7 +266,7 @@ work as they do for the ring.
 
 `volcano_ring_theme()` holds the palette; the plot arguments hold the layout.
 
-```{r palette, fig.alt = "Volcano ring in the Okabe-Ito palette with labelled top proteins"}
+```{r palette, eval = FALSE}
 volcano_ring(young, ex,
   contrast = "Training_Young",
   theme = volcano_ring_theme(palette = "okabe"),
@@ -286,7 +286,7 @@ The arguments you will reach for most:
 `volcano_ring_grid()` draws one ring per contrast and collects a shared
 legend; extra arguments pass to every ring.
 
-```{r grid, fig.width = 12, fig.height = 7, fig.alt = "Two volcano rings side by side for trained young and trained old"}
+```{r grid, fig.width = 10, fig.height = 5.5, fig.alt = "Two volcano rings side by side for trained young and trained old"}
 g <- volcano_ring_grid(da, ex, contrasts = c("Training_Young", "Training_Old"), ncol = 2)
 g$plot
 ```

@@ -4,11 +4,11 @@
 \name{enrichVolcano-package}
 \alias{enrichVolcano}
 \alias{enrichVolcano-package}
-\title{enrichVolcano: Volcano-in-Ring Composite Plots from Differential Abundance and Enrichment}
+\title{enrichVolcano: Volcano-in-Ring and Concordance Plots from Enrichment Results}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Draws a single composite figure that combines a differential abundance volcano in the centre with a ring of enrichment terms around it, using NES-coloured arcs and tick lines from significant volcano points to the pathways they drive. Accepts any tidy differential abundance table and any tidy enrichment table (fgsea, clusterProfiler, enrichR, custom) via configurable column arguments.
+Draws figures from gene-set enrichment results computed elsewhere. Results from fgsea, clusterProfiler, limma's rotation and competitive gene-set tests, over-representation analysis or custom tables are converted into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or 'fgsea' conditional collapsing, without changing any p-value.
 }
 \seealso{
 Useful links:
