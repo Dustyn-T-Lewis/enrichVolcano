@@ -1,0 +1,259 @@
+---
+title: "enrichVolcano"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{enrichVolcano}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 6,
+  dpi = 96
+)
+```
+
+enrichVolcano draws figures from enrichment results you have already
+computed. Every workflow has the same three steps:
+
+1. `as_enrichment()` converts results from any supported tool into one
+   validated `enrichment` object.
+2. `dedup()` (optional) flags redundant terms so figures show each signal
+   once.
+3. A plot function draws from the object: `volcano_ring()` puts a
+   differential-abundance volcano inside a ring of enrichment terms.
+
+## Install
+
+```{r install, eval = FALSE}
+install.packages("remotes")
+remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
+```
+
+## Quick start
+
+The package ships one example study: fgsea results for four contrasts across
+five gene-set collections, and the matching limma differential-abundance
+table. The collections are MSigDB Hallmark, KEGG MEDICUS, Reactome and GO:BP
+from msigdbr 26.1.0, and the GO Consortium's generic GO slim (release
+2026-07-26).
+
+```{r read}
+library(enrichVolcano)
+
+fgsea_path <- system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano")
+da_path <- system.file("extdata", "examples", "yvo_da.csv.gz", package = "enrichVolcano")
+
+ex <- as_enrichment(read.csv(fgsea_path))
+ex
+```
+
+`as_enrichment()` recognised fgsea output from its columns and split the
+table by its `contrast` column. The DA table needs one contrast and a `padj`
+column:
+
+```{r da}
+da <- read.csv(da_path)
+names(da)[names(da) == "adj.P.Val"] <- "padj"
+young <- da[da$contrast == "Training_Young", ]
+```
+
+```{r ring, fig.alt = "Volcano of Training_Young proteins inside a ring of enriched Hallmark and GO slim terms"}
+volcano_ring(young, ex, contrast = "Training_Young", title = "Training, young")
+```
+
+Arc fill is NES and arc height is \(-\log_{10}\)(padj). Up-regulated terms sit
+on the upper half, down-regulated ones on the lower. Ticks run from each arc
+to its leading-edge proteins in the volcano. By default the ring takes up to
+eight significant terms (padj < 0.05) per direction from Hallmark and GO slim;
+`databases`, `term_threshold`, `n_terms` and `terms` change the selection.
+
+## Convert your results
+
+Every tool below ends in the same object. Pass one table per contrast as a
+named list, or one table with a `contrast` column.
+
+### fgsea
+
+```{r fgsea, eval = FALSE}
+res <- fgsea::fgsea(pathways, stats = ranks)
+x <- as_enrichment(list(Aging = res), database = "Hallmark")
+```
+
+The score is the normalised enrichment score (NES): how far the gene set sits
+toward the top or bottom of the ranking, scaled so sets of different sizes
+compare. `database` labels every row when the table has no `database` column.
+
+### clusterProfiler
+
+```{r gsea-result, eval = FALSE}
+res <- clusterProfiler::gseGO(gene_list, ont = "BP", OrgDb = org.Hs.eg.db::org.Hs.eg.db)
+x <- as_enrichment(list(Aging = res), database = "GO:BP")
+```
+
+The `gseaResult` object is read directly. The score is NES and the leading
+edge comes from `core_enrichment`.
+
+### limma: fry and mroast
+
+```{r fry-run, eval = FALSE}
+res <- limma::fry(y, index = gene_sets, design = design, contrast = contrast)
+x <- as_enrichment(list(Aging = res), database = "Hallmark")
+```
+
+fry and mroast are **self-contained** tests: they ask whether the genes in a
+set changed at all, without reference to genes outside it. Neither reports an
+effect size like NES, or a leading edge. The score is therefore
+\(-\log_{10}\)(FDR), signed by the reported direction, and the figure's legend
+says so. The table below has fry's shape; the numbers are invented to show the
+conversion.
+
+```{r fry}
+fry_res <- data.frame(
+  NGenes = c(200, 150, 180, 160),
+  Direction = c("Up", "Up", "Down", "Down"),
+  PValue = c(1e-6, 4e-4, 2e-5, 3e-3),
+  FDR = c(4e-6, 8e-4, 4e-5, 4e-3),
+  PValue.Mixed = c(1e-7, 1e-4, 1e-5, 1e-3),
+  FDR.Mixed = c(4e-7, 2e-4, 2e-5, 1e-3),
+  row.names = c(
+    "HALLMARK_OXIDATIVE_PHOSPHORYLATION", "HALLMARK_MYOGENESIS",
+    "HALLMARK_INFLAMMATORY_RESPONSE", "HALLMARK_APOPTOSIS"
+  )
+)
+fry_x <- as_enrichment(list(Training_Young = fry_res), database = "Hallmark")
+```
+
+```{r fry-ring, fig.alt = "Volcano ring drawn from fry results, with arcs coloured by signed -log10 FDR and no tick lines"}
+volcano_ring(young, fry_x, title = "fry")
+```
+
+With no NES to encode, arc fill carries the signed \(-\log_{10}\)(FDR) and arc
+height switches to set size, so the two channels show different facts.
+
+### limma: camera and cameraPR
+
+```{r camera, eval = FALSE}
+res <- limma::camera(y, index = gene_sets, design = design, contrast = contrast)
+x <- as_enrichment(list(Aging = res), enrichment_test = "camera", database = "Hallmark")
+```
+
+camera and cameraPR are **competitive** tests, like fgsea: they ask whether a
+set changed more than the genes outside it. Their default output has
+identical columns, so `as_enrichment()` cannot tell them apart and asks you to
+name the test with `enrichment_test`. camera run with
+`inter.gene.cor = NA` adds a `Correlation` column and is recognised
+automatically.
+
+### Over-representation analysis
+
+```{r ora, eval = FALSE}
+up <- enrichR::enrichr(up_genes, "GO_Biological_Process_2023")[[1]]
+down <- enrichR::enrichr(down_genes, "GO_Biological_Process_2023")[[1]]
+up$direction <- "up"
+down$direction <- "down"
+x <- as_enrichment(
+  list(Aging = rbind(up, down)),
+  enrichment_test = "ora",
+  term = "Term", padj = "Adjusted.P.value", p = "P.value", leading_edge = "Genes"
+)
+```
+
+Over-representation asks whether a gene list overlaps a set more than chance
+predicts; it has no direction of its own. Run it on up- and down-regulated
+genes separately and stack the two with a `direction` column. The score is
+signed \(-\log_{10}\)(padj).
+
+### Anything else
+
+```{r custom, eval = FALSE}
+x <- as_enrichment(
+  list(Aging = my_table),
+  enrichment_test = "custom",
+  term = "set", score = "stat", padj = "q", size = "n", score_type = "z"
+)
+```
+
+Name the columns and, optionally, what the score is; `score_type` becomes the
+legend title.
+
+## Deduplicate
+
+Related gene sets often reach significance together. In GO:BP or Reactome,
+one biological signal can light up a dozen overlapping terms. `dedup()` flags
+all but one per cluster as `"redundant"`, and plots hide redundant terms by
+default (`collapse = TRUE`). No row is removed and no p-value changes: the
+multiple-testing correction already covered every term, so redundancy is a
+display decision.
+
+```{r dedup, eval = FALSE}
+gene_sets <- split(msig$gene_symbol, msig$gs_name)
+x <- dedup(x, gene_sets)
+x <- dedup(x, gene_sets, similarity = "jaccard")
+x <- dedup(x, gene_sets, method = "collapse_pathways", stats = list(Aging = ranks))
+```
+
+Within each contrast and database, significant terms are walked from the
+smallest padj. A term is redundant when its gene set is similar enough to a
+term already kept:
+
+- `similarity = "combined"` (default, cutoff 0.375) is the EnrichmentMap
+  coefficient: the mean of the Jaccard index and the overlap coefficient. The
+  overlap coefficient catches a small set nested inside a large one, which
+  Jaccard alone misses.
+- `similarity = "jaccard"` (cutoff 0.5) is shared genes over all genes in
+  either set.
+
+`method = "collapse_pathways"` is a different kind of rule. It calls
+`fgsea::collapsePathways()`, which asks whether a term is still enriched once
+the genes of a more significant term are conditioned on. That is a new
+statistical test, so it needs the ranking each contrast was tested on, works
+only for ranked GSEA results, and should be reported as its own analysis.
+Call `set.seed()` first; it permutes.
+
+The example object carries flags computed upstream with the Jaccard rule. They
+pass straight through `as_enrichment()`:
+
+```{r flags}
+table(ex@results$dedup_status, ex@results$database, useNA = "ifany")
+```
+
+Hallmark and GO slim lose nothing because both are built to be non-redundant.
+The flags matter once you draw from GO:BP or Reactome:
+
+```{r reactome, fig.alt = "Volcano ring drawn from Reactome terms with redundant terms hidden"}
+volcano_ring(young, ex, contrast = "Training_Young", databases = "Reactome", title = "Reactome")
+```
+
+## Change the look
+
+`volcano_ring_theme()` holds the palette; the plot arguments hold the layout.
+
+```{r palette, fig.alt = "Volcano ring in the Okabe-Ito palette with labelled top proteins"}
+volcano_ring(young, ex,
+  contrast = "Training_Young",
+  theme = volcano_ring_theme(palette = "okabe"),
+  label_mode = "top_per_direction", label_n = 4
+)
+```
+
+The arguments you will reach for most:
+
+- `magnitude`: what arc height encodes, `"neg_log_padj"` or `"size"`.
+- `arc_height_range`: shortest and tallest arc.
+- `arc_order`: order arcs by `"padj"` or by absolute score within each half.
+- `x_scale`, `y_scale`: compress the volcano when points crowd the ring.
+- `label_mode`, `label_n`, `label_genes`: which proteins get text.
+- `show_counts`, `disc_color`: count badges and a tinted central disc.
+
+`volcano_ring_grid()` draws one ring per contrast and collects a shared
+legend; extra arguments pass to every ring.
+
+```{r grid, fig.width = 12, fig.height = 7, fig.alt = "Two volcano rings side by side for trained young and trained old"}
+g <- volcano_ring_grid(da, ex, contrasts = c("Training_Young", "Training_Old"), ncol = 2)
+g$plot
+```

@@ -34,28 +34,14 @@ make_toy_enrich <- function(seed = 1L) {
   )
 }
 
-# Same enrichment table with fgsea-native list-column for leadingEdge.
-make_toy_enrich_listcol <- function(seed = 1L) {
-  d <- make_toy_enrich(seed = seed)
-  d$leadingEdge <- strsplit(d$leading_edge, ";", fixed = TRUE)
-  d$leading_edge <- NULL
-  d
-}
-
-# clusterProfiler-style: core_enrichment as "/"-separated string.
-make_toy_enrich_cp <- function(seed = 1L) {
-  d <- make_toy_enrich(seed = seed)
-  d$core_enrichment <- gsub(";", "/", d$leading_edge, fixed = TRUE)
-  d$leading_edge <- NULL
-  d
-}
-
-# enrichR-style: Genes column with ";" separator.
-make_toy_enrich_enrichr <- function(seed = 1L) {
-  d <- make_toy_enrich(seed = seed)
-  d$Genes <- d$leading_edge
-  d$leading_edge <- NULL
-  d
+# The toy enrichment table as an enrichment object, one copy per contrast.
+make_toy_ring_enrichment <- function(contrasts = "toy") {
+  e <- make_toy_enrich()
+  suppressMessages(as_enrichment(
+    stats::setNames(rep(list(e), length(contrasts)), contrasts),
+    enrichment_test = "custom", term = "pathway", score = "NES",
+    leading_edge = "leading_edge", score_type = "NES"
+  ))
 }
 
 # A valid `results` table for the enrichment class: two contrasts, one

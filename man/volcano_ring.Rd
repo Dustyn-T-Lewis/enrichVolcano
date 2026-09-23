@@ -6,17 +6,18 @@
 \usage{
 volcano_ring(
   volc_df,
-  enrich_df,
+  enrichment,
+  contrast = NULL,
+  databases = c("Hallmark", "GO Slim"),
+  collapse = TRUE,
+  term_threshold = 0.05,
+  n_terms = 8,
+  terms = NULL,
   gene_col = "gene",
   logfc_col = "logFC",
   pval_col = "P.Value",
   padj_col = "padj",
   volc_sig_col = NULL,
-  term_col = "pathway",
-  nes_col = "NES",
-  size_col = "size",
-  genes_col = NULL,
-  genes_sep = NULL,
   p_threshold = 0.05,
   logfc_threshold = 0,
   title = NULL,
@@ -31,7 +32,7 @@ volcano_ring(
   label_headroom = 0.5,
   disc_color = NULL,
   nes_limits = NULL,
-  magnitude = c("neg_log_padj", "size"),
+  magnitude = NULL,
   arc_order = c("padj", "nes"),
   arc_height_range = c(0.4, 1.6),
   show_counts = TRUE,
@@ -51,27 +52,32 @@ volcano_ring(
 )
 }
 \arguments{
-\item{volc_df}{Tidy DA tibble for a single contrast.}
+\item{volc_df}{Tidy DA table for the contrast being drawn.}
 
-\item{enrich_df}{Tidy enrichment tibble for the same contrast.}
+\item{enrichment}{An \link{enrichment} object; see \code{\link[=as_enrichment]{as_enrichment()}}.}
+
+\item{contrast}{Which contrast of \code{enrichment} to draw. Needed only when it
+holds more than one.}
+
+\item{databases}{Collections to draw from, matched against the \code{database}
+column. \code{NULL} draws from all. Skipped, with a note, when the object has no
+database labels.}
+
+\item{collapse}{Hide terms flagged \code{"redundant"} by \code{\link[=dedup]{dedup()}}.}
+
+\item{term_threshold}{Terms need \code{padj} below this to be drawn.}
+
+\item{n_terms}{Most terms drawn per direction.}
+
+\item{terms}{Optional character vector of exact term names to draw instead.}
 
 \item{gene_col, logfc_col, pval_col, padj_col}{Column names in \code{volc_df}.}
 
 \item{volc_sig_col}{Optional column in \code{volc_df} used to call point
-significance (e.g. a pi-value), decoupled from the enrichment \code{padj_col}.
-\code{NULL} falls back to \code{padj_col} then \code{pval_col}. The y-axis stays
-\code{-log10(pval_col)} regardless.}
+significance (e.g. a pi-value), decoupled from \code{padj_col}. \code{NULL} falls
+back to \code{padj_col} then \code{pval_col}. The y-axis stays \code{-log10(pval_col)}.}
 
-\item{term_col, nes_col, size_col}{Column names in \code{enrich_df}. \code{padj_col}
-is reused for the enrichment-side adjusted-p column.}
-
-\item{genes_col}{Optional column name in \code{enrich_df} carrying leading-edge
-genes. \code{NULL} triggers auto-detect (Q4).}
-
-\item{genes_sep}{Separator for the leading-edge string. \code{NULL} defers to
-the auto-detected default.}
-
-\item{p_threshold}{Cutoff applied to \code{padj_col} in \code{volc_df}.}
+\item{p_threshold}{Significance cutoff for volcano points.}
 
 \item{logfc_threshold}{Effect-size cutoff; a point is called up/down only
 when \code{abs(logFC) >= logfc_threshold} as well as significant.}
@@ -106,14 +112,17 @@ when wide label boxes are clipped; lower it to pack the ring tighter.}
 
 \item{disc_color}{Optional fill for a tinted central disc.}
 
-\item{nes_limits}{Length-2 numeric or \code{NULL}; defaults to \code{c(-3, 3)}.}
+\item{nes_limits}{Length-2 numeric or \code{NULL}; limits of the arc fill scale.
+\code{NULL} uses \code{c(-3, 3)} for NES, and otherwise spans the largest absolute
+significant score in the whole object, so every contrast shares a scale.}
 
-\item{magnitude}{\code{"neg_log_padj"} (default) or \code{"size"}; controls arc
-thickness encoding.}
+\item{magnitude}{What arc height encodes: \code{"neg_log_padj"} or \code{"size"}.
+\code{NULL} picks \code{"neg_log_padj"} for NES and \code{"size"} otherwise, so fill and
+height never repeat the same number for fry or camera results.}
 
 \item{arc_order}{Angular order of arcs within each up/down half:
-\code{"padj"} (default, lowest FDR first) or \code{"nes"} (strongest \code{abs(NES)}
-first). The up/down split itself is always by NES sign.}
+\code{"padj"} (default, lowest FDR first) or \code{"nes"} (strongest absolute score
+first). The up/down split itself is always by direction.}
 
 \item{arc_height_range}{Length-2 numeric \code{c(min, max)} for the shortest
 and tallest arc; widen it to exaggerate the magnitude encoding.}
@@ -146,30 +155,28 @@ A ggplot.
 }
 \description{
 Draws a differential-abundance volcano embedded in a ring of enrichment
-terms. NES-coloured arcs sit around the volcano; tick lines drop from the
-arcs to each pathway's leading-edge genes inside the volcano.
+terms. Score-coloured arcs sit around the volcano; tick lines drop from the
+arcs to each term's leading-edge genes inside the volcano.
 }
-\details{
-Column-naming arguments default to limma + fgsea conventions. The tick
-column is auto-detected from \code{leading_edge} / \code{leadingEdge} /
-\code{core_enrichment} / \code{Genes} unless \code{genes_col} is supplied.
+\section{Which terms ring the volcano}{
+
+From the chosen contrast, terms in \code{databases} are kept, redundant ones are
+hidden when \code{collapse = TRUE} (see \code{\link[=dedup]{dedup()}}), and the \code{n_terms} smallest
+\code{padj} per direction below \code{term_threshold} are drawn. \code{terms} overrides
+all of this with a hand-picked set.
 }
+
 \examples{
 da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
   package = "enrichVolcano"
 ))
-en <- read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
+ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
   package = "enrichVolcano"
-))
+)))
 
 ctr <- "Training_Young"
 da1 <- da[da$contrast == ctr, ]
 names(da1)[names(da1) == "adj.P.Val"] <- "padj"
 
-# ring the volcano with this contrast's ten strongest GO-BP terms
-en1 <- en[en$contrast == ctr & en$database == "GO:BP", ]
-en1 <- en1[order(en1$padj), ]
-en1 <- head(en1[!duplicated(en1$pathway), ], 10)
-
-volcano_ring(da1, en1, title = ctr)
+volcano_ring(da1, ex, contrast = ctr, title = ctr)
 }

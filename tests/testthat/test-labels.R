@@ -140,7 +140,7 @@ test_that("ev_clean_label does not repeat a word the acronym already carries", {
 
 test_that("volcano_ring with label_mode = 'top_per_direction' runs", {
   p <- suppressMessages(volcano_ring(
-    make_toy_volc(), make_toy_enrich(),
+    make_toy_volc(), make_toy_ring_enrichment(),
     label_mode = "top_per_direction", label_n = 2
   ))
   expect_s3_class(p, "ggplot")
@@ -148,7 +148,7 @@ test_that("volcano_ring with label_mode = 'top_per_direction' runs", {
 
 test_that("volcano_ring with label_mode = 'by_significance' runs", {
   p <- suppressMessages(volcano_ring(
-    make_toy_volc(), make_toy_enrich(),
+    make_toy_volc(), make_toy_ring_enrichment(),
     label_mode = "by_significance", label_n = 3
   ))
   expect_s3_class(p, "ggplot")
@@ -156,7 +156,7 @@ test_that("volcano_ring with label_mode = 'by_significance' runs", {
 
 test_that("volcano_ring with label_mode = 'by_genes' runs", {
   p <- suppressMessages(volcano_ring(
-    make_toy_volc(), make_toy_enrich(),
+    make_toy_volc(), make_toy_ring_enrichment(),
     label_mode = "by_genes",
     label_genes = c("G1", "G15")
   ))

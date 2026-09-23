@@ -142,27 +142,31 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' Volcano-in-ring composite for one contrast
 #'
 #' Draws a differential-abundance volcano embedded in a ring of enrichment
-#' terms. NES-coloured arcs sit around the volcano; tick lines drop from the
-#' arcs to each pathway's leading-edge genes inside the volcano.
+#' terms. Score-coloured arcs sit around the volcano; tick lines drop from the
+#' arcs to each term's leading-edge genes inside the volcano.
 #'
-#' Column-naming arguments default to limma + fgsea conventions. The tick
-#' column is auto-detected from `leading_edge` / `leadingEdge` /
-#' `core_enrichment` / `Genes` unless `genes_col` is supplied.
+#' @section Which terms ring the volcano:
+#' From the chosen contrast, terms in `databases` are kept, redundant ones are
+#' hidden when `collapse = TRUE` (see [dedup()]), and the `n_terms` smallest
+#' `padj` per direction below `term_threshold` are drawn. `terms` overrides
+#' all of this with a hand-picked set.
 #'
-#' @param volc_df Tidy DA tibble for a single contrast.
-#' @param enrich_df Tidy enrichment tibble for the same contrast.
+#' @param volc_df Tidy DA table for the contrast being drawn.
+#' @param enrichment An [enrichment] object; see [as_enrichment()].
+#' @param contrast Which contrast of `enrichment` to draw. Needed only when it
+#'   holds more than one.
+#' @param databases Collections to draw from, matched against the `database`
+#'   column. `NULL` draws from all. Skipped, with a note, when the object has no
+#'   database labels.
+#' @param collapse Hide terms flagged `"redundant"` by [dedup()].
+#' @param term_threshold Terms need `padj` below this to be drawn.
+#' @param n_terms Most terms drawn per direction.
+#' @param terms Optional character vector of exact term names to draw instead.
 #' @param gene_col,logfc_col,pval_col,padj_col Column names in `volc_df`.
 #' @param volc_sig_col Optional column in `volc_df` used to call point
-#'   significance (e.g. a pi-value), decoupled from the enrichment `padj_col`.
-#'   `NULL` falls back to `padj_col` then `pval_col`. The y-axis stays
-#'   `-log10(pval_col)` regardless.
-#' @param term_col,nes_col,size_col Column names in `enrich_df`. `padj_col`
-#'   is reused for the enrichment-side adjusted-p column.
-#' @param genes_col Optional column name in `enrich_df` carrying leading-edge
-#'   genes. `NULL` triggers auto-detect (Q4).
-#' @param genes_sep Separator for the leading-edge string. `NULL` defers to
-#'   the auto-detected default.
-#' @param p_threshold Cutoff applied to `padj_col` in `volc_df`.
+#'   significance (e.g. a pi-value), decoupled from `padj_col`. `NULL` falls
+#'   back to `padj_col` then `pval_col`. The y-axis stays `-log10(pval_col)`.
+#' @param p_threshold Significance cutoff for volcano points.
 #' @param logfc_threshold Effect-size cutoff; a point is called up/down only
 #'   when `abs(logFC) >= logfc_threshold` as well as significant.
 #' @param title,subtitle,tag Plot text.
@@ -186,12 +190,15 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #'   square panel rather than clipping or spilling into a neighbour. Raise it
 #'   when wide label boxes are clipped; lower it to pack the ring tighter.
 #' @param disc_color Optional fill for a tinted central disc.
-#' @param nes_limits Length-2 numeric or `NULL`; defaults to `c(-3, 3)`.
-#' @param magnitude `"neg_log_padj"` (default) or `"size"`; controls arc
-#'   thickness encoding.
+#' @param nes_limits Length-2 numeric or `NULL`; limits of the arc fill scale.
+#'   `NULL` uses `c(-3, 3)` for NES, and otherwise spans the largest absolute
+#'   significant score in the whole object, so every contrast shares a scale.
+#' @param magnitude What arc height encodes: `"neg_log_padj"` or `"size"`.
+#'   `NULL` picks `"neg_log_padj"` for NES and `"size"` otherwise, so fill and
+#'   height never repeat the same number for fry or camera results.
 #' @param arc_order Angular order of arcs within each up/down half:
-#'   `"padj"` (default, lowest FDR first) or `"nes"` (strongest `abs(NES)`
-#'   first). The up/down split itself is always by NES sign.
+#'   `"padj"` (default, lowest FDR first) or `"nes"` (strongest absolute score
+#'   first). The up/down split itself is always by direction.
 #' @param arc_height_range Length-2 numeric `c(min, max)` for the shortest
 #'   and tallest arc; widen it to exaggerate the magnitude encoding.
 #' @param show_counts Draw the up/down significant-point count badges.
@@ -214,31 +221,27 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
 #'   package = "enrichVolcano"
 #' ))
-#' en <- read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
+#' ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
 #'   package = "enrichVolcano"
-#' ))
+#' )))
 #'
 #' ctr <- "Training_Young"
 #' da1 <- da[da$contrast == ctr, ]
 #' names(da1)[names(da1) == "adj.P.Val"] <- "padj"
 #'
-#' # ring the volcano with this contrast's ten strongest GO-BP terms
-#' en1 <- en[en$contrast == ctr & en$database == "GO:BP", ]
-#' en1 <- en1[order(en1$padj), ]
-#' en1 <- head(en1[!duplicated(en1$pathway), ], 10)
-#'
-#' volcano_ring(da1, en1, title = ctr)
-volcano_ring <- function(volc_df, enrich_df,
+#' volcano_ring(da1, ex, contrast = ctr, title = ctr)
+volcano_ring <- function(volc_df, enrichment,
+                         contrast = NULL,
+                         databases = c("Hallmark", "GO Slim"),
+                         collapse = TRUE,
+                         term_threshold = 0.05,
+                         n_terms = 8,
+                         terms = NULL,
                          gene_col = "gene",
                          logfc_col = "logFC",
                          pval_col = "P.Value",
                          padj_col = "padj",
                          volc_sig_col = NULL,
-                         term_col = "pathway",
-                         nes_col = "NES",
-                         size_col = "size",
-                         genes_col = NULL,
-                         genes_sep = NULL,
                          p_threshold = 0.05,
                          logfc_threshold = 0,
                          title = NULL,
@@ -253,7 +256,7 @@ volcano_ring <- function(volc_df, enrich_df,
                          label_headroom = 0.5,
                          disc_color = NULL,
                          nes_limits = NULL,
-                         magnitude = c("neg_log_padj", "size"),
+                         magnitude = NULL,
                          arc_order = c("padj", "nes"),
                          arc_height_range = c(0.4, 1.6),
                          show_counts = TRUE,
@@ -273,7 +276,6 @@ volcano_ring <- function(volc_df, enrich_df,
                          label_rank_by = c("significance", "logfc"),
                          label_genes = NULL,
                          theme = volcano_ring_theme()) {
-  magnitude <- match.arg(magnitude)
   arc_order <- match.arg(arc_order)
   label_mode <- match.arg(label_mode)
   label_rank_by <- match.arg(label_rank_by)
@@ -286,29 +288,26 @@ volcano_ring <- function(volc_df, enrich_df,
       class = "enrichVolcano_input_error"
     )
   }
-  if (!is.data.frame(enrich_df)) {
-    ev_abort(
-      "{.arg enrich_df} must be a data.frame, not {.cls {class(enrich_df)[1]}}.",
-      class = "enrichVolcano_input_error"
-    )
-  }
+  check_enrichment(enrichment)
 
   vcols <- resolve_volc_cols(volc_df, gene_col, logfc_col, pval_col, padj_col)
   if (!is.null(volc_sig_col) && !volc_sig_col %in% names(volc_df)) {
     ev_abort_missing_column(volc_df, volc_sig_col, "volc_sig_col", "volc_df")
   }
-  ecols <- resolve_enrich_cols(
-    enrich_df, term_col, nes_col, padj_col,
-    size_col, magnitude
-  )
   validate_volc_df(volc_df, vcols)
-  validate_enrich_df(enrich_df, ecols)
-  enrich_df <- dedup_by_term(enrich_df, ecols)
-  enrich_df <- enrich_df[!is.na(enrich_df[[ecols$term]]), , drop = FALSE]
+  score_type <- enrichment@metadata$score_type
+  magnitude <- default_magnitude(magnitude, score_type)
+  enrich_df <- contrast_rows(enrichment@results, contrast)
+  if (is.null(terms)) enrich_df <- filter_view(enrich_df, databases, collapse)
+  enrich_df <- ring_terms(enrich_df, term_threshold, n_terms, terms)
+  if (nrow(enrich_df) == 0) {
+    ev_inform("No terms pass the selection, so the ring is empty.", class = "enrichVolcano_empty_ring")
+  }
   has_padj <- vcols$has_padj
 
   pal <- theme$palette
-  nes_limits <- nes_limits %||% theme$nes_limits %||% c(-3, 3)
+  nes_limits <- nes_limits %||% theme$nes_limits %||%
+    default_score_limits(score_type, enrichment@results, term_threshold)
   vr <- volcano_radius * 0.92
   ring_r0 <- ring_radius
   ring_r1 <- ring_radius + ring_thickness
@@ -361,17 +360,13 @@ volcano_ring <- function(volc_df, enrich_df,
   )
 
   mag_vec <- switch(magnitude,
-    neg_log_padj = -log10(pmax(enrich_df[[ecols$padj]], .Machine$double.xmin)),
-    size         = as.numeric(enrich_df[[ecols$size]])
+    neg_log_padj = -log10(pmax(enrich_df$padj, .Machine$double.xmin)),
+    size         = enrich_df$size
   )
-  genes_list <- resolve_genes_col(enrich_df, genes_col, genes_sep)
-  if (is.null(genes_list)) {
-    genes_list <- replicate(nrow(enrich_df), character(0), simplify = FALSE)
-  }
   ring <- ev_ring_geometry(enrich_df,
-    term_col = term_col, padj_col = padj_col,
-    nes_col = nes_col, magnitude_col = mag_vec,
-    genes_list = genes_list, order_by = arc_order, arc_r0 = ring_r1,
+    term_col = "term", padj_col = "padj",
+    nes_col = "score", magnitude_col = mag_vec,
+    genes_list = enrich_df$leading_edge, order_by = arc_order, arc_r0 = ring_r1,
     min_height = arc_height_range[1], max_height = arc_height_range[2]
   )
   ticks <- ev_tick_data(ring, v,
@@ -492,14 +487,14 @@ volcano_ring <- function(volc_df, enrich_df,
         ggplot2::aes(
           x0 = 0, y0 = 0, r0 = ring_r1, r = .data$arc_r1_var,
           start = .data$.ev_start_rad, end = .data$.ev_end_rad,
-          fill = .data[[nes_col]]
+          fill = .data$score
         ),
         colour = "grey40", linewidth = 0.2, inherit.aes = FALSE
       ) +
       ggplot2::scale_fill_gradientn(
         colours = pal$nes_scale,
         values = scales::rescale(pal$nes_values),
-        limits = nes_limits, oob = scales::squish, name = "NES"
+        limits = nes_limits, oob = scales::squish, name = score_type
       )
 
     lbl <- ring
