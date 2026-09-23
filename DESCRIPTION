@@ -36,6 +36,7 @@ Suggests:
     data.table,
     fgsea,
     knitr,
+    limma,
     msigdbr,
     org.Hs.eg.db,
     org.Mm.eg.db,

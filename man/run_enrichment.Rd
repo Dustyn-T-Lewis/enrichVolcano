@@ -7,7 +7,9 @@
 run_enrichment(
   study,
   gene_sets,
-  tests = "fgsea",
+  tests = c("fgsea", "camera", "fry"),
+  subject_effect = c("block", "fixed"),
+  covariates = NULL,
   min_size = 15,
   max_size = 500
 )
@@ -18,7 +20,13 @@ run_enrichment(
 \item{gene_sets}{Output of \code{\link[=load_gene_sets]{load_gene_sets()}}, a named list of collections
 of gene-symbol vectors, or one named list of sets.}
 
-\item{tests}{\code{"fgsea"}.}
+\item{tests}{Any of \code{"fgsea"}, \code{"camera"}, \code{"fry"}. A study without a
+matrix runs fgsea only.}
+
+\item{subject_effect}{\code{"block"} or \code{"fixed"}: how a \code{subject} column enters
+the camera and fry model.}
+
+\item{covariates}{Sample columns added to the camera and fry design.}
 
 \item{min_size, max_size}{Sets need this many genes present in the data.}
 }
@@ -38,5 +46,20 @@ gene (the table's average abundance, else the matrix row mean); without any
 abundance, the first accession alphabetically. The choice never looks at
 the results. Each collection is tested and corrected separately. fgsea
 permutes, so call \code{\link[=set.seed]{set.seed()}} first for reproducible p-values.
+}
+
+\section{camera and fry}{
+
+Both refit limma on the study's matrix, which must have no missing values
+(use an imputed or limpa-quantified matrix), reduced to one protein per gene
+by the same rule. The design is \code{~ 0 + group}, plus any \code{covariates}, plus
+\code{subject} when \code{subject_effect = "fixed"}; contrasts come from the
+\code{contrasts} sheet. With \code{subject_effect = "block"} and a \code{subject} column,
+samples from one subject are treated as correlated
+(\code{limma::duplicateCorrelation()}). fry uses that blocking directly. camera
+cannot block, so for a blocked design the package runs
+\code{limma::cameraPR()} on the moderated t of the blocked fit instead, and the
+result records \code{cameraPR} as its test. Precision weights are used when the
+study has them.
 }
 

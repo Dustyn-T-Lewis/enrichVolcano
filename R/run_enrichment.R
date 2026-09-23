@@ -11,20 +11,56 @@
 #' the results. Each collection is tested and corrected separately. fgsea
 #' permutes, so call [set.seed()] first for reproducible p-values.
 #'
+#' @section camera and fry:
+#' Both refit limma on the study's matrix, which must have no missing values
+#' (use an imputed or limpa-quantified matrix), reduced to one protein per gene
+#' by the same rule. The design is `~ 0 + group`, plus any `covariates`, plus
+#' `subject` when `subject_effect = "fixed"`; contrasts come from the
+#' `contrasts` sheet. With `subject_effect = "block"` and a `subject` column,
+#' samples from one subject are treated as correlated
+#' (`limma::duplicateCorrelation()`). fry uses that blocking directly. camera
+#' cannot block, so for a blocked design the package runs
+#' `limma::cameraPR()` on the moderated t of the blocked fit instead, and the
+#' result records `cameraPR` as its test. Precision weights are used when the
+#' study has them.
+#'
 #' @param study Output of [read_study()], or of [as_da()] for fgsea alone.
 #' @param gene_sets Output of [load_gene_sets()], a named list of collections
 #'   of gene-symbol vectors, or one named list of sets.
-#' @param tests `"fgsea"`.
+#' @param tests Any of `"fgsea"`, `"camera"`, `"fry"`. A study without a
+#'   matrix runs fgsea only.
+#' @param subject_effect `"block"` or `"fixed"`: how a `subject` column enters
+#'   the camera and fry model.
+#' @param covariates Sample columns added to the camera and fry design.
 #' @param min_size,max_size Sets need this many genes present in the data.
 #' @return A named list with one [enrichment] object per test. Its metadata
 #'   records the ranking statistic and the gene-set versions.
 #' @export
-run_enrichment <- function(study, gene_sets, tests = "fgsea", min_size = 15, max_size = 500) {
+run_enrichment <- function(study, gene_sets, tests = c("fgsea", "camera", "fry"),
+                           subject_effect = c("block", "fixed"), covariates = NULL,
+                           min_size = 15, max_size = 500) {
   study <- as_study(study)
-  tests <- rlang::arg_match(tests, "fgsea", multiple = TRUE)
+  tests_given <- !missing(tests)
+  tests <- rlang::arg_match(tests, c("fgsea", "camera", "fry"), multiple = TRUE)
+  subject_effect <- rlang::arg_match(subject_effect)
   collections <- as_collections(gene_sets)
+  limma_tests <- intersect(c("camera", "fry"), tests)
+  if (is.null(study$matrix) && length(limma_tests) > 0) {
+    if (tests_given) {
+      ev_abort(
+        "camera and fry need a matrix, samples and contrasts; see {.fn read_study}.",
+        class = "enrichVolcano_input_error"
+      )
+    }
+    ev_inform("This study has no matrix, so only fgsea runs.", class = "enrichVolcano_fgsea_only")
+    limma_tests <- character(0)
+  }
   out <- list()
   if ("fgsea" %in% tests) out$fgsea <- run_fgsea(study, collections, min_size, max_size)
+  if (length(limma_tests) > 0) {
+    model <- limma_model(study, subject_effect, covariates)
+    for (test in limma_tests) out[[test]] <- run_limma_test(test, model, collections, min_size, max_size)
+  }
   out
 }
 
@@ -95,4 +131,104 @@ fill_abundance <- function(da, matrix) {
   missing <- is.na(da$abundance) & da$protein %in% names(means)
   da$abundance[missing] <- means[da$protein[missing]]
   da
+}
+
+limma_model <- function(study, subject_effect, covariates) {
+  rlang::check_installed("limma", reason = "to run camera and fry.")
+  n_missing <- sum(is.na(study$matrix))
+  if (n_missing > 0) {
+    ev_abort(
+      c(
+        "The matrix has {n_missing} missing value{?s}.",
+        i = "camera and fry need a complete matrix: use an imputed or limpa-quantified one."
+      ),
+      class = "enrichVolcano_data_error"
+    )
+  }
+  genes <- fill_abundance(study$da, study$matrix)
+  genes <- genes[!duplicated(genes$protein) & !is.na(genes$gene) & genes$protein %in% rownames(study$matrix), ]
+  genes <- one_per_gene(genes)
+  m <- study$matrix[genes$protein, , drop = FALSE]
+  rownames(m) <- genes$gene
+  w <- study$weights
+  if (!is.null(w)) {
+    w <- w[genes$protein, , drop = FALSE]
+    rownames(w) <- genes$gene
+  }
+  samples <- study$samples
+  design <- design_matrix(samples, subject_effect, covariates)
+  cm <- limma::makeContrasts(contrasts = study$contrasts$expression, levels = design)
+  colnames(cm) <- study$contrasts$name
+
+  model <- list(m = m, w = w, design = design, cm = cm, block = NULL, correlation = NULL)
+  if (subject_effect == "block") {
+    if (is.null(samples$subject)) {
+      ev_inform("No {.field subject} column, so samples are treated as independent.",
+        class = "enrichVolcano_no_blocking"
+      )
+    } else {
+      model$block <- samples$subject
+      dupcor <- limma::duplicateCorrelation(m, design, block = model$block, weights = w)
+      model$correlation <- dupcor$consensus.correlation
+      fit <- limma::lmFit(m, design, block = model$block, correlation = model$correlation, weights = w)
+      model$t <- limma::eBayes(limma::contrasts.fit(fit, cm))$t
+    }
+  }
+  model
+}
+
+design_matrix <- function(samples, subject_effect, covariates) {
+  require_columns(samples, covariates)
+  if (subject_effect == "fixed") require_columns(samples, "subject")
+  group <- factor(samples$group)
+  data <- data.frame(group = group, samples[covariates], check.names = FALSE)
+  terms <- c("0", "group", covariates)
+  if (subject_effect == "fixed") {
+    data$subject <- factor(samples$subject)
+    terms <- c(terms, "subject")
+  }
+  design <- stats::model.matrix(stats::reformulate(terms), data)
+  colnames(design)[seq_len(nlevels(group))] <- levels(group)
+  design
+}
+
+run_limma_test <- function(test, model, collections, min_size, max_size) {
+  blocked_camera <- test == "camera" && !is.null(model$block)
+  per_contrast <- lapply(colnames(model$cm), function(contrast) {
+    do.call(rbind, lapply(names(collections), function(db) {
+      index <- limma::ids2indices(collections[[db]], rownames(model$m))
+      index <- index[lengths(index) >= min_size & lengths(index) <= max_size]
+      if (length(index) == 0) {
+        return(NULL)
+      }
+      res <- if (test == "fry") {
+        limma::fry(model$m, index, model$design, model$cm[, contrast],
+          block = model$block, correlation = model$correlation, weights = model$w, sort = "none"
+        )
+      } else if (blocked_camera) {
+        limma::cameraPR(model$t[, contrast], index, sort = FALSE)
+      } else {
+        limma::camera(model$m, index, model$design, model$cm[, contrast], weights = model$w, sort = FALSE)
+      }
+      res$term <- rownames(res)
+      res$database <- db
+      rownames(res) <- NULL
+      res
+    }))
+  })
+  names(per_contrast) <- colnames(model$cm)
+  if (all(vapply(per_contrast, is.null, logical(1)))) {
+    ev_abort(
+      "There is no gene set with {min_size} to {max_size} genes present in the data.",
+      class = "enrichVolcano_input_error"
+    )
+  }
+  name <- if (blocked_camera) "cameraPR" else test
+  x <- as_enrichment(per_contrast, enrichment_test = name)
+  x@metadata$gene_sets <- attr(collections, "versions")
+  x@metadata$design <- list(
+    columns = colnames(model$design), blocked = !is.null(model$block),
+    correlation = model$correlation, weighted = !is.null(model$w)
+  )
+  x
 }

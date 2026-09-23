@@ -95,3 +95,115 @@ test_that("bad inputs are refused", {
     class = "enrichVolcano_input_error"
   )
 })
+
+# The gene-level matrix and design the package should build for the toy study.
+toy_expected <- function(fixed = FALSE) {
+  s <- toy_study()
+  m <- s$matrix
+  rownames(m) <- s$da$gene[match(rownames(m), s$da$protein)]
+  w <- s$weights
+  rownames(w) <- rownames(m)
+  f <- if (fixed) ~ 0 + group + subject else ~ 0 + group
+  design <- model.matrix(f, data.frame(group = factor(s$samples$group), subject = factor(s$samples$subject)))
+  colnames(design)[1:2] <- levels(factor(s$samples$group))
+  cm <- limma::makeContrasts(contrasts = "Post - Pre", levels = design)
+  index <- limma::ids2indices(toy_sets()$Hallmark, rownames(m))
+  list(m = m, w = w, design = design, contrast = cm[, 1], index = index, subject = s$samples$subject)
+}
+
+run_limma <- function(tests, ...) {
+  skip_if_not_installed("limma")
+  skip_if_not_installed("org.Hs.eg.db")
+  suppressMessages(run_enrichment(toy_study(), toy_sets(), tests = tests, min_size = 5, ...))
+}
+
+test_that("blocked fry equals a direct limma::fry call", {
+  e <- toy_expected()
+  corr <- limma::duplicateCorrelation(e$m, e$design, block = e$subject, weights = e$w)$consensus.correlation
+  expected <- limma::fry(e$m, e$index, e$design, e$contrast,
+    block = e$subject, correlation = corr, weights = e$w, sort = "none"
+  )
+  x <- run_limma("fry")$fry
+  r <- x@results[x@results$database == "Hallmark", ]
+  expect_equal(r$p[match(rownames(expected), r$term)], expected$PValue)
+  expect_identical(x@metadata$enrichment_test, "fry")
+})
+
+test_that("blocked camera runs cameraPR on the blocked fit's t", {
+  e <- toy_expected()
+  corr <- limma::duplicateCorrelation(e$m, e$design, block = e$subject, weights = e$w)$consensus.correlation
+  fit <- limma::lmFit(e$m, e$design, block = e$subject, correlation = corr, weights = e$w)
+  fit <- limma::eBayes(limma::contrasts.fit(fit, e$contrast))
+  expected <- limma::cameraPR(fit$t[, 1], e$index, sort = FALSE)
+  x <- run_limma("camera")$camera
+  r <- x@results[x@results$database == "Hallmark", ]
+  expect_equal(r$p[match(rownames(expected), r$term)], expected$PValue)
+  expect_identical(x@metadata$enrichment_test, "cameraPR")
+})
+
+test_that("with a fixed subject effect, camera runs on the full design", {
+  e <- toy_expected(fixed = TRUE)
+  expected <- limma::camera(e$m, e$index, e$design, e$contrast, weights = e$w, sort = FALSE)
+  x <- run_limma("camera", subject_effect = "fixed")$camera
+  r <- x@results[x@results$database == "Hallmark", ]
+  expect_equal(r$p[match(rownames(expected), r$term)], expected$PValue)
+  expect_identical(x@metadata$enrichment_test, "camera")
+})
+
+test_that("the default runs all three tests when the study has a matrix", {
+  skip_if_not_installed("fgsea")
+  x <- run_limma(c("fgsea", "camera", "fry"))
+  expect_named(x, c("fgsea", "camera", "fry"))
+})
+
+test_that("a DA-only study falls back to fgsea unless camera or fry is asked for", {
+  skip_if_not_installed("fgsea")
+  skip_if_not_installed("org.Hs.eg.db")
+  da <- toy_study()$da
+  expect_message(x <- run_enrichment(da, toy_sets(), min_size = 5), class = "enrichVolcano_fgsea_only")
+  expect_named(x, "fgsea")
+  expect_error(run_enrichment(da, toy_sets(), tests = "fry"), "matrix", class = "enrichVolcano_input_error")
+})
+
+test_that("design_matrix builds groups, covariates and fixed subjects", {
+  samples <- data.frame(
+    sample = paste0("S", 1:6), group = rep(c("A", "B"), 3), subject = rep(c("P1", "P2", "P3"), each = 2),
+    sex = rep(c("F", "M", "F"), each = 2)
+  )
+  d <- design_matrix(samples, "block", covariates = "sex")
+  expect_identical(colnames(d), c("A", "B", "sexM"))
+  d <- design_matrix(samples, "fixed", covariates = NULL)
+  expect_identical(colnames(d), c("A", "B", "subjectP2", "subjectP3"))
+  expect_error(design_matrix(samples, "block", covariates = "age"), "age", class = "enrichVolcano_column_error")
+  samples$subject <- NULL
+  expect_error(design_matrix(samples, "fixed", NULL), "subject", class = "enrichVolcano_column_error")
+})
+
+test_that("blocking without a subject column says the samples are independent", {
+  skip_if_not_installed("limma")
+  skip_if_not_installed("org.Hs.eg.db")
+  s <- toy_study()
+  s$samples$subject <- NULL
+  expect_message(
+    run_enrichment(s, toy_sets(), tests = "fry", min_size = 5),
+    class = "enrichVolcano_no_blocking"
+  )
+})
+
+test_that("a matrix with missing values is refused for fry and camera", {
+  skip_if_not_installed("limma")
+  skip_if_not_installed("org.Hs.eg.db")
+  s <- toy_study()
+  s$matrix[1, 1] <- NA
+  expect_error(run_enrichment(s, toy_sets(), tests = "fry"), "1 missing", class = "enrichVolcano_data_error")
+})
+
+test_that("camera and fry say so when no set fits the size window", {
+  skip_if_not_installed("limma")
+  skip_if_not_installed("org.Hs.eg.db")
+  expect_error(
+    suppressMessages(run_enrichment(toy_study(), toy_sets(), tests = "fry", min_size = 50)),
+    "no gene set",
+    class = "enrichVolcano_input_error"
+  )
+})
