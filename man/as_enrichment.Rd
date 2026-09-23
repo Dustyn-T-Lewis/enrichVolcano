@@ -56,6 +56,12 @@ leading edges are empty.
 \item \strong{camera} with its default fixed correlation and \strong{cameraPR} return
 identical columns. Say which with \code{enrichment_test = "camera"} or
 \code{"cameraPR"}.
+\item \strong{gseaResult} (clusterProfiler \code{GSEA()}, \code{gseGO()}, ...): read from its
+\code{result} table. Score is NES; leading edges come from \code{core_enrichment}.
+\item \strong{ora} (enrichR, \code{enrichGO()}, g:Profiler, ...): over-representation has
+no direction of its own, so supply a \code{direction} column (run up- and
+down-regulated genes separately and stack them). Score is signed
+\eqn{-\log_{10}}(padj).
 \item \strong{custom}: any table, mapped with the column arguments. Direction comes
 from the \code{direction} column when present, otherwise from the score sign.
 }

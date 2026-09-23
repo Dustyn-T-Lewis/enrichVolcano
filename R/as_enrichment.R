@@ -15,6 +15,12 @@
 #' * **camera** with its default fixed correlation and **cameraPR** return
 #'   identical columns. Say which with `enrichment_test = "camera"` or
 #'   `"cameraPR"`.
+#' * **gseaResult** (clusterProfiler `GSEA()`, `gseGO()`, ...): read from its
+#'   `result` table. Score is NES; leading edges come from `core_enrichment`.
+#' * **ora** (enrichR, `enrichGO()`, g:Profiler, ...): over-representation has
+#'   no direction of its own, so supply a `direction` column (run up- and
+#'   down-regulated genes separately and stack them). Score is signed
+#'   \eqn{-\log_{10}}(padj).
 #' * **custom**: any table, mapped with the column arguments. Direction comes
 #'   from the `direction` column when present, otherwise from the score sign.
 #'
@@ -101,17 +107,18 @@ default_score_type <- list(
 )
 
 split_contrasts <- function(x) {
+  unnamed <- inherits(x, "gseaResult") || (is.data.frame(x) && !"contrast" %in% names(x))
+  if (unnamed) {
+    ev_abort(
+      c(
+        "Name the contrast these results belong to.",
+        i = "Pass a named list, e.g. {.code as_enrichment(list(Aging = res))},
+             or a table with a {.field contrast} column."
+      ),
+      class = "enrichVolcano_input_error"
+    )
+  }
   if (is.data.frame(x)) {
-    if (!"contrast" %in% names(x)) {
-      ev_abort(
-        c(
-          "Name the contrast these results belong to.",
-          i = "Pass a named list, e.g. {.code as_enrichment(list(Aging = res))},
-               or a table with a {.field contrast} column."
-        ),
-        class = "enrichVolcano_input_error"
-      )
-    }
     x <- as.data.frame(x)
     return(split(x, factor(x$contrast, levels = unique(x$contrast))))
   }
@@ -128,6 +135,9 @@ split_contrasts <- function(x) {
     )
   }
   lapply(x, function(tbl) {
+    if (inherits(tbl, "gseaResult")) {
+      return(tbl)
+    }
     if (!is.data.frame(tbl)) {
       ev_abort(
         "Each element of {.arg x} must be a results table, not {.cls {class(tbl)[1]}}.",
@@ -141,6 +151,9 @@ split_contrasts <- function(x) {
 detect_test <- function(tbl, enrichment_test = NULL) {
   if (!is.null(enrichment_test)) {
     return(enrichment_test)
+  }
+  if (inherits(tbl, "gseaResult")) {
+    return("gseaResult")
   }
   cols <- names(tbl)
   if (all(c("NES", "leadingEdge", "pval") %in% cols)) {
@@ -177,6 +190,7 @@ detect_test <- function(tbl, enrichment_test = NULL) {
 convert_table <- function(tbl, test, cols) {
   switch(test,
     fgsea = from_fgsea(tbl),
+    gseaResult = from_gsea_result(tbl),
     fry = ,
     mroast = ,
     camera = ,
@@ -191,6 +205,17 @@ from_fgsea <- function(tbl) {
     term = tbl$pathway, score = tbl$NES, p = tbl$pval, padj = tbl$padj,
     size = tbl$size, leading_edge = split_genes(tbl$leadingEdge),
     used = c("pathway", "pval", "padj", "NES", "size", "leadingEdge")
+  )
+}
+
+from_gsea_result <- function(obj) {
+  tbl <- obj@result
+  used <- c("Description", "NES", "pvalue", "p.adjust", "setSize", "core_enrichment")
+  require_columns(tbl, used)
+  names(tbl)[names(tbl) == "leading_edge"] <- "leading_edge_stats"
+  new_results(tbl,
+    term = tbl$Description, score = tbl$NES, p = tbl$pvalue, padj = tbl$p.adjust,
+    size = tbl$setSize, leading_edge = split_genes(tbl$core_enrichment), used = used
   )
 }
 

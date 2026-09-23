@@ -204,3 +204,61 @@ test_that("score_type cannot relabel a known test's score", {
     class = "enrichVolcano_param_error"
   )
 })
+
+local_gsea_result <- function(env = parent.frame()) {
+  where <- new.env()
+  methods::setClass("gseaResult", representation(result = "data.frame"), where = where)
+  withr::defer(methods::removeClass("gseaResult", where = where), envir = env)
+  methods::new("gseaResult", result = read_fixture("gsea_result_small.csv"))
+}
+
+test_that("a clusterProfiler gseaResult is read from its result table", {
+  g <- local_gsea_result()
+  res <- g@result
+  x <- quietly(as_enrichment(list(A = g)))
+  r <- x@results
+  expect_identical(x@metadata$enrichment_test, "gseaResult")
+  expect_identical(x@metadata$score_type, "NES")
+  expect_identical(r$term, res$Description)
+  expect_equal(r$score, res$NES)
+  expect_equal(r$padj, res$p.adjust)
+  expect_equal(r$size, res$setSize)
+  expect_identical(r$leading_edge[[1]], strsplit(res$core_enrichment[1], "/")[[1]])
+  expect_identical(r$leading_edge_stats, res$leading_edge)
+  expect_identical(r$ID, res$ID)
+})
+
+test_that("a bare gseaResult still needs a contrast name", {
+  g <- local_gsea_result()
+  expect_error(as_enrichment(g), class = "enrichVolcano_input_error")
+})
+
+test_that("ORA tables take their score from padj and the supplied direction", {
+  ora <- data.frame(
+    Term = c("SET_A", "SET_B"),
+    Adjusted.P.value = c(0.001, 0.02),
+    P.value = c(0.0001, 0.004),
+    Genes = c("G1;G2", "G3"),
+    direction = c("Up", "DOWN")
+  )
+  x <- as_enrichment(
+    list(A = ora),
+    enrichment_test = "ora",
+    term = "Term", padj = "Adjusted.P.value", p = "P.value", leading_edge = "Genes"
+  )
+  r <- x@results
+  expect_identical(x@metadata$score_type, "signed -log10(FDR)")
+  expect_identical(r$direction, c("up", "down"))
+  expect_equal(r$score, c(-log10(0.001), log10(0.02)))
+  expect_equal(r$p, ora$P.value)
+  expect_true(all(is.na(r$size)))
+})
+
+test_that("ORA without a direction column is refused", {
+  ora <- data.frame(term = "SET_A", padj = 0.01)
+  expect_error(
+    as_enrichment(list(A = ora), enrichment_test = "ora"),
+    "direction",
+    class = "enrichVolcano_column_error"
+  )
+})

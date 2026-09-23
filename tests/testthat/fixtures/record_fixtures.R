@@ -27,3 +27,11 @@ write.csv(mroast(y, idx, design, nrot = 999), fixture("limma_mroast.csv"))
 write.csv(camera(y, idx, design), fixture("limma_camera.csv"))
 write.csv(camera(y, idx, design, inter.gene.cor = NA), fixture("limma_camera_cor.csv"))
 write.csv(cameraPR(t_stat, idx), fixture("limma_camerapr.csv"))
+
+t2g <- utils::stack(examplePathways[1:30])[, c("ind", "values")]
+gsea <- clusterProfiler::GSEA(
+  sort(exampleRanks, decreasing = TRUE),
+  TERM2GENE = t2g, pvalueCutoff = 1, minGSSize = 15, maxGSSize = 500,
+  seed = TRUE, verbose = FALSE, eps = 0
+)
+write.csv(head(gsea@result, 6), fixture("gsea_result_small.csv"), row.names = FALSE)
