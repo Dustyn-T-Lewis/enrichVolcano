@@ -262,3 +262,54 @@ test_that("ORA without a direction column is refused", {
     class = "enrichVolcano_column_error"
   )
 })
+
+test_that("a long limma table reads set names from a term column", {
+  fry <- read_fixture("limma_fry.csv", row.names = 1)
+  fry$term <- rownames(fry)
+  long <- rbind(transform(fry, contrast = "A"), transform(fry, contrast = "B"))
+  x <- quietly(as_enrichment(long))
+  r <- x@results
+  expect_identical(r$term[r$contrast == "B"], rownames(fry))
+})
+
+test_that("a long limma table without a term column is refused", {
+  fry <- read_fixture("limma_fry.csv", row.names = 1)
+  long <- rbind(transform(fry, contrast = "A"), transform(fry, contrast = "B"))
+  expect_error(as_enrichment(long), "term", class = "enrichVolcano_input_error")
+})
+
+test_that("clusterProfiler results exported as a data frame are recognised", {
+  res <- read_fixture("gsea_result_small.csv")
+  x <- quietly(as_enrichment(list(A = res)))
+  expect_identical(x@metadata$enrichment_test, "gseaResult")
+  expect_identical(x@results$term, res$Description)
+  y <- as_enrichment(list(A = res), enrichment_test = "gseaResult")
+  expect_identical(y@results$term, res$Description)
+})
+
+test_that("dedup flags that arrive with the data are recorded as precomputed", {
+  fg <- read_fixture("fgsea_small.csv")
+  fg$dedup_status <- "kept"
+  x <- quietly(as_enrichment(list(A = fg)))
+  expect_identical(x@metadata$dedup$method, "precomputed")
+  expect_match(cli::cli_fmt(print(x)), "precomputed", all = FALSE)
+})
+
+test_that("direction = NULL takes direction from the score sign", {
+  tbl <- data.frame(term = c("S1", "S2"), score = c(1.2, -0.8), padj = c(0.01, 0.02))
+  x <- as_enrichment(list(A = tbl), enrichment_test = "custom", direction = NULL)
+  expect_identical(x@results$direction, c("up", "down"))
+})
+
+test_that("leading edges written by data.table::fwrite split on |", {
+  expect_identical(split_genes("G1|G2|G3"), list(c("G1", "G2", "G3")))
+})
+
+test_that("ORA with direction = NULL is refused", {
+  ora <- data.frame(term = "S1", padj = 0.01)
+  expect_error(
+    as_enrichment(list(A = ora), enrichment_test = "ora", direction = NULL),
+    "direction",
+    class = "enrichVolcano_column_error"
+  )
+})

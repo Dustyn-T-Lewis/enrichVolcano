@@ -34,8 +34,9 @@
 #' @param enrichment An [enrichment] object holding both contrasts.
 #' @param x,y Contrast names for the horizontal and vertical axes.
 #' @param comparison `"concordance"` or `"reversal"`; see Description.
-#' @param databases Collections to draw from; `NULL` draws from all. Skipped,
-#'   with a note, when the object has no database labels.
+#' @param databases Collections to draw from, e.g. `c("Hallmark", "GO Slim")`;
+#'   `NULL` (default) draws from all. Skipped, with a note, when the object has
+#'   no database labels.
 #' @param collapse Hide terms that [dedup()] flagged redundant in one contrast
 #'   and kept as a representative in neither.
 #' @param p_threshold Significance cutoff on `padj`.
@@ -58,7 +59,7 @@
 #' nes_scatter(ex, "Aging", "Training_Old", comparison = "reversal")
 nes_scatter <- function(enrichment, x, y,
                         comparison = c("concordance", "reversal"),
-                        databases = c("Hallmark", "GO Slim"),
+                        databases = NULL,
                         collapse = TRUE,
                         p_threshold = 0.05,
                         color_by = "significance",
@@ -126,6 +127,11 @@ pair_contrasts <- function(res, x, y) {
   b <- res[res$contrast == y, , drop = FALSE]
   key <- function(d) paste(d$database, d$term, sep = "\r")
   shared <- intersect(key(a), key(b))
+  if (length(shared) == 0) {
+    ev_abort("Contrasts {.val {x}} and {.val {y}} share no terms to compare.",
+      class = "enrichVolcano_input_error"
+    )
+  }
   n_single <- length(union(key(a), key(b))) - length(shared)
   if (n_single > 0) {
     ev_inform("{n_single} term{?s} appear{?s/} in only one contrast and {?is/are} left out.",
@@ -176,7 +182,7 @@ concordance_fraction <- function(counts) {
 }
 
 score_correlation <- function(x, y, with_ci = requireNamespace("correlation", quietly = TRUE)) {
-  if (length(x) < 3) {
+  if (length(x) < 3 || stats::sd(x) == 0 || stats::sd(y) == 0) {
     return(NULL)
   }
   if (with_ci) {

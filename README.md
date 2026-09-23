@@ -57,9 +57,11 @@ score is the signed −log10(FDR) and the legend says so.
   volcano.
 
 By default the ring draws the twelve most significant terms, in either
-direction, from Hallmark and GO slim; `databases`, `n_terms`,
-`term_threshold` and `terms` change that. `vignette("enrichVolcano")`
-walks every step on the bundled example.
+direction, from every collection in the object. For figures,
+`databases = c("Hallmark", "GO Slim")` is the recommended view;
+`n_terms`, `term_threshold` and `terms` change the selection further.
+`vignette("enrichVolcano")` walks every step on the bundled example,
+including how to get each gene-set collection.
 
 ## Cite the methods you used
 

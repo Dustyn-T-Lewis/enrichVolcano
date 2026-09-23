@@ -7,7 +7,7 @@
   `term_col`, `nes_col`, `size_col`, `genes_col` and `genes_sep`, and gains
   `contrast`; `volcano_ring_grid()` takes one `enrichment` for all contrasts.
 * `volcano_ring()` now chooses its terms: the `n_terms` (12) most significant
-  below `term_threshold`, in either direction, from `databases` (Hallmark and GO slim by
+  below `term_threshold`, in either direction, from `databases` (all by
   default), with redundant terms hidden (`collapse`). `terms` hand-picks
   instead.
 * `magnitude` defaults to `"neg_log_padj"` for NES and `"size"` for other
@@ -27,7 +27,10 @@
   class). The producing test is recognised from the columns and recorded;
   camera and cameraPR, whose columns are identical, must be named with
   `enrichment_test`. Tests without an effect size are scored as signed
-  -log10(FDR).
+  -log10(FDR). clusterProfiler results are also read when exported as a data
+  frame; a long table of limma results needs a `term` column, because row
+  names do not survive stacking; `dedup_status` flags carried in the input
+  are kept and recorded as `precomputed`.
 * `dedup()` flags redundant terms for display without dropping rows or
   changing p-values: `method = "enrichmentmap"` (EnrichmentMap combined
   coefficient at 0.375 by default, or Jaccard at 0.5) or

@@ -32,7 +32,8 @@ has no \code{database} column.}
 \item{term, score, padj, p, size, direction, leading_edge}{Column names, used only
 when \code{enrichment_test} is \code{"custom"} or \code{"ora"}. \code{p}, \code{size} and
 \code{leading_edge} are optional; a leading-edge column may be a list or a
-\verb{;}- or \code{/}-separated string.}
+string separated by \verb{;}, \code{/} or \code{|}. Pass \code{direction = NULL} to take
+direction from the score sign.}
 
 \item{score_type}{Axis and legend label for a custom score, e.g. \code{"NES"}.}
 }
@@ -50,14 +51,16 @@ The test is recognised from the columns it returns:
 \itemize{
 \item \strong{fgsea}: \verb{pathway, pval, padj, NES, size, leadingEdge}. Score is NES.
 \item \strong{fry} (\code{PValue.Mixed}), \strong{mroast} (\code{PropUp}), \strong{camera} estimating
-its own inter-gene correlation (\code{Correlation}): \verb{NGenes, Direction, PValue, FDR}, set names in the row names. None of these report an effect
+its own inter-gene correlation (\code{Correlation}): \verb{NGenes, Direction, PValue, FDR}, set names in the row names (or a \code{term} column, which a
+long table with a \code{contrast} column must have). None of these report an effect
 size or a leading edge, so the score is signed \eqn{-\log_{10}}(FDR) and
 leading edges are empty.
 \item \strong{camera} with its default fixed correlation and \strong{cameraPR} return
 identical columns. Say which with \code{enrichment_test = "camera"} or
 \code{"cameraPR"}.
-\item \strong{gseaResult} (clusterProfiler \code{GSEA()}, \code{gseGO()}, ...): read from its
-\code{result} table. Score is NES; leading edges come from \code{core_enrichment}.
+\item \strong{gseaResult} (clusterProfiler \code{GSEA()}, \code{gseGO()}, ...): read from the
+object's \code{result} table, or from that table exported as a data frame.
+Score is NES; leading edges come from \code{core_enrichment}.
 \item \strong{ora} (enrichR, \code{enrichGO()}, g:Profiler, ...): over-representation has
 no direction of its own, so supply a \code{direction} column (run up- and
 down-regulated genes separately and stack them). Score is signed

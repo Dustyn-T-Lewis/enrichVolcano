@@ -8,7 +8,7 @@ volcano_ring(
   volc_df,
   enrichment,
   contrast = NULL,
-  databases = c("Hallmark", "GO Slim"),
+  databases = NULL,
   collapse = TRUE,
   term_threshold = 0.05,
   n_terms = 12,
@@ -60,8 +60,8 @@ volcano_ring(
 holds more than one.}
 
 \item{databases}{Collections to draw from, matched against the \code{database}
-column. \code{NULL} draws from all. Skipped, with a note, when the object has no
-database labels.}
+column, e.g. \code{c("Hallmark", "GO Slim")}. \code{NULL} (default) draws from all.
+Skipped, with a note, when the object has no database labels.}
 
 \item{collapse}{Hide terms flagged \code{"redundant"} by \code{\link[=dedup]{dedup()}}.}
 
@@ -118,7 +118,8 @@ significant score in the whole object, so every contrast shares a scale.}
 
 \item{magnitude}{What arc height encodes: \code{"neg_log_padj"} or \code{"size"}.
 \code{NULL} picks \code{"neg_log_padj"} for NES and \code{"size"} otherwise, so fill and
-height never repeat the same number for fry or camera results.}
+height never repeat the same number for fry or camera results; without
+set sizes it falls back to \code{"neg_log_padj"}.}
 
 \item{arc_order}{Angular order of arcs within each up/down half:
 \code{"padj"} (default, lowest FDR first) or \code{"nes"} (strongest absolute score

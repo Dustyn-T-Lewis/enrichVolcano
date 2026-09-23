@@ -9,7 +9,7 @@ nes_scatter(
   x,
   y,
   comparison = c("concordance", "reversal"),
-  databases = c("Hallmark", "GO Slim"),
+  databases = NULL,
   collapse = TRUE,
   p_threshold = 0.05,
   color_by = "significance",
@@ -26,8 +26,9 @@ nes_scatter(
 
 \item{comparison}{\code{"concordance"} or \code{"reversal"}; see Description.}
 
-\item{databases}{Collections to draw from; \code{NULL} draws from all. Skipped,
-with a note, when the object has no database labels.}
+\item{databases}{Collections to draw from, e.g. \code{c("Hallmark", "GO Slim")};
+\code{NULL} (default) draws from all. Skipped, with a note, when the object has
+no database labels.}
 
 \item{collapse}{Hide terms that \code{\link[=dedup]{dedup()}} flagged redundant in one contrast
 and kept as a representative in neither.}

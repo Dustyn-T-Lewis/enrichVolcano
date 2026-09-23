@@ -204,3 +204,25 @@ test_that("an unlabelled database column draws one shape and no shape legend", {
   x@results <- r
   expect_null(scatter(x)$scales$get_scales("shape"))
 })
+
+test_that("tied scores on one axis draw without rho instead of failing", {
+  x <- make_toy_scatter_enrichment()
+  r <- x@results
+  r$score[r$contrast == "A"] <- 1.5
+  r$direction[r$contrast == "A"] <- "up"
+  x@results <- r
+  p <- suppressWarnings(scatter(x))
+  expect_false(grepl("rho", paste(deparse(p$labels$subtitle), collapse = "")))
+})
+
+test_that("contrasts with no shared terms give a clear error", {
+  x <- make_toy_scatter_enrichment()
+  r <- x@results
+  r$term[r$contrast == "B"] <- paste0(r$term[r$contrast == "B"], "_b")
+  x@results <- r
+  expect_error(suppressMessages(nes_scatter(x, "A", "B")), "no terms", class = "enrichVolcano_input_error")
+})
+
+test_that("the scatter defaults to every database", {
+  expect_null(formals(nes_scatter)$databases)
+})

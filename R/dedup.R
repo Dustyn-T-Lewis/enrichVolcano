@@ -58,11 +58,7 @@
 dedup <- function(x, gene_sets, method = c("enrichmentmap", "collapse_pathways"),
                   similarity = c("combined", "jaccard"), cutoff = NULL,
                   p_threshold = 0.05, stats = NULL) {
-  if (!S7::S7_inherits(x, enrichment)) {
-    ev_abort("{.arg x} must be an {.cls enrichment}; build one with {.fn as_enrichment}.",
-      class = "enrichVolcano_input_error"
-    )
-  }
+  check_enrichment(x, "x")
   if (!is.list(gene_sets) || is.null(names(gene_sets)) || any(!nzchar(names(gene_sets)))) {
     ev_abort("{.arg gene_sets} must be a named list of gene vectors, one per term.",
       class = "enrichVolcano_input_error"

@@ -27,7 +27,8 @@ results_columns <- c(
 #'   and can be mapped by the plots.
 #' @param metadata A list with `enrichment_test` (the method that produced the
 #'   results), `score_type` (the axis and legend label for `score`), and
-#'   `dedup` (`NULL`, or the settings `dedup()` used).
+#'   `dedup` (`NULL`; the settings [dedup()] used; or `list(method =
+#'   "precomputed")` when the input already carried `dedup_status`).
 #'
 #' @return An S7 object with properties `results` and `metadata`. Every
 #'   construction and every edit is validated.

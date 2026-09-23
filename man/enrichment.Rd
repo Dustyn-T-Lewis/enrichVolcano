@@ -23,7 +23,7 @@ and can be mapped by the plots.}
 
 \item{metadata}{A list with \code{enrichment_test} (the method that produced the
 results), \code{score_type} (the axis and legend label for \code{score}), and
-\code{dedup} (\code{NULL}, or the settings \code{dedup()} used).}
+\code{dedup} (\code{NULL}; the settings \code{\link[=dedup]{dedup()}} used; or \code{list(method = "precomputed")} when the input already carried \code{dedup_status}).}
 }
 \value{
 An S7 object with properties \code{results} and \code{metadata}. Every

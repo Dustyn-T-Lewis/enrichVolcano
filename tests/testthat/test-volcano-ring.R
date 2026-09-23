@@ -224,3 +224,41 @@ test_that("the ring holds at most n_terms terms in total", {
   expect_identical(arcs(suppressMessages(volcano_ring(make_toy_volc(), x, databases = NULL, n_terms = 3))), 3L)
   expect_identical(formals(volcano_ring)$n_terms, 12)
 })
+
+test_that("results without set sizes draw arcs by padj instead of failing", {
+  ora <- data.frame(term = c("S1", "S2", "S3"), padj = c(0.001, 0.01, 0.02), direction = c("up", "down", "up"))
+  x <- as_enrichment(list(toy = ora), enrichment_test = "ora")
+  expect_s3_class(suppressMessages(volcano_ring(make_toy_volc(), x)), "ggplot")
+  expect_error(
+    suppressMessages(volcano_ring(make_toy_volc(), x, magnitude = "size")),
+    class = "enrichVolcano_param_error"
+  )
+})
+
+test_that("the default draws from every database", {
+  expect_null(formals(volcano_ring)$databases)
+  x <- make_toy_ring_enrichment()
+  r <- x@results
+  r$database <- "KEGG"
+  x@results <- r
+  expect_s3_class(suppressMessages(volcano_ring(make_toy_volc(), x)), "ggplot")
+})
+
+test_that("a hand-picked term found in two databases is drawn once", {
+  x <- make_toy_ring_enrichment()
+  r <- x@results
+  twin <- r[1, ]
+  twin$database <- "Other"
+  twin$padj <- 0.3
+  x@results <- rbind(r, twin)
+  picked <- ring_terms(x@results, 0.05, 12, terms = r$term[1])
+  expect_identical(nrow(picked), 1L)
+  expect_identical(picked$padj, r$padj[1])
+})
+
+test_that("grid subtitles can be named by contrast or given in order", {
+  volc <- list(A = make_toy_volc(seed = 1L), B = make_toy_volc(seed = 2L))
+  subtitles_of <- function(g) c(g$plot[[1]]$labels$subtitle, g$plot[[2]]$labels$subtitle)
+  expect_identical(subtitles_of(grid(volc, subtitles = c(B = "second", A = "first"))), c("first", "second"))
+  expect_identical(subtitles_of(grid(volc, subtitles = c("first", "second"))), c("first", "second"))
+})

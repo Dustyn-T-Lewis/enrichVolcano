@@ -157,8 +157,8 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' @param contrast Which contrast of `enrichment` to draw. Needed only when it
 #'   holds more than one.
 #' @param databases Collections to draw from, matched against the `database`
-#'   column. `NULL` draws from all. Skipped, with a note, when the object has no
-#'   database labels.
+#'   column, e.g. `c("Hallmark", "GO Slim")`. `NULL` (default) draws from all.
+#'   Skipped, with a note, when the object has no database labels.
 #' @param collapse Hide terms flagged `"redundant"` by [dedup()].
 #' @param term_threshold Terms need `padj` below this to be drawn.
 #' @param n_terms Most terms drawn, counted across both directions.
@@ -196,7 +196,8 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #'   significant score in the whole object, so every contrast shares a scale.
 #' @param magnitude What arc height encodes: `"neg_log_padj"` or `"size"`.
 #'   `NULL` picks `"neg_log_padj"` for NES and `"size"` otherwise, so fill and
-#'   height never repeat the same number for fry or camera results.
+#'   height never repeat the same number for fry or camera results; without
+#'   set sizes it falls back to `"neg_log_padj"`.
 #' @param arc_order Angular order of arcs within each up/down half:
 #'   `"padj"` (default, lowest FDR first) or `"nes"` (strongest absolute score
 #'   first). The up/down split itself is always by direction.
@@ -233,7 +234,7 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' volcano_ring(da1, ex, contrast = ctr, title = ctr)
 volcano_ring <- function(volc_df, enrichment,
                          contrast = NULL,
-                         databases = c("Hallmark", "GO Slim"),
+                         databases = NULL,
                          collapse = TRUE,
                          term_threshold = 0.05,
                          n_terms = 12,
@@ -297,10 +298,10 @@ volcano_ring <- function(volc_df, enrichment,
   }
   validate_volc_df(volc_df, vcols)
   score_type <- enrichment@metadata$score_type
-  magnitude <- default_magnitude(magnitude, score_type)
   enrich_df <- contrast_rows(enrichment@results, contrast)
   if (is.null(terms)) enrich_df <- filter_view(enrich_df, databases, collapse)
   enrich_df <- ring_terms(enrich_df, term_threshold, n_terms, terms)
+  magnitude <- default_magnitude(magnitude, score_type, enrich_df$size)
   if (nrow(enrich_df) == 0) {
     ev_inform("No terms pass the selection, so the ring is empty.", class = "enrichVolcano_empty_ring")
   }

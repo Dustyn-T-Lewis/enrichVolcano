@@ -64,15 +64,51 @@ young <- da[da$contrast == "Training_Young", ]
 ```
 
 ```{r ring, fig.alt = "Volcano of Training_Young proteins inside a ring of enriched Hallmark and GO slim terms"}
-volcano_ring(young, ex, contrast = "Training_Young", title = "Training, young")
+volcano_ring(young, ex,
+  contrast = "Training_Young", databases = c("Hallmark", "GO Slim"),
+  title = "Training, young"
+)
 ```
 
 Arc fill is NES and arc height is \(-\log_{10}\)(padj). Up-regulated terms sit
 on the upper half, down-regulated ones on the lower. Ticks run from each arc
-to its leading-edge proteins in the volcano. By default the ring takes the
-twelve most significant terms (padj < 0.05), in either direction, from
-Hallmark and GO slim;
-`databases`, `term_threshold`, `n_terms` and `terms` change the selection.
+to its leading-edge proteins in the volcano. The ring takes the twelve most
+significant terms (padj < 0.05), in either direction. `databases` limits them
+to named collections, here Hallmark and GO slim; left at its default, `NULL`,
+every collection in the object competes. `term_threshold`, `n_terms` and
+`terms` change the selection further.
+
+## Choose gene-set collections
+
+Hallmark and GO slim make a good default pair for figures. The 50 Hallmark
+sets each summarise one well-defined biological state, and the GO
+Consortium's generic slim keeps a small set of broad GO terms. Both are built
+to avoid overlapping terms, so every arc says something different. Larger
+collections such as GO:BP or Reactome find more specific terms but need
+`dedup()`.
+
+Hallmark comes from msigdbr (CRAN). The GO slim is a list of GO IDs; mapping
+it to genes needs AnnotationDbi and org.Hs.eg.db (Bioconductor), counting
+genes annotated to each term or any of its descendants:
+
+```{r collections, eval = FALSE}
+h <- msigdbr::msigdbr(species = "Homo sapiens", collection = "H")
+hallmark <- split(h$gene_symbol, h$gs_name)
+
+obo <- readLines("https://current.geneontology.org/ontology/subsets/goslim_generic.obo")
+slim <- sub("^id: ", "", grep("^id: GO:", obo, value = TRUE))
+entrez <- AnnotationDbi::mget(slim, org.Hs.eg.db::org.Hs.egGO2ALLEGS, ifnotfound = NA)
+entrez <- Filter(function(ids) !all(is.na(ids)), entrez)
+go_slim <- lapply(entrez, function(ids) {
+  unique(AnnotationDbi::mapIds(org.Hs.eg.db::org.Hs.eg.db, unique(ids), "SYMBOL", "ENTREZID"))
+})
+```
+
+The slim spans all three GO namespaces and its terms are broad (a median of
+about 570 human genes), so fgsea's `maxSize` drops some of them; the example
+data used sets of 15 to 500 genes. Test each collection as its own family, so
+padj is corrected within it, and record `packageVersion("msigdbr")` and the
+OBO file's `data-version` line with your methods.
 
 ## Convert your results
 
@@ -217,8 +253,8 @@ statistical test, so it needs the ranking each contrast was tested on, works
 only for ranked GSEA results, and should be reported as its own analysis.
 Call `set.seed()` first; it permutes.
 
-The example object carries flags computed upstream with the Jaccard rule. They
-pass straight through `as_enrichment()`:
+The example object carries flags computed upstream with the Jaccard rule.
+`as_enrichment()` keeps them and records the object as `precomputed`:
 
 ```{r flags}
 table(ex@results$dedup_status, ex@results$database, useNA = "ifany")
@@ -241,7 +277,7 @@ regulate the same pathways. Terms in the shaded top-right and bottom-left
 quadrants move the same way in both.
 
 ```{r concordance, fig.width = 6.5, fig.height = 7.5, fig.alt = "Scatter of NES in trained young against trained old, with most significant terms in the concordant quadrants"}
-nes_scatter(ex, "Training_Young", "Training_Old")
+nes_scatter(ex, "Training_Young", "Training_Old", databases = c("Hallmark", "GO Slim"))
 ```
 
 `comparison = "reversal"` asks whether one condition undoes another. The
@@ -249,7 +285,9 @@ unshaded quadrants hold the answer: a pathway raised by aging and lowered by
 training, or the reverse. The reference line becomes \(y = -x\).
 
 ```{r reversal, fig.width = 6.5, fig.height = 7.5, fig.alt = "Scatter of NES in aging against trained old, with most significant terms in the reversed quadrants"}
-nes_scatter(ex, "Aging", "Training_Old", comparison = "reversal")
+nes_scatter(ex, "Aging", "Training_Old",
+  comparison = "reversal", databases = c("Hallmark", "GO Slim")
+)
 ```
 
 A term counts as significant in a contrast when its padj is below
@@ -270,7 +308,7 @@ work as they do for the ring.
 
 ```{r palette, eval = FALSE}
 volcano_ring(young, ex,
-  contrast = "Training_Young",
+  contrast = "Training_Young", databases = c("Hallmark", "GO Slim"),
   theme = volcano_ring_theme(palette = "okabe"),
   label_mode = "top_per_direction", label_n = 4
 )

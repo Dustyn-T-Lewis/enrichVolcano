@@ -64,17 +64,25 @@ ring_terms <- function(results, term_threshold, n_terms, terms) {
         class = "enrichVolcano_input_error"
       )
     }
-    return(results[results$term %in% terms, , drop = FALSE])
+    picked <- results[results$term %in% terms, , drop = FALSE]
+    picked <- picked[order(picked$padj), , drop = FALSE]
+    return(picked[!duplicated(picked$term), , drop = FALSE])
   }
   sig <- results[!is.na(results$padj) & results$padj < term_threshold, , drop = FALSE]
   utils::head(sig[order(sig$padj), , drop = FALSE], n_terms)
 }
 
-default_magnitude <- function(magnitude, score_type) {
+default_magnitude <- function(magnitude, score_type, size = 1) {
   if (is.null(magnitude)) {
-    return(if (identical(score_type, "NES")) "neg_log_padj" else "size")
+    return(if (identical(score_type, "NES") || anyNA(size)) "neg_log_padj" else "size")
   }
-  rlang::arg_match(magnitude, c("neg_log_padj", "size"))
+  magnitude <- rlang::arg_match(magnitude, c("neg_log_padj", "size"))
+  if (magnitude == "size" && anyNA(size)) {
+    ev_abort("{.code magnitude = \"size\"} needs a set size for every drawn term.",
+      class = "enrichVolcano_param_error"
+    )
+  }
+  magnitude
 }
 
 default_score_limits <- function(score_type, results, term_threshold) {

@@ -59,16 +59,10 @@ volcano_ring_grid <- function(volc_dfs, enrichment,
   legend_position <- match.arg(legend_position)
   validate_grid_spacing(panel_spacing, panel_margin, legend_width)
   check_enrichment(enrichment)
-  volc_list <- split_by_contrast(volc_dfs, "volc_dfs")
+  volc_list <- split_contrasts(volc_dfs)
   enrich_contrasts <- unique(enrichment@results$contrast)
 
   contrasts <- contrasts %||% names(volc_list)
-  if (is.null(contrasts) || !length(contrasts)) {
-    ev_abort(
-      "Cannot infer contrasts; supply `contrasts` or name the list elements.",
-      class = "enrichVolcano_input_error"
-    )
-  }
   missing_v <- setdiff(contrasts, names(volc_list))
   missing_e <- setdiff(contrasts, enrich_contrasts)
   if (length(missing_v) || length(missing_e)) {
@@ -142,25 +136,4 @@ volcano_ring_grid <- function(volc_dfs, enrichment,
 print.volcano_ring_grid <- function(x, ...) {
   print(x$plot, ...)
   invisible(x)
-}
-
-split_by_contrast <- function(x, arg_name) {
-  if (is.list(x) && !is.data.frame(x)) {
-    return(x)
-  }
-  if (is.data.frame(x)) {
-    if (!"contrast" %in% names(x)) {
-      ev_abort(
-        c("{.arg {arg_name}} is a single data.frame but has no `contrast` column.",
-          "i" = "Either pass a named list of frames, or add a `contrast` column."
-        ),
-        class = "enrichVolcano_input_error"
-      )
-    }
-    return(split(x, x$contrast))
-  }
-  ev_abort(
-    "{.arg {arg_name}} must be a named list of data.frames or a single data.frame.",
-    class = "enrichVolcano_input_error"
-  )
 }

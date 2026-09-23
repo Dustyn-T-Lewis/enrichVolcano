@@ -9,14 +9,16 @@
 #' * **fgsea**: `pathway, pval, padj, NES, size, leadingEdge`. Score is NES.
 #' * **fry** (`PValue.Mixed`), **mroast** (`PropUp`), **camera** estimating
 #'   its own inter-gene correlation (`Correlation`): `NGenes, Direction,
-#'   PValue, FDR`, set names in the row names. None of these report an effect
+#'   PValue, FDR`, set names in the row names (or a `term` column, which a
+#'   long table with a `contrast` column must have). None of these report an effect
 #'   size or a leading edge, so the score is signed \eqn{-\log_{10}}(FDR) and
 #'   leading edges are empty.
 #' * **camera** with its default fixed correlation and **cameraPR** return
 #'   identical columns. Say which with `enrichment_test = "camera"` or
 #'   `"cameraPR"`.
-#' * **gseaResult** (clusterProfiler `GSEA()`, `gseGO()`, ...): read from its
-#'   `result` table. Score is NES; leading edges come from `core_enrichment`.
+#' * **gseaResult** (clusterProfiler `GSEA()`, `gseGO()`, ...): read from the
+#'   object's `result` table, or from that table exported as a data frame.
+#'   Score is NES; leading edges come from `core_enrichment`.
 #' * **ora** (enrichR, `enrichGO()`, g:Profiler, ...): over-representation has
 #'   no direction of its own, so supply a `direction` column (run up- and
 #'   down-regulated genes separately and stack them). Score is signed
@@ -38,7 +40,8 @@
 #' @param term,score,padj,p,size,direction,leading_edge Column names, used only
 #'   when `enrichment_test` is `"custom"` or `"ora"`. `p`, `size` and
 #'   `leading_edge` are optional; a leading-edge column may be a list or a
-#'   `;`- or `/`-separated string.
+#'   string separated by `;`, `/` or `|`. Pass `direction = NULL` to take
+#'   direction from the score sign.
 #' @param score_type Axis and legend label for a custom score, e.g. `"NES"`.
 #'
 #' @return An [enrichment] object.
@@ -70,6 +73,16 @@ as_enrichment <- function(x, enrichment_test = NULL, database = NULL,
   if (is.null(enrichment_test)) {
     ev_inform("Reading {.val {test}} results.", class = "enrichVolcano_detected_test")
   }
+  limma_family <- c("fry", "mroast", "camera", "cameraPR")
+  if (is.data.frame(x) && test %in% limma_family && !"term" %in% names(x)) {
+    ev_abort(
+      c(
+        "A long {.val {test}} table needs a {.field term} column: row names do not survive stacking.",
+        i = "Add {.code res$term <- rownames(res)} to each table before binding, or pass a named list."
+      ),
+      class = "enrichVolcano_input_error"
+    )
+  }
   if (!is.null(score_type) && test != "custom") {
     ev_abort(
       "{.arg score_type} applies only to {.val custom} tables.",
@@ -94,7 +107,7 @@ as_enrichment <- function(x, enrichment_test = NULL, database = NULL,
     metadata = list(
       enrichment_test = test,
       score_type = score_type %||% default_score_type[[test]],
-      dedup = NULL
+      dedup = if ("dedup_status" %in% names(results)) list(method = "precomputed")
     )
   )
 }
@@ -156,6 +169,9 @@ detect_test <- function(tbl, enrichment_test = NULL) {
     return("gseaResult")
   }
   cols <- names(tbl)
+  if (all(c("NES", "p.adjust", "setSize", "core_enrichment") %in% cols)) {
+    return("gseaResult")
+  }
   if (all(c("NES", "leadingEdge", "pval") %in% cols)) {
     return("fgsea")
   }
@@ -209,7 +225,7 @@ from_fgsea <- function(tbl) {
 }
 
 from_gsea_result <- function(obj) {
-  tbl <- obj@result
+  tbl <- if (isS4(obj)) obj@result else obj
   used <- c("Description", "NES", "pvalue", "p.adjust", "setSize", "core_enrichment")
   require_columns(tbl, used)
   names(tbl)[names(tbl) == "leading_edge"] <- "leading_edge_stats"
@@ -223,17 +239,21 @@ from_limma <- function(tbl) {
   require_columns(tbl, c("NGenes", "Direction", "PValue", "FDR"))
   direction <- tolower(tbl$Direction)
   new_results(tbl,
-    term = rownames(tbl), score = signed_log_fdr(tbl$FDR, direction),
+    term = if ("term" %in% names(tbl)) tbl$term else rownames(tbl),
+    score = signed_log_fdr(tbl$FDR, direction),
     p = tbl$PValue, padj = tbl$FDR, size = tbl$NGenes,
-    direction = direction, used = c("NGenes", "Direction", "PValue", "FDR")
+    direction = direction, used = c("term", "NGenes", "Direction", "PValue", "FDR")
   )
 }
 
 from_table <- function(tbl, test, cols) {
+  if (test == "ora" && is.null(cols$direction)) {
+    ev_abort("{.val ora} tables need a {.arg direction} column.", class = "enrichVolcano_column_error")
+  }
   needed <- c(cols$term, cols$padj, if (test == "custom") cols$score, if (test == "ora") cols$direction)
   require_columns(tbl, needed)
   optional <- function(col) if (!is.null(col) && col %in% names(tbl)) tbl[[col]] else NA_real_
-  direction <- if (cols$direction %in% names(tbl)) tolower(tbl[[cols$direction]])
+  direction <- if (!is.null(cols$direction) && cols$direction %in% names(tbl)) tolower(tbl[[cols$direction]])
   score <- if (test == "ora") signed_log_fdr(tbl[[cols$padj]], direction) else tbl[[cols$score]]
   new_results(tbl,
     term = as.character(tbl[[cols$term]]), score = score,
@@ -266,7 +286,7 @@ split_genes <- function(x) {
   if (is.list(x)) {
     return(lapply(x, as.character))
   }
-  lapply(strsplit(as.character(x), "[;/]"), function(g) g[!is.na(g) & nzchar(g)])
+  lapply(strsplit(as.character(x), "[;/|]"), function(g) g[!is.na(g) & nzchar(g)])
 }
 
 require_columns <- function(tbl, cols) {
