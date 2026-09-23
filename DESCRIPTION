@@ -36,6 +36,7 @@ Suggests:
     fgsea,
     knitr,
     pkgdown,
+    readxl,
     rmarkdown,
     testthat (>= 3.0.0),
     vdiffr,

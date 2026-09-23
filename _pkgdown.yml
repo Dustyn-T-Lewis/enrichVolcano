@@ -4,6 +4,7 @@ template:
 reference:
   - title: "Build"
     contents:
+      - read_study
       - as_da
       - as_enrichment
       - enrichment
