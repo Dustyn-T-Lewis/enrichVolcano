@@ -162,3 +162,23 @@ test_that("volcano_ring with label_mode = 'by_genes' runs", {
   ))
   expect_s3_class(p, "ggplot")
 })
+
+test_that("the default width is unchanged, hand-placed breaks included", {
+  expect_identical(ev_clean_label("HALLMARK_HEME_METABOLISM"), "Heme\nMetabolism")
+})
+
+test_that("a wider width wraps less and skips the ring's hand-placed breaks", {
+  expect_identical(ev_clean_label("HALLMARK_HEME_METABOLISM", width = 40), "Heme Metabolism")
+  long <- "GOBP_REGULATION_OF_CYTOPLASMIC_TRANSLATION_IN_RESPONSE_TO_STRESS"
+  lines <- strsplit(ev_clean_label(long, width = 40), "\n")[[1]]
+  expect_true(all(nchar(lines) <= 40))
+  expect_lt(length(lines), length(strsplit(ev_clean_label(long), "\n")[[1]]))
+})
+
+test_that("width reaches vectorised and MitoCarta names", {
+  out <- ev_clean_label(c("HALLMARK_HEME_METABOLISM", "HALLMARK_MITOTIC_SPINDLE"), width = 40)
+  expect_identical(out, c("Heme Metabolism", "Mitotic Spindle"))
+  mito <- "MITOCARTA_OXPHOS__OXPHOS_ASSEMBLY_FACTORS"
+  expect_false(grepl("\n", ev_clean_label(mito, width = 40)))
+  expect_true(grepl("\n", ev_clean_label(mito)))
+})

@@ -74,26 +74,28 @@ ev_select_labels <- function(df, mode, n, rank_by, genes,
 # Pathway-name cleaning for ring display: strips DB prefixes, expands
 # acronyms, shortens long phrases, and wraps for the arc labels.
 
-#' Clean a pathway name for ring display
+#' Clean a pathway name for display
 #'
 #' Strips the database prefix, expands common acronyms, title-cases, wraps,
 #' and applies MitoCarta-hierarchy shortening for `MITOCARTA_` pathways.
 #'
 #' @param name Character vector of raw pathway names.
+#' @param width Wrap width in characters. The default suits ring arcs; at 15
+#'   or narrower a few short names also get hand-placed line breaks.
 #' @return Character vector of cleaned, wrapped labels.
 #' @export
 #' @examples
 #' ev_clean_label(c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "REACTOME_TCA_CYCLE"))
-ev_clean_label <- function(name) {
+ev_clean_label <- function(name, width = 15) {
   if (length(name) > 1) {
-    return(vapply(name, ev_clean_label, character(1), USE.NAMES = FALSE))
+    return(vapply(name, ev_clean_label, character(1), width = width, USE.NAMES = FALSE))
   }
   if (is.na(name) || !nzchar(name)) {
     return(name)
   }
 
   if (startsWith(name, "MITOCARTA_")) {
-    return(ev_clean_label_mitocarta(name))
+    return(ev_clean_label_mitocarta(name, width))
   }
 
   out <- name |>
@@ -112,8 +114,9 @@ ev_clean_label <- function(name) {
   out <- ev_expand_acronyms(out)
   out <- ev_shorten_phrases(out)
   out <- ev_collapse_repeats(out)
-  out <- stringr::str_wrap(out, width = 15)
-  ev_post_wrap_overrides(trimws(out))
+  out <- trimws(stringr::str_wrap(out, width = width))
+  if (width <= 15) out <- ev_post_wrap_overrides(out)
+  out
 }
 
 #' Collapse adjacent duplicate words left by overlapping MSigDB hierarchies
@@ -250,7 +253,7 @@ ev_shorten_phrases <- function(x) {
 
 #' @keywords internal
 #' @noRd
-ev_clean_label_mitocarta <- function(name) {
+ev_clean_label_mitocarta <- function(name, width = 15) {
   n <- sub("^MITOCARTA_", "", name)
   parts <- strsplit(n, "__|>", perl = TRUE)[[1]]
   if (length(parts) == 1) parts <- strsplit(n, "_")[[1]]
@@ -269,5 +272,5 @@ ev_clean_label_mitocarta <- function(name) {
   )
   for (pat in names(reps)) leaf <- gsub(pat, reps[[pat]], leaf, perl = TRUE)
   leaf <- trimws(gsub("\\s+", " ", leaf))
-  stringr::str_wrap(leaf, width = 15)
+  stringr::str_wrap(leaf, width = width)
 }
