@@ -236,16 +236,17 @@ volcano_ring(young, ex, contrast = "Training_Young", databases = "Reactome", tit
 `nes_scatter()` plots every term's score in one contrast against its score in
 another. It answers two kinds of question, set by `comparison`.
 
-**Concordance**: do two conditions regulate the same pathways? Terms in the
-shaded top-right and bottom-left quadrants move the same way in both.
+The default, `comparison = "concordance"`, asks whether two conditions
+regulate the same pathways. Terms in the shaded top-right and bottom-left
+quadrants move the same way in both.
 
 ```{r concordance, fig.width = 6.5, fig.height = 7.5, fig.alt = "Scatter of NES in trained young against trained old, with most significant terms in the concordant quadrants"}
 nes_scatter(ex, "Training_Young", "Training_Old")
 ```
 
-**Reversal**: does one condition undo another? Here the unshaded quadrants
-carry the story: a pathway raised by aging and lowered by training, or the
-reverse. The reference line becomes \(y = -x\).
+`comparison = "reversal"` asks whether one condition undoes another. The
+unshaded quadrants hold the answer: a pathway raised by aging and lowered by
+training, or the reverse. The reference line becomes \(y = -x\).
 
 ```{r reversal, fig.width = 6.5, fig.height = 7.5, fig.alt = "Scatter of NES in aging against trained old, with most significant terms in the reversed quadrants"}
 nes_scatter(ex, "Aging", "Training_Old", comparison = "reversal")

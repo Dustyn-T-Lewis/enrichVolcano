@@ -18,14 +18,13 @@ x <- dedup(x, gene_sets)
 volcano_ring(da_aging, x)
 ```
 
-1.  **`as_enrichment()`** converts results from any supported tool into
-    one validated `enrichment` object and records which test produced
-    them.
-2.  **`dedup()`** (optional) flags redundant terms so a figure shows
-    each signal once. p-values are never changed.
-3.  **Plot**: `volcano_ring()` for one contrast, `volcano_ring_grid()`
-    for several, `nes_scatter()` to compare two contrasts term by term
-    (concordance or reversal).
+1.  `as_enrichment()` converts results from any supported tool into one
+    validated `enrichment` object and records which test produced them.
+2.  `dedup()` (optional) flags redundant terms so a figure shows each
+    signal once. p-values are never changed.
+3.  A plot function draws from the object: `volcano_ring()` for one
+    contrast, `volcano_ring_grid()` for several, `nes_scatter()` to
+    compare two contrasts term by term (concordance or reversal).
 
 ## Install
 
