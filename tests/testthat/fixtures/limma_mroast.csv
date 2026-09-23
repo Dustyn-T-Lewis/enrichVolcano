@@ -1,0 +1,4 @@
+"","NGenes","PropDown","PropUp","Direction","PValue","FDR","PValue.Mixed","FDR.Mixed"
+"SET_UP",10,0,0.8,"Up",0.001,0.0015,0.001,0.0015
+"SET_DOWN",10,0.4,0,"Down",0.005,0.00675,0.024,0.03525
+"SET_NULL",20,0,0,"Down",0.589,0.589,0.995,0.995

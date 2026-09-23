@@ -11,7 +11,7 @@ results_columns <- c(
 #' Enrichment results in one validated object
 #'
 #' `enrichment` is the single input every plot in the package reads. Build it
-#' with `as_enrichment()` rather than by hand; construct it directly only when
+#' with [as_enrichment()] rather than by hand; construct it directly only when
 #' you already hold a table in exactly this shape.
 #'
 #' @param results A data frame with one row per term per contrast:

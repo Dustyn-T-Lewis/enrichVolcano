@@ -31,6 +31,6 @@ construction and every edit is validated.
 }
 \description{
 \code{enrichment} is the single input every plot in the package reads. Build it
-with \code{as_enrichment()} rather than by hand; construct it directly only when
+with \code{\link[=as_enrichment]{as_enrichment()}} rather than by hand; construct it directly only when
 you already hold a table in exactly this shape.
 }
