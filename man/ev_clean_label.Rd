@@ -2,12 +2,15 @@
 % Please edit documentation in R/labels.R
 \name{ev_clean_label}
 \alias{ev_clean_label}
-\title{Clean a pathway name for ring display}
+\title{Clean a pathway name for display}
 \usage{
-ev_clean_label(name)
+ev_clean_label(name, width = 15)
 }
 \arguments{
 \item{name}{Character vector of raw pathway names.}
+
+\item{width}{Wrap width in characters. The default suits ring arcs; at 15
+or narrower a few short names also get hand-placed line breaks.}
 }
 \value{
 Character vector of cleaned, wrapped labels.

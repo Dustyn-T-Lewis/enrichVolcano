@@ -1,154 +1,86 @@
 
 # enrichVolcano <a href="https://Dustyn-T-Lewis.github.io/enrichVolcano/"><img src="man/figures/logo.png" align="right" height="139" alt="enrichVolcano website" /></a>
 
-> Draw a volcano-in-ring composite from any differential-abundance table
-> plus any enrichment table you’ve already computed.
+> Figures from enrichment results you have already computed: fgsea,
+> clusterProfiler, limma’s fry and camera, over-representation, or your
+> own.
 
-<img src="man/figures/README-hero-1.png" alt="A volcano plot ringed by NES-coloured enrichment arcs"  />
+<img src="man/figures/README-hero-1.png" alt="A volcano plot ringed by enrichment arcs coloured by normalised enrichment score"  />
 
-`enrichVolcano` is a plotting-only package. It does **not** run
-differential abundance, it does **not** run enrichment, and it ships no
-gene-set databases. Compute those upstream with whatever fits your study
-— `fgsea`, `clusterProfiler`, `enrichR`, or your own — and hand the two
-tidy tables to `volcano_ring()`.
-
-## What the plot encodes
-
-A single figure shows, for one contrast:
-
-- **Centre:** the differential-abundance volcano. `logFC` on x,
-  `-log10(p)` on y, points coloured up / down / non-significant.
-- **Ring:** one arc per enriched pathway. Arc fill is the NES (red up,
-  blue down by default); arc thickness is a magnitude you pick
-  (`-log10(padj)` or gene-set size).
-- **Split:** up-regulated pathways sit on the top semicircle,
-  down-regulated on the bottom, so direction reads at a glance.
-- **Tick lines:** thin spokes from each arc to its leading-edge genes
-  inside the volcano, tying a pathway to the proteins driving it.
-- **Badges:** running counts of significant up / down proteins.
-
-`volcano_ring_grid()` composes several contrasts into a labelled grid
-with a shared NES legend.
-
-## Install
-
-``` r
-# install.packages("remotes")
-remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
-```
-
-## Quick start
+enrichVolcano draws; it does not run differential abundance or
+enrichment. Every workflow has three steps:
 
 ``` r
 library(enrichVolcano)
 
-da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
-  package = "enrichVolcano"
-))
-en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
-  package = "enrichVolcano"
-))
-
-ctr <- "Training_Young"
-da1 <- da[da$contrast == ctr, ]
-names(da1)[names(da1) == "adj.P.Val"] <- "padj"
-
-# Pick the pathways to ring the volcano (the table holds many databases).
-sig <- en[en$contrast == ctr & en$padj < 0.05 & is.finite(en$NES), ]
-sig <- sig[order(sig$padj), ]
-top <- rbind(head(sig[sig$NES > 0, ], 7), head(sig[sig$NES < 0, ], 7))
-
-volcano_ring(da1, top, title = "YvO", subtitle = ctr)
+x <- as_enrichment(list(Aging = fgsea_result), database = "Hallmark")
+x <- dedup(x, gene_sets)
+volcano_ring(da_aging, x)
 ```
 
-## The whole figure, in one call
+1.  `as_enrichment()` converts results from any supported tool into one
+    validated `enrichment` object and records which test produced them.
+2.  `dedup()` (optional) flags redundant terms so a figure shows each
+    signal once. p-values are never changed.
+3.  A plot function draws from the object: `volcano_ring()` for one
+    contrast, `volcano_ring_grid()` for several, `nes_scatter()` to
+    compare two contrasts term by term (concordance or reversal).
 
-`volcano_ring_grid()` takes a DA table and an enrichment table that each
-carry a `contrast` column, splits them, and lays out one composite per
-contrast with a shared NES legend along the bottom.
+## Install
 
 ``` r
-da$padj <- da$adj.P.Val
-en_sig <- en[en$padj < 0.05 & en$size >= 15, ]
-
-grid <- volcano_ring_grid(da, en_sig, contrasts = unique(da$contrast))
-grid$plot
+install.packages("remotes")
+remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
 ```
 
-Every spacing knob (`panel_spacing`, `panel_margin`, `label_headroom`,
-`legend_position`, `legend_width`) has a sensible default, so the call
-above is the whole figure.
+## What goes in
 
-## Input contract, in brief
-
-| Side | Needs | Default column |
+| Tool | Recognised by | Score drawn |
 |----|----|----|
-| DA (`volc_df`) | gene id, effect, p, adjusted p | `gene`, `logFC`, `P.Value`, `padj` |
-| Enrichment (`enrich_df`) | term, NES, adjusted p, size | `pathway`, `NES`, `padj`, `size` |
-| Tick lines (optional) | leading-edge genes | auto-detected from `leading_edge` / `leadingEdge` / `core_enrichment` / `Genes` |
+| fgsea | its columns | NES |
+| clusterProfiler `gseaResult` | its class | NES |
+| limma `fry`, `mroast` | their columns | signed −log10(FDR) |
+| limma `camera`, `cameraPR` | `enrichment_test =` | signed −log10(FDR) |
+| over-representation (enrichR, `enrichGO`, …) | `enrichment_test = "ora"` + a direction column | signed −log10(padj) |
+| anything else | `enrichment_test = "custom"` + column names | yours |
 
-Every column name is an argument, so non-default schemas work without
-renaming. See `vignette("input-contract")` for the limma / DESeq2 /
-edgeR / DEP / fgsea / clusterProfiler / enrichR cross-walk.
+fry, mroast and camera report no effect size or leading edge, so their
+score is the signed −log10(FDR) and the legend says so.
 
-## Customizing
+## What the ring shows
 
-Colours come from `volcano_ring_theme()` (the palette presets, or your
-own `up` / `down` / `ns` / `nes_colors`). Layout comes from
-`volcano_ring()` arguments such as `arc_order`, `arc_height_range`,
-`show_counts`, `magnitude`, and `label_mode`. Everything has a sensible
-default:
+- **Centre:** the volcano, `logFC` against −log10(p).
+- **Ring:** one arc per term, up-regulated on top and down-regulated
+  below. Fill is the score; height is −log10(padj) for NES and set size
+  otherwise.
+- **Ticks:** spokes from each arc to its leading-edge genes in the
+  volcano.
 
-``` r
-volcano_ring(da1, en1,
-  theme = volcano_ring_theme(palette = "okabe"),
-  arc_order = "nes", show_counts = FALSE
-)
-```
+By default the ring draws the twelve most significant terms, in either
+direction, from every collection in the object. For figures,
+`databases = c("Hallmark", "GO Slim")` is the recommended view;
+`n_terms`, `term_threshold` and `terms` change the selection further.
+`vignette("enrichVolcano")` walks every step on the bundled example,
+including how to get each gene-set collection.
 
-`vignette("customizing")` walks every knob section by section.
+## Cite the methods you used
 
-## Public API
+enrichVolcano only draws; the credit belongs to the analysis:
 
-| Function | Role |
-|----|----|
-| `volcano_ring()` | one composite for one contrast — returns a `ggplot` |
-| `volcano_ring_grid()` | a grid of composites, one per contrast |
-| `volcano_ring_theme()` | theme + palette factory, with colour overrides |
-| `print.volcano_ring_grid()` | print method for the grid object |
-
-## Cite the upstream tools
-
-`enrichVolcano` only draws; the methodological credit belongs to the
-enrichment tool you ran:
-
-- `fgsea` — Korotkevich G et al. 2021, DOI 10.1101/060012
-- `clusterProfiler` — Wu T et al. 2021 *Innovation*
-- `enrichR` — Chen EY et al. 2013 *BMC Bioinformatics*; Kuleshov MV et
-  al. 2016 *Nucleic Acids Res*
-
-Useful when choosing what to run and how to read it:
-
-- Xiao Y et al. 2014 *Bioinformatics* 30(6):801-7, PMID 22321699 —
-  π-value
-- Timmons JA et al. 2015 *Genome Biol* 16:186, PMID 26346307 — ORA
-  universe
-- Reimand J et al. 2019 *Nat Protoc* 14:482-517, PMID 30664679 —
-  protocol
-- Wijesooriya K et al. 2022 *PLoS Comput Biol* 18:e1009935, PMID
-  35263338 — background bias
+- fgsea: Korotkevich G et al., bioRxiv, <doi:10.1101/060012>
+- clusterProfiler: Wu T et al. 2021, *The Innovation* 2:100141
+- camera: Wu D, Smyth GK 2012, *Nucleic Acids Res* 40(17),
+  <doi:10.1093/nar/gks461>
+- fry and mroast (ROAST): Wu D et al. 2010, *Bioinformatics* 26(17),
+  <doi:10.1093/bioinformatics/btq401>
+- EnrichmentMap (`dedup()`): Merico D et al. 2010, *PLoS ONE*
+  5(11):e13984
+- Enrichment protocol: Reimand J et al. 2019, *Nat Protoc* 14:482-517
 
 ## Versioning
 
-Current release is v0.3.0. The pre-0.3 enrichment engine and standalone
-volcano / ring wrappers are gone; the old `enrich_volcano()` and GUI
-stay installable from the `v0.2.0` tag.
-
-## Shiny front-end
-
-A graphical front-end (`enrichVolcanoApp`) is **TBD**: under
-construction in a sibling repo and not yet released. Status and install
-details will land here once it stabilises.
+1.0.0 replaced the column-name arguments with the `enrichment` object;
+see `NEWS.md`. Earlier releases stay installable from their tags.
 
 ## License
 

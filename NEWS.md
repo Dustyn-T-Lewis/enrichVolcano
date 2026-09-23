@@ -1,6 +1,53 @@
-# enrichVolcano 0.3.0.9000 (development version)
+# enrichVolcano 1.0.0
+
+## Breaking changes
+
+* Plots read an `enrichment` object built by `as_enrichment()` instead of a
+  data frame described by column-name arguments. `volcano_ring()` loses
+  `term_col`, `nes_col`, `size_col`, `genes_col` and `genes_sep`, and gains
+  `contrast`; `volcano_ring_grid()` takes one `enrichment` for all contrasts.
+* `volcano_ring()` now chooses its terms: the `n_terms` (12) most significant
+  below `term_threshold`, in either direction, from `databases` (all by
+  default), with redundant terms hidden (`collapse`). `terms` hand-picks
+  instead.
+* `magnitude` defaults to `"neg_log_padj"` for NES and `"size"` for other
+  scores; the legend is titled with the score type.
+* The three vignettes are merged into one, `vignette("enrichVolcano")`.
+* Example data: `yvo_fgsea.csv.gz` (fgsea output for four contrasts across
+  MSigDB Hallmark, KEGG MEDICUS, Reactome and GO:BP from msigdbr 26.1.0, and
+  the GO Consortium generic GO slim, release 2026-07-26) and `yvo_da.csv.gz`
+  replace `yvo_enrichment.csv` and `yvo_da.csv`. The unused mito and cvh
+  examples are removed.
 
 ## New features
+
+* `as_enrichment()` converts fgsea, clusterProfiler `gseaResult`, limma
+  `fry`, `mroast`, `camera` and `cameraPR`, over-representation tables with a
+  direction column, and custom tables into one validated `enrichment` (an S7
+  class). The producing test is recognised from the columns and recorded;
+  camera and cameraPR, whose columns are identical, must be named with
+  `enrichment_test`. Tests without an effect size are scored as signed
+  -log10(FDR). clusterProfiler results are also read when exported as a data
+  frame; a long table of limma results needs a `term` column, because row
+  names do not survive stacking; `dedup_status` flags carried in the input
+  are kept and recorded as `precomputed`.
+* `dedup()` flags redundant terms for display without dropping rows or
+  changing p-values: `method = "enrichmentmap"` (EnrichmentMap combined
+  coefficient at 0.375 by default, or Jaccard at 0.5) or
+  `method = "collapse_pathways"` (`fgsea::collapsePathways()`).
+* `nes_scatter()` plots two contrasts term by term, as concordance or, with
+  `comparison = "reversal"`, as reversal, with quadrant counts, Spearman's rho
+  and the share of concordant or reversed terms. `color_by` and `shape_by`
+  map any per-term column.
+* `ev_clean_label()` gains `width`.
+* For scores other than NES, the ring's fill scale spans the object's largest
+  significant score rather than squishing at 3.
+
+## Dependencies
+
+* Imports S7. Suggests correlation, data.table, fgsea and withr.
+
+## Also in this release
 
 * `volcano_ring_theme()` takes direct colour overrides: `up`, `down`, `ns`
   for the points and `nes_colors` for the arc ramp, so custom palettes no
@@ -9,8 +56,6 @@
   `"nes"`) sets the angular order of arcs within each half,
   `arc_height_range` sets the shortest and tallest arc, and `show_counts`
   toggles the up/down count badges.
-* New `vignette("customizing")` walks the colour, volcano, ring, and layout
-  knobs section by section.
 * `volcano_ring_grid()` exposes the composite-layout knobs: `panel_spacing`,
   `panel_margin`, `label_headroom`, `legend_position` (`"bottom"`, `"right"`,
   `"none"`), and `legend_width`. The shared NES legend now collects along the

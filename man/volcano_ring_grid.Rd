@@ -6,7 +6,7 @@
 \usage{
 volcano_ring_grid(
   volc_dfs,
-  enrich_dfs,
+  enrichment,
   contrasts = NULL,
   subtitles = NULL,
   nrow = NULL,
@@ -25,8 +25,7 @@ volcano_ring_grid(
 \item{volc_dfs}{Named list of tidy DA tibbles, one per contrast. A single
 data.frame carrying a \code{contrast} column is also accepted and is split.}
 
-\item{enrich_dfs}{Named list of tidy enrichment tibbles, one per contrast.
-Same split convenience as \code{volc_dfs}.}
+\item{enrichment}{An \link{enrichment} object holding every contrast drawn.}
 
 \item{contrasts}{Character vector of contrast names to include and the
 order in which to draw them. Defaults to \code{names(volc_dfs)}.}
@@ -39,7 +38,7 @@ order in which to draw them. Defaults to \code{names(volc_dfs)}.}
 \item{tag_levels}{Panel-tag scheme; forwarded to \code{patchwork::plot_annotation()}.}
 
 \item{guides}{Patchwork \code{guides} argument; default \code{"collect"} collects the
-shared NES legend.}
+shared score legend.}
 
 \item{panel_spacing}{Gutter between adjacent panels, in millimetres
 (default 1.5). Applied as half on each panel edge, so neighbours sit
@@ -53,39 +52,34 @@ panel (default 1.1, looser than the single-ring default of 0.5 so wide
 boxes stay enclosed when panels are packed tight). Forwarded to
 \code{volcano_ring()}; raise it if labels clip, lower it to enlarge the rings.}
 
-\item{legend_position}{Placement of the collected NES legend: \code{"bottom"}
+\item{legend_position}{Placement of the collected score legend: \code{"bottom"}
 (default, recovers the right-hand gap), \code{"right"}, or \code{"none"}.}
 
-\item{legend_width}{Length of the NES colourbar long axis, in millimetres
+\item{legend_width}{Length of the score colourbar long axis, in millimetres
 (default 26, tuned for the bottom bar). Sets the key width when the legend
 is horizontal, the key height when vertical; a side legend usually wants a
 larger value (~40).}
 
-\item{...}{Forwarded to each \code{volcano_ring()} call (e.g. \code{gene_col},
-\code{padj_col}, \code{magnitude}, \code{theme}).}
+\item{...}{Forwarded to each \code{volcano_ring()} call (e.g. \code{databases},
+\code{n_terms}, \code{padj_col}, \code{theme}).}
 }
 \value{
 An S3 object \code{c("volcano_ring_grid", "list")} with elements
-\verb{$plot} (patchwork) and \verb{$data} (list of \code{list(volc, enrich)} pairs).
+\verb{$plot} (patchwork) and \verb{$data} (list of \code{list(volc, enrich)} pairs, where
+\code{enrich} is that contrast's rows of \code{enrichment@results}).
 }
 \description{
 Compose a grid of \code{volcano_ring()} plots, one per contrast
 }
 \examples{
-da <- read.csv(system.file("extdata", "examples", "yvo_da.csv",
+da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
   package = "enrichVolcano"
 ))
-en <- read.csv(system.file("extdata", "examples", "yvo_enrichment.csv",
+ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
   package = "enrichVolcano"
-))
+)))
 names(da)[names(da) == "adj.P.Val"] <- "padj"
 
-# up to eight GO-BP terms per contrast, one composite each
-en_go <- en[en$database == "GO_BP" & en$padj < 0.01, ]
-en_go <- en_go[order(en_go$padj), ]
-en_go <- en_go[!duplicated(en_go[c("contrast", "pathway")]), ]
-en_go <- do.call(rbind, lapply(split(en_go, en_go$contrast), head, 8))
-
-g <- volcano_ring_grid(da, en_go, contrasts = c("Training_Young", "Training_Old"))
+g <- volcano_ring_grid(da, ex, contrasts = c("Training_Young", "Training_Old"))
 g$plot
 }
