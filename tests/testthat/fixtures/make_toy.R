@@ -57,3 +57,27 @@ make_toy_enrich_enrichr <- function(seed = 1L) {
   d$leading_edge <- NULL
   d
 }
+
+# A valid `results` table for the enrichment class: two contrasts, one
+# unlabelled-database row, leading edges pointing at make_toy_volc() genes.
+make_toy_results <- function() {
+  data.frame(
+    contrast = rep(c("A", "B"), each = 3),
+    database = c("Hallmark", "Hallmark", NA, "Hallmark", "Hallmark", NA),
+    term = rep(c("HALLMARK_TOY_A", "HALLMARK_TOY_B", "SET_C"), 2),
+    score = c(2.4, -1.5, 0.8, 1.9, -2.2, -0.3),
+    p = c(0.001, 0.01, NA, 0.002, 0.004, 0.6),
+    padj = c(0.004, 0.02, 0.4, 0.006, 0.008, 0.7),
+    size = c(40L, 25L, 18L, 40L, 25L, 18L),
+    direction = c("up", "down", "up", "up", "down", "down"),
+    leading_edge = I(list(
+      c("G1", "G2"), c("G11", "G12"), character(0),
+      c("G1", "G3"), c("G13"), character(0)
+    )),
+    stringsAsFactors = FALSE
+  )
+}
+
+make_toy_metadata <- function(enrichment_test = "fgsea", score_type = "NES") {
+  list(enrichment_test = enrichment_test, score_type = score_type, dedup = NULL)
+}

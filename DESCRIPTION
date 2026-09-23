@@ -23,6 +23,7 @@ Imports:
     ggrepel,
     patchwork,
     rlang,
+    S7,
     scales,
     stringr
 Suggests:
