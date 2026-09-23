@@ -22,10 +22,11 @@ study_sheets <- c("matrix", "samples", "contrasts", "da_results", "weights")
 #'
 #' @param path An `.xlsx` workbook with sheets named as above, or a folder of
 #'   `<sheet>.csv` or `<sheet>.csv.gz` files.
+#' @param species Passed to [as_da()] for the gene-symbol lookup.
 #' @return A list of class `enrichVolcano_study` with `da`, `matrix`,
 #'   `samples`, `contrasts` and `weights` (absent parts are `NULL`).
 #' @export
-read_study <- function(path) {
+read_study <- function(path, species = "Homo sapiens") {
   sheets <- read_sheets(path)
   if (is.null(sheets$da_results)) {
     ev_abort("A study needs a {.field da_results} sheet.", class = "enrichVolcano_input_error")
@@ -42,7 +43,10 @@ read_study <- function(path) {
     ev_abort("A {.field weights} sheet needs matrix, samples and contrasts.", class = "enrichVolcano_input_error")
   }
 
-  study <- list(da = as_da(sheets$da_results), matrix = NULL, samples = NULL, contrasts = NULL, weights = NULL)
+  study <- list(
+    da = as_da(sheets$da_results, species = species),
+    matrix = NULL, samples = NULL, contrasts = NULL, weights = NULL
+  )
   if (length(present) == 3) {
     study$samples <- check_samples(sheets$samples)
     study$contrasts <- check_contrasts(sheets$contrasts, study$samples$group, study$da$contrast)
@@ -147,4 +151,33 @@ matched_weights <- function(tbl, matrix) {
     )
   }
   weights[rownames(matrix), colnames(matrix), drop = FALSE]
+}
+
+#' Example studies shipped with the package
+#'
+#' Seven proteomics studies from one lab, prepared as [read_study()] inputs.
+#' Two limpa studies (`bfr_limpa`, `mouse_pas`) include the matrix, samples,
+#' contrasts and precision weights, so every test in [run_enrichment()] runs on
+#' them; the rest ship DA results only, for fgsea and the figures. Call with no
+#' name to list them with their species and designs.
+#'
+#' @param name A study name, or `NULL` to list them.
+#' @return The study, as [read_study()] returns it, with its index row in
+#'   `info`; or the index as a data frame.
+#' @export
+#' @examples
+#' example_study()
+example_study <- function(name = NULL) {
+  root <- system.file("extdata", "studies", package = "enrichVolcano")
+  index <- utils::read.csv(file.path(root, "index.csv"))
+  if (is.null(name)) {
+    return(index)
+  }
+  if (!isTRUE(name %in% index$name)) {
+    ev_abort("No example study {.val {name}}; see {.code example_study()}.", class = "enrichVolcano_param_error")
+  }
+  info <- as.list(index[index$name == name, ])
+  study <- read_study(file.path(root, name), species = info$species)
+  study$info <- info
+  study
 }

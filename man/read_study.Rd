@@ -4,11 +4,13 @@
 \alias{read_study}
 \title{Read a study from a workbook or a folder of CSV files}
 \usage{
-read_study(path)
+read_study(path, species = "Homo sapiens")
 }
 \arguments{
 \item{path}{An \code{.xlsx} workbook with sheets named as above, or a folder of
 \verb{<sheet>.csv} or \verb{<sheet>.csv.gz} files.}
+
+\item{species}{Passed to \code{\link[=as_da]{as_da()}} for the gene-symbol lookup.}
 }
 \value{
 A list of class \code{enrichVolcano_study} with \code{da}, \code{matrix},

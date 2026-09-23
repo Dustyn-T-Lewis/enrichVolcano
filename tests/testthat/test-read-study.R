@@ -128,3 +128,29 @@ test_that("required columns and files are named when missing", {
   expect_error(read_study(edited_study(drop = "da_results")), "da_results", class = "enrichVolcano_input_error")
   expect_error(read_study(file.path(tempdir(), "no_such_study")), class = "enrichVolcano_input_error")
 })
+
+test_that("example_study() lists the shipped studies", {
+  idx <- example_study()
+  expect_setequal(idx$name, c("bfr_limpa", "mouse_pas", "yvo", "bfr_proteoda", "cvh", "hrvlr", "mito"))
+  expect_true(all(c("species", "description") %in% names(idx)))
+})
+
+test_that("a shipped study loads with its species", {
+  skip_if_not_installed("org.Mm.eg.db")
+  s <- quietly(example_study("mouse_pas"))
+  expect_identical(dim(s$matrix), c(1842L, 20L))
+  expect_identical(dim(s$weights), dim(s$matrix))
+  expect_identical(s$info$species, "Mus musculus")
+  expect_true("Sdha" %in% s$da$gene)
+})
+
+test_that("a DA-only shipped study has no matrix", {
+  skip_if_not_installed("org.Hs.eg.db")
+  s <- quietly(example_study("yvo"))
+  expect_null(s$matrix)
+  expect_setequal(unique(s$da$contrast), c("Training_Young", "Training_Old", "Aging", "Interaction"))
+})
+
+test_that("an unknown example study is refused", {
+  expect_error(example_study("nope"), "nope", class = "enrichVolcano_param_error")
+})
