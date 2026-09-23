@@ -4,6 +4,7 @@ template:
 reference:
   - title: "Build"
     contents:
+      - as_da
       - as_enrichment
       - enrichment
       - dedup
