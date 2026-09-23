@@ -20,15 +20,28 @@
 #'   catches a small set nested inside a large one, which Jaccard misses.
 #' * `"jaccard"` (cutoff 0.5) uses shared genes over all genes in either set.
 #'
+#' @section `method = "collapse_pathways"`:
+#' Runs [fgsea::collapsePathways()] within each contrast and database: a term
+#' is redundant when it is no longer enriched once the genes of a more
+#' significant term are conditioned on. This is a statistical criterion, not
+#' an overlap rule, so it needs the ranking each contrast was tested on and
+#' applies only to ranked GSEA results (fgsea, clusterProfiler). It permutes,
+#' so call [set.seed()] first for reproducible flags. The p-values it computes
+#' decide redundancy only; the reported `padj` stay those of the original run.
+#'
 #' @param x An [enrichment] object.
 #' @param gene_sets A named list of character vectors, one per term, holding
 #'   the full gene sets that were tested. Terms without a set are kept.
-#' @param method `"enrichmentmap"`.
-#' @param similarity `"combined"` or `"jaccard"`.
-#' @param cutoff Similarity at or above which a term is redundant. `NULL`
-#'   takes 0.375 for `"combined"` and 0.5 for `"jaccard"`.
+#' @param method `"enrichmentmap"` (gene-set overlap) or `"collapse_pathways"`
+#'   (conditional enrichment).
+#' @param similarity For `"enrichmentmap"`: `"combined"` or `"jaccard"`.
+#' @param cutoff For `"enrichmentmap"`: similarity at or above which a term is
+#'   redundant. `NULL` takes 0.375 for `"combined"` and 0.5 for `"jaccard"`.
 #' @param p_threshold Only terms with `padj` below this are compared; the rest
-#'   are left unflagged (`NA`).
+#'   are left unflagged (`NA`). For `"collapse_pathways"` it is also the
+#'   conditional p-value threshold.
+#' @param stats For `"collapse_pathways"`: a named list with one ranking (named
+#'   numeric vector of gene statistics) per contrast.
 #'
 #' @return `x`, with `dedup_status` (`"kept"`, `"redundant"` or `NA`),
 #'   `merged_into` and `similarity` columns in its results, and the settings
@@ -42,9 +55,9 @@
 #' and visualization of omics data using g:Profiler, GSEA, Cytoscape and
 #' EnrichmentMap. Nature Protocols 14:482-517.
 #' @export
-dedup <- function(x, gene_sets, method = "enrichmentmap",
+dedup <- function(x, gene_sets, method = c("enrichmentmap", "collapse_pathways"),
                   similarity = c("combined", "jaccard"), cutoff = NULL,
-                  p_threshold = 0.05) {
+                  p_threshold = 0.05, stats = NULL) {
   if (!S7::S7_inherits(x, enrichment)) {
     ev_abort("{.arg x} must be an {.cls enrichment}; build one with {.fn as_enrichment}.",
       class = "enrichVolcano_input_error"
@@ -55,24 +68,82 @@ dedup <- function(x, gene_sets, method = "enrichmentmap",
       class = "enrichVolcano_input_error"
     )
   }
-  method <- rlang::arg_match(method, "enrichmentmap")
-  similarity <- rlang::arg_match(similarity)
-  cutoff <- cutoff %||% c(combined = 0.375, jaccard = 0.5)[[similarity]]
-  if (!is.numeric(cutoff) || length(cutoff) != 1 || is.na(cutoff) || cutoff <= 0 || cutoff > 1) {
-    ev_abort("{.arg cutoff} must be a single number in (0, 1].", class = "enrichVolcano_param_error")
-  }
-
+  method <- rlang::arg_match(method)
   res <- x@results
   res[intersect(c("dedup_status", "merged_into", "similarity", "overlap_jaccard"), names(res))] <- NULL
-  sim <- switch(similarity,
-    combined = combined_similarity,
-    jaccard = jaccard
-  )
-  x@results <- cbind(res, flag_redundant(res, gene_sets, sim, cutoff, p_threshold))
+
+  if (method == "enrichmentmap") {
+    similarity <- rlang::arg_match(similarity)
+    cutoff <- cutoff %||% c(combined = 0.375, jaccard = 0.5)[[similarity]]
+    if (!is.numeric(cutoff) || length(cutoff) != 1 || is.na(cutoff) || cutoff <= 0 || cutoff > 1) {
+      ev_abort("{.arg cutoff} must be a single number in (0, 1].", class = "enrichVolcano_param_error")
+    }
+    sim <- switch(similarity,
+      combined = combined_similarity,
+      jaccard = jaccard
+    )
+    flags <- flag_redundant(res, gene_sets, sim, cutoff, p_threshold)
+  } else {
+    check_collapse_inputs(x, stats)
+    similarity <- NULL
+    cutoff <- NULL
+    flags <- flag_collapsed(res, gene_sets, stats, p_threshold)
+  }
+
+  x@results <- cbind(res, flags)
   x@metadata$dedup <- list(
     method = method, similarity = similarity, cutoff = cutoff, p_threshold = p_threshold
   )
   x
+}
+
+check_collapse_inputs <- function(x, stats) {
+  if (!x@metadata$enrichment_test %in% c("fgsea", "gseaResult")) {
+    ev_abort(
+      c(
+        "{.val collapse_pathways} needs ranked GSEA results, not {.val {x@metadata$enrichment_test}}.",
+        i = "Use {.code method = \"enrichmentmap\"} for these."
+      ),
+      class = "enrichVolcano_input_error"
+    )
+  }
+  if (is.null(stats)) {
+    ev_abort(
+      "{.val collapse_pathways} needs {.arg stats}: the ranking each contrast was tested on.",
+      class = "enrichVolcano_param_error"
+    )
+  }
+  missing <- setdiff(unique(x@results$contrast), names(stats))
+  if (length(missing) > 0) {
+    ev_abort("{.arg stats} has no ranking for contrast{?s} {.val {missing}}.",
+      class = "enrichVolcano_input_error"
+    )
+  }
+  rlang::check_installed(c("fgsea", "data.table"), reason = "for `method = \"collapse_pathways\"`.")
+}
+
+flag_collapsed <- function(res, gene_sets, stats, p_threshold) {
+  status <- rep(NA_character_, nrow(res))
+  merged_into <- rep(NA_character_, nrow(res))
+
+  sig <- significant_rows(res, gene_sets, p_threshold)
+  status[sig] <- "kept"
+  sig <- sig[res$term[sig] %in% names(gene_sets)]
+  for (rows in split(sig, paste(res$contrast[sig], res$database[sig], sep = "\r"))) {
+    rows <- rows[order(res$p[rows])]
+    fg <- data.table::data.table(
+      pathway = res$term[rows], ES = res$score[rows],
+      pval = res$p[rows], padj = res$padj[rows]
+    )
+    collapsed <- fgsea::collapsePathways(
+      fg, gene_sets, stats[[res$contrast[rows[1]]]],
+      pval.threshold = p_threshold
+    )
+    parent <- collapsed$parentPathways[res$term[rows]]
+    status[rows] <- ifelse(is.na(parent), "kept", "redundant")
+    merged_into[rows] <- unname(parent)
+  }
+  data.frame(dedup_status = status, merged_into = merged_into, similarity = NA_real_)
 }
 
 flag_redundant <- function(res, gene_sets, sim, cutoff, p_threshold) {
@@ -80,13 +151,7 @@ flag_redundant <- function(res, gene_sets, sim, cutoff, p_threshold) {
   merged_into <- rep(NA_character_, nrow(res))
   similarity <- rep(NA_real_, nrow(res))
 
-  sig <- which(!is.na(res$padj) & res$padj < p_threshold)
-  no_set <- setdiff(res$term[sig], names(gene_sets))
-  if (length(no_set) > 0) {
-    ev_inform("{length(no_set)} term{?s} had no gene set and {?was/were} kept.",
-      class = "enrichVolcano_dedup_missing_sets"
-    )
-  }
+  sig <- significant_rows(res, gene_sets, p_threshold)
 
   for (rows in split(sig, paste(res$contrast[sig], res$database[sig], sep = "\r"))) {
     kept <- integer(0)
@@ -105,6 +170,17 @@ flag_redundant <- function(res, gene_sets, sim, cutoff, p_threshold) {
     }
   }
   data.frame(dedup_status = status, merged_into = merged_into, similarity = similarity)
+}
+
+significant_rows <- function(res, gene_sets, p_threshold) {
+  sig <- which(!is.na(res$padj) & res$padj < p_threshold)
+  no_set <- setdiff(res$term[sig], names(gene_sets))
+  if (length(no_set) > 0) {
+    ev_inform("{length(no_set)} term{?s} had no gene set and {?was/were} kept.",
+      class = "enrichVolcano_dedup_missing_sets"
+    )
+  }
+  sig
 }
 
 jaccard <- function(a, b) {

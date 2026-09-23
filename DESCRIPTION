@@ -28,6 +28,8 @@ Imports:
     stringr
 Suggests:
     covr,
+    data.table,
+    fgsea,
     knitr,
     pkgdown,
     rmarkdown,

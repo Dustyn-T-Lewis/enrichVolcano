@@ -7,10 +7,11 @@
 dedup(
   x,
   gene_sets,
-  method = "enrichmentmap",
+  method = c("enrichmentmap", "collapse_pathways"),
   similarity = c("combined", "jaccard"),
   cutoff = NULL,
-  p_threshold = 0.05
+  p_threshold = 0.05,
+  stats = NULL
 )
 }
 \arguments{
@@ -19,15 +20,20 @@ dedup(
 \item{gene_sets}{A named list of character vectors, one per term, holding
 the full gene sets that were tested. Terms without a set are kept.}
 
-\item{method}{\code{"enrichmentmap"}.}
+\item{method}{\code{"enrichmentmap"} (gene-set overlap) or \code{"collapse_pathways"}
+(conditional enrichment).}
 
-\item{similarity}{\code{"combined"} or \code{"jaccard"}.}
+\item{similarity}{For \code{"enrichmentmap"}: \code{"combined"} or \code{"jaccard"}.}
 
-\item{cutoff}{Similarity at or above which a term is redundant. \code{NULL}
-takes 0.375 for \code{"combined"} and 0.5 for \code{"jaccard"}.}
+\item{cutoff}{For \code{"enrichmentmap"}: similarity at or above which a term is
+redundant. \code{NULL} takes 0.375 for \code{"combined"} and 0.5 for \code{"jaccard"}.}
 
 \item{p_threshold}{Only terms with \code{padj} below this are compared; the rest
-are left unflagged (\code{NA}).}
+are left unflagged (\code{NA}). For \code{"collapse_pathways"} it is also the
+conditional p-value threshold.}
+
+\item{stats}{For \code{"collapse_pathways"}: a named list with one ranking (named
+numeric vector of gene statistics) per contrast.}
 }
 \value{
 \code{x}, with \code{dedup_status} (\code{"kept"}, \code{"redundant"} or \code{NA}),
@@ -56,6 +62,17 @@ the mean of the Jaccard index and the overlap coefficient
 catches a small set nested inside a large one, which Jaccard misses.
 \item \code{"jaccard"} (cutoff 0.5) uses shared genes over all genes in either set.
 }
+}
+
+\section{\code{method = "collapse_pathways"}}{
+
+Runs \code{\link[fgsea:collapsePathways]{fgsea::collapsePathways()}} within each contrast and database: a term
+is redundant when it is no longer enriched once the genes of a more
+significant term are conditioned on. This is a statistical criterion, not
+an overlap rule, so it needs the ranking each contrast was tested on and
+applies only to ranked GSEA results (fgsea, clusterProfiler). It permutes,
+so call \code{\link[=set.seed]{set.seed()}} first for reproducible flags. The p-values it computes
+decide redundancy only; the reported \code{padj} stay those of the original run.
 }
 
 \references{

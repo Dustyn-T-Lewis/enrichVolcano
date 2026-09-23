@@ -109,3 +109,79 @@ test_that("bad inputs are refused with classed errors", {
   expect_error(dedup(x, sets, cutoff = c(0.3, 0.4)), class = "enrichVolcano_param_error")
   expect_error(dedup(x, sets, similarity = "cosine"), class = "rlang_error")
 })
+
+fgsea_example <- function() {
+  skip_if_not_installed("fgsea")
+  skip_if_not_installed("data.table")
+  pathways <- NULL
+  ranks <- NULL
+  utils::data("examplePathways", package = "fgsea", envir = environment())
+  utils::data("exampleRanks", package = "fgsea", envir = environment())
+  pathways <- get("examplePathways")[1:40]
+  ranks <- get("exampleRanks")
+  withr::local_seed(1)
+  res <- fgsea::fgsea(pathways, ranks, minSize = 15, maxSize = 500)
+  list(res = res, pathways = pathways, ranks = ranks)
+}
+
+test_that("collapse_pathways reproduces fgsea::collapsePathways", {
+  fx <- fgsea_example()
+  x <- suppressMessages(as_enrichment(list(A = fx$res)))
+
+  sig <- fx$res[fx$res$padj < 0.05, ]
+  sig <- sig[order(sig$pval), ]
+  expected <- withr::with_seed(2, fgsea::collapsePathways(sig, fx$pathways, fx$ranks))
+  y <- withr::with_seed(2, dedup(x, fx$pathways, method = "collapse_pathways", stats = list(A = fx$ranks)))
+
+  r <- y@results
+  in_sig <- r$term %in% sig$pathway
+  expect_setequal(r$term[in_sig & r$dedup_status == "kept"], expected$mainPathways)
+  parents <- expected$parentPathways[!is.na(expected$parentPathways)]
+  expect_identical(
+    r$merged_into[match(names(parents), r$term)],
+    unname(parents)
+  )
+  expect_true(all(is.na(r$dedup_status[!in_sig])))
+  expect_true(all(is.na(r$similarity)))
+  expect_identical(
+    y@metadata$dedup,
+    list(method = "collapse_pathways", similarity = NULL, cutoff = NULL, p_threshold = 0.05)
+  )
+})
+
+test_that("collapse_pathways needs a ranking for every contrast", {
+  fx <- fgsea_example()
+  x <- suppressMessages(as_enrichment(list(A = fx$res, B = fx$res)))
+  expect_error(
+    dedup(x, fx$pathways, method = "collapse_pathways"),
+    class = "enrichVolcano_param_error"
+  )
+  expect_error(
+    dedup(x, fx$pathways, method = "collapse_pathways", stats = list(A = fx$ranks)),
+    "B",
+    class = "enrichVolcano_input_error"
+  )
+})
+
+test_that("collapse_pathways refuses results that were not ranked GSEA", {
+  fry <- utils::read.csv(test_path("fixtures", "limma_fry.csv"), row.names = 1)
+  x <- suppressMessages(as_enrichment(list(A = fry)))
+  sets <- list(SET_UP = "G1", SET_DOWN = "G11", SET_NULL = "G41")
+  expect_error(
+    dedup(x, sets, method = "collapse_pathways", stats = list(A = c(G1 = 1))),
+    class = "enrichVolcano_input_error"
+  )
+})
+
+test_that("collapse_pathways keeps terms that have no gene set", {
+  fx <- fgsea_example()
+  x <- suppressMessages(as_enrichment(list(A = fx$res)))
+  top <- x@results$term[which.min(x@results$padj)]
+  sets <- fx$pathways[setdiff(names(fx$pathways), top)]
+  withr::local_seed(2)
+  expect_message(
+    y <- dedup(x, sets, method = "collapse_pathways", stats = list(A = fx$ranks)),
+    "1 term"
+  )
+  expect_identical(y@results$dedup_status[y@results$term == top], "kept")
+})
