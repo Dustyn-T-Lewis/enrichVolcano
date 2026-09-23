@@ -48,8 +48,11 @@ test_that("Hallmark loads 50 sets and records its version", {
 test_that("the pinned GO slim maps to genes and records its release", {
   skip_if_not_installed("org.Hs.eg.db")
   sets <- load_gene_sets("GO Slim", min_size = 1, max_size = Inf)
-  expect_gt(length(sets$`GO Slim`), 100)
-  expect_true(all(grepl("^GO:", names(sets$`GO Slim`))))
+  slim <- sets$`GO Slim`
+  expect_gt(length(slim), 50)
+  expect_true(all(grepl("^GOSLIM_[A-Z0-9_]+$", names(slim))))
+  expect_true("GOSLIM_PROTEIN_FOLDING" %in% names(slim))
+  expect_false("GOSLIM_MITOCHONDRION" %in% names(slim))
   expect_identical(attr(sets, "versions")$go_slim, "go/releases/2026-07-26/subsets/goslim_generic.owl")
 })
 

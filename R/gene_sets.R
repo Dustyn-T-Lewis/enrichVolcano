@@ -45,10 +45,11 @@ map_symbols <- function(ids, species) {
 #'
 #' * `"Hallmark"`, `"Reactome"`, `"KEGG"` (KEGG MEDICUS) and `"GO:BP"` come from
 #'   msigdbr; mouse and rat sets are human sets mapped through orthologs.
-#' * `"GO Slim"` is the GO Consortium's generic slim, pinned in this package
-#'   (release 2026-07-26), with each term's genes taken from the species'
-#'   annotation package, counting genes annotated to the term or any of its
-#'   descendants.
+#' * `"GO Slim"` is the biological-process part of the GO Consortium's generic
+#'   slim, pinned in this package (release 2026-07-26), with each term's genes
+#'   taken from the species' annotation package, counting genes annotated to
+#'   the term or any of its descendants. Sets are named like
+#'   `GOSLIM_PROTEIN_FOLDING`.
 #'
 #' Each collection is kept separate so [run_enrichment()] corrects p-values
 #' within it.
@@ -95,14 +96,30 @@ load_gene_sets <- function(collections = c("Hallmark", "GO Slim"), species = "Ho
 
 go_slim_sets <- function(pkg) {
   obo <- readLines(system.file("extdata", "goslim_generic.obo.gz", package = "enrichVolcano"))
-  ids <- sub("^id: ", "", grep("^id: GO:", obo, value = TRUE))
+  terms <- go_slim_terms(obo)
   db <- getExportedValue(pkg, pkg)
   go2genes <- getExportedValue(pkg, sub("\\.db$", "GO2ALLEGS", pkg))
-  entrez <- AnnotationDbi::mget(intersect(ids, AnnotationDbi::keys(go2genes)), go2genes)
+  terms <- terms[terms$id %in% AnnotationDbi::keys(go2genes), ]
+  entrez <- AnnotationDbi::mget(terms$id, go2genes)
   sets <- lapply(entrez, function(genes) {
     symbols <- suppressMessages(AnnotationDbi::mapIds(db, unique(genes), "SYMBOL", "ENTREZID"))
     unique(unname(symbols[!is.na(symbols)]))
   })
+  names(sets) <- terms$set_name
   attr(sets, "data_version") <- sub("^data-version: ", "", grep("^data-version:", obo, value = TRUE)[1])
   sets
+}
+
+go_slim_terms <- function(obo) {
+  stanzas <- split(obo, cumsum(obo == "[Term]"))[-1]
+  field <- function(lines, tag) sub(paste0("^", tag, ": "), "", grep(paste0("^", tag, ": "), lines, value = TRUE)[1])
+  terms <- data.frame(
+    id = vapply(stanzas, field, character(1), tag = "id"),
+    name = vapply(stanzas, field, character(1), tag = "name"),
+    namespace = vapply(stanzas, field, character(1), tag = "namespace"),
+    obsolete = vapply(stanzas, function(lines) any(lines == "is_obsolete: true"), logical(1))
+  )
+  terms <- terms[terms$namespace == "biological_process" & !terms$obsolete, ]
+  terms$set_name <- paste0("GOSLIM_", gsub("^_|_$", "", toupper(gsub("[^A-Za-z0-9]+", "_", terms$name))))
+  terms
 }

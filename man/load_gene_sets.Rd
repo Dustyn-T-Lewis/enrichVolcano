@@ -32,10 +32,11 @@ those versions, so an analysis can state exactly what it tested.
 \itemize{
 \item \code{"Hallmark"}, \code{"Reactome"}, \code{"KEGG"} (KEGG MEDICUS) and \code{"GO:BP"} come from
 msigdbr; mouse and rat sets are human sets mapped through orthologs.
-\item \code{"GO Slim"} is the GO Consortium's generic slim, pinned in this package
-(release 2026-07-26), with each term's genes taken from the species'
-annotation package, counting genes annotated to the term or any of its
-descendants.
+\item \code{"GO Slim"} is the biological-process part of the GO Consortium's generic
+slim, pinned in this package (release 2026-07-26), with each term's genes
+taken from the species' annotation package, counting genes annotated to
+the term or any of its descendants. Sets are named like
+\code{GOSLIM_PROTEIN_FOLDING}.
 }
 
 Each collection is kept separate so \code{\link[=run_enrichment]{run_enrichment()}} corrects p-values
