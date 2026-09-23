@@ -15,7 +15,8 @@ The study, as \code{\link[=read_study]{read_study()}} returns it, with its index
 }
 \description{
 Seven proteomics studies from one lab, prepared as \code{\link[=read_study]{read_study()}} inputs.
-Two limpa studies (\code{bfr_limpa}, \code{mouse_pas}) include the matrix, samples,
+The three limpa studies (\code{bfr_limpa}, \code{mouse_pas}, \code{yvo}) include the
+matrix, samples,
 contrasts and precision weights, so every test in \code{\link[=run_enrichment]{run_enrichment()}} runs on
 them; the rest ship DA results only, for fgsea and the figures. Call with no
 name to list them with their species and designs.

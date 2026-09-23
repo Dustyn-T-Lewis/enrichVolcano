@@ -156,7 +156,8 @@ matched_weights <- function(tbl, matrix) {
 #' Example studies shipped with the package
 #'
 #' Seven proteomics studies from one lab, prepared as [read_study()] inputs.
-#' Two limpa studies (`bfr_limpa`, `mouse_pas`) include the matrix, samples,
+#' The three limpa studies (`bfr_limpa`, `mouse_pas`, `yvo`) include the
+#' matrix, samples,
 #' contrasts and precision weights, so every test in [run_enrichment()] runs on
 #' them; the rest ship DA results only, for fgsea and the figures. Call with no
 #' name to list them with their species and designs.

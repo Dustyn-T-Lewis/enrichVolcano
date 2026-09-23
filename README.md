@@ -95,4 +95,5 @@ Earlier releases stay installable from their tags.
 
 ## License
 
-MIT. See `LICENSE`.
+MIT for the code; see `LICENSE`. The example data are CC BY 4.0; see
+`inst/extdata/studies/LICENSE.md`.

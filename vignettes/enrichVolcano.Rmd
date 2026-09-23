@@ -40,40 +40,36 @@ remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
 
 ## Quick start
 
-The `yvo` example study holds limma results for four contrasts (young and
-old muscle, before and after training). Its fgsea results cover five gene-set
-collections: MSigDB Hallmark, KEGG MEDICUS, Reactome and GO:BP from msigdbr
-26.1.0, and the GO Consortium's generic GO slim (release 2026-07-26).
+The `yvo` example study is human muscle from 32 people, young and old,
+before and after resistance training: 2,106 proteins in 62 samples, quantified
+with limpa, with four contrasts. It ships every sheet a study can have, so the
+whole workflow runs on it:
 
 ```{r read}
 library(enrichVolcano)
 
-da <- example_study("yvo")$da
-ex <- as_enrichment(read.csv(
-  system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano")
-))
-ex
+yvo <- example_study("yvo")
+sets <- load_gene_sets(c("Hallmark", "GO Slim"))
+set.seed(1)
+res <- run_enrichment(yvo, sets)
+res$fgsea
 ```
 
-`as_enrichment()` recognised fgsea output from its columns and split the table
-by its `contrast` column. `da` came through `as_da()`, which gives every DA
-table the same column names and looks up current gene symbols for the UniProt
-accessions.
+`example_study()` read the study through `read_study()`, which checked that its
+sheets agree and looked up current gene symbols for the UniProt accessions.
+`run_enrichment()` returned one result per test; here is the fgsea one drawn
+around the volcano:
 
 ```{r ring, fig.alt = "Volcano of Training_Young proteins inside a ring of enriched Hallmark and GO slim terms"}
-volcano_ring(da, ex,
-  contrast = "Training_Young", databases = c("Hallmark", "GO Slim"),
-  title = "Training, young"
-)
+volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young", title = "Training, young")
 ```
 
 Arc fill is NES and arc height is \(-\log_{10}\)(padj). Up-regulated terms sit
 on the upper half, down-regulated ones on the lower. Ticks run from each arc
 to its leading-edge proteins in the volcano. The ring takes the twelve most
-significant terms (padj < 0.05), in either direction. `databases` limits them
-to named collections, here Hallmark and GO slim; left at its default, `NULL`,
-every collection in the object competes. `term_threshold`, `n_terms` and
-`terms` change the selection further.
+significant terms (padj < 0.05), in either direction, from every collection in
+the object; `databases`, `term_threshold`, `n_terms` and `terms` change the
+selection.
 
 ## Your data
 
@@ -107,20 +103,16 @@ The package ships seven studies in this format:
 example_study()[c("name", "species")]
 ```
 
-`bfr_limpa` and `mouse_pas` include every sheet; the others ship DA results
-only.
+`yvo`, `bfr_limpa` and `mouse_pas` include every sheet; the others ship DA
+results only.
 
 ## Run the enrichment
 
 `run_enrichment()` tests each contrast against gene-set collections from
 `load_gene_sets()`, which records the msigdbr version and GO slim release it
-used. The mouse study is small enough to run here:
+used. The quick start ran all three tests on `yvo`:
 
 ```{r run}
-mouse <- example_study("mouse_pas")
-sets <- load_gene_sets("Hallmark", species = "Mus musculus")
-set.seed(1)
-res <- run_enrichment(mouse, sets, inter_gene_cor = NA)
 names(res)
 res$camera
 ```
@@ -135,15 +127,16 @@ represents it.
 A `subject` column marks repeated measures. By default the samples of one
 subject are treated as correlated (`subject_effect = "block"`); fry handles
 that directly, and camera, which cannot, is replaced by `cameraPR()` on the
-blocked fit. `subject_effect = "fixed"` puts subject in the design instead.
-camera assumes a correlation between genes in a set; limma's default is 0.01,
-and `inter_gene_cor = NA` estimates it from the data, which can change results
-substantially.
+blocked fit, which is why `res$camera` above reports `cameraPR`.
+`subject_effect = "fixed"` puts subject in the design instead. camera assumes
+a correlation between genes in a set; limma's default is 0.01, and
+`inter_gene_cor = NA` estimates it from the data (unblocked designs only),
+which can change results substantially.
 
-Each result is an `enrichment` object, so the figures read it directly:
+Each result is an `enrichment` object, so every figure reads any of them:
 
-```{r run-ring, fig.alt = "Volcano of the mouse treatment contrast ringed by Hallmark terms from fgsea"}
-volcano_ring(mouse$da, res$fgsea, contrast = "PAS_vs_VEH_female", title = "PAS vs vehicle, female")
+```{r run-ring, fig.alt = "Volcano of the Aging contrast ringed by gene sets tested with fry"}
+volcano_ring(yvo$da, res$fry, contrast = "Aging", title = "Aging, fry")
 ```
 
 ## Choose gene-set collections
@@ -155,32 +148,37 @@ to avoid overlapping terms, so every arc says something different. Larger
 collections such as GO:BP or Reactome find more specific terms but need
 `dedup()`.
 
-Hallmark comes from msigdbr (CRAN). The GO slim is a list of GO IDs; mapping
-it to genes needs AnnotationDbi and org.Hs.eg.db (Bioconductor), counting
-genes annotated to each term or any of its descendants:
+`load_gene_sets()` fetches them for human, mouse or rat. Hallmark, Reactome,
+KEGG MEDICUS and GO:BP come from msigdbr (mouse and rat through orthologs). The
+GO slim is the biological-process part of the GO Consortium's generic slim,
+pinned in the package, with genes taken from the species' annotation package
+(org.Hs.eg.db, org.Mm.eg.db or org.Rn.eg.db), counting genes annotated to each
+term or any of its descendants:
 
-```{r collections, eval = FALSE}
-h <- msigdbr::msigdbr(species = "Homo sapiens", collection = "H")
-hallmark <- split(h$gene_symbol, h$gs_name)
-
-obo <- readLines("https://current.geneontology.org/ontology/subsets/goslim_generic.obo")
-slim <- sub("^id: ", "", grep("^id: GO:", obo, value = TRUE))
-entrez <- AnnotationDbi::mget(slim, org.Hs.eg.db::org.Hs.egGO2ALLEGS, ifnotfound = NA)
-entrez <- Filter(function(ids) !all(is.na(ids)), entrez)
-go_slim <- lapply(entrez, function(ids) {
-  unique(AnnotationDbi::mapIds(org.Hs.eg.db::org.Hs.eg.db, unique(ids), "SYMBOL", "ENTREZID"))
-})
+```{r collections}
+lengths(sets)
+attr(sets, "versions")
 ```
 
-The slim spans all three GO namespaces and its terms are broad (a median of
-about 570 human genes), so fgsea's `maxSize` drops some of them; the example
-data used sets of 15 to 500 genes. Test each collection as its own family, so
-padj is corrected within it, and record `packageVersion("msigdbr")` and the
-OBO file's `data-version` line with your methods.
+Slim terms are broad, so the 15 to 500 gene window drops some of them. Each
+collection is tested as its own family, so padj is corrected within it.
+`attr(sets, "versions")` records what to cite in your methods.
 
 ## Convert enrichment you already have
 
-Every tool below ends in the same object. Pass one table per contrast as a
+`as_enrichment()` reads enrichment results you computed elsewhere. The package
+ships YvO's published fgsea results, from the original proteoDA analysis, in
+the form fgsea wrote them:
+
+```{r ex}
+ex <- as_enrichment(read.csv(
+  system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano")
+))
+ex
+```
+
+It recognised fgsea output from its columns and split the table by its
+`contrast` column. Every tool below ends in the same object. Pass one table per contrast as a
 named list, or one table with a `contrast` column.
 
 ### fgsea
@@ -235,7 +233,7 @@ fry_x <- as_enrichment(list(Training_Young = fry_res), database = "Hallmark")
 ```
 
 ```{r fry-ring, fig.alt = "Volcano ring drawn from fry results, with arcs coloured by signed -log10 FDR and no tick lines"}
-volcano_ring(da, fry_x, contrast = "Training_Young", title = "fry")
+volcano_ring(yvo$da, fry_x, contrast = "Training_Young", title = "fry")
 ```
 
 With no NES to encode, arc fill carries the signed \(-\log_{10}\)(FDR) and arc
@@ -321,24 +319,30 @@ statistical test, so it needs the ranking each contrast was tested on, works
 only for ranked GSEA results, and should be reported as its own analysis.
 Call `set.seed()` first; it permutes.
 
-The example object carries flags computed upstream with the Jaccard rule.
-`as_enrichment()` keeps them and records the object as `precomputed`:
+The published fgsea results carry flags computed upstream with the Jaccard
+rule. `as_enrichment()` keeps them and records the object as `precomputed`:
 
 ```{r flags}
 table(ex@results$dedup_status, ex@results$database, useNA = "ifany")
 ```
 
 Hallmark and GO slim lose nothing because both are built to be non-redundant.
-The flags matter once you draw from GO:BP or Reactome:
+Deduplication matters for large collections such as Reactome:
 
-```{r reactome, fig.alt = "Volcano ring drawn from Reactome terms with redundant terms hidden"}
-volcano_ring(da, ex, contrast = "Training_Young", databases = "Reactome", title = "Reactome")
+```{r reactome, fig.alt = "Volcano of the Aging contrast ringed by Reactome terms with redundant terms hidden"}
+reactome <- load_gene_sets("Reactome")
+set.seed(1)
+aging <- run_enrichment(yvo, reactome, tests = "fgsea")$fgsea
+aging <- dedup(aging, reactome$Reactome)
+volcano_ring(yvo$da, aging, contrast = "Aging", title = "Aging, Reactome")
 ```
 
 ## Compare two contrasts
 
 `nes_scatter()` plots every term's score in one contrast against its score in
-another. It answers two kinds of question, set by `comparison`.
+another. It answers two kinds of question, set by `comparison`. The examples
+below draw from the published fgsea results, `ex`; `res$fgsea` works the same
+way.
 
 The default, `comparison = "concordance"`, asks whether two conditions
 regulate the same pathways. Terms in the shaded top-right and bottom-left
@@ -375,8 +379,8 @@ work as they do for the ring.
 `volcano_ring_theme()` holds the palette; the plot arguments hold the layout.
 
 ```{r palette, eval = FALSE}
-volcano_ring(da, ex,
-  contrast = "Training_Young", databases = c("Hallmark", "GO Slim"),
+volcano_ring(yvo$da, res$fgsea,
+  contrast = "Training_Young",
   theme = volcano_ring_theme(palette = "okabe"),
   label_mode = "top_per_direction", label_n = 4
 )
@@ -395,6 +399,6 @@ The arguments you will reach for most:
 legend; extra arguments pass to every ring.
 
 ```{r grid, fig.width = 10, fig.height = 5.5, fig.alt = "Two volcano rings side by side for trained young and trained old"}
-g <- volcano_ring_grid(da, ex, contrasts = c("Training_Young", "Training_Old"), ncol = 2)
+g <- volcano_ring_grid(yvo$da, res$fgsea, contrasts = c("Training_Young", "Training_Old"), ncol = 2)
 g$plot
 ```

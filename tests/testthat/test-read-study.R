@@ -146,9 +146,18 @@ test_that("a shipped study loads with its species", {
 
 test_that("a DA-only shipped study has no matrix", {
   skip_if_not_installed("org.Hs.eg.db")
-  s <- quietly(example_study("yvo"))
+  s <- quietly(example_study("cvh"))
   expect_null(s$matrix)
-  expect_setequal(unique(s$da$contrast), c("Training_Young", "Training_Old", "Aging", "Interaction"))
+  expect_identical(length(unique(s$da$contrast)), 7L)
+})
+
+test_that("the YvO study ships its limpa matrix, weights and design", {
+  skip_if_not_installed("org.Hs.eg.db")
+  s <- quietly(example_study("yvo"))
+  expect_identical(dim(s$matrix), c(2106L, 62L))
+  expect_identical(dim(s$weights), dim(s$matrix))
+  expect_identical(length(unique(s$samples$subject)), 32L)
+  expect_setequal(s$contrasts$name, c("Training_Young", "Training_Old", "Aging", "Interaction"))
 })
 
 test_that("an unknown example study is refused", {
