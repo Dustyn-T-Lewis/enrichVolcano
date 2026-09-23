@@ -52,7 +52,9 @@ volcano_ring(
 )
 }
 \arguments{
-\item{volc_df}{Tidy DA table for the contrast being drawn.}
+\item{volc_df}{DA results from \code{\link[=as_da]{as_da()}}; the rows for \code{contrast} are drawn.
+A plain table still works through the column arguments but is deprecated
+and will be refused in 2.0.0.}
 
 \item{enrichment}{An \link{enrichment} object; see \code{\link[=as_enrichment]{as_enrichment()}}.}
 
@@ -71,7 +73,8 @@ Skipped, with a note, when the object has no database labels.}
 
 \item{terms}{Optional character vector of exact term names to draw instead.}
 
-\item{gene_col, logfc_col, pval_col, padj_col}{Column names in \code{volc_df}.}
+\item{gene_col, logfc_col, pval_col, padj_col}{Column names in a plain
+\code{volc_df}; ignored for \code{\link[=as_da]{as_da()}} output. Deprecated.}
 
 \item{volc_sig_col}{Optional column in \code{volc_df} used to call point
 significance (e.g. a pi-value), decoupled from \code{padj_col}. \code{NULL} falls
@@ -169,16 +172,12 @@ all of this with a hand-picked set.
 }
 
 \examples{
-da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
+da <- as_da(read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
   package = "enrichVolcano"
-))
+)))
 ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
   package = "enrichVolcano"
 )))
 
-ctr <- "Training_Young"
-da1 <- da[da$contrast == ctr, ]
-names(da1)[names(da1) == "adj.P.Val"] <- "padj"
-
-volcano_ring(da1, ex, contrast = ctr, title = ctr)
+volcano_ring(da, ex, contrast = "Training_Young", title = "Training_Young")
 }

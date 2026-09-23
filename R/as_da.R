@@ -47,7 +47,8 @@ da_candidates <- list(
 #'
 #' @return A data frame of class `enrichVolcano_da` with columns `protein`,
 #'   `gene`, `contrast`, `logFC`, `t`, `p`, `padj`, `abundance`, `rank` and
-#'   `rank_stat`.
+#'   `rank_stat`, followed by any input columns it did not use (for example a
+#'   pi-value column for `volcano_ring(volc_sig_col = )`).
 #' @export
 #' @examples
 #' tbl <- data.frame(
@@ -87,10 +88,8 @@ as_da <- function(x, contrast = NULL, species = "Homo sapiens", protein = NULL, 
   }, tables, names(tables)))
   validate_da(out)
   out <- lookup_genes(out, species)
-  structure(
-    out[c("protein", "gene", "contrast", "logFC", "t", "p", "padj", "abundance", "rank", "rank_stat")],
-    class = c("enrichVolcano_da", "data.frame")
-  )
+  core <- c("protein", "gene", "contrast", "logFC", "t", "p", "padj", "abundance", "rank", "rank_stat")
+  structure(out[c(core, setdiff(names(out), core))], class = c("enrichVolcano_da", "data.frame"))
 }
 
 standardise_da <- function(tbl, cols) {
@@ -123,8 +122,9 @@ standardise_da <- function(tbl, cols) {
   }
   column <- function(name) if (is.na(stat[[name]])) NA_real_ else as.numeric(tbl[[stat[[name]]]])
 
+  ids <- protein_ids(tbl, stat[["protein"]], stat[["gene"]])
   res <- data.frame(
-    protein = protein_ids(tbl, stat[["protein"]], stat[["gene"]]),
+    protein = ids$ids,
     logFC = as.numeric(tbl[[logfc_col]]),
     t = column("t"), p = column("p"), padj = column("padj"), abundance = column("abundance"),
     stringsAsFactors = FALSE
@@ -133,23 +133,26 @@ standardise_da <- function(tbl, cols) {
   ranked <- rank_statistic(res, stat)
   res$rank <- ranked$rank
   res$rank_stat <- ranked$label
+  used <- c(logfc_col, stat[!is.na(stat)], ids$col)
+  extras <- tbl[setdiff(names(tbl), used)]
   rownames(res) <- NULL
-  res
+  rownames(extras) <- NULL
+  cbind(res, extras)
 }
 
 protein_ids <- function(tbl, col, gene_col) {
   if (!is.na(col)) {
-    return(as.character(tbl[[col]]))
+    return(list(ids = as.character(tbl[[col]]), col = col))
   }
   unnamed <- intersect(c("X", "", "...1"), names(tbl))
   if (length(unnamed) > 0) {
-    return(as.character(tbl[[unnamed[1]]]))
+    return(list(ids = as.character(tbl[[unnamed[1]]]), col = unnamed[1]))
   }
   if (!all(grepl("^[0-9]+$", rownames(tbl)))) {
-    return(rownames(tbl))
+    return(list(ids = rownames(tbl), col = NULL))
   }
   if (!is.na(gene_col)) {
-    return(unwrap_excel(tbl[[gene_col]]))
+    return(list(ids = unwrap_excel(tbl[[gene_col]]), col = gene_col))
   }
   ev_abort_missing_column(tbl, "protein", "protein", "x")
 }

@@ -22,8 +22,9 @@ volcano_ring_grid(
 )
 }
 \arguments{
-\item{volc_dfs}{Named list of tidy DA tibbles, one per contrast. A single
-data.frame carrying a \code{contrast} column is also accepted and is split.}
+\item{volc_dfs}{DA results from \code{\link[=as_da]{as_da()}} covering the contrasts drawn. A
+named list of plain tables, or one with a \code{contrast} column, still works
+but is deprecated.}
 
 \item{enrichment}{An \link{enrichment} object holding every contrast drawn.}
 
@@ -72,13 +73,12 @@ An S3 object \code{c("volcano_ring_grid", "list")} with elements
 Compose a grid of \code{volcano_ring()} plots, one per contrast
 }
 \examples{
-da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
+da <- as_da(read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
   package = "enrichVolcano"
-))
+)))
 ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
   package = "enrichVolcano"
 )))
-names(da)[names(da) == "adj.P.Val"] <- "padj"
 
 g <- volcano_ring_grid(da, ex, contrasts = c("Training_Young", "Training_Old"))
 g$plot

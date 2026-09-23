@@ -119,3 +119,10 @@ test_that("impossible values and duplicate rows are refused", {
   dup <- data.frame(protein = c("P1", "P1"), logFC = c(1, 2), p = c(0.1, 0.2))
   expect_error(as_da(dup, contrast = "A"), "duplicate", class = "enrichVolcano_data_error")
 })
+
+test_that("columns as_da does not use are kept for later", {
+  tbl <- data.frame(protein = c("P1", "P2"), logFC = c(1, -1), P.Value = c(0.01, 0.02), pi_eq2 = c(0.1, 0.3))
+  d <- as_da(tbl, contrast = "A", species = NULL)
+  expect_equal(d$pi_eq2, c(0.1, 0.3))
+  expect_false("P.Value" %in% names(d))
+})

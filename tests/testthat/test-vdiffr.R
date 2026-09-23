@@ -7,7 +7,7 @@ source(test_path("fixtures/make_toy.R"))
 test_that("default palette toy snapshot is stable", {
   skip_on_ci()
   skip_if_not_installed("vdiffr")
-  p <- suppressMessages(volcano_ring(make_toy_volc(), make_toy_ring_enrichment(),
+  p <- suppressMessages(volcano_ring(make_toy_da(), make_toy_ring_enrichment(),
     databases = NULL, term_threshold = 1, n_terms = Inf,
     title = "toy default"
   ))
@@ -17,7 +17,7 @@ test_that("default palette toy snapshot is stable", {
 test_that("viridis palette toy snapshot is stable", {
   skip_on_ci()
   skip_if_not_installed("vdiffr")
-  p <- suppressMessages(volcano_ring(make_toy_volc(), make_toy_ring_enrichment(),
+  p <- suppressMessages(volcano_ring(make_toy_da(), make_toy_ring_enrichment(),
     databases = NULL, term_threshold = 1, n_terms = Inf,
     title = "toy viridis",
     theme = volcano_ring_theme(palette = "viridis")
@@ -28,7 +28,7 @@ test_that("viridis palette toy snapshot is stable", {
 test_that("magnitude = 'size' toy snapshot is stable", {
   skip_on_ci()
   skip_if_not_installed("vdiffr")
-  p <- suppressMessages(volcano_ring(make_toy_volc(), make_toy_ring_enrichment(),
+  p <- suppressMessages(volcano_ring(make_toy_da(), make_toy_ring_enrichment(),
     databases = NULL, term_threshold = 1, n_terms = Inf,
     title = "toy size", magnitude = "size"
   ))
@@ -39,7 +39,7 @@ test_that("2-panel grid toy snapshot is stable", {
   skip_on_ci()
   skip_if_not_installed("vdiffr")
   g <- suppressMessages(volcano_ring_grid(
-    list(A = make_toy_volc(seed = 1L), B = make_toy_volc(seed = 2L)),
+    make_toy_da(c("A", "B")),
     make_toy_ring_enrichment(c("A", "B")),
     databases = NULL, term_threshold = 1, n_terms = Inf
   ))
