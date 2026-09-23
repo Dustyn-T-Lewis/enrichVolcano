@@ -9,6 +9,7 @@ reference:
       - as_enrichment
       - enrichment
       - load_gene_sets
+      - run_enrichment
       - dedup
   - title: "Plot"
     contents:

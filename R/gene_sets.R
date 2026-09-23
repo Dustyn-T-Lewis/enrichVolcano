@@ -50,7 +50,7 @@ map_symbols <- function(ids, species) {
 #'   annotation package, counting genes annotated to the term or any of its
 #'   descendants.
 #'
-#' Each collection is kept separate so `run_enrichment()` corrects p-values
+#' Each collection is kept separate so [run_enrichment()] corrects p-values
 #' within it.
 #'
 #' @param collections Any of `"Hallmark"`, `"GO Slim"`, `"Reactome"`, `"KEGG"`,

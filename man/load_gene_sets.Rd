@@ -38,6 +38,6 @@ annotation package, counting genes annotated to the term or any of its
 descendants.
 }
 
-Each collection is kept separate so \code{run_enrichment()} corrects p-values
+Each collection is kept separate so \code{\link[=run_enrichment]{run_enrichment()}} corrects p-values
 within it.
 }

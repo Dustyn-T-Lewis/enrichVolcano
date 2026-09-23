@@ -12,7 +12,7 @@ da_candidates <- list(
 #' Standardise differential-abundance results
 #'
 #' Reads a DA results table from any common proteomics tool and returns it with
-#' one set of column names, so the plots and `run_enrichment()` can read it.
+#' one set of column names, so the plots and [run_enrichment()] can read it.
 #'
 #' @section Recognised tools:
 #' limma and limpa `topTable()` (IDs in the row names, or an unnamed first

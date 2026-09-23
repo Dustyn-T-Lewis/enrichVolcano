@@ -39,7 +39,7 @@ A data frame of class \code{enrichVolcano_da} with columns \code{protein},
 }
 \description{
 Reads a DA results table from any common proteomics tool and returns it with
-one set of column names, so the plots and \code{run_enrichment()} can read it.
+one set of column names, so the plots and \code{\link[=run_enrichment]{run_enrichment()}} can read it.
 }
 \section{Recognised tools}{
 
