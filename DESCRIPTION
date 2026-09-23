@@ -30,11 +30,16 @@ Imports:
     scales,
     stringr
 Suggests:
+    AnnotationDbi,
     correlation,
     covr,
     data.table,
     fgsea,
     knitr,
+    msigdbr,
+    org.Hs.eg.db,
+    org.Mm.eg.db,
+    org.Rn.eg.db,
     pkgdown,
     readxl,
     rmarkdown,

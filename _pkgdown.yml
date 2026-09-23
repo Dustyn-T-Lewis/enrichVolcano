@@ -8,6 +8,7 @@ reference:
       - as_da
       - as_enrichment
       - enrichment
+      - load_gene_sets
       - dedup
   - title: "Plot"
     contents:

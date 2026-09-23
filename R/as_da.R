@@ -32,8 +32,18 @@ da_candidates <- list(
 #'   `Label`), a single-contrast table with `contrast` set, or a named list of
 #'   tables whose names are the contrasts.
 #' @param contrast Label for a table that has no contrast column.
+#' @param species For UniProt accessions, the species whose annotation
+#'   package supplies current gene symbols (`"Homo sapiens"`, `"Mus musculus"`,
+#'   `"Rattus norvegicus"`). `NULL` keeps the table's own symbols. Tables keyed
+#'   by symbols rather than accessions keep theirs either way.
 #' @param protein,gene,logfc,t,p,padj,abundance Column names, when detection
 #'   does not find them. `logfc` names the fold-change column.
+#'
+#' @section Gene symbols:
+#' Gene sets list gene symbols, so each UniProt accession is mapped to its
+#' current symbol through the species' annotation package (isoform suffixes
+#' such as `-2` are dropped first). A symbol from the search engine's FASTA can
+#' be out of date: `O00483` is `COXFA4`, formerly `NDUFA4`.
 #'
 #' @return A data frame of class `enrichVolcano_da` with columns `protein`,
 #'   `gene`, `contrast`, `logFC`, `t`, `p`, `padj`, `abundance`, `rank` and
@@ -45,8 +55,8 @@ da_candidates <- list(
 #'   adj.P.Val = c(1e-3, 0.01), row.names = c("P31040", "Q9UBK2")
 #' )
 #' as_da(tbl, contrast = "Aging")
-as_da <- function(x, contrast = NULL, protein = NULL, gene = NULL, logfc = NULL,
-                  t = NULL, p = NULL, padj = NULL, abundance = NULL) {
+as_da <- function(x, contrast = NULL, species = "Homo sapiens", protein = NULL, gene = NULL,
+                  logfc = NULL, t = NULL, p = NULL, padj = NULL, abundance = NULL) {
   cols <- list(
     protein = protein, gene = gene, logFC = logfc, t = t, p = p,
     padj = padj, abundance = abundance
@@ -76,6 +86,7 @@ as_da <- function(x, contrast = NULL, protein = NULL, gene = NULL, logfc = NULL,
     res
   }, tables, names(tables)))
   validate_da(out)
+  out <- lookup_genes(out, species)
   structure(
     out[c("protein", "gene", "contrast", "logFC", "t", "p", "padj", "abundance", "rank", "rank_stat")],
     class = c("enrichVolcano_da", "data.frame")
@@ -113,7 +124,7 @@ standardise_da <- function(tbl, cols) {
   column <- function(name) if (is.na(stat[[name]])) NA_real_ else as.numeric(tbl[[stat[[name]]]])
 
   res <- data.frame(
-    protein = protein_ids(tbl, stat[["protein"]]),
+    protein = protein_ids(tbl, stat[["protein"]], stat[["gene"]]),
     logFC = as.numeric(tbl[[logfc_col]]),
     t = column("t"), p = column("p"), padj = column("padj"), abundance = column("abundance"),
     stringsAsFactors = FALSE
@@ -126,7 +137,7 @@ standardise_da <- function(tbl, cols) {
   res
 }
 
-protein_ids <- function(tbl, col) {
+protein_ids <- function(tbl, col, gene_col) {
   if (!is.na(col)) {
     return(as.character(tbl[[col]]))
   }
@@ -136,6 +147,9 @@ protein_ids <- function(tbl, col) {
   }
   if (!all(grepl("^[0-9]+$", rownames(tbl)))) {
     return(rownames(tbl))
+  }
+  if (!is.na(gene_col)) {
+    return(unwrap_excel(tbl[[gene_col]]))
   }
   ev_abort_missing_column(tbl, "protein", "protein", "x")
 }
@@ -149,6 +163,21 @@ rank_statistic <- function(res, stat) {
     return(list(rank = signed(res$p), label = "signed -log10(p)"))
   }
   list(rank = signed(res$padj), label = "signed -log10(padj)")
+}
+
+lookup_genes <- function(d, species) {
+  accession <- grepl(uniprot_pattern, d$protein)
+  if (!is.null(species) && any(accession)) {
+    d$gene[accession] <- map_symbols(d$protein[accession], species)
+    n_ids <- length(unique(d$protein[accession]))
+    n_mapped <- length(unique(d$protein[accession & !is.na(d$gene)]))
+    ev_inform("{n_mapped} of {n_ids} accession{?s} mapped to {species} symbols.",
+      class = "enrichVolcano_symbol_lookup"
+    )
+  }
+  fill <- is.na(d$gene) & !accession
+  d$gene[fill] <- d$protein[fill]
+  d
 }
 
 unwrap_excel <- function(x) sub('^="(.*)"$', "\\1", as.character(x))

@@ -7,6 +7,7 @@
 as_da(
   x,
   contrast = NULL,
+  species = "Homo sapiens",
   protein = NULL,
   gene = NULL,
   logfc = NULL,
@@ -22,6 +23,11 @@ as_da(
 tables whose names are the contrasts.}
 
 \item{contrast}{Label for a table that has no contrast column.}
+
+\item{species}{For UniProt accessions, the species whose annotation
+package supplies current gene symbols (\code{"Homo sapiens"}, \code{"Mus musculus"},
+\code{"Rattus norvegicus"}). \code{NULL} keeps the table's own symbols. Tables keyed
+by symbols rather than accessions keep theirs either way.}
 
 \item{protein, gene, logfc, t, p, padj, abundance}{Column names, when detection
 does not find them. \code{logfc} names the fold-change column.}
@@ -51,6 +57,14 @@ contrast first.
 \code{rank} is the moderated t when the table has one, else
 \code{sign(logFC) * -log10(p)}, else \code{sign(logFC) * -log10(padj)}; \code{rank_stat}
 says which.
+}
+
+\section{Gene symbols}{
+
+Gene sets list gene symbols, so each UniProt accession is mapped to its
+current symbol through the species' annotation package (isoform suffixes
+such as \code{-2} are dropped first). A symbol from the search engine's FASTA can
+be out of date: \code{O00483} is \code{COXFA4}, formerly \code{NDUFA4}.
 }
 
 \examples{
