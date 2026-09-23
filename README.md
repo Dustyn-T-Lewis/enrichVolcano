@@ -57,10 +57,10 @@ score is the signed −log10(FDR) and the legend says so.
 - **Ticks:** spokes from each arc to its leading-edge genes in the
   volcano.
 
-By default the ring draws up to eight significant terms per direction
-from Hallmark and GO slim; `databases`, `n_terms`, `term_threshold` and
-`terms` change that. `vignette("enrichVolcano")` walks every step on the
-bundled example.
+By default the ring draws the twelve most significant terms, in either
+direction, from Hallmark and GO slim; `databases`, `n_terms`,
+`term_threshold` and `terms` change that. `vignette("enrichVolcano")`
+walks every step on the bundled example.
 
 ## Cite the methods you used
 

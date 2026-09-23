@@ -6,8 +6,8 @@
   data frame described by column-name arguments. `volcano_ring()` loses
   `term_col`, `nes_col`, `size_col`, `genes_col` and `genes_sep`, and gains
   `contrast`; `volcano_ring_grid()` takes one `enrichment` for all contrasts.
-* `volcano_ring()` now chooses its terms: significant ones (`term_threshold`),
-  up to `n_terms` per direction, from `databases` (Hallmark and GO slim by
+* `volcano_ring()` now chooses its terms: the `n_terms` (12) most significant
+  below `term_threshold`, in either direction, from `databases` (Hallmark and GO slim by
   default), with redundant terms hidden (`collapse`). `terms` hand-picks
   instead.
 * `magnitude` defaults to `"neg_log_padj"` for NES and `"size"` for other

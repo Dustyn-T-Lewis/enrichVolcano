@@ -147,8 +147,9 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #'
 #' @section Which terms ring the volcano:
 #' From the chosen contrast, terms in `databases` are kept, redundant ones are
-#' hidden when `collapse = TRUE` (see [dedup()]), and the `n_terms` smallest
-#' `padj` per direction below `term_threshold` are drawn. `terms` overrides
+#' hidden when `collapse = TRUE` (see [dedup()]), and the `n_terms` terms with
+#' the smallest `padj` below `term_threshold` are drawn, whatever their
+#' direction. `terms` overrides
 #' all of this with a hand-picked set.
 #'
 #' @param volc_df Tidy DA table for the contrast being drawn.
@@ -160,7 +161,7 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #'   database labels.
 #' @param collapse Hide terms flagged `"redundant"` by [dedup()].
 #' @param term_threshold Terms need `padj` below this to be drawn.
-#' @param n_terms Most terms drawn per direction.
+#' @param n_terms Most terms drawn, counted across both directions.
 #' @param terms Optional character vector of exact term names to draw instead.
 #' @param gene_col,logfc_col,pval_col,padj_col Column names in `volc_df`.
 #' @param volc_sig_col Optional column in `volc_df` used to call point
@@ -235,7 +236,7 @@ volcano_ring <- function(volc_df, enrichment,
                          databases = c("Hallmark", "GO Slim"),
                          collapse = TRUE,
                          term_threshold = 0.05,
-                         n_terms = 8,
+                         n_terms = 12,
                          terms = NULL,
                          gene_col = "gene",
                          logfc_col = "logFC",

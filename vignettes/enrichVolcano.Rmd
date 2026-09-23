@@ -69,8 +69,9 @@ volcano_ring(young, ex, contrast = "Training_Young", title = "Training, young")
 
 Arc fill is NES and arc height is \(-\log_{10}\)(padj). Up-regulated terms sit
 on the upper half, down-regulated ones on the lower. Ticks run from each arc
-to its leading-edge proteins in the volcano. By default the ring takes up to
-eight significant terms (padj < 0.05) per direction from Hallmark and GO slim;
+to its leading-edge proteins in the volcano. By default the ring takes the
+twelve most significant terms (padj < 0.05), in either direction, from
+Hallmark and GO slim;
 `databases`, `term_threshold`, `n_terms` and `terms` change the selection.
 
 ## Convert your results

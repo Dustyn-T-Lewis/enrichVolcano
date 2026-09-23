@@ -67,9 +67,7 @@ ring_terms <- function(results, term_threshold, n_terms, terms) {
     return(results[results$term %in% terms, , drop = FALSE])
   }
   sig <- results[!is.na(results$padj) & results$padj < term_threshold, , drop = FALSE]
-  sig <- sig[order(sig$padj), , drop = FALSE]
-  rank_in_direction <- stats::ave(seq_len(nrow(sig)), sig$direction, FUN = seq_along)
-  sig[rank_in_direction <= n_terms, , drop = FALSE]
+  utils::head(sig[order(sig$padj), , drop = FALSE], n_terms)
 }
 
 default_magnitude <- function(magnitude, score_type) {

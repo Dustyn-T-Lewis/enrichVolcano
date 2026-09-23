@@ -37,7 +37,7 @@ test_that("collapse hides redundant terms and keeps unflagged ones", {
   expect_identical(nrow(filter_view(r, databases = NULL, collapse = FALSE)), 6L)
 })
 
-test_that("ring_terms keeps significant terms, top n per direction by padj", {
+test_that("ring_terms keeps the n most significant terms, whatever their direction", {
   r <- data.frame(
     term = paste0("T", 1:6),
     score = c(2, 1.5, 1, -2, -1.5, -1),
@@ -48,9 +48,10 @@ test_that("ring_terms keeps significant terms, top n per direction by padj", {
     ring_terms(r, term_threshold = 0.05, n_terms = Inf, terms = NULL)$term,
     c("T1", "T2", "T4", "T5", "T6")
   )
+  expect_setequal(ring_terms(r, term_threshold = 0.05, n_terms = 1, terms = NULL)$term, "T2")
   expect_setequal(
-    ring_terms(r, term_threshold = 0.05, n_terms = 1, terms = NULL)$term,
-    c("T2", "T6")
+    ring_terms(r, term_threshold = 0.05, n_terms = 3, terms = NULL)$term,
+    c("T2", "T6", "T4")
   )
 })
 

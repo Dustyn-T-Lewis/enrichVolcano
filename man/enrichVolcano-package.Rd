@@ -14,6 +14,7 @@ Draws figures from gene-set enrichment results computed elsewhere. Results from 
 Useful links:
 \itemize{
   \item \url{https://github.com/Dustyn-T-Lewis/enrichVolcano}
+  \item \url{https://Dustyn-T-Lewis.github.io/enrichVolcano/}
   \item Report bugs at \url{https://github.com/Dustyn-T-Lewis/enrichVolcano/issues}
 }
 

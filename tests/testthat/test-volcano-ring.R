@@ -214,3 +214,13 @@ test_that("a fry ring's fill scale spans its scores instead of squishing at 3", 
   limits <- p$scales$get_scales("fill")$limits
   expect_equal(max(limits), max(abs(x@results$score[x@results$padj < 0.05])))
 })
+
+test_that("the ring holds at most n_terms terms in total", {
+  arcs <- function(p) {
+    geoms <- vapply(p$layers, function(l) class(l$geom)[1], character(1))
+    length(unique(ggplot2::layer_data(p, which(geoms == "GeomArcBar")[1])$group))
+  }
+  x <- make_toy_ring_enrichment()
+  expect_identical(arcs(suppressMessages(volcano_ring(make_toy_volc(), x, databases = NULL, n_terms = 3))), 3L)
+  expect_identical(formals(volcano_ring)$n_terms, 12)
+})

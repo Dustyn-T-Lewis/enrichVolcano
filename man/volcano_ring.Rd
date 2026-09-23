@@ -11,7 +11,7 @@ volcano_ring(
   databases = c("Hallmark", "GO Slim"),
   collapse = TRUE,
   term_threshold = 0.05,
-  n_terms = 8,
+  n_terms = 12,
   terms = NULL,
   gene_col = "gene",
   logfc_col = "logFC",
@@ -67,7 +67,7 @@ database labels.}
 
 \item{term_threshold}{Terms need \code{padj} below this to be drawn.}
 
-\item{n_terms}{Most terms drawn per direction.}
+\item{n_terms}{Most terms drawn, counted across both directions.}
 
 \item{terms}{Optional character vector of exact term names to draw instead.}
 
@@ -161,8 +161,9 @@ arcs to each term's leading-edge genes inside the volcano.
 \section{Which terms ring the volcano}{
 
 From the chosen contrast, terms in \code{databases} are kept, redundant ones are
-hidden when \code{collapse = TRUE} (see \code{\link[=dedup]{dedup()}}), and the \code{n_terms} smallest
-\code{padj} per direction below \code{term_threshold} are drawn. \code{terms} overrides
+hidden when \code{collapse = TRUE} (see \code{\link[=dedup]{dedup()}}), and the \code{n_terms} terms with
+the smallest \code{padj} below \code{term_threshold} are drawn, whatever their
+direction. \code{terms} overrides
 all of this with a hand-picked set.
 }
 
