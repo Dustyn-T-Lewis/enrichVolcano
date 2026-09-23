@@ -18,7 +18,7 @@
   sheet and contrasts, with subjects blocked or fixed, optional covariates
   and precision weights; a blocked camera runs as `cameraPR()`.
   `inter_gene_cor` sets camera's inter-gene correlation or estimates it.
-* `example_study()` loads seven example studies; two include the full
+* `example_study()` loads seven example studies; three include the full
   sample-level data.
 
 ## Deprecated
@@ -29,8 +29,12 @@
 
 ## Other changes
 
-* `yvo_da.csv.gz` is replaced by `example_study("yvo")`, which adds UniProt
-  IDs and moderated t statistics.
+* `yvo_da.csv.gz` is replaced by `example_study("yvo")`, a full study
+  (matrix, weights, samples, contrasts and DA results) quantified with limpa.
+* GO slim sets are biological-process terms only and are named like
+  `GOSLIM_PROTEIN_FOLDING`.
+* The example data are licensed CC BY 4.0
+  (`inst/extdata/studies/LICENSE.md`); the code stays MIT.
 
 # enrichVolcano 1.0.0
 
