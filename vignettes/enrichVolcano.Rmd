@@ -168,8 +168,9 @@ lengths(sets)
 attr(sets, "versions")
 ```
 
-Slim terms are broad, so the 15 to 500 gene window drops some of them. Each
-collection is tested as its own family, so padj is corrected within it.
+Every set is kept here. `run_enrichment()` tests sets with 15 to 500 of their
+genes measured in the data (`min_size`, `max_size`). Each collection is
+tested as its own family, so padj is corrected within it.
 `attr(sets, "versions")` records what to cite in your methods.
 
 ## Convert enrichment you already have

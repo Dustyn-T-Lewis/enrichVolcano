@@ -1,3 +1,23 @@
+# enrichVolcano (development version)
+
+## Breaking changes
+
+* `load_gene_sets()` no longer takes `min_size` or `max_size` and keeps every
+  set. Sets were filtered twice: on genome size here, then on the genes in
+  the data in `run_enrichment()`. The genome filter removed about half the GO
+  slim terms, such as signalling and programmed cell death, that proteomics
+  data measure well below 500 genes. GO slim results now test more terms.
+
+## Bug fixes
+
+* A protein group such as `P31040;Q9UBK2` is mapped to its gene symbol
+  through its first accession.
+* A blank gene symbol counts as missing.
+* The annotation packages no longer print an empty line when loaded.
+* A wide table without a contrast column gets the wide-table message.
+* The `mito` example study ships the Mito pipeline's gene symbols. The rat
+  annotation package lacked 447 of its 4,806 proteins, which fgsea dropped.
+
 # enrichVolcano 2.0.0
 
 2.0.0 renames the exports to one rule, verb then noun, and gives arguments

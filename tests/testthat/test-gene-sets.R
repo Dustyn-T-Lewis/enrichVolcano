@@ -36,7 +36,7 @@ test_that("tables keyed by symbols rather than accessions keep them", {
 
 test_that("Hallmark loads 50 sets and records its version", {
   skip_if_not_installed("msigdbr")
-  sets <- load_gene_sets("Hallmark", min_size = 1)
+  sets <- load_gene_sets("Hallmark")
   expect_named(sets, "Hallmark")
   expect_length(sets$Hallmark, 50L)
   expect_true("SDHA" %in% sets$Hallmark$HALLMARK_OXIDATIVE_PHOSPHORYLATION)
@@ -47,7 +47,7 @@ test_that("Hallmark loads 50 sets and records its version", {
 
 test_that("the pinned GO slim maps to genes and records its release", {
   skip_if_not_installed("org.Hs.eg.db")
-  sets <- load_gene_sets("GO Slim", min_size = 1, max_size = Inf)
+  sets <- load_gene_sets("GO Slim")
   slim <- sets$`GO Slim`
   expect_gt(length(slim), 50)
   expect_true(all(grepl("^GOSLIM_[A-Z0-9_]+$", names(slim))))
@@ -56,16 +56,16 @@ test_that("the pinned GO slim maps to genes and records its release", {
   expect_identical(attr(sets, "versions")$go_slim, "go/releases/2026-07-26/subsets/goslim_generic.owl")
 })
 
-test_that("set sizes are filtered to the requested window", {
-  skip_if_not_installed("msigdbr")
-  sets <- load_gene_sets("Hallmark", min_size = 150, max_size = 200)
-  sizes <- lengths(sets$Hallmark)
-  expect_true(all(sizes >= 150 & sizes <= 200))
+test_that("every set is kept whatever its genome size, since run_enrichment filters on the data", {
+  skip_if_not_installed("org.Hs.eg.db")
+  sets <- load_gene_sets("GO Slim")
+  expect_gt(length(sets$`GO Slim`[["GOSLIM_SIGNALING"]]), 500)
+  expect_false(any(c("min_size", "max_size") %in% names(formals(load_gene_sets))))
 })
 
 test_that("mouse gene sets come back in mouse symbols", {
   skip_if_not_installed("msigdbr")
-  sets <- load_gene_sets("Hallmark", species = "Mus musculus", min_size = 1)
+  sets <- load_gene_sets("Hallmark", species = "Mus musculus")
   expect_true("Sdha" %in% sets$Hallmark$HALLMARK_OXIDATIVE_PHOSPHORYLATION)
 })
 

@@ -53,8 +53,8 @@ map_symbols <- function(ids, species) {
 #'   the term or any of its descendants. Sets are named like
 #'   `GOSLIM_PROTEIN_FOLDING`.
 #'
-#' Each collection is kept separate so [run_enrichment()] corrects p-values
-#' within it.
+#' Every set is kept, whatever its size. [run_enrichment()] filters on the
+#' genes measured in your data, and corrects p-values within each collection.
 #'
 #' @references
 #' Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
@@ -64,14 +64,11 @@ map_symbols <- function(ids, species) {
 #' @param databases Any of `"Hallmark"`, `"GO Slim"`, `"Reactome"`, `"KEGG"`,
 #'   `"GO:BP"`.
 #' @param species `"Homo sapiens"`, `"Mus musculus"` or `"Rattus norvegicus"`.
-#' @param min_size,max_size Keep sets with at least `min_size` and at most
-#'   `max_size` genes.
 #' @return A named list of collections, each a named list of gene symbols, with
 #'   a `versions` attribute (msigdbr, GO slim release, annotation package,
 #'   species).
 #' @export
-load_gene_sets <- function(databases = c("Hallmark", "GO Slim"), species = "Homo sapiens",
-                           min_size = 15, max_size = 500) {
+load_gene_sets <- function(databases = c("Hallmark", "GO Slim"), species = "Homo sapiens") {
   known <- c(names(msigdb_collections), "GO Slim")
   unknown <- setdiff(databases, known)
   if (length(unknown) > 0) {
@@ -97,7 +94,6 @@ load_gene_sets <- function(databases = c("Hallmark", "GO Slim"), species = "Homo
     lapply(split(tbl$gene_symbol, tbl$gs_name), unique)
   })
   names(sets) <- databases
-  sets <- lapply(sets, function(s) s[lengths(s) >= min_size & lengths(s) <= max_size])
   attr(sets, "versions") <- versions
   sets
 }
