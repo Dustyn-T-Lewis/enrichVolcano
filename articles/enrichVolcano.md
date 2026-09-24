@@ -1,35 +1,35 @@
 # enrichVolcano
 
 enrichVolcano turns differential-abundance results into enrichment
-figures. Every workflow has the same steps:
+figures. The steps:
 
-1.  Read your results:
+1.  Read your results.
     [`read_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_study.md)
-    for a set of study files, or
+    reads a set of study files;
     [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
-    for one DA table from limma, limpa, proteoDA, MSstats, proDA,
+    reads one DA table from limma, limpa, proteoDA, MSstats, proDA,
     msqrob2, prolfQua or ProtRank.
-2.  Get enrichment:
+2.  Get enrichment.
     [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
-    runs fgsea, camera and fry, or
+    runs fgsea, camera and fry.
     [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
-    converts results you already have. Both give one validated
+    converts results you already have. Both return one validated
     `enrichment` object per test.
-3.  [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
-    (optional) flags redundant terms so figures show each signal once.
-4.  Plot:
-    [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-    puts the volcano inside a ring of enrichment terms, and
-    [`nes_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/nes_scatter.md)
+3.  Optionally,
+    [`dedup_terms()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup_terms.md)
+    flags redundant terms so a figure shows each signal once.
+4.  Plot.
+    [`plot_volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_volcano_ring.md)
+    puts the volcano inside a ring of enrichment terms.
+    [`plot_bias_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_bias_ring.md)
+    rings it with every significant term.
+    [`plot_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_scatter.md)
     compares two contrasts term by term.
-
-## Install
-
-``` r
-
-install.packages("remotes")
-remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
-```
+5.  Write.
+    [`write_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_plot.md)
+    saves figures to one PDF;
+    [`write_table()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_table.md)
+    saves results to CSV.
 
 ## Quick start
 
@@ -42,7 +42,7 @@ can have, so the whole workflow runs on it:
 
 library(enrichVolcano)
 
-yvo <- example_study("yvo")
+yvo <- read_example("yvo")
 #> 
 #> 2103 of 2106 accessions mapped to Homo sapiens symbols.
 #> 2106 of 2106 matrix proteins have DA results.
@@ -57,7 +57,7 @@ res$fgsea
 #> Dedup: not deduplicated
 ```
 
-[`example_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/example_study.md)
+[`read_example()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_example.md)
 read the study through
 [`read_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_study.md),
 which checked that its sheets agree and looked up current gene symbols
@@ -68,7 +68,7 @@ volcano:
 
 ``` r
 
-volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young", title = "Training, young")
+plot_volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young", title = "Training, young")
 ```
 
 ![Volcano of Training_Young proteins inside a ring of enriched Hallmark
@@ -114,7 +114,7 @@ The package ships seven studies in this format:
 
 ``` r
 
-example_study()[c("name", "species")]
+read_example()[c("name", "species")]
 #>           name           species
 #> 1    bfr_limpa      Homo sapiens
 #> 2    mouse_pas      Mus musculus
@@ -168,11 +168,29 @@ them:
 
 ``` r
 
-volcano_ring(yvo$da, res$fry, contrast = "Aging", title = "Aging, fry")
+plot_volcano_ring(yvo$da, res$fry, contrast = "Aging", title = "Aging, fry")
 ```
 
 ![Volcano of the Aging contrast ringed by gene sets tested with
 fry](enrichVolcano_files/figure-html/run-ring-1.png)
+
+## See the whole contrast
+
+The ring above draws the twelve most significant terms.
+[`plot_bias_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_bias_ring.md)
+draws every significant term of a contrast, without names, to show
+whether the contrast leans up or down. Each arc gets the same angle, so
+the larger half holds more terms. Fill and height are each score over
+the strongest score in the contrast.
+
+``` r
+
+plot_bias_ring(yvo$da, res$fgsea, contrast = "Aging", title = "Aging")
+```
+
+![Volcano of the Aging contrast ringed by every significant term, more
+of them up than down, with no term
+names](enrichVolcano_files/figure-html/bias-1.png)
 
 ## Choose gene-set collections
 
@@ -182,7 +200,7 @@ GO Consortium’s generic slim keeps a small set of broad GO terms. Both
 are built to avoid overlapping terms, so every arc says something
 different. Larger collections such as <GO:BP> or Reactome find more
 specific terms but need
-[`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md).
+[`dedup_terms()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup_terms.md).
 
 [`load_gene_sets()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/load_gene_sets.md)
 fetches them for human, mouse or rat. Hallmark, Reactome, KEGG MEDICUS
@@ -273,8 +291,8 @@ res <- limma::fry(y, index = gene_sets, design = design, contrast = contrast)
 x <- as_enrichment(list(Aging = res), database = "Hallmark")
 ```
 
-fry and mroast are **self-contained** tests: they ask whether the genes
-in a set changed at all, without reference to genes outside it. Neither
+fry and mroast are self-contained tests: they ask whether the genes in a
+set changed at all, without reference to genes outside it. Neither
 reports an effect size like NES, or a leading edge. The score is
 therefore $`-\log_{10}`$(FDR), signed by the reported direction, and the
 figure’s legend says so. The table below has fry’s shape; the numbers
@@ -300,7 +318,7 @@ fry_x <- as_enrichment(list(Training_Young = fry_res), database = "Hallmark")
 
 ``` r
 
-volcano_ring(yvo$da, fry_x, contrast = "Training_Young", title = "fry")
+plot_volcano_ring(yvo$da, fry_x, contrast = "Training_Young", title = "fry")
 ```
 
 ![Volcano ring drawn from fry results, with arcs coloured by signed
@@ -319,9 +337,9 @@ res <- limma::camera(y, index = gene_sets, design = design, contrast = contrast)
 x <- as_enrichment(list(Aging = res), enrichment_test = "camera", database = "Hallmark")
 ```
 
-camera and cameraPR are **competitive** tests, like fgsea: they ask
-whether a set changed more than the genes outside it. Their default
-output has identical columns, so
+camera and cameraPR are competitive tests, like fgsea: they ask whether
+a set changed more than the genes outside it. Their default output has
+identical columns, so
 [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
 cannot tell them apart and asks you to name the test with
 `enrichment_test`. camera run with `inter.gene.cor = NA` adds a
@@ -365,7 +383,7 @@ becomes the legend title.
 
 Related gene sets often reach significance together. In <GO:BP> or
 Reactome, one biological signal can light up a dozen overlapping terms.
-[`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
+[`dedup_terms()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup_terms.md)
 flags all but one per cluster as `"redundant"`, and plots hide redundant
 terms by default (`collapse = TRUE`). No row is removed and no p-value
 changes: the multiple-testing correction already covered every term, so
@@ -374,9 +392,9 @@ redundancy is a display decision.
 ``` r
 
 gene_sets <- split(msig$gene_symbol, msig$gs_name)
-x <- dedup(x, gene_sets)
-x <- dedup(x, gene_sets, similarity = "jaccard")
-x <- dedup(x, gene_sets, method = "collapse_pathways", stats = list(Aging = ranks))
+x <- dedup_terms(x, gene_sets)
+x <- dedup_terms(x, gene_sets, similarity = "jaccard")
+x <- dedup_terms(x, gene_sets, method = "collapse_pathways", stats = list(Aging = ranks))
 ```
 
 Within each contrast and database, significant terms are walked from the
@@ -423,8 +441,8 @@ reactome <- load_gene_sets("Reactome")
 set.seed(1)
 aging <- run_enrichment(yvo, reactome, tests = "fgsea")$fgsea
 #> Up to 10 of 2103 ranked genes tie; fgsea orders tied genes arbitrarily.
-aging <- dedup(aging, reactome$Reactome)
-volcano_ring(yvo$da, aging, contrast = "Aging", title = "Aging, Reactome")
+aging <- dedup_terms(aging, reactome$Reactome)
+plot_volcano_ring(yvo$da, aging, contrast = "Aging", title = "Aging, Reactome")
 ```
 
 ![Volcano of the Aging contrast ringed by Reactome terms with redundant
@@ -432,7 +450,7 @@ terms hidden](enrichVolcano_files/figure-html/reactome-1.png)
 
 ## Compare two contrasts
 
-[`nes_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/nes_scatter.md)
+[`plot_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_scatter.md)
 plots every term’s score in one contrast against its score in another.
 It answers two kinds of question, set by `comparison`. The examples
 below draw from the published fgsea results, `ex`; `res$fgsea` works the
@@ -444,7 +462,7 @@ bottom-left quadrants move the same way in both.
 
 ``` r
 
-nes_scatter(ex, "Training_Young", "Training_Old", databases = c("Hallmark", "GO Slim"))
+plot_scatter(ex, "Training_Young", "Training_Old", databases = c("Hallmark", "GO Slim"))
 ```
 
 ![Scatter of NES in trained young against trained old, with most
@@ -458,7 +476,7 @@ $`y = -x`$.
 
 ``` r
 
-nes_scatter(ex, "Aging", "Training_Old",
+plot_scatter(ex, "Aging", "Training_Old",
   comparison = "reversal", databases = c("Hallmark", "GO Slim")
 )
 ```
@@ -468,27 +486,28 @@ terms in the reversed
 quadrants](enrichVolcano_files/figure-html/reversal-1.png)
 
 A term counts as significant in a contrast when its padj is below
-`p_threshold` (0.05); the colour says whether that holds in one contrast
-or both. Pathways are judged on the false discovery rate alone. Scores
-that combine effect size with p, such as the $`\pi`$-value, are defined
-for single proteins, not gene sets. The corner counts and the headline
-share use significant terms only; Spearman’s $`\rho`$ uses every plotted
-term, with a 95% interval when the correlation package is installed.
+`term_threshold` (0.05); the colour says whether that holds in one
+contrast or both. Pathways are judged on the false discovery rate alone.
+Scores that combine effect size with p, such as the $`\pi`$-value, are
+defined for single proteins, not gene sets. The corner counts and the
+headline share use significant terms only; Spearman’s $`\rho`$ uses
+every plotted term, with a 95% interval when the correlation package is
+installed.
 
-`color_by` and `shape_by` take any per-term column, for example
-`color_by = "database"`, and `databases`, `collapse` and
+`colour_by` and `shape_by` take any per-term column, for example
+`colour_by = "database"`, and `databases`, `collapse` and
 `label_min_size` work as they do for the ring.
 
 ## Change the look
 
-[`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md)
+[`plot_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_theme.md)
 holds the palette; the plot arguments hold the layout.
 
 ``` r
 
-volcano_ring(yvo$da, res$fgsea,
+plot_volcano_ring(yvo$da, res$fgsea,
   contrast = "Training_Young",
-  theme = volcano_ring_theme(palette = "okabe"),
+  theme = plot_theme(palette = "okabe"),
   label_mode = "top_per_direction", label_n = 4
 )
 ```
@@ -501,17 +520,54 @@ The arguments you will reach for most:
   half.
 - `x_scale`, `y_scale`: compress the volcano when points crowd the ring.
 - `label_mode`, `label_n`, `label_genes`: which proteins get text.
-- `show_counts`, `disc_color`: count badges and a tinted central disc.
+- `show_counts`, `disc_colour`: count badges and a tinted central disc.
 
-[`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
-draws one ring per contrast and collects a shared legend; extra
-arguments pass to every ring.
+## Write figures and tables
+
+Every plot function returns one ggplot.
+[`write_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_plot.md)
+takes a named list of them and writes one PDF. Page 1 is a composite
+lettered A, B, C in list order. Each later page holds one panel at full
+size, headed by its letter and name. Fonts are embedded.
 
 ``` r
 
-g <- volcano_ring_grid(yvo$da, res$fgsea, contrasts = c("Training_Young", "Training_Old"), ncol = 2)
-g$plot
+panels <- list(
+  "Training, young" = plot_volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young"),
+  "Training, old" = plot_volcano_ring(yvo$da, res$fgsea, contrast = "Training_Old"),
+  "Young against old" = plot_scatter(res$fgsea, "Training_Young", "Training_Old")
+)
+```
+
+``` r
+
+write_plot(panels, "training.pdf", design = "AB\nCC", caption = "fgsea, Hallmark and GO slim")
+```
+
+To see a composite on screen, pass the list to
+[`patchwork::wrap_plots()`](https://patchwork.data-imaginist.com/reference/wrap_plots.html):
+
+``` r
+
+patchwork::wrap_plots(panels[1:2], ncol = 2)
 ```
 
 ![Two volcano rings side by side for trained young and trained
-old](enrichVolcano_files/figure-html/grid-1.png)
+old](enrichVolcano_files/figure-html/composite-1.png)
+
+[`write_table()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_table.md)
+writes one enrichment object, or the whole list from
+[`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md),
+to one CSV with an `enrichment_test` column:
+
+``` r
+
+write_table(res, "yvo_enrichment.csv")
+```
+
+The papers behind each method are listed on the help pages of
+[`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md),
+[`load_gene_sets()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/load_gene_sets.md),
+[`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
+and
+[`dedup_terms()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup_terms.md).

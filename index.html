@@ -16,8 +16,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Volcano-in-Ring and Concordance Plots from Enrichment Results">
-<meta name="description" content="Turns differential abundance results into gene-set enrichment figures. Reads results from common proteomics tools and study files with a sample sheet and contrasts, runs fgsea and limmas camera and fry tests, or converts enrichment results computed elsewhere, into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or fgsea' conditional collapsing, without changing any p-value. Seven example proteomics studies are included.">
-<meta property="og:description" content="Turns differential abundance results into gene-set enrichment figures. Reads results from common proteomics tools and study files with a sample sheet and contrasts, runs fgsea and limmas camera and fry tests, or converts enrichment results computed elsewhere, into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or fgsea' conditional collapsing, without changing any p-value. Seven example proteomics studies are included.">
+<meta name="description" content="Turns differential abundance results into gene-set enrichment figures. Reads results from common proteomics tools and study files with a sample sheet and contrasts, runs fgsea and limmas camera and fry tests, or converts enrichment results computed elsewhere, into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term, and writes them to one PDF. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or fgsea' conditional collapsing. No p-value changes. Seven example proteomics studies are included.">
+<meta property="og:description" content="Turns differential abundance results into gene-set enrichment figures. Reads results from common proteomics tools and study files with a sample sheet and contrasts, runs fgsea and limmas camera and fry tests, or converts enrichment results computed elsewhere, into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term, and writes them to one PDF. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or fgsea' conditional collapsing. No p-value changes. Seven example proteomics studies are included.">
 <meta property="og:image" content="https://Dustyn-T-Lewis.github.io/enrichVolcano/logo.png">
 </head>
 <body>
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,129 +59,30 @@
 <a class="anchor" aria-label="anchor" href="#enrichvolcano-"></a>
 </h1>
 </div>
-<blockquote>
-<p>Figures from enrichment results you have already computed: fgsea, clusterProfiler, limma’s fry and camera, over-representation, or your own.</p>
-</blockquote>
-<p><img src="reference/figures/README-hero-1.png" alt="A volcano plot ringed by enrichment arcs coloured by normalised enrichment score"></p>
-<p>enrichVolcano starts from differential-abundance results you already have and ends in enrichment figures:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Dustyn-T-Lewis/enrichVolcano" class="external-link">enrichVolcano</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">study</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_study.html">read_study</a></span><span class="op">(</span><span class="st">"my_study.xlsx"</span><span class="op">)</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_enrichment.html">run_enrichment</a></span><span class="op">(</span><span class="va">study</span>, <span class="fu"><a href="reference/load_gene_sets.html">load_gene_sets</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">study</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Aging"</span><span class="op">)</span></span></code></pre></div>
-<ol style="list-style-type: decimal">
-<li>
-<code><a href="reference/read_study.html">read_study()</a></code> reads your DA results, and optionally the matrix, sample sheet and contrasts, from one workbook; <code><a href="reference/as_da.html">as_da()</a></code> reads a single DA table from limma, limpa, proteoDA, MSstats, proDA, msqrob2, prolfQua or ProtRank.</li>
-<li>
-<code><a href="reference/run_enrichment.html">run_enrichment()</a></code> runs fgsea, camera and fry, or <code><a href="reference/as_enrichment.html">as_enrichment()</a></code> converts enrichment you computed elsewhere. Either way you get a validated <code>enrichment</code> object that records which test produced it.</li>
-<li>
-<code><a href="reference/dedup.html">dedup()</a></code> (optional) flags redundant terms so a figure shows each signal once. p-values are never changed.</li>
-<li>A plot function draws from the object: <code><a href="reference/volcano_ring.html">volcano_ring()</a></code> for one contrast, <code><a href="reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> for several, <code><a href="reference/nes_scatter.html">nes_scatter()</a></code> to compare two contrasts term by term (concordance or reversal).</li>
-</ol>
+<p>enrichVolcano draws gene-set enrichment around a differential-abundance volcano.</p>
 <div class="section level2">
 <h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"Dustyn-T-Lewis/enrichVolcano"</span><span class="op">)</span></span></code></pre></div>
+<p>2.0.0 renamed the functions. Code written for 1.x runs on the last 1.x release:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"Dustyn-T-Lewis/enrichVolcano@v1.1.0"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="what-goes-in">What goes in<a class="anchor" aria-label="anchor" href="#what-goes-in"></a>
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<table class="table">
-<colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
-</colgroup>
-<thead><tr>
-<th>Tool</th>
-<th>Recognised by</th>
-<th>Score drawn</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>fgsea</td>
-<td>its columns</td>
-<td>NES</td>
-</tr>
-<tr>
-<td>clusterProfiler <code>gseaResult</code>
-</td>
-<td>its class</td>
-<td>NES</td>
-</tr>
-<tr>
-<td>limma <code>fry</code>, <code>mroast</code>
-</td>
-<td>their columns</td>
-<td>signed −log10(FDR)</td>
-</tr>
-<tr>
-<td>limma <code>camera</code>, <code>cameraPR</code>
-</td>
-<td><code>enrichment_test =</code></td>
-<td>signed −log10(FDR)</td>
-</tr>
-<tr>
-<td>over-representation (enrichR, <code>enrichGO</code>, …)</td>
-<td>
-<code>enrichment_test = "ora"</code> + a direction column</td>
-<td>signed −log10(padj)</td>
-</tr>
-<tr>
-<td>anything else</td>
-<td>
-<code>enrichment_test = "custom"</code> + column names</td>
-<td>yours</td>
-</tr>
-</tbody>
-</table>
-<p>fry, mroast and camera report no effect size or leading edge, so their score is the signed −log10(FDR) and the legend says so.</p>
-</div>
-<div class="section level2">
-<h2 id="what-the-ring-shows">What the ring shows<a class="anchor" aria-label="anchor" href="#what-the-ring-shows"></a>
-</h2>
-<ul>
-<li>
-<strong>Centre:</strong> the volcano, <code>logFC</code> against −log10(p).</li>
-<li>
-<strong>Ring:</strong> one arc per term, up-regulated on top and down-regulated below. Fill is the score; height is −log10(padj) for NES and set size otherwise.</li>
-<li>
-<strong>Ticks:</strong> spokes from each arc to its leading-edge genes in the volcano.</li>
-</ul>
-<p>By default the ring draws the twelve most significant terms, in either direction, from every collection in the object. For figures, <code>databases = c("Hallmark", "GO Slim")</code> is the recommended view; <code>n_terms</code>, <code>term_threshold</code> and <code>terms</code> change the selection further. <code><a href="articles/enrichVolcano.html">vignette("enrichVolcano")</a></code> walks every step on the bundled example, including how to get each gene-set collection.</p>
-</div>
-<div class="section level2">
-<h2 id="cite-the-methods-you-used">Cite the methods you used<a class="anchor" aria-label="anchor" href="#cite-the-methods-you-used"></a>
-</h2>
-<p>Cite the methods behind your results, whether enrichVolcano ran them or you did:</p>
-<ul>
-<li>limma: Ritchie ME et al. 2015, <em>Nucleic Acids Res</em> 43(7), <a href="doi:10.1093/nar/gkv007" class="uri">doi:10.1093/nar/gkv007</a>
-</li>
-<li>fgsea: Korotkevich G et al., bioRxiv, <a href="doi:10.1101/060012" class="uri">doi:10.1101/060012</a>
-</li>
-<li>clusterProfiler: Wu T et al. 2021, <em>The Innovation</em> 2:100141</li>
-<li>camera: Wu D, Smyth GK 2012, <em>Nucleic Acids Res</em> 40(17), <a href="doi:10.1093/nar/gks461" class="uri">doi:10.1093/nar/gks461</a>
-</li>
-<li>fry and mroast (ROAST): Wu D et al. 2010, <em>Bioinformatics</em> 26(17), <a href="doi:10.1093/bioinformatics/btq401" class="uri">doi:10.1093/bioinformatics/btq401</a>
-</li>
-<li>EnrichmentMap (<code><a href="reference/dedup.html">dedup()</a></code>): Merico D et al. 2010, <em>PLoS ONE</em> 5(11):e13984</li>
-<li>Hallmark gene sets: Liberzon A et al. 2015, <em>Cell Systems</em> 1(6), <a href="doi:10.1016/j.cels.2015.12.004" class="uri">doi:10.1016/j.cels.2015.12.004</a>
-</li>
-<li>Enrichment protocol: Reimand J et al. 2019, <em>Nat Protoc</em> 14:482-517</li>
-</ul>
-</div>
-<div class="section level2">
-<h2 id="versioning">Versioning<a class="anchor" aria-label="anchor" href="#versioning"></a>
-</h2>
-<p>1.0.0 replaced the column-name arguments with the <code>enrichment</code> object, and 1.1.0 added the study readers and <code><a href="reference/run_enrichment.html">run_enrichment()</a></code>; see <code>NEWS.md</code>. Earlier releases stay installable from their tags.</p>
-</div>
-<div class="section level2">
-<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
-</h2>
-<p>MIT for the code; see <code>LICENSE</code>. The example data are CC BY 4.0; see <code>inst/extdata/studies/LICENSE.md</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Dustyn-T-Lewis/enrichVolcano" class="external-link">enrichVolcano</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">yvo</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_example.html">read_example</a></span><span class="op">(</span><span class="st">"yvo"</span><span class="op">)</span></span>
+<span><span class="va">sets</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/load_gene_sets.html">load_gene_sets</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_enrichment.html">run_enrichment</a></span><span class="op">(</span><span class="va">yvo</span>, <span class="va">sets</span>, tests <span class="op">=</span> <span class="st">"fgsea"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Training_Young"</span>, title <span class="op">=</span> <span class="st">"Training, young"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-ring-1.png" alt="A volcano plot ringed by enrichment arcs coloured by normalised enrichment score"></p>
+<p>The documentation, a full walkthrough and the migration table from 1.x are on the site: <a href="https://Dustyn-T-Lewis.github.io/enrichVolcano/" class="uri">https://Dustyn-T-Lewis.github.io/enrichVolcano/</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

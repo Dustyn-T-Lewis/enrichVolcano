@@ -1,45 +1,7 @@
 # enrichVolcano
 
-> Figures from enrichment results you have already computed: fgsea,
-> clusterProfiler, limma’s fry and camera, over-representation, or your
-> own.
-
-![A volcano plot ringed by enrichment arcs coloured by normalised
-enrichment score](reference/figures/README-hero-1.png)
-
-enrichVolcano starts from differential-abundance results you already
-have and ends in enrichment figures:
-
-``` r
-
-library(enrichVolcano)
-
-study <- read_study("my_study.xlsx")
-res <- run_enrichment(study, load_gene_sets(c("Hallmark", "GO Slim")))
-volcano_ring(study$da, res$fgsea, contrast = "Aging")
-```
-
-1.  [`read_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_study.md)
-    reads your DA results, and optionally the matrix, sample sheet and
-    contrasts, from one workbook;
-    [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
-    reads a single DA table from limma, limpa, proteoDA, MSstats, proDA,
-    msqrob2, prolfQua or ProtRank.
-2.  [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
-    runs fgsea, camera and fry, or
-    [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
-    converts enrichment you computed elsewhere. Either way you get a
-    validated `enrichment` object that records which test produced it.
-3.  [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
-    (optional) flags redundant terms so a figure shows each signal once.
-    p-values are never changed.
-4.  A plot function draws from the object:
-    [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-    for one contrast,
-    [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
-    for several,
-    [`nes_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/nes_scatter.md)
-    to compare two contrasts term by term (concordance or reversal).
+enrichVolcano draws gene-set enrichment around a differential-abundance
+volcano.
 
 ## Install
 
@@ -49,68 +11,32 @@ install.packages("remotes")
 remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
 ```
 
-## What goes in
+2.0.0 renamed the functions. Code written for 1.x runs on the last 1.x
+release:
 
-| Tool | Recognised by | Score drawn |
-|----|----|----|
-| fgsea | its columns | NES |
-| clusterProfiler `gseaResult` | its class | NES |
-| limma `fry`, `mroast` | their columns | signed −log10(FDR) |
-| limma `camera`, `cameraPR` | `enrichment_test =` | signed −log10(FDR) |
-| over-representation (enrichR, `enrichGO`, …) | `enrichment_test = "ora"` + a direction column | signed −log10(padj) |
-| anything else | `enrichment_test = "custom"` + column names | yours |
+``` r
 
-fry, mroast and camera report no effect size or leading edge, so their
-score is the signed −log10(FDR) and the legend says so.
+remotes::install_github("Dustyn-T-Lewis/enrichVolcano@v1.1.0")
+```
 
-## What the ring shows
+## Example
 
-- **Centre:** the volcano, `logFC` against −log10(p).
-- **Ring:** one arc per term, up-regulated on top and down-regulated
-  below. Fill is the score; height is −log10(padj) for NES and set size
-  otherwise.
-- **Ticks:** spokes from each arc to its leading-edge genes in the
-  volcano.
+``` r
 
-By default the ring draws the twelve most significant terms, in either
-direction, from every collection in the object. For figures,
-`databases = c("Hallmark", "GO Slim")` is the recommended view;
-`n_terms`, `term_threshold` and `terms` change the selection further.
-[`vignette("enrichVolcano")`](https://Dustyn-T-Lewis.github.io/enrichVolcano/articles/enrichVolcano.md)
-walks every step on the bundled example, including how to get each
-gene-set collection.
+library(enrichVolcano)
 
-## Cite the methods you used
+yvo <- read_example("yvo")
+sets <- load_gene_sets(c("Hallmark", "GO Slim"))
+set.seed(1)
+res <- run_enrichment(yvo, sets, tests = "fgsea")
+plot_volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young", title = "Training, young")
+```
 
-Cite the methods behind your results, whether enrichVolcano ran them or
-you did:
+![A volcano plot ringed by enrichment arcs coloured by normalised
+enrichment score](reference/figures/README-ring-1.png)
 
-- limma: Ritchie ME et al. 2015, *Nucleic Acids Res* 43(7),
-  <doi:10.1093/nar/gkv007>
-- fgsea: Korotkevich G et al., bioRxiv, <doi:10.1101/060012>
-- clusterProfiler: Wu T et al. 2021, *The Innovation* 2:100141
-- camera: Wu D, Smyth GK 2012, *Nucleic Acids Res* 40(17),
-  <doi:10.1093/nar/gks461>
-- fry and mroast (ROAST): Wu D et al. 2010, *Bioinformatics* 26(17),
-  <doi:10.1093/bioinformatics/btq401>
-- EnrichmentMap
-  ([`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)):
-  Merico D et al. 2010, *PLoS ONE* 5(11):e13984
-- Hallmark gene sets: Liberzon A et al. 2015, *Cell Systems* 1(6),
-  <doi:10.1016/j.cels.2015.12.004>
-- Enrichment protocol: Reimand J et al. 2019, *Nat Protoc* 14:482-517
-
-## Versioning
-
-1.0.0 replaced the column-name arguments with the `enrichment` object,
-and 1.1.0 added the study readers and
-[`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md);
-see `NEWS.md`. Earlier releases stay installable from their tags.
-
-## License
-
-MIT for the code; see `LICENSE`. The example data are CC BY 4.0; see
-`inst/extdata/studies/LICENSE.md`.
+The documentation, a full walkthrough and the migration table from 1.x
+are on the site: <https://Dustyn-T-Lewis.github.io/enrichVolcano/>.
 
 # Package index
 
@@ -119,7 +45,7 @@ MIT for the code; see `LICENSE`. The example data are CC BY 4.0; see
 - [`read_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_study.md)
   : Read a study from a workbook or a folder of CSV files
 
-- [`example_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/example_study.md)
+- [`read_example()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_example.md)
   : Example studies shipped with the package
 
 - [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
@@ -130,42 +56,36 @@ MIT for the code; see `LICENSE`. The example data are CC BY 4.0; see
 
   Convert enrichment results into an `enrichment` object
 
-- [`enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrichment.md)
-  : Enrichment results in one validated object
-
 - [`load_gene_sets()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/load_gene_sets.md)
   : Load gene-set collections for enrichment
 
 - [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
   : Run gene-set enrichment on a study
 
-- [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
+- [`dedup_terms()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup_terms.md)
   : Flag redundant terms for display
 
 ## Plot
 
-- [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
+- [`plot_volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_volcano_ring.md)
   : Volcano-in-ring composite for one contrast
-
-- [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
-  :
-
-  Compose a grid of
-  [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-  plots, one per contrast
-
-- [`nes_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/nes_scatter.md)
+- [`plot_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_scatter.md)
   : Compare two contrasts term by term
+- [`plot_bias_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_bias_ring.md)
+  : Every significant term of one contrast around its volcano
+
+## Write
+
+- [`write_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_plot.md)
+  : Write panels to one PDF
+- [`write_table()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_table.md)
+  : Write enrichment results to a CSV file
 
 ## Style
 
-- [`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md)
-  :
-
-  Theme + palette for
-  [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-
-- [`ev_clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_clean_label.md)
+- [`plot_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_theme.md)
+  : Fonts and colours for the plots
+- [`clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/clean_label.md)
   : Clean a pathway name for display
 
 # Articles

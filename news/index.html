@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,9 +29,85 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v1.1.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.0.0" id="enrichvolcano-200">enrichVolcano 2.0.0<a class="anchor" aria-label="anchor" href="#enrichvolcano-200"></a></h2>
+<p>2.0.0 renames the exports to one rule, verb then noun, and gives arguments that mean the same thing one name. Old names are gone, with no aliases. To stay on the old API, install 1.1.0: <code>remotes::install_github("Dustyn-T-Lewis/enrichVolcano@v1.1.0")</code>.</p>
+<div class="section level3">
+<h3 id="migration-2-0-0">Migration<a class="anchor" aria-label="anchor" href="#migration-2-0-0"></a></h3>
+<table class="table"><colgroup><col width="50%"><col width="50%"></colgroup><thead><tr><th>1.1.0</th>
+<th>2.0.0</th>
+</tr></thead><tbody><tr><td><code>example_study(name)</code></td>
+<td><code>read_example(name)</code></td>
+</tr><tr><td><code>dedup(x, gene_sets)</code></td>
+<td><code>dedup_terms(enrichment, gene_sets)</code></td>
+</tr><tr><td><code>dedup(p_threshold = )</code></td>
+<td><code>dedup_terms(term_threshold = )</code></td>
+</tr><tr><td><code>volcano_ring(volc_df, enrichment)</code></td>
+<td><code>plot_volcano_ring(da, enrichment)</code></td>
+</tr><tr><td><code>volcano_ring(gene_col, logfc_col, pval_col, padj_col)</code></td>
+<td>removed; pass <code><a href="../reference/as_da.html">as_da()</a></code> output</td>
+</tr><tr><td><code>volcano_ring(volc_sig_col = "pi")</code></td>
+<td>
+<code>as_da(x, padj = "pi")</code>, then <code><a href="../reference/plot_volcano_ring.html">plot_volcano_ring()</a></code>
+</td>
+</tr><tr><td><code>volcano_ring(disc_color = )</code></td>
+<td><code>plot_volcano_ring(disc_colour = )</code></td>
+</tr><tr><td><code>volcano_ring(nes_limits = )</code></td>
+<td><code>plot_volcano_ring(score_limits = )</code></td>
+</tr><tr><td><code>volcano_ring(arc_order = "nes")</code></td>
+<td><code>plot_volcano_ring(arc_order = "score")</code></td>
+</tr><tr><td><code>volcano_ring_grid(volc_dfs, enrichment, contrasts)</code></td>
+<td>
+<code><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply()</a></code> over contrasts, then <code><a href="../reference/write_plot.html">write_plot()</a></code> or <code><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html" class="external-link">patchwork::wrap_plots()</a></code>
+</td>
+</tr><tr><td><code>nes_scatter(enrichment, x, y)</code></td>
+<td><code>plot_scatter(enrichment, x, y)</code></td>
+</tr><tr><td><code>nes_scatter(p_threshold = )</code></td>
+<td><code>plot_scatter(term_threshold = )</code></td>
+</tr><tr><td><code>nes_scatter(color_by = )</code></td>
+<td><code>plot_scatter(colour_by = )</code></td>
+</tr><tr><td><code>nes_scatter(max_labels = )</code></td>
+<td><code>plot_scatter(label_n = )</code></td>
+</tr><tr><td><code>volcano_ring_theme()</code></td>
+<td><code><a href="../reference/plot_theme.html">plot_theme()</a></code></td>
+</tr><tr><td><code>volcano_ring_theme(nes_colors = )</code></td>
+<td><code>plot_theme(score_colours = )</code></td>
+</tr><tr><td><code>volcano_ring_theme(nes_limits = )</code></td>
+<td><code>plot_theme(score_limits = )</code></td>
+</tr><tr><td><code>volcano_ring_theme(nes_stops = )</code></td>
+<td><code>plot_theme(score_stops = )</code></td>
+</tr><tr><td><code>ev_clean_label(name)</code></td>
+<td><code>clean_label(name)</code></td>
+</tr><tr><td><code>load_gene_sets(collections = )</code></td>
+<td><code>load_gene_sets(databases = )</code></td>
+</tr><tr><td><code>enrichment(results, metadata)</code></td>
+<td>
+<code><a href="../reference/as_enrichment.html">as_enrichment()</a></code>; the constructor is internal</td>
+</tr></tbody></table></div>
+<div class="section level3">
+<h3 id="new-features-2-0-0">New features<a class="anchor" aria-label="anchor" href="#new-features-2-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/plot_bias_ring.html">plot_bias_ring()</a></code> draws every significant term of one contrast, without names, with fill and arc height scaled to the strongest term. It shows at a glance whether a contrast leans up or down.</li>
+<li>The ring draws the twelve most significant unique terms by default. A term found in two collections counts once.</li>
+<li>
+<code><a href="../reference/write_plot.html">write_plot()</a></code> writes a named list of plots to one PDF: a lettered composite on page 1, then one panel per page. Fonts are embedded.</li>
+<li>
+<code><a href="../reference/write_table.html">write_table()</a></code> writes one enrichment object, or the list from <code><a href="../reference/run_enrichment.html">run_enrichment()</a></code>, to one CSV that <code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> reads back.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="other-changes-2-0-0">Other changes<a class="anchor" aria-label="anchor" href="#other-changes-2-0-0"></a></h3>
+<ul><li>Plot functions refuse plain volcano tables. Pass <code><a href="../reference/as_da.html">as_da()</a></code> output.</li>
+<li>Points without a gene symbol are labelled with their accession.</li>
+<li>An invalid colour raises <code>enrichVolcano_param_error</code>.</li>
+<li>
+<code><a href="../reference/dedup_terms.html">dedup_terms()</a></code> records its cutoff as <code>term_threshold</code> in <code>metadata$dedup</code>.</li>
+<li>
+<code>CITATION</code> and <code>REFERENCES.bib</code> are gone. <code>citation("enrichVolcano")</code> reads DESCRIPTION, and each method’s paper is on the help page of the function that runs it.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.0" id="enrichvolcano-110">enrichVolcano 1.1.0<a class="anchor" aria-label="anchor" href="#enrichvolcano-110"></a></h2>
 <div class="section level3">
@@ -45,12 +121,12 @@
 <li>
 <code><a href="../reference/run_enrichment.html">run_enrichment()</a></code> runs fgsea, camera and fry on a study and returns one <code>enrichment</code> object per test. camera and fry refit limma from the sample sheet and contrasts, with subjects blocked or fixed, optional covariates and precision weights; a blocked camera runs as <code>cameraPR()</code>. <code>inter_gene_cor</code> sets camera’s inter-gene correlation or estimates it.</li>
 <li>
-<code><a href="../reference/example_study.html">example_study()</a></code> loads seven example studies; three include the full sample-level data.</li>
+<code>example_study()</code> loads seven example studies; three include the full sample-level data.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="deprecated-1-1-0">Deprecated<a class="anchor" aria-label="anchor" href="#deprecated-1-1-0"></a></h3>
 <ul><li>
-<code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> and <code><a href="../reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> take <code><a href="../reference/as_da.html">as_da()</a></code> output. Plain tables and the <code>gene_col</code>, <code>logfc_col</code>, <code>pval_col</code> and <code>padj_col</code> arguments still work with a warning and will be removed in 2.0.0.</li>
+<code>volcano_ring()</code> and <code>volcano_ring_grid()</code> take <code><a href="../reference/as_da.html">as_da()</a></code> output. Plain tables and the <code>gene_col</code>, <code>logfc_col</code>, <code>pval_col</code> and <code>padj_col</code> arguments still work with a warning and will be removed in 2.0.0.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="other-changes-1-1-0">Other changes<a class="anchor" aria-label="anchor" href="#other-changes-1-1-0"></a></h3>
@@ -64,9 +140,9 @@
 <h2 class="pkg-version" data-toc-text="1.0.0" id="enrichvolcano-100">enrichVolcano 1.0.0<a class="anchor" aria-label="anchor" href="#enrichvolcano-100"></a></h2>
 <div class="section level3">
 <h3 id="breaking-changes-1-0-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-0-0"></a></h3>
-<ul><li>Plots read an <code>enrichment</code> object built by <code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> instead of a data frame described by column-name arguments. <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> loses <code>term_col</code>, <code>nes_col</code>, <code>size_col</code>, <code>genes_col</code> and <code>genes_sep</code>, and gains <code>contrast</code>; <code><a href="../reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> takes one <code>enrichment</code> for all contrasts.</li>
+<ul><li>Plots read an <code>enrichment</code> object built by <code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> instead of a data frame described by column-name arguments. <code>volcano_ring()</code> loses <code>term_col</code>, <code>nes_col</code>, <code>size_col</code>, <code>genes_col</code> and <code>genes_sep</code>, and gains <code>contrast</code>; <code>volcano_ring_grid()</code> takes one <code>enrichment</code> for all contrasts.</li>
 <li>
-<code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> now chooses its terms: the <code>n_terms</code> (12) most significant below <code>term_threshold</code>, in either direction, from <code>databases</code> (all by default), with redundant terms hidden (<code>collapse</code>). <code>terms</code> hand-picks instead.</li>
+<code>volcano_ring()</code> now chooses its terms: the <code>n_terms</code> (12) most significant below <code>term_threshold</code>, in either direction, from <code>databases</code> (all by default), with redundant terms hidden (<code>collapse</code>). <code>terms</code> hand-picks instead.</li>
 <li>
 <code>magnitude</code> defaults to <code>"neg_log_padj"</code> for NES and <code>"size"</code> for other scores; the legend is titled with the score type.</li>
 <li>The three vignettes are merged into one, <code><a href="../articles/enrichVolcano.html">vignette("enrichVolcano")</a></code>.</li>
@@ -77,11 +153,11 @@
 <ul><li>
 <code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> converts fgsea, clusterProfiler <code>gseaResult</code>, limma <code>fry</code>, <code>mroast</code>, <code>camera</code> and <code>cameraPR</code>, over-representation tables with a direction column, and custom tables into one validated <code>enrichment</code> (an S7 class). The producing test is recognised from the columns and recorded; camera and cameraPR, whose columns are identical, must be named with <code>enrichment_test</code>. Tests without an effect size are scored as signed -log10(FDR). clusterProfiler results are also read when exported as a data frame; a long table of limma results needs a <code>term</code> column, because row names do not survive stacking; <code>dedup_status</code> flags carried in the input are kept and recorded as <code>precomputed</code>.</li>
 <li>
-<code><a href="../reference/dedup.html">dedup()</a></code> flags redundant terms for display without dropping rows or changing p-values: <code>method = "enrichmentmap"</code> (EnrichmentMap combined coefficient at 0.375 by default, or Jaccard at 0.5) or <code>method = "collapse_pathways"</code> (<code><a href="https://rdrr.io/pkg/fgsea/man/collapsePathways.html" class="external-link">fgsea::collapsePathways()</a></code>).</li>
+<code>dedup()</code> flags redundant terms for display without dropping rows or changing p-values: <code>method = "enrichmentmap"</code> (EnrichmentMap combined coefficient at 0.375 by default, or Jaccard at 0.5) or <code>method = "collapse_pathways"</code> (<code><a href="https://rdrr.io/pkg/fgsea/man/collapsePathways.html" class="external-link">fgsea::collapsePathways()</a></code>).</li>
 <li>
-<code><a href="../reference/nes_scatter.html">nes_scatter()</a></code> plots two contrasts term by term, as concordance or, with <code>comparison = "reversal"</code>, as reversal, with quadrant counts, Spearman’s rho and the share of concordant or reversed terms. <code>color_by</code> and <code>shape_by</code> map any per-term column.</li>
+<code>nes_scatter()</code> plots two contrasts term by term, as concordance or, with <code>comparison = "reversal"</code>, as reversal, with quadrant counts, Spearman’s rho and the share of concordant or reversed terms. <code>color_by</code> and <code>shape_by</code> map any per-term column.</li>
 <li>
-<code><a href="../reference/ev_clean_label.html">ev_clean_label()</a></code> gains <code>width</code>.</li>
+<code>ev_clean_label()</code> gains <code>width</code>.</li>
 <li>For scores other than NES, the ring’s fill scale spans the object’s largest significant score rather than squishing at 3.</li>
 </ul></div>
 <div class="section level3">
@@ -91,24 +167,24 @@
 <div class="section level3">
 <h3 id="also-in-this-release-1-0-0">Also in this release<a class="anchor" aria-label="anchor" href="#also-in-this-release-1-0-0"></a></h3>
 <ul><li>
-<code><a href="../reference/volcano_ring_theme.html">volcano_ring_theme()</a></code> takes direct colour overrides: <code>up</code>, <code>down</code>, <code>ns</code> for the points and <code>nes_colors</code> for the arc ramp, so custom palettes no longer need editing the returned list by hand.</li>
+<code>volcano_ring_theme()</code> takes direct colour overrides: <code>up</code>, <code>down</code>, <code>ns</code> for the points and <code>nes_colors</code> for the arc ramp, so custom palettes no longer need editing the returned list by hand.</li>
 <li>
-<code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> gains three layout controls: <code>arc_order</code> (<code>"padj"</code> or <code>"nes"</code>) sets the angular order of arcs within each half, <code>arc_height_range</code> sets the shortest and tallest arc, and <code>show_counts</code> toggles the up/down count badges.</li>
+<code>volcano_ring()</code> gains three layout controls: <code>arc_order</code> (<code>"padj"</code> or <code>"nes"</code>) sets the angular order of arcs within each half, <code>arc_height_range</code> sets the shortest and tallest arc, and <code>show_counts</code> toggles the up/down count badges.</li>
 <li>
-<code><a href="../reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> exposes the composite-layout knobs: <code>panel_spacing</code>, <code>panel_margin</code>, <code>label_headroom</code>, <code>legend_position</code> (<code>"bottom"</code>, <code>"right"</code>, <code>"none"</code>), and <code>legend_width</code>. The shared NES legend now collects along the bottom by default.</li>
+<code>volcano_ring_grid()</code> exposes the composite-layout knobs: <code>panel_spacing</code>, <code>panel_margin</code>, <code>label_headroom</code>, <code>legend_position</code> (<code>"bottom"</code>, <code>"right"</code>, <code>"none"</code>), and <code>legend_width</code>. The shared NES legend now collects along the bottom by default.</li>
 <li>
-<code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> gains <code>ring_thickness</code> and <code>tick_width</code> for the leading-edge tick band, <code>label_gap</code> for the gap between each arc and its label, and <code>count_size</code> / <code>axis_size</code> for the badge and axis-annotation text. Pathway labels now sit a fixed distance above their own arc, so every leader line is the same short length.</li>
+<code>volcano_ring()</code> gains <code>ring_thickness</code> and <code>tick_width</code> for the leading-edge tick band, <code>label_gap</code> for the gap between each arc and its label, and <code>count_size</code> / <code>axis_size</code> for the badge and axis-annotation text. Pathway labels now sit a fixed distance above their own arc, so every leader line is the same short length.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="internal-1-0-0">Internal<a class="anchor" aria-label="anchor" href="#internal-1-0-0"></a></h3>
-<ul><li>Pathway-name cleaning (<code><a href="../reference/ev_clean_label.html">ev_clean_label()</a></code> and helpers) moved from <code>volcano_ring.R</code> to <code>labels.R</code>; <code><a href="../reference/volcano_ring_theme.html">volcano_ring_theme()</a></code> no longer returns an unused theme element and now honours <code>base_family</code>. No behaviour change.</li>
+<ul><li>Pathway-name cleaning (<code>ev_clean_label()</code> and helpers) moved from <code>volcano_ring.R</code> to <code>labels.R</code>; <code>volcano_ring_theme()</code> no longer returns an unused theme element and now honours <code>base_family</code>. No behaviour change.</li>
 </ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="enrichvolcano-030">enrichVolcano 0.3.0<a class="anchor" aria-label="anchor" href="#enrichvolcano-030"></a></h2>
 <div class="section level3">
 <h3 id="breaking-changes-0-3-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-3-0"></a></h3>
-<ul><li>enrichVolcano is now a plotting-only package. Enrichment computation has been removed. Compute your enrichment with <code><a href="https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html" class="external-link">fgsea::fgseaMultilevel()</a></code>, <code>clusterProfiler::gseGO()</code>, <code>enrichR::enrichr()</code>, or any tool you like, and pass the resulting tidy table to <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code>.</li>
+<ul><li>enrichVolcano is now a plotting-only package. Enrichment computation has been removed. Compute your enrichment with <code><a href="https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html" class="external-link">fgsea::fgseaMultilevel()</a></code>, <code>clusterProfiler::gseGO()</code>, <code>enrichR::enrichr()</code>, or any tool you like, and pass the resulting tidy table to <code>volcano_ring()</code>.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="removed-use-v020-to-recover-0-3-0">Removed (use v0.2.0 to recover)<a class="anchor" aria-label="anchor" href="#removed-use-v020-to-recover-0-3-0"></a></h3>
@@ -121,22 +197,22 @@
 <div class="section level3">
 <h3 id="renamed-0-3-0">Renamed<a class="anchor" aria-label="anchor" href="#renamed-0-3-0"></a></h3>
 <ul><li>
-<code>ev_volcano_ring()</code> -&gt; <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code>
+<code>ev_volcano_ring()</code> -&gt; <code>volcano_ring()</code>
 </li>
 <li>
-<code>ev_compose()</code> -&gt; <code><a href="../reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> (signature changed; now takes paired lists of tidy DA + enrichment frames keyed by contrast, and returns an S3 <code>volcano_ring_grid</code> object carrying <code>$plot</code> and <code>$data</code>).</li>
+<code>ev_compose()</code> -&gt; <code>volcano_ring_grid()</code> (signature changed; now takes paired lists of tidy DA + enrichment frames keyed by contrast, and returns an S3 <code>volcano_ring_grid</code> object carrying <code>$plot</code> and <code>$data</code>).</li>
 <li>
-<code>ev_theme()</code> -&gt; <code><a href="../reference/volcano_ring_theme.html">volcano_ring_theme()</a></code> (new args: <code>base_family</code>, <code>nes_limits</code>, <code>nes_stops</code>; palettes: <code>"default"</code>, <code>"viridis"</code>, <code>"okabe"</code>).</li>
+<code>ev_theme()</code> -&gt; <code>volcano_ring_theme()</code> (new args: <code>base_family</code>, <code>nes_limits</code>, <code>nes_stops</code>; palettes: <code>"default"</code>, <code>"viridis"</code>, <code>"okabe"</code>).</li>
 <li>
 <code>print.enrichVolcano()</code> -&gt; <code>print.volcano_ring_grid()</code>.</li>
 <li>
-<code>ev_volcano()</code> and <code>ring_plot()</code> removed entirely — the composite is the plot.</li>
+<code>ev_volcano()</code> and <code>ring_plot()</code> removed. The composite is the plot.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="new-0-3-0">New<a class="anchor" aria-label="anchor" href="#new-0-3-0"></a></h3>
-<ul><li>Column-naming arguments on <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code>: <code>gene_col</code>, <code>logfc_col</code>, <code>pval_col</code>, <code>padj_col</code>, <code>term_col</code>, <code>nes_col</code>, <code>size_col</code>, <code>genes_col</code>, <code>genes_sep</code>. Defaults assume limma + fgsea conventional names.</li>
+<ul><li>Column-naming arguments on <code>volcano_ring()</code>: <code>gene_col</code>, <code>logfc_col</code>, <code>pval_col</code>, <code>padj_col</code>, <code>term_col</code>, <code>nes_col</code>, <code>size_col</code>, <code>genes_col</code>, <code>genes_sep</code>. Defaults assume limma + fgsea conventional names.</li>
 <li>Tick-line column auto-detect: <code>leading_edge</code> (<code>;</code>-string), <code>leadingEdge</code> (list-col), <code>core_enrichment</code> (<code>/</code>-string), and <code>Genes</code> (<code>;</code>-string) all work out of the box. Override via <code>genes_col</code>.</li>
-<li>Structured error classes: <code>enrichVolcano_input_error</code>, <code>enrichVolcano_column_error</code>, <code>enrichVolcano_data_error</code>, <code>enrichVolcano_param_error</code> — all under the parent <code>enrichVolcano_error</code>.</li>
+<li>Structured error classes: <code>enrichVolcano_input_error</code>, <code>enrichVolcano_column_error</code>, <code>enrichVolcano_data_error</code>, <code>enrichVolcano_param_error</code>, all under the parent <code>enrichVolcano_error</code>.</li>
 <li>
 <code>magnitude = c("neg_log_padj", "size")</code> controls the arc-thickness encoding on the ring.</li>
 </ul></div>
@@ -155,11 +231,11 @@
 <div class="section level3">
 <h3 id="bug-fixes-0-2-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-0"></a></h3>
 <ul><li>
-<code>ev_enrich(nperm = ...)</code> now actually takes effect — it is passed to <code><a href="https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html" class="external-link">fgsea::fgseaMultilevel()</a></code> as <code>nPermSimple</code> (previously a no-op).</li>
+<code>ev_enrich(nperm = ...)</code> now takes effect. It is passed to <code><a href="https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html" class="external-link">fgsea::fgseaMultilevel()</a></code> as <code>nPermSimple</code> (previously a no-op).</li>
 <li>
-<code>ev_collapse(keep_by = "NES")</code> now ranks representatives by <strong>|NES|</strong>, so a strongly down-regulated pathway is no longer dropped in favour of a weakly up-regulated one.</li>
+<code>ev_collapse(keep_by = "NES")</code> now ranks representatives by |NES|, so a strongly down-regulated pathway is no longer dropped in favour of a weakly up-regulated one.</li>
 <li>
-<code>ev_collapse()</code> no longer collapses an up- and a down-regulated pathway that share leading-edge genes — dedup is now within-direction.</li>
+<code>ev_collapse()</code> no longer collapses an up- and a down-regulated pathway that share leading-edge genes. Dedup is now within-direction.</li>
 <li>
 <code>adjust_p(method = "qvalue")</code> falls back to BH (with a warning) instead of erroring when a contrast has too few p-values to estimate pi0.</li>
 <li>

@@ -50,8 +50,7 @@ as_da(
 
 A data frame of class `enrichVolcano_da` with columns `protein`, `gene`,
 `contrast`, `logFC`, `t`, `p`, `padj`, `abundance`, `rank` and
-`rank_stat`, followed by any input columns it did not use (for example a
-pi-value column for `volcano_ring(volc_sig_col = )`).
+`rank_stat`, followed by any input columns it did not use.
 
 ## Recognised tools
 

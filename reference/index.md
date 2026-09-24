@@ -5,7 +5,7 @@
 - [`read_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_study.md)
   : Read a study from a workbook or a folder of CSV files
 
-- [`example_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/example_study.md)
+- [`read_example()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_example.md)
   : Example studies shipped with the package
 
 - [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
@@ -16,40 +16,34 @@
 
   Convert enrichment results into an `enrichment` object
 
-- [`enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrichment.md)
-  : Enrichment results in one validated object
-
 - [`load_gene_sets()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/load_gene_sets.md)
   : Load gene-set collections for enrichment
 
 - [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
   : Run gene-set enrichment on a study
 
-- [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
+- [`dedup_terms()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup_terms.md)
   : Flag redundant terms for display
 
 ## Plot
 
-- [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
+- [`plot_volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_volcano_ring.md)
   : Volcano-in-ring composite for one contrast
-
-- [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
-  :
-
-  Compose a grid of
-  [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-  plots, one per contrast
-
-- [`nes_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/nes_scatter.md)
+- [`plot_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_scatter.md)
   : Compare two contrasts term by term
+- [`plot_bias_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_bias_ring.md)
+  : Every significant term of one contrast around its volcano
+
+## Write
+
+- [`write_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_plot.md)
+  : Write panels to one PDF
+- [`write_table()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_table.md)
+  : Write enrichment results to a CSV file
 
 ## Style
 
-- [`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md)
-  :
-
-  Theme + palette for
-  [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-
-- [`ev_clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_clean_label.md)
+- [`plot_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_theme.md)
+  : Fonts and colours for the plots
+- [`clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/clean_label.md)
   : Clean a pathway name for display

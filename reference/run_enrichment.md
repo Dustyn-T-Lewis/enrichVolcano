@@ -1,9 +1,9 @@
 # Run gene-set enrichment on a study
 
 Tests each contrast of a study against gene-set collections and returns
-one
-[enrichment](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrichment.md)
-object per test, ready for the plots.
+one enrichment object per test, the same object
+[`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
+builds.
 
 ## Usage
 
@@ -58,14 +58,13 @@ run_enrichment(
 
 - min_size, max_size:
 
-  Sets need this many genes present in the data.
+  Test sets with at least `min_size` and at most `max_size` genes
+  present in the data.
 
 ## Value
 
-A named list with one
-[enrichment](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrichment.md)
-object per test. Its metadata records the ranking statistic and the
-gene-set versions.
+A named list with one enrichment object per test. Its metadata records
+the ranking statistic and the gene-set versions.
 
 ## fgsea
 
@@ -96,3 +95,21 @@ moderated t of the blocked fit instead, and the result records
 them. camera assumes genes within a set correlate at `inter_gene_cor`
 (limma's default, 0.01); `NA` estimates it from the data, which can
 change results substantially and needs an unblocked design.
+
+## References
+
+Korotkevich G, Sukhov V, Budin N, et al. Fast gene set enrichment
+analysis. bioRxiv. [doi:10.1101/060012](https://doi.org/10.1101/060012)
+
+Wu D, Smyth GK (2012). Camera: a competitive gene set test accounting
+for inter-gene correlation. Nucleic Acids Research 40(17):e133.
+[doi:10.1093/nar/gks461](https://doi.org/10.1093/nar/gks461)
+
+Wu D, Lim E, Vaillant F, et al. (2010). ROAST: rotation gene set tests
+for complex microarray experiments. Bioinformatics 26(17):2176-2182.
+[doi:10.1093/bioinformatics/btq401](https://doi.org/10.1093/bioinformatics/btq401)
+
+Ritchie ME, Phipson B, Wu D, et al. (2015). limma powers differential
+expression analyses for RNA-sequencing and microarray studies. Nucleic
+Acids Research 43(7):e47.
+[doi:10.1093/nar/gkv007](https://doi.org/10.1093/nar/gkv007)

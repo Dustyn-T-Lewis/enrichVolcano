@@ -7,7 +7,7 @@ records those versions, so an analysis can state exactly what it tested.
 
 ``` r
 load_gene_sets(
-  collections = c("Hallmark", "GO Slim"),
+  databases = c("Hallmark", "GO Slim"),
   species = "Homo sapiens",
   min_size = 15,
   max_size = 500
@@ -16,7 +16,7 @@ load_gene_sets(
 
 ## Arguments
 
-- collections:
+- databases:
 
   Any of `"Hallmark"`, `"GO Slim"`, `"Reactome"`, `"KEGG"`, `"GO:BP"`.
 
@@ -26,7 +26,7 @@ load_gene_sets(
 
 - min_size, max_size:
 
-  Keep sets with this many genes.
+  Keep sets with at least `min_size` and at most `max_size` genes.
 
 ## Value
 
@@ -49,3 +49,10 @@ species).
 Each collection is kept separate so
 [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
 corrects p-values within it.
+
+## References
+
+Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
+Signatures Database hallmark gene set collection. Cell Systems
+1(6):417-425.
+[doi:10.1016/j.cels.2015.12.004](https://doi.org/10.1016/j.cels.2015.12.004)

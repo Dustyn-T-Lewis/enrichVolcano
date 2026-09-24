@@ -6,9 +6,10 @@ sheet and contrasts, runs 'fgsea' and limma's camera and fry tests, or
 converts enrichment results computed elsewhere, into one validated
 object. From it the package draws a differential abundance volcano
 inside a ring of enrichment terms, and a scatter comparing two contrasts
-term by term. Redundant terms can be flagged for display with the
-EnrichmentMap overlap rule or 'fgsea' conditional collapsing, without
-changing any p-value. Seven example proteomics studies are included.
+term by term, and writes them to one PDF. Redundant terms can be flagged
+for display with the EnrichmentMap overlap rule or 'fgsea' conditional
+collapsing. No p-value changes. Seven example proteomics studies are
+included.
 
 ## See also
 

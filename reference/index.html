@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +50,7 @@
 
         <dt>
 
-          <code><a href="example_study.html">example_study()</a></code>
+          <code><a href="read_example.html">read_example()</a></code>
 
         </dt>
         <dd>Example studies shipped with the package</dd>
@@ -71,13 +71,6 @@
 
         <dt>
 
-          <code><a href="enrichment.html">enrichment()</a></code>
-
-        </dt>
-        <dd>Enrichment results in one validated object</dd>
-
-        <dt>
-
           <code><a href="load_gene_sets.html">load_gene_sets()</a></code>
 
         </dt>
@@ -92,7 +85,7 @@
 
         <dt>
 
-          <code><a href="dedup.html">dedup()</a></code>
+          <code><a href="dedup_terms.html">dedup_terms()</a></code>
 
         </dt>
         <dd>Flag redundant terms for display</dd>
@@ -108,24 +101,47 @@
 
       <dl><dt>
 
-          <code><a href="volcano_ring.html">volcano_ring()</a></code>
+          <code><a href="plot_volcano_ring.html">plot_volcano_ring()</a></code>
 
         </dt>
         <dd>Volcano-in-ring composite for one contrast</dd>
 
         <dt>
 
-          <code><a href="volcano_ring_grid.html">volcano_ring_grid()</a></code>
-
-        </dt>
-        <dd>Compose a grid of <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> plots, one per contrast</dd>
-
-        <dt>
-
-          <code><a href="nes_scatter.html">nes_scatter()</a></code>
+          <code><a href="plot_scatter.html">plot_scatter()</a></code>
 
         </dt>
         <dd>Compare two contrasts term by term</dd>
+
+        <dt>
+
+          <code><a href="plot_bias_ring.html">plot_bias_ring()</a></code>
+
+        </dt>
+        <dd>Every significant term of one contrast around its volcano</dd>
+      </dl></div><div class="section level2">
+      <h2 id="write">Write<a class="anchor" aria-label="anchor" href="#write"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="write_plot.html">write_plot()</a></code>
+
+        </dt>
+        <dd>Write panels to one PDF</dd>
+
+        <dt>
+
+          <code><a href="write_table.html">write_table()</a></code>
+
+        </dt>
+        <dd>Write enrichment results to a CSV file</dd>
       </dl></div><div class="section level2">
       <h2 id="style">Style<a class="anchor" aria-label="anchor" href="#style"></a></h2>
 
@@ -138,14 +154,14 @@
 
       <dl><dt>
 
-          <code><a href="volcano_ring_theme.html">volcano_ring_theme()</a></code>
+          <code><a href="plot_theme.html">plot_theme()</a></code>
 
         </dt>
-        <dd>Theme + palette for <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code></dd>
+        <dd>Fonts and colours for the plots</dd>
 
         <dt>
 
-          <code><a href="ev_clean_label.html">ev_clean_label()</a></code>
+          <code><a href="clean_label.html">clean_label()</a></code>
 
         </dt>
         <dd>Clean a pathway name for display</dd>

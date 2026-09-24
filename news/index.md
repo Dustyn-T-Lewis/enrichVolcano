@@ -1,5 +1,69 @@
 # Changelog
 
+## enrichVolcano 2.0.0
+
+2.0.0 renames the exports to one rule, verb then noun, and gives
+arguments that mean the same thing one name. Old names are gone, with no
+aliases. To stay on the old API, install 1.1.0:
+`remotes::install_github("Dustyn-T-Lewis/enrichVolcano@v1.1.0")`.
+
+### Migration
+
+| 1.1.0 | 2.0.0 |
+|----|----|
+| `example_study(name)` | `read_example(name)` |
+| `dedup(x, gene_sets)` | `dedup_terms(enrichment, gene_sets)` |
+| `dedup(p_threshold = )` | `dedup_terms(term_threshold = )` |
+| `volcano_ring(volc_df, enrichment)` | `plot_volcano_ring(da, enrichment)` |
+| `volcano_ring(gene_col, logfc_col, pval_col, padj_col)` | removed; pass [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md) output |
+| `volcano_ring(volc_sig_col = "pi")` | `as_da(x, padj = "pi")`, then [`plot_volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_volcano_ring.md) |
+| `volcano_ring(disc_color = )` | `plot_volcano_ring(disc_colour = )` |
+| `volcano_ring(nes_limits = )` | `plot_volcano_ring(score_limits = )` |
+| `volcano_ring(arc_order = "nes")` | `plot_volcano_ring(arc_order = "score")` |
+| `volcano_ring_grid(volc_dfs, enrichment, contrasts)` | [`lapply()`](https://rdrr.io/r/base/lapply.html) over contrasts, then [`write_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_plot.md) or [`patchwork::wrap_plots()`](https://patchwork.data-imaginist.com/reference/wrap_plots.html) |
+| `nes_scatter(enrichment, x, y)` | `plot_scatter(enrichment, x, y)` |
+| `nes_scatter(p_threshold = )` | `plot_scatter(term_threshold = )` |
+| `nes_scatter(color_by = )` | `plot_scatter(colour_by = )` |
+| `nes_scatter(max_labels = )` | `plot_scatter(label_n = )` |
+| `volcano_ring_theme()` | [`plot_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_theme.md) |
+| `volcano_ring_theme(nes_colors = )` | `plot_theme(score_colours = )` |
+| `volcano_ring_theme(nes_limits = )` | `plot_theme(score_limits = )` |
+| `volcano_ring_theme(nes_stops = )` | `plot_theme(score_stops = )` |
+| `ev_clean_label(name)` | `clean_label(name)` |
+| `load_gene_sets(collections = )` | `load_gene_sets(databases = )` |
+| `enrichment(results, metadata)` | [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md); the constructor is internal |
+
+### New features
+
+- [`plot_bias_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_bias_ring.md)
+  draws every significant term of one contrast, without names, with fill
+  and arc height scaled to the strongest term. It shows at a glance
+  whether a contrast leans up or down.
+- The ring draws the twelve most significant unique terms by default. A
+  term found in two collections counts once.
+- [`write_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_plot.md)
+  writes a named list of plots to one PDF: a lettered composite on page
+  1, then one panel per page. Fonts are embedded.
+- [`write_table()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_table.md)
+  writes one enrichment object, or the list from
+  [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md),
+  to one CSV that
+  [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
+  reads back.
+
+### Other changes
+
+- Plot functions refuse plain volcano tables. Pass
+  [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
+  output.
+- Points without a gene symbol are labelled with their accession.
+- An invalid colour raises `enrichVolcano_param_error`.
+- [`dedup_terms()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup_terms.md)
+  records its cutoff as `term_threshold` in `metadata$dedup`.
+- `CITATION` and `REFERENCES.bib` are gone. `citation("enrichVolcano")`
+  reads DESCRIPTION, and each method’s paper is on the help page of the
+  function that runs it.
+
 ## enrichVolcano 1.1.0
 
 ### New features
@@ -24,15 +88,12 @@
   contrasts, with subjects blocked or fixed, optional covariates and
   precision weights; a blocked camera runs as `cameraPR()`.
   `inter_gene_cor` sets camera’s inter-gene correlation or estimates it.
-- [`example_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/example_study.md)
-  loads seven example studies; three include the full sample-level data.
+- `example_study()` loads seven example studies; three include the full
+  sample-level data.
 
 ### Deprecated
 
-- [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-  and
-  [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
-  take
+- `volcano_ring()` and `volcano_ring_grid()` take
   [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
   output. Plain tables and the `gene_col`, `logfc_col`, `pval_col` and
   `padj_col` arguments still work with a warning and will be removed in
@@ -55,16 +116,13 @@
 - Plots read an `enrichment` object built by
   [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
   instead of a data frame described by column-name arguments.
-  [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-  loses `term_col`, `nes_col`, `size_col`, `genes_col` and `genes_sep`,
-  and gains `contrast`;
-  [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
-  takes one `enrichment` for all contrasts.
-- [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-  now chooses its terms: the `n_terms` (12) most significant below
-  `term_threshold`, in either direction, from `databases` (all by
-  default), with redundant terms hidden (`collapse`). `terms` hand-picks
-  instead.
+  `volcano_ring()` loses `term_col`, `nes_col`, `size_col`, `genes_col`
+  and `genes_sep`, and gains `contrast`; `volcano_ring_grid()` takes one
+  `enrichment` for all contrasts.
+- `volcano_ring()` now chooses its terms: the `n_terms` (12) most
+  significant below `term_threshold`, in either direction, from
+  `databases` (all by default), with redundant terms hidden
+  (`collapse`). `terms` hand-picks instead.
 - `magnitude` defaults to `"neg_log_padj"` for NES and `"size"` for
   other scores; the legend is titled with the score type.
 - The three vignettes are merged into one,
@@ -88,19 +146,16 @@
   exported as a data frame; a long table of limma results needs a `term`
   column, because row names do not survive stacking; `dedup_status`
   flags carried in the input are kept and recorded as `precomputed`.
-- [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
-  flags redundant terms for display without dropping rows or changing
-  p-values: `method = "enrichmentmap"` (EnrichmentMap combined
+- `dedup()` flags redundant terms for display without dropping rows or
+  changing p-values: `method = "enrichmentmap"` (EnrichmentMap combined
   coefficient at 0.375 by default, or Jaccard at 0.5) or
   `method = "collapse_pathways"`
   ([`fgsea::collapsePathways()`](https://rdrr.io/pkg/fgsea/man/collapsePathways.html)).
-- [`nes_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/nes_scatter.md)
-  plots two contrasts term by term, as concordance or, with
-  `comparison = "reversal"`, as reversal, with quadrant counts,
+- `nes_scatter()` plots two contrasts term by term, as concordance or,
+  with `comparison = "reversal"`, as reversal, with quadrant counts,
   Spearman’s rho and the share of concordant or reversed terms.
   `color_by` and `shape_by` map any per-term column.
-- [`ev_clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_clean_label.md)
-  gains `width`.
+- `ev_clean_label()` gains `width`.
 - For scores other than NES, the ring’s fill scale spans the object’s
   largest significant score rather than squishing at 3.
 
@@ -110,35 +165,29 @@
 
 ### Also in this release
 
-- [`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md)
-  takes direct colour overrides: `up`, `down`, `ns` for the points and
-  `nes_colors` for the arc ramp, so custom palettes no longer need
-  editing the returned list by hand.
-- [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-  gains three layout controls: `arc_order` (`"padj"` or `"nes"`) sets
-  the angular order of arcs within each half, `arc_height_range` sets
-  the shortest and tallest arc, and `show_counts` toggles the up/down
-  count badges.
-- [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
-  exposes the composite-layout knobs: `panel_spacing`, `panel_margin`,
-  `label_headroom`, `legend_position` (`"bottom"`, `"right"`, `"none"`),
-  and `legend_width`. The shared NES legend now collects along the
-  bottom by default.
-- [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-  gains `ring_thickness` and `tick_width` for the leading-edge tick
-  band, `label_gap` for the gap between each arc and its label, and
-  `count_size` / `axis_size` for the badge and axis-annotation text.
-  Pathway labels now sit a fixed distance above their own arc, so every
-  leader line is the same short length.
+- `volcano_ring_theme()` takes direct colour overrides: `up`, `down`,
+  `ns` for the points and `nes_colors` for the arc ramp, so custom
+  palettes no longer need editing the returned list by hand.
+- `volcano_ring()` gains three layout controls: `arc_order` (`"padj"` or
+  `"nes"`) sets the angular order of arcs within each half,
+  `arc_height_range` sets the shortest and tallest arc, and
+  `show_counts` toggles the up/down count badges.
+- `volcano_ring_grid()` exposes the composite-layout knobs:
+  `panel_spacing`, `panel_margin`, `label_headroom`, `legend_position`
+  (`"bottom"`, `"right"`, `"none"`), and `legend_width`. The shared NES
+  legend now collects along the bottom by default.
+- `volcano_ring()` gains `ring_thickness` and `tick_width` for the
+  leading-edge tick band, `label_gap` for the gap between each arc and
+  its label, and `count_size` / `axis_size` for the badge and
+  axis-annotation text. Pathway labels now sit a fixed distance above
+  their own arc, so every leader line is the same short length.
 
 ### Internal
 
-- Pathway-name cleaning
-  ([`ev_clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/ev_clean_label.md)
-  and helpers) moved from `volcano_ring.R` to `labels.R`;
-  [`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md)
-  no longer returns an unused theme element and now honours
-  `base_family`. No behaviour change.
+- Pathway-name cleaning (`ev_clean_label()` and helpers) moved from
+  `volcano_ring.R` to `labels.R`; `volcano_ring_theme()` no longer
+  returns an unused theme element and now honours `base_family`. No
+  behaviour change.
 
 ## enrichVolcano 0.3.0
 
@@ -148,8 +197,7 @@
   has been removed. Compute your enrichment with
   [`fgsea::fgseaMultilevel()`](https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html),
   `clusterProfiler::gseGO()`, `enrichR::enrichr()`, or any tool you
-  like, and pass the resulting tidy table to
-  [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md).
+  like, and pass the resulting tidy table to `volcano_ring()`.
 
 ### Removed (use v0.2.0 to recover)
 
@@ -164,34 +212,29 @@
 
 ### Renamed
 
-- `ev_volcano_ring()` -\>
-  [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-- `ev_compose()` -\>
-  [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
-  (signature changed; now takes paired lists of tidy DA + enrichment
-  frames keyed by contrast, and returns an S3 `volcano_ring_grid` object
-  carrying `$plot` and `$data`).
-- `ev_theme()` -\>
-  [`volcano_ring_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_theme.md)
-  (new args: `base_family`, `nes_limits`, `nes_stops`; palettes:
-  `"default"`, `"viridis"`, `"okabe"`).
+- `ev_volcano_ring()` -\> `volcano_ring()`
+- `ev_compose()` -\> `volcano_ring_grid()` (signature changed; now takes
+  paired lists of tidy DA + enrichment frames keyed by contrast, and
+  returns an S3 `volcano_ring_grid` object carrying `$plot` and
+  `$data`).
+- `ev_theme()` -\> `volcano_ring_theme()` (new args: `base_family`,
+  `nes_limits`, `nes_stops`; palettes: `"default"`, `"viridis"`,
+  `"okabe"`).
 - `print.enrichVolcano()` -\> `print.volcano_ring_grid()`.
-- `ev_volcano()` and `ring_plot()` removed entirely — the composite is
-  the plot.
+- `ev_volcano()` and `ring_plot()` removed. The composite is the plot.
 
 ### New
 
-- Column-naming arguments on
-  [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md):
-  `gene_col`, `logfc_col`, `pval_col`, `padj_col`, `term_col`,
-  `nes_col`, `size_col`, `genes_col`, `genes_sep`. Defaults assume
-  limma + fgsea conventional names.
+- Column-naming arguments on `volcano_ring()`: `gene_col`, `logfc_col`,
+  `pval_col`, `padj_col`, `term_col`, `nes_col`, `size_col`,
+  `genes_col`, `genes_sep`. Defaults assume limma + fgsea conventional
+  names.
 - Tick-line column auto-detect: `leading_edge` (`;`-string),
   `leadingEdge` (list-col), `core_enrichment` (`/`-string), and `Genes`
   (`;`-string) all work out of the box. Override via `genes_col`.
 - Structured error classes: `enrichVolcano_input_error`,
   `enrichVolcano_column_error`, `enrichVolcano_data_error`,
-  `enrichVolcano_param_error` — all under the parent
+  `enrichVolcano_param_error`, all under the parent
   `enrichVolcano_error`.
 - `magnitude = c("neg_log_padj", "size")` controls the arc-thickness
   encoding on the ring.
@@ -218,14 +261,14 @@
 
 ### Bug fixes
 
-- `ev_enrich(nperm = ...)` now actually takes effect — it is passed to
+- `ev_enrich(nperm = ...)` now takes effect. It is passed to
   [`fgsea::fgseaMultilevel()`](https://rdrr.io/pkg/fgsea/man/fgseaMultilevel.html)
   as `nPermSimple` (previously a no-op).
-- `ev_collapse(keep_by = "NES")` now ranks representatives by
-  **\|NES\|**, so a strongly down-regulated pathway is no longer dropped
-  in favour of a weakly up-regulated one.
+- `ev_collapse(keep_by = "NES")` now ranks representatives by \|NES\|,
+  so a strongly down-regulated pathway is no longer dropped in favour of
+  a weakly up-regulated one.
 - `ev_collapse()` no longer collapses an up- and a down-regulated
-  pathway that share leading-edge genes — dedup is now within-direction.
+  pathway that share leading-edge genes. Dedup is now within-direction.
 - `adjust_p(method = "qvalue")` falls back to BH (with a warning)
   instead of erroring when a contrast has too few p-values to estimate
   pi0.

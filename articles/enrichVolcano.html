@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,35 +58,30 @@
       <img src="../logo.png" class="logo" alt=""><h1>enrichVolcano</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v1.1.0/vignettes/enrichVolcano.Rmd" class="external-link"><code>vignettes/enrichVolcano.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/vignettes/enrichVolcano.Rmd" class="external-link"><code>vignettes/enrichVolcano.Rmd</code></a></small>
       <div class="d-none name"><code>enrichVolcano.Rmd</code></div>
     </div>
 
     
     
 <p>enrichVolcano turns differential-abundance results into enrichment
-figures. Every workflow has the same steps:</p>
+figures. The steps:</p>
 <ol style="list-style-type: decimal">
-<li>Read your results: <code><a href="../reference/read_study.html">read_study()</a></code> for a set of study
-files, or <code><a href="../reference/as_da.html">as_da()</a></code> for one DA table from limma, limpa,
+<li>Read your results. <code><a href="../reference/read_study.html">read_study()</a></code> reads a set of study
+files; <code><a href="../reference/as_da.html">as_da()</a></code> reads one DA table from limma, limpa,
 proteoDA, MSstats, proDA, msqrob2, prolfQua or ProtRank.</li>
-<li>Get enrichment: <code><a href="../reference/run_enrichment.html">run_enrichment()</a></code> runs fgsea, camera and
-fry, or <code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> converts results you already have.
-Both give one validated <code>enrichment</code> object per test.</li>
-<li>
-<code><a href="../reference/dedup.html">dedup()</a></code> (optional) flags redundant terms so figures
-show each signal once.</li>
-<li>Plot: <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> puts the volcano inside a ring of
-enrichment terms, and <code><a href="../reference/nes_scatter.html">nes_scatter()</a></code> compares two contrasts
-term by term.</li>
+<li>Get enrichment. <code><a href="../reference/run_enrichment.html">run_enrichment()</a></code> runs fgsea, camera and
+fry. <code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> converts results you already have.
+Both return one validated <code>enrichment</code> object per test.</li>
+<li>Optionally, <code><a href="../reference/dedup_terms.html">dedup_terms()</a></code> flags redundant terms so a
+figure shows each signal once.</li>
+<li>Plot. <code><a href="../reference/plot_volcano_ring.html">plot_volcano_ring()</a></code> puts the volcano inside a
+ring of enrichment terms. <code><a href="../reference/plot_bias_ring.html">plot_bias_ring()</a></code> rings it with
+every significant term. <code><a href="../reference/plot_scatter.html">plot_scatter()</a></code> compares two
+contrasts term by term.</li>
+<li>Write. <code><a href="../reference/write_plot.html">write_plot()</a></code> saves figures to one PDF;
+<code><a href="../reference/write_table.html">write_table()</a></code> saves results to CSV.</li>
 </ol>
-<div class="section level2">
-<h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
-</h2>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"Dustyn-T-Lewis/enrichVolcano"</span><span class="op">)</span></span></code></pre></div>
-</div>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
@@ -94,10 +89,10 @@ term by term.</li>
 young and old, before and after resistance training: 2,106 proteins in
 62 samples, quantified with limpa, with four contrasts. It ships every
 sheet a study can have, so the whole workflow runs on it:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Dustyn-T-Lewis/enrichVolcano" class="external-link">enrichVolcano</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">yvo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/example_study.html">example_study</a></span><span class="op">(</span><span class="st">"yvo"</span><span class="op">)</span></span>
+<span><span class="va">yvo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_example.html">read_example</a></span><span class="op">(</span><span class="st">"yvo"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 2103 of 2106 accessions mapped to Homo sapiens symbols.</span></span>
 <span><span class="co">#&gt; 2106 of 2106 matrix proteins have DA results.</span></span>
@@ -110,13 +105,13 @@ sheet a study can have, so the whole workflow runs on it:</p>
 <span><span class="co">#&gt; 4 contrasts: Training_Young, Training_Old, Aging, and Interaction</span></span>
 <span><span class="co">#&gt; 252 rows: GO Slim (108) and Hallmark (144)</span></span>
 <span><span class="co">#&gt; Dedup: not deduplicated</span></span></code></pre></div>
-<p><code><a href="../reference/example_study.html">example_study()</a></code> read the study through
+<p><code><a href="../reference/read_example.html">read_example()</a></code> read the study through
 <code><a href="../reference/read_study.html">read_study()</a></code>, which checked that its sheets agree and
 looked up current gene symbols for the UniProt accessions.
 <code><a href="../reference/run_enrichment.html">run_enrichment()</a></code> returned one result per test; here is the
 fgsea one drawn around the volcano:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Training_Young"</span>, title <span class="op">=</span> <span class="st">"Training, young"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Training_Young"</span>, title <span class="op">=</span> <span class="st">"Training, young"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="enrichVolcano_files/figure-html/ring-1.png" class="r-plt" alt="Volcano of Training_Young proteins inside a ring of enriched Hallmark and GO slim terms" width="432"></p>
 <p>Arc fill is NES and arc height is
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>10</mn></msub></mrow><annotation encoding="application/x-tex">-\log_{10}</annotation></semantics></math>(padj).
@@ -199,8 +194,8 @@ signed
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>10</mn></msub></mrow><annotation encoding="application/x-tex">-\log_{10}</annotation></semantics></math>
 p-value.</p>
 <p>The package ships seven studies in this format:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/example_study.html">example_study</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"name"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">]</span></span>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/read_example.html">read_example</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"name"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;           name           species</span></span>
 <span><span class="co">#&gt; 1    bfr_limpa      Homo sapiens</span></span>
 <span><span class="co">#&gt; 2    mouse_pas      Mus musculus</span></span>
@@ -219,7 +214,7 @@ include every sheet; the others ship DA results only.</p>
 collections from <code><a href="../reference/load_gene_sets.html">load_gene_sets()</a></code>, which records the
 msigdbr version and GO slim release it used. The quick start ran all
 three tests on <code>yvo</code>:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "fgsea"  "camera" "fry"</span></span>
 <span><span class="va">res</span><span class="op">$</span><span class="va">camera</span></span>
@@ -246,9 +241,21 @@ genes in a set; limma’s default is 0.01, and
 designs only), which can change results substantially.</p>
 <p>Each result is an <code>enrichment</code> object, so every figure
 reads any of them:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fry</span>, contrast <span class="op">=</span> <span class="st">"Aging"</span>, title <span class="op">=</span> <span class="st">"Aging, fry"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fry</span>, contrast <span class="op">=</span> <span class="st">"Aging"</span>, title <span class="op">=</span> <span class="st">"Aging, fry"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="enrichVolcano_files/figure-html/run-ring-1.png" class="r-plt" alt="Volcano of the Aging contrast ringed by gene sets tested with fry" width="432"></p>
+</div>
+<div class="section level2">
+<h2 id="see-the-whole-contrast">See the whole contrast<a class="anchor" aria-label="anchor" href="#see-the-whole-contrast"></a>
+</h2>
+<p>The ring above draws the twelve most significant terms.
+<code><a href="../reference/plot_bias_ring.html">plot_bias_ring()</a></code> draws every significant term of a
+contrast, without names, to show whether the contrast leans up or down.
+Each arc gets the same angle, so the larger half holds more terms. Fill
+and height are each score over the strongest score in the contrast.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_bias_ring.html">plot_bias_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Aging"</span>, title <span class="op">=</span> <span class="st">"Aging"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="enrichVolcano_files/figure-html/bias-1.png" class="r-plt" alt="Volcano of the Aging contrast ringed by every significant term, more of them up than down, with no term names" width="432"></p>
 </div>
 <div class="section level2">
 <h2 id="choose-gene-set-collections">Choose gene-set collections<a class="anchor" aria-label="anchor" href="#choose-gene-set-collections"></a>
@@ -258,7 +265,7 @@ Hallmark sets each summarise one well-defined biological state, and the
 GO Consortium’s generic slim keeps a small set of broad GO terms. Both
 are built to avoid overlapping terms, so every arc says something
 different. Larger collections such as <a href="GO:BP" class="uri">GO:BP</a> or Reactome find more specific terms but need
-<code><a href="../reference/dedup.html">dedup()</a></code>.</p>
+<code><a href="../reference/dedup_terms.html">dedup_terms()</a></code>.</p>
 <p><code><a href="../reference/load_gene_sets.html">load_gene_sets()</a></code> fetches them for human, mouse or rat.
 Hallmark, Reactome, KEGG MEDICUS and <a href="GO:BP" class="uri">GO:BP</a> come from msigdbr (mouse and rat through
 orthologs). The GO slim is the biological-process part of the GO
@@ -334,10 +341,10 @@ and the leading edge comes from <code>core_enrichment</code>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">limma</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/roast.html" class="external-link">fry</a></span><span class="op">(</span><span class="va">y</span>, index <span class="op">=</span> <span class="va">gene_sets</span>, design <span class="op">=</span> <span class="va">design</span>, contrast <span class="op">=</span> <span class="va">contrast</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aging <span class="op">=</span> <span class="va">res</span><span class="op">)</span>, database <span class="op">=</span> <span class="st">"Hallmark"</span><span class="op">)</span></span></code></pre></div>
-<p>fry and mroast are <strong>self-contained</strong> tests: they ask
-whether the genes in a set changed at all, without reference to genes
-outside it. Neither reports an effect size like NES, or a leading edge.
-The score is therefore
+<p>fry and mroast are self-contained tests: they ask whether the genes
+in a set changed at all, without reference to genes outside it. Neither
+reports an effect size like NES, or a leading edge. The score is
+therefore
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>10</mn></msub></mrow><annotation encoding="application/x-tex">-\log_{10}</annotation></semantics></math>(FDR),
 signed by the reported direction, and the figure’s legend says so. The
 table below has fry’s shape; the numbers are invented to show the
@@ -358,7 +365,7 @@ conversion.</p>
 <span><span class="va">fry_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Training_Young <span class="op">=</span> <span class="va">fry_res</span><span class="op">)</span>, database <span class="op">=</span> <span class="st">"Hallmark"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Reading <span style="color: #0000BB;">"fry"</span> results.</span></span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">fry_x</span>, contrast <span class="op">=</span> <span class="st">"Training_Young"</span>, title <span class="op">=</span> <span class="st">"fry"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">fry_x</span>, contrast <span class="op">=</span> <span class="st">"Training_Young"</span>, title <span class="op">=</span> <span class="st">"fry"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="enrichVolcano_files/figure-html/fry-ring-1.png" class="r-plt" alt="Volcano ring drawn from fry results, with arcs coloured by signed -log10 FDR and no tick lines" width="432"></p>
 <p>With no NES to encode, arc fill carries the signed
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>10</mn></msub></mrow><annotation encoding="application/x-tex">-\log_{10}</annotation></semantics></math>(FDR)
@@ -371,11 +378,11 @@ facts.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">limma</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/camera.html" class="external-link">camera</a></span><span class="op">(</span><span class="va">y</span>, index <span class="op">=</span> <span class="va">gene_sets</span>, design <span class="op">=</span> <span class="va">design</span>, contrast <span class="op">=</span> <span class="va">contrast</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aging <span class="op">=</span> <span class="va">res</span><span class="op">)</span>, enrichment_test <span class="op">=</span> <span class="st">"camera"</span>, database <span class="op">=</span> <span class="st">"Hallmark"</span><span class="op">)</span></span></code></pre></div>
-<p>camera and cameraPR are <strong>competitive</strong> tests, like
-fgsea: they ask whether a set changed more than the genes outside it.
-Their default output has identical columns, so
-<code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> cannot tell them apart and asks you to name
-the test with <code>enrichment_test</code>. camera run with
+<p>camera and cameraPR are competitive tests, like fgsea: they ask
+whether a set changed more than the genes outside it. Their default
+output has identical columns, so <code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> cannot
+tell them apart and asks you to name the test with
+<code>enrichment_test</code>. camera run with
 <code>inter.gene.cor = NA</code> adds a <code>Correlation</code> column
 and is recognised automatically.</p>
 </div>
@@ -415,16 +422,16 @@ down-regulated genes separately and stack the two with a
 <h2 id="deduplicate">Deduplicate<a class="anchor" aria-label="anchor" href="#deduplicate"></a>
 </h2>
 <p>Related gene sets often reach significance together. In <a href="GO:BP" class="uri">GO:BP</a> or Reactome, one biological signal
-can light up a dozen overlapping terms. <code><a href="../reference/dedup.html">dedup()</a></code> flags all
-but one per cluster as <code>"redundant"</code>, and plots hide
+can light up a dozen overlapping terms. <code><a href="../reference/dedup_terms.html">dedup_terms()</a></code> flags
+all but one per cluster as <code>"redundant"</code>, and plots hide
 redundant terms by default (<code>collapse = TRUE</code>). No row is
 removed and no p-value changes: the multiple-testing correction already
 covered every term, so redundancy is a display decision.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gene_sets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">msig</span><span class="op">$</span><span class="va">gene_symbol</span>, <span class="va">msig</span><span class="op">$</span><span class="va">gs_name</span><span class="op">)</span></span>
-<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup.html">dedup</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">gene_sets</span><span class="op">)</span></span>
-<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup.html">dedup</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">gene_sets</span>, similarity <span class="op">=</span> <span class="st">"jaccard"</span><span class="op">)</span></span>
-<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup.html">dedup</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">gene_sets</span>, method <span class="op">=</span> <span class="st">"collapse_pathways"</span>, stats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aging <span class="op">=</span> <span class="va">ranks</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup_terms.html">dedup_terms</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">gene_sets</span><span class="op">)</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup_terms.html">dedup_terms</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">gene_sets</span>, similarity <span class="op">=</span> <span class="st">"jaccard"</span><span class="op">)</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup_terms.html">dedup_terms</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">gene_sets</span>, method <span class="op">=</span> <span class="st">"collapse_pathways"</span>, stats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aging <span class="op">=</span> <span class="va">ranks</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Within each contrast and database, significant terms are walked from
 the smallest padj. A term is redundant when its gene set is similar
 enough to a term already kept:</p>
@@ -463,14 +470,14 @@ Reactome:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">aging</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_enrichment.html">run_enrichment</a></span><span class="op">(</span><span class="va">yvo</span>, <span class="va">reactome</span>, tests <span class="op">=</span> <span class="st">"fgsea"</span><span class="op">)</span><span class="op">$</span><span class="va">fgsea</span></span>
 <span><span class="co">#&gt; Up to 10 of 2103 ranked genes tie; fgsea orders tied genes arbitrarily.</span></span>
-<span><span class="va">aging</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup.html">dedup</a></span><span class="op">(</span><span class="va">aging</span>, <span class="va">reactome</span><span class="op">$</span><span class="va">Reactome</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">aging</span>, contrast <span class="op">=</span> <span class="st">"Aging"</span>, title <span class="op">=</span> <span class="st">"Aging, Reactome"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">aging</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup_terms.html">dedup_terms</a></span><span class="op">(</span><span class="va">aging</span>, <span class="va">reactome</span><span class="op">$</span><span class="va">Reactome</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">aging</span>, contrast <span class="op">=</span> <span class="st">"Aging"</span>, title <span class="op">=</span> <span class="st">"Aging, Reactome"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="enrichVolcano_files/figure-html/reactome-1.png" class="r-plt" alt="Volcano of the Aging contrast ringed by Reactome terms with redundant terms hidden" width="432"></p>
 </div>
 <div class="section level2">
 <h2 id="compare-two-contrasts">Compare two contrasts<a class="anchor" aria-label="anchor" href="#compare-two-contrasts"></a>
 </h2>
-<p><code><a href="../reference/nes_scatter.html">nes_scatter()</a></code> plots every term’s score in one contrast
+<p><code><a href="../reference/plot_scatter.html">plot_scatter()</a></code> plots every term’s score in one contrast
 against its score in another. It answers two kinds of question, set by
 <code>comparison</code>. The examples below draw from the published
 fgsea results, <code>ex</code>; <code>res$fgsea</code> works the same
@@ -479,7 +486,7 @@ way.</p>
 two conditions regulate the same pathways. Terms in the shaded top-right
 and bottom-left quadrants move the same way in both.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/nes_scatter.html">nes_scatter</a></span><span class="op">(</span><span class="va">ex</span>, <span class="st">"Training_Young"</span>, <span class="st">"Training_Old"</span>, databases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_scatter.html">plot_scatter</a></span><span class="op">(</span><span class="va">ex</span>, <span class="st">"Training_Young"</span>, <span class="st">"Training_Old"</span>, databases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="enrichVolcano_files/figure-html/concordance-1.png" class="r-plt" alt="Scatter of NES in trained young against trained old, with most significant terms in the concordant quadrants" width="468"></p>
 <p><code>comparison = "reversal"</code> asks whether one condition
 undoes another. The unshaded quadrants hold the answer: a pathway raised
@@ -487,13 +494,13 @@ by aging and lowered by training, or the reverse. The reference line
 becomes
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mi>−</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">y = -x</annotation></semantics></math>.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/nes_scatter.html">nes_scatter</a></span><span class="op">(</span><span class="va">ex</span>, <span class="st">"Aging"</span>, <span class="st">"Training_Old"</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_scatter.html">plot_scatter</a></span><span class="op">(</span><span class="va">ex</span>, <span class="st">"Aging"</span>, <span class="st">"Training_Old"</span>,</span>
 <span>  comparison <span class="op">=</span> <span class="st">"reversal"</span>, databases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="enrichVolcano_files/figure-html/reversal-1.png" class="r-plt" alt="Scatter of NES in aging against trained old, with most significant terms in the reversed quadrants" width="468"></p>
 <p>A term counts as significant in a contrast when its padj is below
-<code>p_threshold</code> (0.05); the colour says whether that holds in
-one contrast or both. Pathways are judged on the false discovery rate
+<code>term_threshold</code> (0.05); the colour says whether that holds
+in one contrast or both. Pathways are judged on the false discovery rate
 alone. Scores that combine effect size with p, such as the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>π</mi><annotation encoding="application/x-tex">\pi</annotation></semantics></math>-value,
 are defined for single proteins, not gene sets. The corner counts and
@@ -501,20 +508,20 @@ the headline share use significant terms only; Spearman’s
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
 uses every plotted term, with a 95% interval when the correlation
 package is installed.</p>
-<p><code>color_by</code> and <code>shape_by</code> take any per-term
-column, for example <code>color_by = "database"</code>, and
+<p><code>colour_by</code> and <code>shape_by</code> take any per-term
+column, for example <code>colour_by = "database"</code>, and
 <code>databases</code>, <code>collapse</code> and
 <code>label_min_size</code> work as they do for the ring.</p>
 </div>
 <div class="section level2">
 <h2 id="change-the-look">Change the look<a class="anchor" aria-label="anchor" href="#change-the-look"></a>
 </h2>
-<p><code><a href="../reference/volcano_ring_theme.html">volcano_ring_theme()</a></code> holds the palette; the plot
-arguments hold the layout.</p>
+<p><code><a href="../reference/plot_theme.html">plot_theme()</a></code> holds the palette; the plot arguments hold
+the layout.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>,</span>
 <span>  contrast <span class="op">=</span> <span class="st">"Training_Young"</span>,</span>
-<span>  theme <span class="op">=</span> <span class="fu"><a href="../reference/volcano_ring_theme.html">volcano_ring_theme</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"okabe"</span><span class="op">)</span>,</span>
+<span>  theme <span class="op">=</span> <span class="fu"><a href="../reference/plot_theme.html">plot_theme</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"okabe"</span><span class="op">)</span>,</span>
 <span>  label_mode <span class="op">=</span> <span class="st">"top_per_direction"</span>, label_n <span class="op">=</span> <span class="fl">4</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The arguments you will reach for most:</p>
@@ -534,15 +541,38 @@ when points crowd the ring.</li>
 <code>label_mode</code>, <code>label_n</code>,
 <code>label_genes</code>: which proteins get text.</li>
 <li>
-<code>show_counts</code>, <code>disc_color</code>: count badges and
+<code>show_counts</code>, <code>disc_colour</code>: count badges and
 a tinted central disc.</li>
 </ul>
-<p><code><a href="../reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> draws one ring per contrast and
-collects a shared legend; extra arguments pass to every ring.</p>
+</div>
+<div class="section level2">
+<h2 id="write-figures-and-tables">Write figures and tables<a class="anchor" aria-label="anchor" href="#write-figures-and-tables"></a>
+</h2>
+<p>Every plot function returns one ggplot. <code><a href="../reference/write_plot.html">write_plot()</a></code>
+takes a named list of them and writes one PDF. Page 1 is a composite
+lettered A, B, C in list order. Each later page holds one panel at full
+size, headed by its letter and name. Fonts are embedded.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/volcano_ring_grid.html">volcano_ring_grid</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrasts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Training_Young"</span>, <span class="st">"Training_Old"</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">g</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
-<p><img src="enrichVolcano_files/figure-html/grid-1.png" class="r-plt" alt="Two volcano rings side by side for trained young and trained old" width="720"></p>
+<code class="sourceCode R"><span><span class="va">panels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="st">"Training, young"</span> <span class="op">=</span> <span class="fu"><a href="../reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Training_Young"</span><span class="op">)</span>,</span>
+<span>  <span class="st">"Training, old"</span> <span class="op">=</span> <span class="fu"><a href="../reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Training_Old"</span><span class="op">)</span>,</span>
+<span>  <span class="st">"Young against old"</span> <span class="op">=</span> <span class="fu"><a href="../reference/plot_scatter.html">plot_scatter</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, <span class="st">"Training_Young"</span>, <span class="st">"Training_Old"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/write_plot.html">write_plot</a></span><span class="op">(</span><span class="va">panels</span>, <span class="st">"training.pdf"</span>, design <span class="op">=</span> <span class="st">"AB\nCC"</span>, caption <span class="op">=</span> <span class="st">"fgsea, Hallmark and GO slim"</span><span class="op">)</span></span></code></pre></div>
+<p>To see a composite on screen, pass the list to
+<code><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html" class="external-link">patchwork::wrap_plots()</a></code>:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">patchwork</span><span class="fu">::</span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html" class="external-link">wrap_plots</a></span><span class="op">(</span><span class="va">panels</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p><img src="enrichVolcano_files/figure-html/composite-1.png" class="r-plt" alt="Two volcano rings side by side for trained young and trained old" width="720"></p>
+<p><code><a href="../reference/write_table.html">write_table()</a></code> writes one enrichment object, or the whole
+list from <code><a href="../reference/run_enrichment.html">run_enrichment()</a></code>, to one CSV with an
+<code>enrichment_test</code> column:</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/write_table.html">write_table</a></span><span class="op">(</span><span class="va">res</span>, <span class="st">"yvo_enrichment.csv"</span><span class="op">)</span></span></code></pre></div>
+<p>The papers behind each method are listed on the help pages of
+<code><a href="../reference/run_enrichment.html">run_enrichment()</a></code>, <code><a href="../reference/load_gene_sets.html">load_gene_sets()</a></code>,
+<code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> and <code><a href="../reference/dedup_terms.html">dedup_terms()</a></code>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
