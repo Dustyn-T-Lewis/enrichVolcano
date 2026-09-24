@@ -47,8 +47,7 @@ da_candidates <- list(
 #'
 #' @return A data frame of class `enrichVolcano_da` with columns `protein`,
 #'   `gene`, `contrast`, `logFC`, `t`, `p`, `padj`, `abundance`, `rank` and
-#'   `rank_stat`, followed by any input columns it did not use (for example a
-#'   pi-value column for `volcano_ring(volc_sig_col = )`).
+#'   `rank_stat`, followed by any input columns it did not use.
 #' @export
 #' @examples
 #' tbl <- data.frame(
@@ -130,9 +129,11 @@ standardise_da <- function(tbl, cols) {
     stringsAsFactors = FALSE
   )
   res$gene <- if (is.na(stat[["gene"]])) NA_character_ else unwrap_excel(tbl[[stat[["gene"]]]])
-  ranked <- rank_statistic(res, stat)
-  res$rank <- ranked$rank
-  res$rank_stat <- ranked$label
+  signed <- function(pv) sign(res$logFC) * -log10(pmax(pv, .Machine$double.xmin))
+  has_t <- !is.na(stat[["t"]])
+  has_p <- !is.na(stat[["p"]])
+  res$rank <- if (has_t) res$t else if (has_p) signed(res$p) else signed(res$padj)
+  res$rank_stat <- if (has_t) "t" else if (has_p) "signed -log10(p)" else "signed -log10(padj)"
   used <- c(logfc_col, stat[!is.na(stat)], ids$col)
   extras <- tbl[setdiff(names(tbl), used)]
   rownames(res) <- NULL
@@ -155,17 +156,6 @@ protein_ids <- function(tbl, col, gene_col) {
     return(list(ids = unwrap_excel(tbl[[gene_col]]), col = gene_col))
   }
   ev_abort_missing_column(tbl, "protein", "protein", "x")
-}
-
-rank_statistic <- function(res, stat) {
-  signed <- function(pv) sign(res$logFC) * -log10(pmax(pv, .Machine$double.xmin))
-  if (!is.na(stat[["t"]])) {
-    return(list(rank = res$t, label = "t"))
-  }
-  if (!is.na(stat[["p"]])) {
-    return(list(rank = signed(res$p), label = "signed -log10(p)"))
-  }
-  list(rank = signed(res$padj), label = "signed -log10(padj)")
 }
 
 lookup_genes <- function(d, species) {

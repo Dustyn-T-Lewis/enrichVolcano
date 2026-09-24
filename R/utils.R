@@ -76,7 +76,7 @@ ev_abort_missing_column <- function(df, col_name, col_arg, df_name) {
 #' Catch it at the boundary instead.
 #' @keywords internal
 #' @noRd
-ev_assert_colour <- function(x, arg = "disc_color") {
+ev_assert_colour <- function(x, arg = "disc_colour") {
   if (is.null(x)) {
     return(invisible(NULL))
   }
@@ -90,7 +90,7 @@ ev_assert_colour <- function(x, arg = "disc_color") {
     )
   if (!ok) {
     ev_abort("{.arg {arg}} must be a single colour name or hex code; got {.val {x}}.",
-      class = "ev_invalid_colour"
+      class = "enrichVolcano_param_error"
     )
   }
   invisible(x)

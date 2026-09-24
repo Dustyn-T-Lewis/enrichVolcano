@@ -54,27 +54,33 @@ map_symbols <- function(ids, species) {
 #' Each collection is kept separate so [run_enrichment()] corrects p-values
 #' within it.
 #'
-#' @param collections Any of `"Hallmark"`, `"GO Slim"`, `"Reactome"`, `"KEGG"`,
+#' @references
+#' Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
+#' Signatures Database hallmark gene set collection. Cell Systems 1(6):417-425.
+#' \doi{10.1016/j.cels.2015.12.004}
+#'
+#' @param databases Any of `"Hallmark"`, `"GO Slim"`, `"Reactome"`, `"KEGG"`,
 #'   `"GO:BP"`.
 #' @param species `"Homo sapiens"`, `"Mus musculus"` or `"Rattus norvegicus"`.
-#' @param min_size,max_size Keep sets with this many genes.
+#' @param min_size,max_size Keep sets with at least `min_size` and at most
+#'   `max_size` genes.
 #' @return A named list of collections, each a named list of gene symbols, with
 #'   a `versions` attribute (msigdbr, GO slim release, annotation package,
 #'   species).
 #' @export
-load_gene_sets <- function(collections = c("Hallmark", "GO Slim"), species = "Homo sapiens",
+load_gene_sets <- function(databases = c("Hallmark", "GO Slim"), species = "Homo sapiens",
                            min_size = 15, max_size = 500) {
   known <- c(names(msigdb_collections), "GO Slim")
-  unknown <- setdiff(collections, known)
+  unknown <- setdiff(databases, known)
   if (length(unknown) > 0) {
     ev_abort(
-      c("Unknown collection{?s}: {.val {unknown}}.", i = "Available: {.val {known}}."),
+      c("Unknown database{?s}: {.val {unknown}}.", i = "Available: {.val {known}}."),
       class = "enrichVolcano_param_error"
     )
   }
   pkg <- org_package(species)
   versions <- list(species = species, annotation = paste(pkg, utils::packageVersion(pkg)))
-  sets <- lapply(collections, function(name) {
+  sets <- lapply(databases, function(name) {
     if (name == "GO Slim") {
       slim <- go_slim_sets(pkg)
       versions$go_slim <<- attr(slim, "data_version")
@@ -88,7 +94,7 @@ load_gene_sets <- function(collections = c("Hallmark", "GO Slim"), species = "Ho
     ))
     lapply(split(tbl$gene_symbol, tbl$gs_name), unique)
   })
-  names(sets) <- collections
+  names(sets) <- databases
   sets <- lapply(sets, function(s) s[lengths(s) >= min_size & lengths(s) <= max_size])
   attr(sets, "versions") <- versions
   sets

@@ -5,22 +5,25 @@ reference:
   - title: "Build"
     contents:
       - read_study
-      - example_study
+      - read_example
       - as_da
       - as_enrichment
-      - enrichment
       - load_gene_sets
       - run_enrichment
-      - dedup
+      - dedup_terms
   - title: "Plot"
     contents:
-      - volcano_ring
-      - volcano_ring_grid
-      - nes_scatter
+      - plot_volcano_ring
+      - plot_scatter
+      - plot_bias_ring
+  - title: "Write"
+    contents:
+      - write_plot
+      - write_table
   - title: "Style"
     contents:
-      - volcano_ring_theme
-      - ev_clean_label
+      - plot_theme
+      - clean_label
   - title: internal
     contents:
       - enrichVolcano-package

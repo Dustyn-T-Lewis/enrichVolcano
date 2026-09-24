@@ -5,19 +5,20 @@
 \title{Load gene-set collections for enrichment}
 \usage{
 load_gene_sets(
-  collections = c("Hallmark", "GO Slim"),
+  databases = c("Hallmark", "GO Slim"),
   species = "Homo sapiens",
   min_size = 15,
   max_size = 500
 )
 }
 \arguments{
-\item{collections}{Any of \code{"Hallmark"}, \code{"GO Slim"}, \code{"Reactome"}, \code{"KEGG"},
+\item{databases}{Any of \code{"Hallmark"}, \code{"GO Slim"}, \code{"Reactome"}, \code{"KEGG"},
 \code{"GO:BP"}.}
 
 \item{species}{\code{"Homo sapiens"}, \code{"Mus musculus"} or \code{"Rattus norvegicus"}.}
 
-\item{min_size, max_size}{Keep sets with this many genes.}
+\item{min_size, max_size}{Keep sets with at least \code{min_size} and at most
+\code{max_size} genes.}
 }
 \value{
 A named list of collections, each a named list of gene symbols, with
@@ -41,4 +42,9 @@ the term or any of its descendants. Sets are named like
 
 Each collection is kept separate so \code{\link[=run_enrichment]{run_enrichment()}} corrects p-values
 within it.
+}
+\references{
+Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
+Signatures Database hallmark gene set collection. Cell Systems 1(6):417-425.
+\doi{10.1016/j.cels.2015.12.004}
 }

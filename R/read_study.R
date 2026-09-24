@@ -172,15 +172,15 @@ matched_weights <- function(tbl, matrix) {
 #'   `info`; or the index as a data frame.
 #' @export
 #' @examples
-#' example_study()
-example_study <- function(name = NULL) {
+#' read_example()
+read_example <- function(name = NULL) {
   root <- system.file("extdata", "studies", package = "enrichVolcano")
   index <- utils::read.csv(file.path(root, "index.csv"))
   if (is.null(name)) {
     return(index)
   }
   if (!isTRUE(name %in% index$name)) {
-    ev_abort("No example study {.val {name}}; see {.code example_study()}.", class = "enrichVolcano_param_error")
+    ev_abort("No example study {.val {name}}; see {.code read_example()}.", class = "enrichVolcano_param_error")
   }
   info <- as.list(index[index$name == name, ])
   study <- read_study(file.path(root, name), species = info$species)

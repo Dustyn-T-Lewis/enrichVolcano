@@ -38,12 +38,26 @@ direction from the score sign.}
 \item{score_type}{Axis and legend label for a custom score, e.g. \code{"NES"}.}
 }
 \value{
-An \link{enrichment} object.
+An S7 \code{enrichment} object. Every construction and every edit is
+validated. \verb{@results} has one row per term per contrast:
+\itemize{
+\item \code{contrast}, \code{database}, \code{term}: character. \code{database} may be \code{NA}.
+\item \code{score}: numeric. NES for fgsea and clusterProfiler; signed
+\eqn{-\log_{10}}(FDR) for limma rotation/competitive tests and ORA.
+\item \code{p}, \code{padj}: numeric in [0, 1]; \code{NA} allowed.
+\item \code{size}: numeric set size.
+\item \code{direction}: \code{"up"} or \code{"down"}, agreeing with the sign of \code{score}.
+\item \code{leading_edge}: list of character vectors, empty when the test has none.
+}
+
+Extra columns, such as \code{dedup_status}, are kept. \verb{@metadata} holds
+\code{enrichment_test}, \code{score_type} (the axis and legend label for \code{score})
+and \code{dedup} (the settings \code{\link[=dedup_terms]{dedup_terms()}} used, or \code{list(method = "precomputed")} when the input already carried \code{dedup_status}).
 }
 \description{
 The one entry point for results from any enrichment tool. Hand it one
-table per contrast and it returns a validated \link{enrichment} that every plot
-in the package reads.
+table per contrast and it returns a validated \code{enrichment} object that
+every plot in the package reads.
 }
 \section{Which test produced the table}{
 
@@ -80,4 +94,9 @@ path <- system.file("extdata", "examples", "yvo_fgsea.csv.gz",
 )
 ex <- as_enrichment(read.csv(path))
 ex
+}
+\references{
+Wu T, Hu E, Xu S, et al. (2021). clusterProfiler 4.0: A universal
+enrichment tool for interpreting omics data. The Innovation 2(3):100141.
+\doi{10.1016/j.xinn.2021.100141}
 }

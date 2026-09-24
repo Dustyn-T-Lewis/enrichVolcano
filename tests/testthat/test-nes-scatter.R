@@ -1,7 +1,5 @@
-source(test_path("fixtures/make_toy.R"))
-
 scatter <- function(x = make_toy_scatter_enrichment(), ...) {
-  suppressMessages(nes_scatter(x, "A", "B", databases = NULL, ...))
+  suppressMessages(plot_scatter(x, "A", "B", databases = NULL, ...))
 }
 
 layer_labels <- function(p) {
@@ -74,7 +72,7 @@ test_that("the subtitle states rho, CI, p, concordance and counts", {
   expect_false(grepl("concordant", s))
 })
 
-test_that("nes_scatter returns a ggplot labelled with score type and contrasts", {
+test_that("plot_scatter returns a ggplot labelled with score type and contrasts", {
   p <- scatter()
   expect_s3_class(p, "ggplot")
   expect_identical(p$labels$x, "NES (A)")
@@ -96,12 +94,12 @@ test_that("reversal framing flips the reference line, names and headline share",
   expect_error(scatter(comparison = "sideways"), class = "rlang_error")
 })
 
-test_that("only significant terms of at least label_min_size are labelled, up to max_labels", {
+test_that("only significant terms of at least label_min_size are labelled, up to label_n", {
   labs <- layer_labels(scatter())
   expect_true(any(grepl("T01", labs)))
   expect_false(any(grepl("T12", labs)))
   expect_false(any(grepl("T06", labs)))
-  labs_few <- layer_labels(scatter(max_labels = 2))
+  labs_few <- layer_labels(scatter(label_n = 2))
   expect_identical(sum(grepl("^T[0-9]+$", labs_few)), 2L)
 })
 
@@ -109,7 +107,7 @@ test_that("terms missing from one contrast are dropped with a note", {
   x <- make_toy_scatter_enrichment()
   r <- x@results
   x@results <- r[!(r$contrast == "B" & r$term == "T01"), ]
-  expect_message(nes_scatter(x, "A", "B", databases = NULL), "1 term")
+  expect_message(plot_scatter(x, "A", "B", databases = NULL), "1 term")
 })
 
 test_that("collapse hides terms redundant somewhere and representative nowhere", {
@@ -130,16 +128,16 @@ test_that("collapse hides terms redundant somewhere and representative nowhere",
 
 test_that("contrasts must be two different ones that exist", {
   x <- make_toy_scatter_enrichment()
-  expect_error(nes_scatter(x, "A", "A"), class = "enrichVolcano_input_error")
-  expect_error(nes_scatter(x, "A", "Z"), "Z", class = "enrichVolcano_input_error")
-  expect_error(nes_scatter(make_toy_enrich(), "A", "B"), class = "enrichVolcano_input_error")
+  expect_error(plot_scatter(x, "A", "A"), class = "enrichVolcano_input_error")
+  expect_error(plot_scatter(x, "A", "Z"), "Z", class = "enrichVolcano_input_error")
+  expect_error(plot_scatter(make_toy_enrich(), "A", "B"), class = "enrichVolcano_input_error")
 })
 
-test_that("color_by and shape_by take any column, or NULL", {
-  expect_s3_class(scatter(color_by = "database", shape_by = NULL), "ggplot")
-  expect_s3_class(scatter(color_by = NULL), "ggplot")
-  expect_s3_class(scatter(color_by = "size"), "ggplot")
-  expect_error(scatter(color_by = "nope"), class = "enrichVolcano_column_error")
+test_that("colour_by and shape_by take any column, or NULL", {
+  expect_s3_class(scatter(colour_by = "database", shape_by = NULL), "ggplot")
+  expect_s3_class(scatter(colour_by = NULL), "ggplot")
+  expect_s3_class(scatter(colour_by = "size"), "ggplot")
+  expect_error(scatter(colour_by = "nope"), class = "enrichVolcano_column_error")
   expect_error(scatter(shape_by = "nope"), class = "enrichVolcano_column_error")
 })
 
@@ -149,7 +147,7 @@ test_that("significance falls back to nominal p when padj is absent", {
   r$p <- r$padj
   r$padj <- NA_real_
   x@results <- r
-  expect_message(p <- nes_scatter(x, "A", "B", databases = NULL), "nominal")
+  expect_message(p <- plot_scatter(x, "A", "B", databases = NULL), "nominal")
   expect_true(any(grepl("n = 4", layer_labels(p))))
 })
 
@@ -194,7 +192,7 @@ test_that("more than eight colour groups fall back to the default palette", {
   r <- x@results
   r$group <- rep(sprintf("g%02d", 1:12), 2)
   x@results <- r
-  expect_s3_class(scatter(x, color_by = "group")$scales$get_scales("fill"), "ScaleDiscrete")
+  expect_s3_class(scatter(x, colour_by = "group")$scales$get_scales("fill"), "ScaleDiscrete")
 })
 
 test_that("an unlabelled database column draws one shape and no shape legend", {
@@ -220,9 +218,9 @@ test_that("contrasts with no shared terms give a clear error", {
   r <- x@results
   r$term[r$contrast == "B"] <- paste0(r$term[r$contrast == "B"], "_b")
   x@results <- r
-  expect_error(suppressMessages(nes_scatter(x, "A", "B")), "no terms", class = "enrichVolcano_input_error")
+  expect_error(suppressMessages(plot_scatter(x, "A", "B")), "no terms", class = "enrichVolcano_input_error")
 })
 
 test_that("the scatter defaults to every database", {
-  expect_null(formals(nes_scatter)$databases)
+  expect_null(formals(plot_scatter)$databases)
 })

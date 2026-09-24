@@ -18,25 +18,21 @@ knitr::opts_chunk$set(
 ```
 
 enrichVolcano turns differential-abundance results into enrichment figures.
-Every workflow has the same steps:
+The steps:
 
-1. Read your results: `read_study()` for a set of study files, or `as_da()`
-   for one DA table from limma, limpa, proteoDA, MSstats, proDA, msqrob2,
+1. Read your results. `read_study()` reads a set of study files; `as_da()`
+   reads one DA table from limma, limpa, proteoDA, MSstats, proDA, msqrob2,
    prolfQua or ProtRank.
-2. Get enrichment: `run_enrichment()` runs fgsea, camera and fry, or
-   `as_enrichment()` converts results you already have. Both give one
+2. Get enrichment. `run_enrichment()` runs fgsea, camera and fry.
+   `as_enrichment()` converts results you already have. Both return one
    validated `enrichment` object per test.
-3. `dedup()` (optional) flags redundant terms so figures show each signal
-   once.
-4. Plot: `volcano_ring()` puts the volcano inside a ring of enrichment terms,
-   and `nes_scatter()` compares two contrasts term by term.
-
-## Install
-
-```{r install, eval = FALSE}
-install.packages("remotes")
-remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
-```
+3. Optionally, `dedup_terms()` flags redundant terms so a figure shows each
+   signal once.
+4. Plot. `plot_volcano_ring()` puts the volcano inside a ring of enrichment
+   terms. `plot_bias_ring()` rings it with every significant term.
+   `plot_scatter()` compares two contrasts term by term.
+5. Write. `write_plot()` saves figures to one PDF; `write_table()` saves
+   results to CSV.
 
 ## Quick start
 
@@ -48,20 +44,20 @@ whole workflow runs on it:
 ```{r read}
 library(enrichVolcano)
 
-yvo <- example_study("yvo")
+yvo <- read_example("yvo")
 sets <- load_gene_sets(c("Hallmark", "GO Slim"))
 set.seed(1)
 res <- run_enrichment(yvo, sets)
 res$fgsea
 ```
 
-`example_study()` read the study through `read_study()`, which checked that its
+`read_example()` read the study through `read_study()`, which checked that its
 sheets agree and looked up current gene symbols for the UniProt accessions.
 `run_enrichment()` returned one result per test; here is the fgsea one drawn
 around the volcano:
 
 ```{r ring, fig.alt = "Volcano of Training_Young proteins inside a ring of enriched Hallmark and GO slim terms"}
-volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young", title = "Training, young")
+plot_volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young", title = "Training, young")
 ```
 
 Arc fill is NES and arc height is \(-\log_{10}\)(padj). Up-regulated terms sit
@@ -100,7 +96,7 @@ the signed \(-\log_{10}\) p-value.
 The package ships seven studies in this format:
 
 ```{r studies}
-example_study()[c("name", "species")]
+read_example()[c("name", "species")]
 ```
 
 `yvo`, `bfr_limpa` and `mouse_pas` include every sheet; the others ship DA
@@ -136,7 +132,19 @@ which can change results substantially.
 Each result is an `enrichment` object, so every figure reads any of them:
 
 ```{r run-ring, fig.alt = "Volcano of the Aging contrast ringed by gene sets tested with fry"}
-volcano_ring(yvo$da, res$fry, contrast = "Aging", title = "Aging, fry")
+plot_volcano_ring(yvo$da, res$fry, contrast = "Aging", title = "Aging, fry")
+```
+
+## See the whole contrast
+
+The ring above draws the twelve most significant terms. `plot_bias_ring()`
+draws every significant term of a contrast, without names, to show whether
+the contrast leans up or down. Each arc gets the same angle, so the larger
+half holds more terms. Fill and height are each score over the strongest
+score in the contrast.
+
+```{r bias, fig.alt = "Volcano of the Aging contrast ringed by every significant term, more of them up than down, with no term names"}
+plot_bias_ring(yvo$da, res$fgsea, contrast = "Aging", title = "Aging")
 ```
 
 ## Choose gene-set collections
@@ -146,7 +154,7 @@ sets each summarise one well-defined biological state, and the GO
 Consortium's generic slim keeps a small set of broad GO terms. Both are built
 to avoid overlapping terms, so every arc says something different. Larger
 collections such as GO:BP or Reactome find more specific terms but need
-`dedup()`.
+`dedup_terms()`.
 
 `load_gene_sets()` fetches them for human, mouse or rat. Hallmark, Reactome,
 KEGG MEDICUS and GO:BP come from msigdbr (mouse and rat through orthologs). The
@@ -178,8 +186,8 @@ ex
 ```
 
 It recognised fgsea output from its columns and split the table by its
-`contrast` column. Every tool below ends in the same object. Pass one table per contrast as a
-named list, or one table with a `contrast` column.
+`contrast` column. Every tool below ends in the same object. Pass one table
+per contrast as a named list, or one table with a `contrast` column.
 
 ### fgsea
 
@@ -209,7 +217,7 @@ res <- limma::fry(y, index = gene_sets, design = design, contrast = contrast)
 x <- as_enrichment(list(Aging = res), database = "Hallmark")
 ```
 
-fry and mroast are **self-contained** tests: they ask whether the genes in a
+fry and mroast are self-contained tests: they ask whether the genes in a
 set changed at all, without reference to genes outside it. Neither reports an
 effect size like NES, or a leading edge. The score is therefore
 \(-\log_{10}\)(FDR), signed by the reported direction, and the figure's legend
@@ -233,7 +241,7 @@ fry_x <- as_enrichment(list(Training_Young = fry_res), database = "Hallmark")
 ```
 
 ```{r fry-ring, fig.alt = "Volcano ring drawn from fry results, with arcs coloured by signed -log10 FDR and no tick lines"}
-volcano_ring(yvo$da, fry_x, contrast = "Training_Young", title = "fry")
+plot_volcano_ring(yvo$da, fry_x, contrast = "Training_Young", title = "fry")
 ```
 
 With no NES to encode, arc fill carries the signed \(-\log_{10}\)(FDR) and arc
@@ -246,7 +254,7 @@ res <- limma::camera(y, index = gene_sets, design = design, contrast = contrast)
 x <- as_enrichment(list(Aging = res), enrichment_test = "camera", database = "Hallmark")
 ```
 
-camera and cameraPR are **competitive** tests, like fgsea: they ask whether a
+camera and cameraPR are competitive tests, like fgsea: they ask whether a
 set changed more than the genes outside it. Their default output has
 identical columns, so `as_enrichment()` cannot tell them apart and asks you to
 name the test with `enrichment_test`. camera run with
@@ -288,7 +296,7 @@ legend title.
 ## Deduplicate
 
 Related gene sets often reach significance together. In GO:BP or Reactome,
-one biological signal can light up a dozen overlapping terms. `dedup()` flags
+one biological signal can light up a dozen overlapping terms. `dedup_terms()` flags
 all but one per cluster as `"redundant"`, and plots hide redundant terms by
 default (`collapse = TRUE`). No row is removed and no p-value changes: the
 multiple-testing correction already covered every term, so redundancy is a
@@ -296,9 +304,9 @@ display decision.
 
 ```{r dedup, eval = FALSE}
 gene_sets <- split(msig$gene_symbol, msig$gs_name)
-x <- dedup(x, gene_sets)
-x <- dedup(x, gene_sets, similarity = "jaccard")
-x <- dedup(x, gene_sets, method = "collapse_pathways", stats = list(Aging = ranks))
+x <- dedup_terms(x, gene_sets)
+x <- dedup_terms(x, gene_sets, similarity = "jaccard")
+x <- dedup_terms(x, gene_sets, method = "collapse_pathways", stats = list(Aging = ranks))
 ```
 
 Within each contrast and database, significant terms are walked from the
@@ -333,13 +341,13 @@ Deduplication matters for large collections such as Reactome:
 reactome <- load_gene_sets("Reactome")
 set.seed(1)
 aging <- run_enrichment(yvo, reactome, tests = "fgsea")$fgsea
-aging <- dedup(aging, reactome$Reactome)
-volcano_ring(yvo$da, aging, contrast = "Aging", title = "Aging, Reactome")
+aging <- dedup_terms(aging, reactome$Reactome)
+plot_volcano_ring(yvo$da, aging, contrast = "Aging", title = "Aging, Reactome")
 ```
 
 ## Compare two contrasts
 
-`nes_scatter()` plots every term's score in one contrast against its score in
+`plot_scatter()` plots every term's score in one contrast against its score in
 another. It answers two kinds of question, set by `comparison`. The examples
 below draw from the published fgsea results, `ex`; `res$fgsea` works the same
 way.
@@ -349,7 +357,7 @@ regulate the same pathways. Terms in the shaded top-right and bottom-left
 quadrants move the same way in both.
 
 ```{r concordance, fig.width = 6.5, fig.height = 7.5, fig.alt = "Scatter of NES in trained young against trained old, with most significant terms in the concordant quadrants"}
-nes_scatter(ex, "Training_Young", "Training_Old", databases = c("Hallmark", "GO Slim"))
+plot_scatter(ex, "Training_Young", "Training_Old", databases = c("Hallmark", "GO Slim"))
 ```
 
 `comparison = "reversal"` asks whether one condition undoes another. The
@@ -357,31 +365,31 @@ unshaded quadrants hold the answer: a pathway raised by aging and lowered by
 training, or the reverse. The reference line becomes \(y = -x\).
 
 ```{r reversal, fig.width = 6.5, fig.height = 7.5, fig.alt = "Scatter of NES in aging against trained old, with most significant terms in the reversed quadrants"}
-nes_scatter(ex, "Aging", "Training_Old",
+plot_scatter(ex, "Aging", "Training_Old",
   comparison = "reversal", databases = c("Hallmark", "GO Slim")
 )
 ```
 
 A term counts as significant in a contrast when its padj is below
-`p_threshold` (0.05); the colour says whether that holds in one contrast or
+`term_threshold` (0.05); the colour says whether that holds in one contrast or
 both. Pathways are judged on the false discovery rate alone. Scores that
 combine effect size with p, such as the \(\pi\)-value, are defined for single
 proteins, not gene sets. The corner counts and the headline share use
 significant terms only; Spearman's \(\rho\) uses every plotted term, with a 95%
 interval when the correlation package is installed.
 
-`color_by` and `shape_by` take any per-term column, for example
-`color_by = "database"`, and `databases`, `collapse` and `label_min_size`
+`colour_by` and `shape_by` take any per-term column, for example
+`colour_by = "database"`, and `databases`, `collapse` and `label_min_size`
 work as they do for the ring.
 
 ## Change the look
 
-`volcano_ring_theme()` holds the palette; the plot arguments hold the layout.
+`plot_theme()` holds the palette; the plot arguments hold the layout.
 
 ```{r palette, eval = FALSE}
-volcano_ring(yvo$da, res$fgsea,
+plot_volcano_ring(yvo$da, res$fgsea,
   contrast = "Training_Young",
-  theme = volcano_ring_theme(palette = "okabe"),
+  theme = plot_theme(palette = "okabe"),
   label_mode = "top_per_direction", label_n = 4
 )
 ```
@@ -393,12 +401,39 @@ The arguments you will reach for most:
 - `arc_order`: order arcs by `"padj"` or by absolute score within each half.
 - `x_scale`, `y_scale`: compress the volcano when points crowd the ring.
 - `label_mode`, `label_n`, `label_genes`: which proteins get text.
-- `show_counts`, `disc_color`: count badges and a tinted central disc.
+- `show_counts`, `disc_colour`: count badges and a tinted central disc.
 
-`volcano_ring_grid()` draws one ring per contrast and collects a shared
-legend; extra arguments pass to every ring.
+## Write figures and tables
 
-```{r grid, fig.width = 10, fig.height = 5.5, fig.alt = "Two volcano rings side by side for trained young and trained old"}
-g <- volcano_ring_grid(yvo$da, res$fgsea, contrasts = c("Training_Young", "Training_Old"), ncol = 2)
-g$plot
+Every plot function returns one ggplot. `write_plot()` takes a named list of
+them and writes one PDF. Page 1 is a composite lettered A, B, C in list order.
+Each later page holds one panel at full size, headed by its letter and name.
+Fonts are embedded.
+
+```{r panels}
+panels <- list(
+  "Training, young" = plot_volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young"),
+  "Training, old" = plot_volcano_ring(yvo$da, res$fgsea, contrast = "Training_Old"),
+  "Young against old" = plot_scatter(res$fgsea, "Training_Young", "Training_Old")
+)
 ```
+
+```{r write-plot, eval = FALSE}
+write_plot(panels, "training.pdf", design = "AB\nCC", caption = "fgsea, Hallmark and GO slim")
+```
+
+To see a composite on screen, pass the list to `patchwork::wrap_plots()`:
+
+```{r composite, fig.width = 10, fig.height = 5.5, fig.alt = "Two volcano rings side by side for trained young and trained old"}
+patchwork::wrap_plots(panels[1:2], ncol = 2)
+```
+
+`write_table()` writes one enrichment object, or the whole list from
+`run_enrichment()`, to one CSV with an `enrichment_test` column:
+
+```{r write-table, eval = FALSE}
+write_table(res, "yvo_enrichment.csv")
+```
+
+The papers behind each method are listed on the help pages of
+`run_enrichment()`, `load_gene_sets()`, `as_enrichment()` and `dedup_terms()`.

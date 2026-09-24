@@ -1,42 +1,39 @@
-#' Theme + palette for `volcano_ring()`
+#' Fonts and colours for the plots
 #'
-#' Returns a list with a `theme` element (ggplot2 theme additions) and a
-#' `palette` element giving the up / down / non-significant point colours and
-#' the diverging NES ramp.
+#' Sets the font and the colours that [plot_volcano_ring()] and
+#' [plot_scatter()] use: the up, down and non-significant point colours and
+#' the diverging ramp that fills arcs by score.
 #'
-#' @param base_size Numeric base font size.
-#' @param base_family Character base font family; `""` defers to ggplot2.
-#' @param palette One of `"default"` (red-blue diverging, the YvO 2026 lock),
-#'   `"viridis"` (5-stop magma cuts), or `"okabe"` (Okabe-Ito CB-safe pair).
-#'   Sets the starting up / down / non-significant colours and NES ramp; any
-#'   of `up`, `down`, `ns`, `nes_colors` below override it.
-#' @param up,down,ns Optional single colours overriding the palette's
-#'   up-regulated, down-regulated, and non-significant point colours.
-#' @param nes_colors Optional colour vector overriding the diverging NES ramp.
-#'   When supplied without `nes_stops`, stops spread evenly across
-#'   `nes_limits` (or `c(-3, 3)`).
-#' @param nes_limits Optional length-2 numeric. When `NULL`, the colour scale
-#'   in `volcano_ring()` uses its own default.
-#' @param nes_stops Optional numeric vector matching the NES ramp length,
-#'   overriding the palette's `nes_values`.
-#' @return A list `list(base_size, base_family, palette, nes_limits)` consumed
-#'   by [volcano_ring()].
+#' @param base_size Base font size.
+#' @param base_family Base font family. `""` uses the ggplot2 default.
+#' @param palette `"default"` (red and blue), `"viridis"` (magma) or
+#'   `"okabe"` (Okabe-Ito, safe for colour-blind readers). `up`, `down`, `ns`
+#'   and `score_colours` override single parts of it.
+#' @param up,down,ns Colours of up-regulated, down-regulated and
+#'   non-significant points.
+#' @param score_colours Colours of the score ramp, low to high. Without
+#'   `score_stops` they spread evenly across `score_limits`, or `c(-3, 3)`.
+#' @param score_limits Length-2 limits of the score scale. `NULL` lets each
+#'   plot choose; see `score_limits` in [plot_volcano_ring()].
+#' @param score_stops Score values at which each ramp colour sits, one per
+#'   colour.
+#' @return A list with `base_size`, `base_family`, `palette` and
+#'   `score_limits`, passed to the plots as `theme`.
 #' @export
 #' @examples
-#' th <- volcano_ring_theme(base_size = 11)
+#' th <- plot_theme(base_size = 11)
 #' th$palette$up
 #'
-#' # Custom point and arc colours, no list-poking needed:
-#' th <- volcano_ring_theme(up = "#B2182B", down = "#2166AC", ns = "grey80")
-volcano_ring_theme <- function(base_size = 11,
-                               base_family = "",
-                               palette = c("default", "viridis", "okabe"),
-                               up = NULL,
-                               down = NULL,
-                               ns = NULL,
-                               nes_colors = NULL,
-                               nes_limits = NULL,
-                               nes_stops = NULL) {
+#' th <- plot_theme(up = "#B2182B", down = "#2166AC", ns = "grey80")
+plot_theme <- function(base_size = 11,
+                       base_family = "",
+                       palette = c("default", "viridis", "okabe"),
+                       up = NULL,
+                       down = NULL,
+                       ns = NULL,
+                       score_colours = NULL,
+                       score_limits = NULL,
+                       score_stops = NULL) {
   palette <- match.arg(palette)
   for (col in list(up, down, ns)) ev_assert_colour(col, "colour override")
   palettes <- list(
@@ -60,26 +57,26 @@ volcano_ring_theme <- function(base_size = 11,
   if (!is.null(up)) pal$up <- up
   if (!is.null(down)) pal$down <- down
   if (!is.null(ns)) pal$ns <- ns
-  if (!is.null(nes_colors)) {
-    pal$nes_scale <- nes_colors
-    span <- nes_limits %||% c(-3, 3)
-    pal$nes_values <- seq(span[1], span[2], length.out = length(nes_colors))
+  if (!is.null(score_colours)) {
+    pal$nes_scale <- score_colours
+    span <- score_limits %||% c(-3, 3)
+    pal$nes_values <- seq(span[1], span[2], length.out = length(score_colours))
   }
-  if (!is.null(nes_stops)) {
-    if (length(nes_stops) != length(pal$nes_scale)) {
+  if (!is.null(score_stops)) {
+    if (length(score_stops) != length(pal$nes_scale)) {
       ev_abort(
-        c("`nes_stops` length must match the palette ramp.",
-          "i" = "Expected {length(pal$nes_scale)} stops, got {length(nes_stops)}."
+        c("`score_stops` length must match the palette ramp.",
+          "i" = "Expected {length(pal$nes_scale)} stops, got {length(score_stops)}."
         ),
         class = "enrichVolcano_param_error"
       )
     }
-    pal$nes_values <- nes_stops
+    pal$nes_values <- score_stops
   }
   list(
     base_size = base_size,
     base_family = base_family,
     palette = pal,
-    nes_limits = nes_limits
+    score_limits = score_limits
   )
 }

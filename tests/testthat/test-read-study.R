@@ -129,15 +129,15 @@ test_that("required columns and files are named when missing", {
   expect_error(read_study(file.path(tempdir(), "no_such_study")), class = "enrichVolcano_input_error")
 })
 
-test_that("example_study() lists the shipped studies", {
-  idx <- example_study()
+test_that("read_example() lists the shipped studies", {
+  idx <- read_example()
   expect_setequal(idx$name, c("bfr_limpa", "mouse_pas", "yvo", "bfr_proteoda", "cvh", "hrvlr", "mito"))
   expect_true(all(c("species", "description") %in% names(idx)))
 })
 
 test_that("a shipped study loads with its species", {
   skip_if_not_installed("org.Mm.eg.db")
-  s <- quietly(example_study("mouse_pas"))
+  s <- quietly(read_example("mouse_pas"))
   expect_identical(dim(s$matrix), c(1842L, 20L))
   expect_identical(dim(s$weights), dim(s$matrix))
   expect_identical(s$info$species, "Mus musculus")
@@ -146,22 +146,34 @@ test_that("a shipped study loads with its species", {
 
 test_that("a DA-only shipped study has no matrix", {
   skip_if_not_installed("org.Hs.eg.db")
-  s <- quietly(example_study("cvh"))
+  s <- quietly(read_example("cvh"))
   expect_null(s$matrix)
   expect_identical(length(unique(s$da$contrast)), 7L)
 })
 
 test_that("the YvO study ships its limpa matrix, weights and design", {
   skip_if_not_installed("org.Hs.eg.db")
-  s <- quietly(example_study("yvo"))
+  s <- quietly(read_example("yvo"))
   expect_identical(dim(s$matrix), c(2106L, 62L))
   expect_identical(dim(s$weights), dim(s$matrix))
   expect_identical(length(unique(s$samples$subject)), 32L)
   expect_setequal(s$contrasts$name, c("Training_Young", "Training_Old", "Aging", "Interaction"))
 })
 
+test_that("every example study loads, with one DA row per protein and contrast", {
+  skip_if_not_installed("org.Hs.eg.db")
+  skip_if_not_installed("org.Mm.eg.db")
+  skip_if_not_installed("org.Rn.eg.db")
+  for (name in read_example()$name) {
+    s <- quietly(read_example(name))
+    expect_s3_class(s$da, "enrichVolcano_da")
+    expect_false(anyDuplicated(s$da[c("contrast", "protein")]) > 0, label = name)
+    expect_identical(is.null(s$matrix), is.null(s$samples), label = name)
+  }
+})
+
 test_that("an unknown example study is refused", {
-  expect_error(example_study("nope"), "nope", class = "enrichVolcano_param_error")
+  expect_error(read_example("nope"), "nope", class = "enrichVolcano_param_error")
 })
 
 test_that("numeric sample IDs select matrix columns by name, not position", {

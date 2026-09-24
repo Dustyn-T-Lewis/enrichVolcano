@@ -1,7 +1,7 @@
 #' Run gene-set enrichment on a study
 #'
 #' Tests each contrast of a study against gene-set collections and returns one
-#' [enrichment] object per test, ready for the plots.
+#' enrichment object per test, the same object [as_enrichment()] builds.
 #'
 #' @section fgsea:
 #' Proteins are ranked by the study's `rank` column (see [as_da()]). Where
@@ -36,9 +36,25 @@
 #' @param covariates Sample columns added to the camera and fry design.
 #' @param inter_gene_cor camera's inter-gene correlation: a number, or `NA` to
 #'   estimate it (unblocked designs only).
-#' @param min_size,max_size Sets need this many genes present in the data.
-#' @return A named list with one [enrichment] object per test. Its metadata
+#' @param min_size,max_size Test sets with at least `min_size` and at most
+#'   `max_size` genes present in the data.
+#' @return A named list with one enrichment object per test. Its metadata
 #'   records the ranking statistic and the gene-set versions.
+#' @references
+#' Korotkevich G, Sukhov V, Budin N, et al. Fast gene set enrichment analysis.
+#' bioRxiv. \doi{10.1101/060012}
+#'
+#' Wu D, Smyth GK (2012). Camera: a competitive gene set test accounting for
+#' inter-gene correlation. Nucleic Acids Research 40(17):e133.
+#' \doi{10.1093/nar/gks461}
+#'
+#' Wu D, Lim E, Vaillant F, et al. (2010). ROAST: rotation gene set tests for
+#' complex microarray experiments. Bioinformatics 26(17):2176-2182.
+#' \doi{10.1093/bioinformatics/btq401}
+#'
+#' Ritchie ME, Phipson B, Wu D, et al. (2015). limma powers differential
+#' expression analyses for RNA-sequencing and microarray studies. Nucleic
+#' Acids Research 43(7):e47. \doi{10.1093/nar/gkv007}
 #' @export
 run_enrichment <- function(study, gene_sets, tests = c("fgsea", "camera", "fry"),
                            subject_effect = c("block", "fixed"), covariates = NULL,

@@ -2,7 +2,7 @@
 #'
 #' Related gene sets often reach significance together: in GO:BP or
 #' Reactome, one biological signal can light up a dozen overlapping terms.
-#' `dedup()` picks one representative per cluster so a figure shows the
+#' `dedup_terms()` picks one representative per cluster so a figure shows the
 #' signal once. It changes what is drawn, not what was tested: no row is
 #' dropped and no p-value is touched, because the multiple-testing correction
 #' already covered every term.
@@ -29,7 +29,7 @@
 #' so call [set.seed()] first for reproducible flags. The p-values it computes
 #' decide redundancy only; the reported `padj` stay those of the original run.
 #'
-#' @param x An [enrichment] object.
+#' @param enrichment An enrichment object from [as_enrichment()] or [run_enrichment()].
 #' @param gene_sets A named list of character vectors, one per term, holding
 #'   the full gene sets that were tested. Terms without a set are kept.
 #' @param method `"enrichmentmap"` (gene-set overlap) or `"collapse_pathways"`
@@ -37,13 +37,13 @@
 #' @param similarity For `"enrichmentmap"`: `"combined"` or `"jaccard"`.
 #' @param cutoff For `"enrichmentmap"`: similarity at or above which a term is
 #'   redundant. `NULL` takes 0.375 for `"combined"` and 0.5 for `"jaccard"`.
-#' @param p_threshold Only terms with `padj` below this are compared; the rest
+#' @param term_threshold Only terms with `padj` below this are compared; the rest
 #'   are left unflagged (`NA`). For `"collapse_pathways"` it is also the
 #'   conditional p-value threshold.
 #' @param stats For `"collapse_pathways"`: a named list with one ranking (named
 #'   numeric vector of gene statistics) per contrast.
 #'
-#' @return `x`, with `dedup_status` (`"kept"`, `"redundant"` or `NA`),
+#' @return `enrichment`, with `dedup_status` (`"kept"`, `"redundant"` or `NA`),
 #'   `merged_into` and `similarity` columns in its results, and the settings
 #'   stored in `metadata$dedup`.
 #' @references
@@ -55,17 +55,17 @@
 #' and visualization of omics data using g:Profiler, GSEA, Cytoscape and
 #' EnrichmentMap. Nature Protocols 14:482-517.
 #' @export
-dedup <- function(x, gene_sets, method = c("enrichmentmap", "collapse_pathways"),
-                  similarity = c("combined", "jaccard"), cutoff = NULL,
-                  p_threshold = 0.05, stats = NULL) {
-  check_enrichment(x, "x")
+dedup_terms <- function(enrichment, gene_sets, method = c("enrichmentmap", "collapse_pathways"),
+                        similarity = c("combined", "jaccard"), cutoff = NULL,
+                        term_threshold = 0.05, stats = NULL) {
+  check_enrichment(enrichment)
   if (!is.list(gene_sets) || is.null(names(gene_sets)) || any(!nzchar(names(gene_sets)))) {
     ev_abort("{.arg gene_sets} must be a named list of gene vectors, one per term.",
       class = "enrichVolcano_input_error"
     )
   }
   method <- rlang::arg_match(method)
-  res <- x@results
+  res <- enrichment@results
   res[intersect(c("dedup_status", "merged_into", "similarity", "overlap_jaccard"), names(res))] <- NULL
 
   if (method == "enrichmentmap") {
@@ -78,19 +78,19 @@ dedup <- function(x, gene_sets, method = c("enrichmentmap", "collapse_pathways")
       combined = combined_similarity,
       jaccard = jaccard
     )
-    flags <- flag_redundant(res, gene_sets, sim, cutoff, p_threshold)
+    flags <- flag_redundant(res, gene_sets, sim, cutoff, term_threshold)
   } else {
-    check_collapse_inputs(x, stats)
+    check_collapse_inputs(enrichment, stats)
     similarity <- NULL
     cutoff <- NULL
-    flags <- flag_collapsed(res, gene_sets, stats, p_threshold)
+    flags <- flag_collapsed(res, gene_sets, stats, term_threshold)
   }
 
-  x@results <- cbind(res, flags)
-  x@metadata$dedup <- list(
-    method = method, similarity = similarity, cutoff = cutoff, p_threshold = p_threshold
+  enrichment@results <- cbind(res, flags)
+  enrichment@metadata$dedup <- list(
+    method = method, similarity = similarity, cutoff = cutoff, term_threshold = term_threshold
   )
-  x
+  enrichment
 }
 
 check_collapse_inputs <- function(x, stats) {
@@ -118,11 +118,11 @@ check_collapse_inputs <- function(x, stats) {
   rlang::check_installed(c("fgsea", "data.table"), reason = "for `method = \"collapse_pathways\"`.")
 }
 
-flag_collapsed <- function(res, gene_sets, stats, p_threshold) {
+flag_collapsed <- function(res, gene_sets, stats, term_threshold) {
   status <- rep(NA_character_, nrow(res))
   merged_into <- rep(NA_character_, nrow(res))
 
-  sig <- significant_rows(res, gene_sets, p_threshold)
+  sig <- significant_rows(res, gene_sets, term_threshold)
   status[sig] <- "kept"
   sig <- sig[res$term[sig] %in% names(gene_sets)]
   for (rows in split(sig, paste(res$contrast[sig], res$database[sig], sep = "\r"))) {
@@ -133,7 +133,7 @@ flag_collapsed <- function(res, gene_sets, stats, p_threshold) {
     )
     collapsed <- fgsea::collapsePathways(
       fg, gene_sets, stats[[res$contrast[rows[1]]]],
-      pval.threshold = p_threshold
+      pval.threshold = term_threshold
     )
     parent <- collapsed$parentPathways[res$term[rows]]
     status[rows] <- ifelse(is.na(parent), "kept", "redundant")
@@ -142,12 +142,12 @@ flag_collapsed <- function(res, gene_sets, stats, p_threshold) {
   data.frame(dedup_status = status, merged_into = merged_into, similarity = NA_real_)
 }
 
-flag_redundant <- function(res, gene_sets, sim, cutoff, p_threshold) {
+flag_redundant <- function(res, gene_sets, sim, cutoff, term_threshold) {
   status <- rep(NA_character_, nrow(res))
   merged_into <- rep(NA_character_, nrow(res))
   similarity <- rep(NA_real_, nrow(res))
 
-  sig <- significant_rows(res, gene_sets, p_threshold)
+  sig <- significant_rows(res, gene_sets, term_threshold)
 
   for (rows in split(sig, paste(res$contrast[sig], res$database[sig], sep = "\r"))) {
     kept <- integer(0)
@@ -168,8 +168,8 @@ flag_redundant <- function(res, gene_sets, sim, cutoff, p_threshold) {
   data.frame(dedup_status = status, merged_into = merged_into, similarity = similarity)
 }
 
-significant_rows <- function(res, gene_sets, p_threshold) {
-  sig <- which(!is.na(res$padj) & res$padj < p_threshold)
+significant_rows <- function(res, gene_sets, term_threshold) {
+  sig <- which(!is.na(res$padj) & res$padj < term_threshold)
   no_set <- setdiff(res$term[sig], names(gene_sets))
   if (length(no_set) > 0) {
     ev_inform("{length(no_set)} term{?s} had no gene set and {?was/were} kept.",

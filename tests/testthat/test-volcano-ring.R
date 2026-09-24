@@ -1,17 +1,15 @@
-source(test_path("fixtures/make_toy.R"))
-
 # Every toy term on the ring, no database filter: the pre-1.0 behaviour.
 ring <- function(v = make_toy_da(), x = make_toy_ring_enrichment(), ...) {
-  suppressMessages(volcano_ring(v, x, databases = NULL, term_threshold = 1, n_terms = Inf, ...))
+  suppressMessages(plot_volcano_ring(v, x, databases = NULL, term_threshold = 1, n_terms = Inf, ...))
 }
 
 fill_title <- function(p) p$scales$get_scales("fill")$name
 
-test_that("volcano_ring returns a ggplot from an enrichment", {
+test_that("plot_volcano_ring returns a ggplot from an enrichment", {
   expect_s3_class(ring(), "ggplot")
 })
 
-test_that("volcano_ring builds without leading edges (no ticks)", {
+test_that("plot_volcano_ring builds without leading edges (no ticks)", {
   x <- make_toy_ring_enrichment()
   r <- x@results
   r$leading_edge <- rep(list(character(0)), nrow(r))
@@ -19,33 +17,21 @@ test_that("volcano_ring builds without leading edges (no ticks)", {
   expect_s3_class(ring(x = x), "ggplot")
 })
 
-test_that("volcano_ring accepts user-supplied volcano column names", {
-  v <- make_toy_volc()
-  names(v) <- sub("^P\\.Value$", "pval", names(v))
-  names(v) <- sub("^logFC$", "lfc", names(v))
-  names(v) <- sub("^gene$", "id", names(v))
-  expect_warning(
-    p <- ring(v, gene_col = "id", logfc_col = "lfc", pval_col = "pval"),
-    class = "enrichVolcano_deprecated"
-  )
-  expect_s3_class(p, "ggplot")
-})
-
-test_that("volcano_ring respects the magnitude = 'size' switch", {
+test_that("plot_volcano_ring respects the magnitude = 'size' switch", {
   expect_s3_class(ring(magnitude = "size"), "ggplot")
 })
 
-test_that("volcano_ring works with the okabe palette", {
-  expect_s3_class(ring(theme = volcano_ring_theme(palette = "okabe")), "ggplot")
+test_that("plot_volcano_ring works with the okabe palette", {
+  expect_s3_class(ring(theme = plot_theme(palette = "okabe")), "ggplot")
 })
 
-test_that("volcano_ring runs on the bundled YvO example with default selection", {
+test_that("plot_volcano_ring runs on the bundled YvO example with default selection", {
   skip_if_not_installed("org.Hs.eg.db")
-  da <- suppressMessages(example_study("yvo"))$da
+  da <- suppressMessages(read_example("yvo"))$da
   ex <- suppressMessages(as_enrichment(read.csv(
     system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano")
   )))
-  expect_no_warning(p <- suppressMessages(volcano_ring(da, ex, contrast = "Training_Young")))
+  expect_no_warning(p <- suppressMessages(plot_volcano_ring(da, ex, contrast = "Training_Young")))
   expect_s3_class(p, "ggplot")
   expect_identical(fill_title(p), "NES")
 })
@@ -61,14 +47,14 @@ test_that("the legend is titled with the score type", {
 test_that("a multi-contrast object needs a contrast, and a real one", {
   x <- make_toy_ring_enrichment(c("A", "B"))
   v <- make_toy_da(c("A", "B"))
-  expect_error(volcano_ring(v, x), class = "enrichVolcano_input_error")
-  expect_error(volcano_ring(v, x, contrast = "C"), "C", class = "enrichVolcano_input_error")
+  expect_error(plot_volcano_ring(v, x), class = "enrichVolcano_input_error")
+  expect_error(plot_volcano_ring(v, x, contrast = "C"), "C", class = "enrichVolcano_input_error")
   expect_s3_class(ring(v, x, contrast = "B"), "ggplot")
 })
 
-test_that("volcano_ring refuses a plain enrichment table", {
+test_that("plot_volcano_ring refuses a plain enrichment table", {
   expect_error(
-    volcano_ring(make_toy_da(), make_toy_enrich()),
+    plot_volcano_ring(make_toy_da(), make_toy_enrich()),
     "as_enrichment",
     class = "enrichVolcano_input_error"
   )
@@ -81,25 +67,23 @@ test_that("default selection drops non-significant terms from the ring", {
     }))
   }
   all_terms <- labels_in(ring())
-  selected <- labels_in(suppressMessages(volcano_ring(make_toy_da(), make_toy_ring_enrichment(), databases = NULL)))
+  selected <- labels_in(suppressMessages(
+    plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(), databases = NULL)
+  ))
   expect_true(any(grepl("Toy E", all_terms)))
   expect_false(any(grepl("Toy E", selected)))
 })
 
 test_that("a ring with no terms left still draws and says why", {
   expect_message(
-    p <- volcano_ring(make_toy_da(), make_toy_ring_enrichment(), databases = NULL, term_threshold = 1e-9),
+    p <- plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(), databases = NULL, term_threshold = 1e-9),
     class = "enrichVolcano_empty_ring"
   )
   expect_s3_class(p, "ggplot")
 })
 
-test_that("disc_color draws a tinted central disc", {
-  expect_s3_class(ring(disc_color = "grey70"), "ggplot")
-})
-
-test_that("volc_sig_col drives point significance independently of padj", {
-  expect_s3_class(ring(volc_sig_col = "pi_eq2"), "ggplot")
+test_that("disc_colour draws a tinted central disc", {
+  expect_s3_class(ring(disc_colour = "grey70"), "ggplot")
 })
 
 test_that("x_scale and y_scale compress the volcano point cloud", {
@@ -114,7 +98,7 @@ test_that("x_scale and y_scale compress the volcano point cloud", {
   expect_lt(point_span(short, "y"), point_span(full, "y"))
 })
 
-test_that("arc_order = 'nes' reorders arcs by absolute score within a half", {
+test_that("arc_order = 'score' reorders arcs by absolute score within a half", {
   # P: most significant, weakest score; Q: least significant, strongest score.
   e <- data.frame(
     term = c("P", "Q"), score = c(1.2, 3.0),
@@ -124,7 +108,7 @@ test_that("arc_order = 'nes' reorders arcs by absolute score within a half", {
   gl <- replicate(nrow(e), character(0), simplify = FALSE)
   mag <- -log10(e$padj)
   by_padj <- ev_ring_geometry(e, "term", "padj", "score", mag, gl, order_by = "padj")
-  by_nes <- ev_ring_geometry(e, "term", "padj", "score", mag, gl, order_by = "nes")
+  by_nes <- ev_ring_geometry(e, "term", "padj", "score", mag, gl, order_by = "score")
   expect_equal(by_padj$term, c("P", "Q"))
   expect_equal(by_nes$term, c("Q", "P"))
 })
@@ -154,63 +138,6 @@ test_that("show_counts = FALSE drops the up/down count badges", {
   expect_false(n_up %in% without)
 })
 
-grid <- function(volc, x = make_toy_ring_enrichment(c("A", "B")), ...) {
-  suppressMessages(volcano_ring_grid(volc, x, databases = NULL, term_threshold = 1, n_terms = Inf, ...))
-}
-
-test_that("volcano_ring_grid composes a 2-panel layout from named lists", {
-  g <- grid(make_toy_da(c("A", "B")))
-  expect_s3_class(g, "volcano_ring_grid")
-  expect_named(g, c("plot", "data"))
-  expect_s3_class(g$plot, "patchwork")
-  expect_named(g$data, c("A", "B"))
-})
-
-test_that("volcano_ring_grid splits a single data.frame by contrast", {
-  d <- rbind(
-    transform(make_toy_volc(seed = 1L), contrast = "A"),
-    transform(make_toy_volc(seed = 2L), contrast = "B")
-  )
-  expect_warning(g <- grid(d), class = "enrichVolcano_deprecated")
-  expect_named(g$data, c("A", "B"))
-})
-
-test_that("volcano_ring_grid aborts when a contrast is missing on either side", {
-  expect_error(
-    grid(make_toy_da("A"), contrasts = c("A", "B")),
-    class = "enrichVolcano_input_error"
-  )
-  expect_error(
-    grid(make_toy_da(c("A", "C"))),
-    "C",
-    class = "enrichVolcano_input_error"
-  )
-})
-
-test_that("volcano_ring_grid aborts when contrasts cannot be inferred", {
-  expect_error(suppressWarnings(grid(list(make_toy_volc()))), class = "enrichVolcano_input_error")
-})
-
-test_that("volcano_ring_grid aborts when split-by-contrast has no column", {
-  v <- make_toy_volc()
-  v$contrast <- NULL
-  expect_error(suppressWarnings(grid(v)), class = "enrichVolcano_input_error")
-})
-
-test_that("volcano_ring_grid refuses a plain enrichment table", {
-  expect_error(
-    volcano_ring_grid(list(A = make_toy_volc()), make_toy_enrich()),
-    class = "enrichVolcano_input_error"
-  )
-})
-
-test_that("print.volcano_ring_grid returns the object invisibly", {
-  g <- grid(make_toy_da(c("A", "B")))
-  pdf(NULL)
-  on.exit(dev.off())
-  expect_invisible(print(g))
-})
-
 test_that("a fry ring's fill scale spans its scores instead of squishing at 3", {
   fry <- utils::read.csv(test_path("fixtures", "limma_fry.csv"), row.names = 1)
   x <- suppressMessages(as_enrichment(list(toy = fry)))
@@ -225,27 +152,38 @@ test_that("the ring holds at most n_terms terms in total", {
     length(unique(ggplot2::layer_data(p, which(geoms == "GeomArcBar")[1])$group))
   }
   x <- make_toy_ring_enrichment()
-  expect_identical(arcs(suppressMessages(volcano_ring(make_toy_da(), x, databases = NULL, n_terms = 3))), 3L)
-  expect_identical(formals(volcano_ring)$n_terms, 12)
+  expect_identical(arcs(suppressMessages(plot_volcano_ring(make_toy_da(), x, databases = NULL, n_terms = 3))), 3L)
+  expect_identical(formals(plot_volcano_ring)$n_terms, 12)
 })
 
 test_that("results without set sizes draw arcs by padj instead of failing", {
   ora <- data.frame(term = c("S1", "S2", "S3"), padj = c(0.001, 0.01, 0.02), direction = c("up", "down", "up"))
   x <- as_enrichment(list(toy = ora), enrichment_test = "ora")
-  expect_s3_class(suppressMessages(volcano_ring(make_toy_da(), x)), "ggplot")
+  expect_s3_class(suppressMessages(plot_volcano_ring(make_toy_da(), x)), "ggplot")
   expect_error(
-    suppressMessages(volcano_ring(make_toy_da(), x, magnitude = "size")),
+    suppressMessages(plot_volcano_ring(make_toy_da(), x, magnitude = "size")),
     class = "enrichVolcano_param_error"
   )
 })
 
 test_that("the default draws from every database", {
-  expect_null(formals(volcano_ring)$databases)
+  expect_null(formals(plot_volcano_ring)$databases)
   x <- make_toy_ring_enrichment()
   r <- x@results
   r$database <- "KEGG"
   x@results <- r
-  expect_s3_class(suppressMessages(volcano_ring(make_toy_da(), x)), "ggplot")
+  expect_s3_class(suppressMessages(plot_volcano_ring(make_toy_da(), x)), "ggplot")
+})
+
+test_that("the default ring takes the n_terms most significant unique terms, whatever their direction", {
+  r <- make_toy_ring_enrichment()@results
+  twin <- r[r$term == "HALLMARK_TOY_A", ]
+  twin$database <- "Other"
+  twin$padj <- 0.0001
+  picked <- ring_terms(rbind(r, twin), 0.05, 3, NULL)
+  expect_identical(picked$term, c("HALLMARK_TOY_A", "HALLMARK_TOY_D", "HALLMARK_TOY_C"))
+  expect_identical(picked$padj[1], 0.0001)
+  expect_identical(sum(picked$score > 0), 1L)
 })
 
 test_that("a hand-picked term found in two databases is drawn once", {
@@ -260,59 +198,37 @@ test_that("a hand-picked term found in two databases is drawn once", {
   expect_identical(picked$padj, r$padj[1])
 })
 
-test_that("grid subtitles can be named by contrast or given in order", {
-  volc <- make_toy_da(c("A", "B"))
-  subtitles_of <- function(g) c(g$plot[[1]]$labels$subtitle, g$plot[[2]]$labels$subtitle)
-  expect_identical(subtitles_of(grid(volc, subtitles = c(B = "second", A = "first"))), c("first", "second"))
-  expect_identical(subtitles_of(grid(volc, subtitles = c("first", "second"))), c("first", "second"))
-})
-
 toy_da <- function(contrasts = c("A", "B")) {
   v <- lapply(contrasts, function(ctr) transform(make_toy_volc(), contrast = ctr))
   as_da(do.call(rbind, v), species = NULL)
 }
 
-test_that("volcano_ring reads as_da output for the chosen contrast, without warning", {
-  expect_no_warning(p <- suppressMessages(volcano_ring(
+test_that("plot_volcano_ring reads as_da output for the chosen contrast, without warning", {
+  expect_no_warning(p <- suppressMessages(plot_volcano_ring(
     toy_da(), make_toy_ring_enrichment(c("A", "B")),
     contrast = "B", databases = NULL
   )))
   expect_s3_class(p, "ggplot")
 })
 
-test_that("a plain volcano table still works, with a deprecation warning", {
-  expect_warning(
-    suppressMessages(volcano_ring(as.data.frame(make_toy_volc()), make_toy_ring_enrichment(), databases = NULL)),
-    class = "enrichVolcano_deprecated"
+test_that("a plain volcano table is refused", {
+  expect_error(
+    plot_volcano_ring(as.data.frame(make_toy_volc()), make_toy_ring_enrichment()),
+    "as_da",
+    class = "enrichVolcano_input_error"
   )
 })
 
 test_that("results with no p-values draw the volcano from padj", {
   d <- toy_da("A")
   d$p <- NA_real_
-  expect_s3_class(suppressMessages(volcano_ring(d, make_toy_ring_enrichment("A"), databases = NULL)), "ggplot")
-})
-
-test_that("volcano_ring_grid takes as_da output and warns once for plain tables", {
-  x <- make_toy_ring_enrichment(c("A", "B"))
-  expect_no_warning(g <- grid(toy_da(), x))
-  expect_named(g$data, c("A", "B"))
-  plain <- list(A = as.data.frame(make_toy_volc()), B = as.data.frame(make_toy_volc()))
-  n_warnings <- 0
-  withCallingHandlers(
-    grid(plain, x),
-    enrichVolcano_deprecated = function(w) {
-      n_warnings <<- n_warnings + 1
-      invokeRestart("muffleWarning")
-    }
-  )
-  expect_identical(n_warnings, 1)
+  expect_s3_class(suppressMessages(plot_volcano_ring(d, make_toy_ring_enrichment("A"), databases = NULL)), "ggplot")
 })
 
 test_that("results without adjusted p-values colour the volcano by nominal p", {
   d <- toy_da("A")
   d$padj <- NA_real_
-  p <- suppressMessages(volcano_ring(d, make_toy_ring_enrichment("A"), databases = NULL))
+  p <- suppressMessages(plot_volcano_ring(d, make_toy_ring_enrichment("A"), databases = NULL))
   labels <- unlist(lapply(ggplot2::ggplot_build(p)$data, function(l) if ("label" %in% names(l)) l$label))
   expect_false(anyNA(labels))
   expect_true(as.character(sum(d$p < 0.05 & d$logFC > 0)) %in% labels)
@@ -322,5 +238,8 @@ test_that("results with neither p nor padj are refused", {
   d <- toy_da("A")
   d$p <- NA_real_
   d$padj <- NA_real_
-  expect_error(volcano_ring(d, make_toy_ring_enrichment("A"), databases = NULL), class = "enrichVolcano_data_error")
+  expect_error(
+    plot_volcano_ring(d, make_toy_ring_enrichment("A"), databases = NULL),
+    class = "enrichVolcano_data_error"
+  )
 })

@@ -1,45 +1,23 @@
-# Shared rule-driven label selection for the standalone volcano and the
-# composite. Default mode "none" labels nothing.
-
-#' Label text for a row: symbol, else accession, else gene.
-#' @keywords internal
-#' @noRd
-ev_label_text <- function(df) {
-  n <- nrow(df)
-  symbol <- if ("symbol" %in% names(df)) df$symbol else rep(NA_character_, n)
-  uniprot <- if ("uniprot" %in% names(df)) df$uniprot else rep(NA_character_, n)
-  gene <- if ("gene" %in% names(df)) df$gene else rep(NA_character_, n)
-  out <- ifelse(!is.na(symbol) & nzchar(symbol), symbol,
-    ifelse(!is.na(uniprot) & nzchar(uniprot), uniprot, gene)
-  )
-  as.character(out)
-}
-
-#' Select which rows to label on a volcano
+#' Select which volcano points to label
 #'
-#' @param df Single-contrast tibble with `logFC` and the significance column.
-#' @param mode One of `"none"`, `"top_per_direction"`, `"top_total"`,
-#'   `"all_significant"`, `"explicit"`.
-#' @param n Cap for the top-* modes (per direction for `top_per_direction`).
+#' @param df Single-contrast DA rows with `protein`, `gene` and `logFC`.
+#' @param mode One of `"none"`, `"top_per_direction"`, `"by_significance"`,
+#'   `"by_genes"`.
+#' @param n Cap for the top modes (per direction for `top_per_direction`).
 #' @param rank_by `"significance"` (smaller `p_col` first) or `"logfc"`
 #'   (larger `|logFC|` first).
-#' @param genes For `"explicit"`: matched against symbol, accession, or gene.
-#' @param p_col Significance column (e.g. `"pi_eq2"`, `"P.Value"`,
-#'   `"adj.P.Val"`).
+#' @param genes For `"by_genes"`: matched against `gene` and `protein`.
+#' @param p_col Column that ranks and filters points.
 #' @param p_threshold,logfc_threshold Cutoffs defining the candidate pool.
-#' @return Sub-tibble of rows to label, with a `label_text` column.
+#' @return The rows to label, with a `label_text` column (the gene symbol, or
+#'   the accession when the symbol is missing).
 #' @keywords internal
 #' @noRd
 ev_select_labels <- function(df, mode, n, rank_by, genes,
                              p_col, p_threshold, logfc_threshold) {
-  df$label_text <- ev_label_text(df)
-  if (mode == "explicit") {
-    in_genes <- function(col) {
-      if (col %in% names(df)) df[[col]] %in% genes else rep(FALSE, nrow(df))
-    }
-    keep <- df$label_text %in% genes | in_genes("symbol") |
-      in_genes("uniprot") | in_genes("gene")
-    return(df[keep, , drop = FALSE])
+  df$label_text <- ifelse(is.na(df$gene) | !nzchar(df$gene), df$protein, df$gene)
+  if (mode == "by_genes") {
+    return(df[df$gene %in% genes | df$protein %in% genes, , drop = FALSE])
   }
   if (mode == "none") {
     return(df[0, , drop = FALSE])
@@ -47,28 +25,13 @@ ev_select_labels <- function(df, mode, n, rank_by, genes,
 
   sig <- df[[p_col]] < p_threshold & abs(df$logFC) >= logfc_threshold
   pool <- df[sig & !is.na(sig), , drop = FALSE]
-  if (nrow(pool) == 0) {
-    return(pool)
-  }
-
-  ord <- if (rank_by == "logfc") {
-    order(-abs(pool$logFC))
-  } else {
-    order(pool[[p_col]])
-  }
+  ord <- if (rank_by == "logfc") order(-abs(pool$logFC)) else order(pool[[p_col]])
   pool <- pool[ord, , drop = FALSE]
-
-  switch(mode,
-    all_significant = pool,
-    top_total = utils::head(pool, n),
-    top_per_direction = {
-      # logFC == 0 belongs to neither direction and is intentionally excluded.
-      up <- pool[pool$logFC > 0, , drop = FALSE]
-      dn <- pool[pool$logFC < 0, , drop = FALSE]
-      rbind(utils::head(up, n), utils::head(dn, n))
-    },
-    ev_abort("Unknown label mode {.val {mode}}.", class = "ev_bad_label_mode")
-  )
+  if (mode == "by_significance") {
+    return(utils::head(pool, n))
+  }
+  # logFC == 0 belongs to neither direction and is intentionally excluded.
+  rbind(utils::head(pool[pool$logFC > 0, , drop = FALSE], n), utils::head(pool[pool$logFC < 0, , drop = FALSE], n))
 }
 
 # Pathway-name cleaning for ring display: strips DB prefixes, expands
@@ -85,10 +48,10 @@ ev_select_labels <- function(df, mode, n, rank_by, genes,
 #' @return Character vector of cleaned, wrapped labels.
 #' @export
 #' @examples
-#' ev_clean_label(c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "REACTOME_TCA_CYCLE"))
-ev_clean_label <- function(name, width = 15) {
+#' clean_label(c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "REACTOME_TCA_CYCLE"))
+clean_label <- function(name, width = 15) {
   if (length(name) > 1) {
-    return(vapply(name, ev_clean_label, character(1), width = width, USE.NAMES = FALSE))
+    return(vapply(name, clean_label, character(1), width = width, USE.NAMES = FALSE))
   }
   if (is.na(name) || !nzchar(name)) {
     return(name)

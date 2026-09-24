@@ -1,5 +1,5 @@
-# Which rows of an enrichment a plot draws. Shared by volcano_ring() and
-# nes_scatter() so both read the same view of one object.
+# Which rows of an enrichment a plot draws. Shared by plot_volcano_ring() and
+# plot_scatter() so both read the same view of one object.
 
 check_enrichment <- function(x, arg = "enrichment") {
   if (!S7::S7_inherits(x, enrichment)) {
@@ -69,7 +69,8 @@ ring_terms <- function(results, term_threshold, n_terms, terms) {
     return(picked[!duplicated(picked$term), , drop = FALSE])
   }
   sig <- results[!is.na(results$padj) & results$padj < term_threshold, , drop = FALSE]
-  utils::head(sig[order(sig$padj), , drop = FALSE], n_terms)
+  sig <- sig[order(sig$padj), , drop = FALSE]
+  utils::head(sig[!duplicated(sig$term), , drop = FALSE], n_terms)
 }
 
 default_magnitude <- function(magnitude, score_type, size = 1) {

@@ -1,6 +1,5 @@
-# Toy-frame factory used by every Phase 3 test. Produces a 20-gene volcano
-# + 5-pathway enrichment table using the package's conventional column
-# names. Calling code controls the seed for reproducibility.
+# Toy data shared by the tests: a 20-gene volcano and a 5-term enrichment
+# table. Callers set the seed.
 
 make_toy_volc <- function(seed = 1L, n = 20L) {
   set.seed(seed)
@@ -58,7 +57,7 @@ make_toy_results <- function() {
     direction = c("up", "down", "up", "up", "down", "down"),
     leading_edge = I(list(
       c("G1", "G2"), c("G11", "G12"), character(0),
-      c("G1", "G3"), c("G13"), character(0)
+      c("G1", "G3"), "G13", character(0)
     )),
     stringsAsFactors = FALSE
   )
