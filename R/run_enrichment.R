@@ -155,7 +155,7 @@ fill_abundance <- function(da, matrix) {
   if (is.null(matrix)) {
     return(da)
   }
-  means <- rowMeans(matrix)
+  means <- rowMeans(matrix, na.rm = TRUE)
   missing <- is.na(da$abundance) & da$protein %in% names(means)
   da$abundance[missing] <- means[da$protein[missing]]
   da

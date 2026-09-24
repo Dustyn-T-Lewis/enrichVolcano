@@ -238,3 +238,12 @@ test_that("tied ranks are reported once as a message, not as fgsea warnings", {
     class = "enrichVolcano_rank_ties"
   ))
 })
+
+test_that("a missing matrix value does not hide a protein's abundance", {
+  skip_if_not_installed("org.Hs.eg.db")
+  s <- toy_study()
+  s$da$abundance <- NA_real_
+  s$matrix[1, 1] <- NA
+  filled <- fill_abundance(s$da, s$matrix)
+  expect_false(anyNA(filled$abundance))
+})

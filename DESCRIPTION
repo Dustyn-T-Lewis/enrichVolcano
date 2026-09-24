@@ -39,7 +39,7 @@ Suggests:
     fgsea,
     knitr,
     limma,
-    msigdbr,
+    msigdbr (>= 10.0.0),
     org.Hs.eg.db,
     org.Mm.eg.db,
     org.Rn.eg.db,
