@@ -15,14 +15,11 @@ cairo_works <- function() {
   opened
 }
 
-pdf_pages <- function(file) {
-  bytes <- readBin(file, "raw", file.size(file))
-  text <- rawToChar(bytes[bytes != as.raw(0)])
-  sum(gregexpr("/Type\\s*/Page\\b", text, useBytes = TRUE)[[1]] > 0)
-}
+pdf_pages <- function(file) pdftools::pdf_info(file)$pages
 
 test_that("write_plot writes the composite, then one page per panel", {
   skip_if_not(cairo_works(), "cairo cannot start here")
+  skip_if_not_installed("pdftools")
   file <- withr::local_tempfile(fileext = ".pdf")
   expect_invisible(out <- write_plot(toy_panels(), file))
   expect_identical(out, file)
