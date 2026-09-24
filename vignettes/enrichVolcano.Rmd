@@ -61,11 +61,11 @@ plot_volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young", title = "Train
 ```
 
 Arc fill is NES and arc height is \(-\log_{10}\)(padj). Up-regulated terms sit
-on the upper half, down-regulated ones on the lower. Ticks run from each arc
-to its leading-edge proteins in the volcano. The ring takes the twelve most
-significant terms (padj < 0.05), in either direction, from every collection in
-the object; `databases`, `term_threshold`, `n_terms` and `terms` change the
-selection.
+on the right half and down-regulated ones on the left, the most significant at
+the top. Ticks run from each arc to its leading-edge proteins in the volcano.
+The ring takes the twelve most significant unique terms (padj < 0.05), in
+either direction, from every collection in the object; `databases`,
+`term_threshold`, `n_terms` and `terms` change the selection.
 
 ## Your data
 
