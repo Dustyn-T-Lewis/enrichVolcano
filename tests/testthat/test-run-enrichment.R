@@ -198,6 +198,17 @@ test_that("a matrix with missing values is refused for fry and camera", {
   expect_error(run_enrichment(s, toy_sets(), tests = "fry"), "1 missing", class = "enrichVolcano_data_error")
 })
 
+test_that("fgsea refuses an empty size window without first reporting ties", {
+  skip_if_not_installed("fgsea")
+  skip_if_not_installed("org.Hs.eg.db")
+  da <- toy_study()$da
+  da$rank[1:2] <- da$rank[3]
+  expect_no_message(
+    expect_error(run_enrichment(da, toy_sets(), tests = "fgsea", min_size = 900), "no gene set"),
+    class = "enrichVolcano_rank_ties"
+  )
+})
+
 test_that("camera and fry say so when no set fits the size window", {
   skip_if_not_installed("limma")
   skip_if_not_installed("org.Hs.eg.db")

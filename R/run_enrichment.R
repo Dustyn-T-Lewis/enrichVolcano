@@ -144,16 +144,16 @@ run_fgsea <- function(study, collections, min_size, max_size) {
       res
     }))
   })
-  if (ties > 0) {
-    ev_inform(
-      "Up to {ties} of {length(unique(da$gene))} ranked genes tie; fgsea orders tied genes arbitrarily.",
-      class = "enrichVolcano_rank_ties"
-    )
-  }
   if (sum(vapply(per_contrast, nrow, integer(1))) == 0) {
     ev_abort(
       "There is no gene set with {min_size} to {max_size} genes present in the data.",
       class = "enrichVolcano_input_error"
+    )
+  }
+  if (ties > 0) {
+    ev_inform(
+      "Up to {ties} of {length(unique(da$gene))} ranked genes tie; fgsea orders tied genes arbitrarily.",
+      class = "enrichVolcano_rank_ties"
     )
   }
   x <- suppressMessages(as_enrichment(per_contrast, enrichment_test = "fgsea"))
