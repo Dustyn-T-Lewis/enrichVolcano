@@ -74,9 +74,9 @@ Skipped, with a note, when the object has no database labels.}
 \item{logfc_threshold}{Effect-size cutoff; a point is called up/down only
 when \code{abs(logFC) >= logfc_threshold} as well as significant.}
 
-\item{title, subtitle, tag}{Plot text.}
+\item{title, subtitle, tag}{Title, subtitle and panel tag.}
 
-\item{volcano_radius}{Inner volcano radius.}
+\item{volcano_radius}{Radius of the volcano in plot units.}
 
 \item{x_scale}{Horizontal compression of the point cloud (default 1). Values
 below 1 pull points toward the fold-change axis so the widest points clear
@@ -124,7 +124,7 @@ and tallest arc; widen it to exaggerate the magnitude encoding.}
 
 \item{point_size, point_alpha}{Volcano point size (default 1.1) and opacity.}
 
-\item{label_size}{Pathway-label text size.}
+\item{label_size}{Text size of the term labels and the point labels.}
 
 \item{label_gap}{Radial gap between each arc's outer top and its own label
 (default 0.6). Anchoring per-arc keeps every leader line the same short
@@ -139,9 +139,19 @@ radius (default 0.7).}
 \item{axis_size}{Text size of the \code{up}/\code{down}/\verb{log2 FC}/\verb{-log10 p} axis
 annotations (default 2.2).}
 
-\item{label_mode, label_n, label_rank_by, label_genes}{Volcano point labels.}
+\item{label_mode}{Which points get a gene label: \code{"none"},
+\code{"top_per_direction"} (\code{label_n} up and \code{label_n} down),
+\code{"by_significance"} (\code{label_n} in total) or \code{"by_genes"} (the proteins in
+\code{label_genes}).}
 
-\item{theme}{Output of \code{plot_theme()}.}
+\item{label_n}{How many points the two top modes label.}
+
+\item{label_rank_by}{Rank points for the top modes by \code{"significance"}
+(smallest \code{p}) or \code{"logfc"} (largest absolute fold change).}
+
+\item{label_genes}{Gene symbols or accessions to label with \code{"by_genes"}.}
+
+\item{theme}{Output of \code{\link[=plot_theme]{plot_theme()}}.}
 }
 \value{
 A ggplot.

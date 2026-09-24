@@ -20,7 +20,8 @@ plot_scatter(
 )
 }
 \arguments{
-\item{enrichment}{An enrichment object from \code{\link[=as_enrichment]{as_enrichment()}} or \code{\link[=run_enrichment]{run_enrichment()}} holding both contrasts.}
+\item{enrichment}{An enrichment object from \code{\link[=as_enrichment]{as_enrichment()}} or
+\code{\link[=run_enrichment]{run_enrichment()}} that holds both contrasts.}
 
 \item{x, y}{Contrast names for the horizontal and vertical axes.}
 
@@ -30,10 +31,11 @@ plot_scatter(
 \code{NULL} (default) draws from all. Skipped, with a note, when the object has
 no database labels.}
 
-\item{collapse}{Hide terms that \code{\link[=dedup_terms]{dedup_terms()}} flagged redundant in one contrast
-and kept as a representative in neither.}
+\item{collapse}{Hide terms that \code{\link[=dedup_terms]{dedup_terms()}} flagged redundant in one
+contrast and kept in neither.}
 
-\item{term_threshold}{Significance cutoff on \code{padj}.}
+\item{term_threshold}{A term is significant in a contrast when its \code{padj}
+is below this.}
 
 \item{colour_by}{Column that fills significant points: \code{"significance"}
 (significant in \code{x} only, \code{y} only, or both), any per-term column such as
@@ -44,7 +46,7 @@ the \code{x} contrast.}
 
 \item{label_min_size}{Smallest gene set that gets a label.}
 
-\item{label_n}{Most labels drawn.}
+\item{label_n}{Most term labels drawn.}
 
 \item{theme}{Output of \code{\link[=plot_theme]{plot_theme()}}; supplies the base font.}
 }

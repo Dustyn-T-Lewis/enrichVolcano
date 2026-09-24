@@ -31,22 +31,24 @@
 #' If the object has no adjusted p-values at all, nominal p-values are used
 #' and a note says so.
 #'
-#' @param enrichment An enrichment object from [as_enrichment()] or [run_enrichment()] holding both contrasts.
+#' @param enrichment An enrichment object from [as_enrichment()] or
+#'   [run_enrichment()] that holds both contrasts.
 #' @param x,y Contrast names for the horizontal and vertical axes.
 #' @param comparison `"concordance"` or `"reversal"`; see Description.
 #' @param databases Collections to draw from, e.g. `c("Hallmark", "GO Slim")`;
 #'   `NULL` (default) draws from all. Skipped, with a note, when the object has
 #'   no database labels.
-#' @param collapse Hide terms that [dedup_terms()] flagged redundant in one contrast
-#'   and kept as a representative in neither.
-#' @param term_threshold Significance cutoff on `padj`.
+#' @param collapse Hide terms that [dedup_terms()] flagged redundant in one
+#'   contrast and kept in neither.
+#' @param term_threshold A term is significant in a contrast when its `padj`
+#'   is below this.
 #' @param colour_by Column that fills significant points: `"significance"`
 #'   (significant in `x` only, `y` only, or both), any per-term column such as
 #'   `"database"`, or `NULL` for one colour. Per-term columns are read from
 #'   the `x` contrast.
 #' @param shape_by Column mapped to point shape (up to five values), or `NULL`.
 #' @param label_min_size Smallest gene set that gets a label.
-#' @param label_n Most labels drawn.
+#' @param label_n Most term labels drawn.
 #' @param theme Output of [plot_theme()]; supplies the base font.
 #'
 #' @return A ggplot.

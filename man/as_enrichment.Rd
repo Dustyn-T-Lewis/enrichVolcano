@@ -95,3 +95,8 @@ path <- system.file("extdata", "examples", "yvo_fgsea.csv.gz",
 ex <- as_enrichment(read.csv(path))
 ex
 }
+\references{
+Wu T, Hu E, Xu S, et al. (2021). clusterProfiler 4.0: A universal
+enrichment tool for interpreting omics data. The Innovation 2(3):100141.
+\doi{10.1016/j.xinn.2021.100141}
+}

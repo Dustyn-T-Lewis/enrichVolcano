@@ -32,10 +32,11 @@ the camera and fry model.}
 \item{inter_gene_cor}{camera's inter-gene correlation: a number, or \code{NA} to
 estimate it (unblocked designs only).}
 
-\item{min_size, max_size}{Sets need this many genes present in the data.}
+\item{min_size, max_size}{Test sets with at least \code{min_size} and at most
+\code{max_size} genes present in the data.}
 }
 \value{
-A named list with one enrichment object (\code{\link[=as_enrichment]{as_enrichment()}}) per test. Its metadata
+A named list with one enrichment object per test. Its metadata
 records the ranking statistic and the gene-set versions.
 }
 \description{
@@ -69,3 +70,19 @@ study has them. camera assumes genes within a set correlate at
 which can change results substantially and needs an unblocked design.
 }
 
+\references{
+Korotkevich G, Sukhov V, Budin N, et al. Fast gene set enrichment analysis.
+bioRxiv. \doi{10.1101/060012}
+
+Wu D, Smyth GK (2012). Camera: a competitive gene set test accounting for
+inter-gene correlation. Nucleic Acids Research 40(17):e133.
+\doi{10.1093/nar/gks461}
+
+Wu D, Lim E, Vaillant F, et al. (2010). ROAST: rotation gene set tests for
+complex microarray experiments. Bioinformatics 26(17):2176-2182.
+\doi{10.1093/bioinformatics/btq401}
+
+Ritchie ME, Phipson B, Wu D, et al. (2015). limma powers differential
+expression analyses for RNA-sequencing and microarray studies. Nucleic
+Acids Research 43(7):e47. \doi{10.1093/nar/gkv007}
+}

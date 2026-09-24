@@ -2,8 +2,6 @@
 # centre and enrichment pathways wrapped around it as an outer ring. Arcs are
 # drawn with ggforce::geom_arc_bar() in a coord_fixed() panel.
 
-# Ring geometry.
-
 ev_ring_r_inner <- 4.4
 ev_ring_r_outer <- 4.8
 
@@ -137,8 +135,6 @@ ev_tick_data <- function(ring_data, da, gene_col, logfc_col,
 }
 
 
-# Composite assembly.
-
 #' Volcano-in-ring composite for one contrast
 #'
 #' Draws a differential-abundance volcano embedded in a ring of enrichment
@@ -169,8 +165,8 @@ ev_tick_data <- function(ring_data, da, gene_col, logfc_col,
 #' @param p_threshold Significance cutoff for volcano points.
 #' @param logfc_threshold Effect-size cutoff; a point is called up/down only
 #'   when `abs(logFC) >= logfc_threshold` as well as significant.
-#' @param title,subtitle,tag Plot text.
-#' @param volcano_radius Inner volcano radius.
+#' @param title,subtitle,tag Title, subtitle and panel tag.
+#' @param volcano_radius Radius of the volcano in plot units.
 #' @param x_scale Horizontal compression of the point cloud (default 1). Values
 #'   below 1 pull points toward the fold-change axis so the widest points clear
 #'   the enrichment ring; the up/down axis annotations are unaffected.
@@ -204,7 +200,7 @@ ev_tick_data <- function(ring_data, da, gene_col, logfc_col,
 #'   and tallest arc; widen it to exaggerate the magnitude encoding.
 #' @param show_counts Draw the up/down significant-point count badges.
 #' @param point_size,point_alpha Volcano point size (default 1.1) and opacity.
-#' @param label_size Pathway-label text size.
+#' @param label_size Text size of the term labels and the point labels.
 #' @param label_gap Radial gap between each arc's outer top and its own label
 #'   (default 0.6). Anchoring per-arc keeps every leader line the same short
 #'   length regardless of arc height; the label box grows outward from this
@@ -214,8 +210,15 @@ ev_tick_data <- function(ring_data, da, gene_col, logfc_col,
 #'   radius (default 0.7).
 #' @param axis_size Text size of the `up`/`down`/`log2 FC`/`-log10 p` axis
 #'   annotations (default 2.2).
-#' @param label_mode,label_n,label_rank_by,label_genes Volcano point labels.
-#' @param theme Output of `plot_theme()`.
+#' @param label_mode Which points get a gene label: `"none"`,
+#'   `"top_per_direction"` (`label_n` up and `label_n` down),
+#'   `"by_significance"` (`label_n` in total) or `"by_genes"` (the proteins in
+#'   `label_genes`).
+#' @param label_n How many points the two top modes label.
+#' @param label_rank_by Rank points for the top modes by `"significance"`
+#'   (smallest `p`) or `"logfc"` (largest absolute fold change).
+#' @param label_genes Gene symbols or accessions to label with `"by_genes"`.
+#' @param theme Output of [plot_theme()].
 #' @return A ggplot.
 #' @export
 #' @examples

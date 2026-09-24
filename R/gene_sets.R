@@ -54,10 +54,16 @@ map_symbols <- function(ids, species) {
 #' Each collection is kept separate so [run_enrichment()] corrects p-values
 #' within it.
 #'
+#' @references
+#' Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
+#' Signatures Database hallmark gene set collection. Cell Systems 1(6):417-425.
+#' \doi{10.1016/j.cels.2015.12.004}
+#'
 #' @param databases Any of `"Hallmark"`, `"GO Slim"`, `"Reactome"`, `"KEGG"`,
 #'   `"GO:BP"`.
 #' @param species `"Homo sapiens"`, `"Mus musculus"` or `"Rattus norvegicus"`.
-#' @param min_size,max_size Keep sets with this many genes.
+#' @param min_size,max_size Keep sets with at least `min_size` and at most
+#'   `max_size` genes.
 #' @return A named list of collections, each a named list of gene symbols, with
 #'   a `versions` attribute (msigdbr, GO slim release, annotation package,
 #'   species).

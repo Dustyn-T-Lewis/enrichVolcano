@@ -1,6 +1,7 @@
 Package: enrichVolcano
 Title: Volcano-in-Ring and Concordance Plots from Enrichment Results
-Version: 1.1.0
+Version: 2.0.0
+Date: 2026-09-24
 Authors@R:
     person("Dustyn", "Lewis", , "dtlts14@gmail.com", role = c("aut", "cre"))
 Description: Turns differential abundance results into gene-set
@@ -9,10 +10,10 @@ Description: Turns differential abundance results into gene-set
     camera and fry tests, or converts enrichment results computed
     elsewhere, into one validated object. From it the package draws a
     differential abundance volcano inside a ring of enrichment terms, and a
-    scatter comparing two contrasts term by term. Redundant terms can be
-    flagged for display with the EnrichmentMap overlap rule or 'fgsea'
-    conditional collapsing, without changing any p-value. Seven example
-    proteomics studies are included.
+    scatter comparing two contrasts term by term, and writes them to one
+    PDF. Redundant terms can be flagged for display with the EnrichmentMap
+    overlap rule or 'fgsea' conditional collapsing. No p-value changes.
+    Seven example proteomics studies are included.
 License: MIT + file LICENSE
 Depends: R (>= 4.2)
 URL: https://github.com/Dustyn-T-Lewis/enrichVolcano,

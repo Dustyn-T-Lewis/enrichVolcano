@@ -58,6 +58,10 @@
 #'   `enrichment_test`, `score_type` (the axis and legend label for `score`)
 #'   and `dedup` (the settings [dedup_terms()] used, or `list(method =
 #'   "precomputed")` when the input already carried `dedup_status`).
+#' @references
+#' Wu T, Hu E, Xu S, et al. (2021). clusterProfiler 4.0: A universal
+#' enrichment tool for interpreting omics data. The Innovation 2(3):100141.
+#' \doi{10.1016/j.xinn.2021.100141}
 #' @export
 #' @examples
 #' path <- system.file("extdata", "examples", "yvo_fgsea.csv.gz",

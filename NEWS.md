@@ -1,3 +1,54 @@
+# enrichVolcano 2.0.0
+
+2.0.0 renames the exports to one rule, verb then noun, and gives arguments
+that mean the same thing one name. Old names are gone, with no aliases.
+To stay on the old API, install 1.1.0:
+`remotes::install_github("Dustyn-T-Lewis/enrichVolcano@v1.1.0")`.
+
+## Migration
+
+| 1.1.0 | 2.0.0 |
+|---|---|
+| `example_study(name)` | `read_example(name)` |
+| `dedup(x, gene_sets)` | `dedup_terms(enrichment, gene_sets)` |
+| `dedup(p_threshold = )` | `dedup_terms(term_threshold = )` |
+| `volcano_ring(volc_df, enrichment)` | `plot_volcano_ring(da, enrichment)` |
+| `volcano_ring(gene_col, logfc_col, pval_col, padj_col)` | removed; pass `as_da()` output |
+| `volcano_ring(volc_sig_col = "pi")` | `as_da(x, padj = "pi")`, then `plot_volcano_ring()` |
+| `volcano_ring(disc_color = )` | `plot_volcano_ring(disc_colour = )` |
+| `volcano_ring(nes_limits = )` | `plot_volcano_ring(score_limits = )` |
+| `volcano_ring(arc_order = "nes")` | `plot_volcano_ring(arc_order = "score")` |
+| `volcano_ring_grid(volc_dfs, enrichment, contrasts)` | `lapply()` over contrasts, then `write_plot()` or `patchwork::wrap_plots()` |
+| `nes_scatter(enrichment, x, y)` | `plot_scatter(enrichment, x, y)` |
+| `nes_scatter(p_threshold = )` | `plot_scatter(term_threshold = )` |
+| `nes_scatter(color_by = )` | `plot_scatter(colour_by = )` |
+| `nes_scatter(max_labels = )` | `plot_scatter(label_n = )` |
+| `volcano_ring_theme()` | `plot_theme()` |
+| `volcano_ring_theme(nes_colors = )` | `plot_theme(score_colours = )` |
+| `volcano_ring_theme(nes_limits = )` | `plot_theme(score_limits = )` |
+| `volcano_ring_theme(nes_stops = )` | `plot_theme(score_stops = )` |
+| `ev_clean_label(name)` | `clean_label(name)` |
+| `load_gene_sets(collections = )` | `load_gene_sets(databases = )` |
+| `enrichment(results, metadata)` | `as_enrichment()`; the constructor is internal |
+
+## New features
+
+* `write_plot()` writes a named list of plots to one PDF: a lettered
+  composite on page 1, then one panel per page. Fonts are embedded.
+* `write_table()` writes one enrichment object, or the list from
+  `run_enrichment()`, to one CSV that `as_enrichment()` reads back.
+
+## Other changes
+
+* Plot functions refuse plain volcano tables. Pass `as_da()` output.
+* Points without a gene symbol are labelled with their accession.
+* An invalid colour raises `enrichVolcano_param_error`.
+* `dedup_terms()` records its cutoff as `term_threshold` in
+  `metadata$dedup`.
+* `CITATION` and `REFERENCES.bib` are gone. `citation("enrichVolcano")`
+  reads DESCRIPTION, and each method's paper is on the help page of the
+  function that runs it.
+
 # enrichVolcano 1.1.0
 
 ## New features
@@ -137,7 +188,7 @@
 * `ev_theme()` -> `volcano_ring_theme()` (new args: `base_family`,
   `nes_limits`, `nes_stops`; palettes: `"default"`, `"viridis"`, `"okabe"`).
 * `print.enrichVolcano()` -> `print.volcano_ring_grid()`.
-* `ev_volcano()` and `ring_plot()` removed entirely — the composite is the
+* `ev_volcano()` and `ring_plot()` removed. The composite is the
   plot.
 
 ## New
@@ -150,7 +201,7 @@
   (`;`-string) all work out of the box. Override via `genes_col`.
 * Structured error classes: `enrichVolcano_input_error`,
   `enrichVolcano_column_error`, `enrichVolcano_data_error`,
-  `enrichVolcano_param_error` — all under the parent
+  `enrichVolcano_param_error`, all under the parent
   `enrichVolcano_error`.
 * `magnitude = c("neg_log_padj", "size")` controls the arc-thickness
   encoding on the ring.
@@ -176,13 +227,13 @@
 
 ## Bug fixes
 
-* `ev_enrich(nperm = ...)` now actually takes effect — it is passed to
+* `ev_enrich(nperm = ...)` now takes effect. It is passed to
   `fgsea::fgseaMultilevel()` as `nPermSimple` (previously a no-op).
-* `ev_collapse(keep_by = "NES")` now ranks representatives by **|NES|**, so a
+* `ev_collapse(keep_by = "NES")` now ranks representatives by |NES|, so a
   strongly down-regulated pathway is no longer dropped in favour of a weakly
   up-regulated one.
 * `ev_collapse()` no longer collapses an up- and a down-regulated pathway that
-  share leading-edge genes — dedup is now within-direction.
+  share leading-edge genes. Dedup is now within-direction.
 * `adjust_p(method = "qvalue")` falls back to BH (with a warning) instead of
   erroring when a contrast has too few p-values to estimate pi0.
 * `ev_validate()` guards MaxQuant ratios `<= 0` (set to `NA` with a warning)

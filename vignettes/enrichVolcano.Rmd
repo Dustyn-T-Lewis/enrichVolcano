@@ -18,25 +18,20 @@ knitr::opts_chunk$set(
 ```
 
 enrichVolcano turns differential-abundance results into enrichment figures.
-Every workflow has the same steps:
+The steps:
 
-1. Read your results: `read_study()` for a set of study files, or `as_da()`
-   for one DA table from limma, limpa, proteoDA, MSstats, proDA, msqrob2,
+1. Read your results. `read_study()` reads a set of study files; `as_da()`
+   reads one DA table from limma, limpa, proteoDA, MSstats, proDA, msqrob2,
    prolfQua or ProtRank.
-2. Get enrichment: `run_enrichment()` runs fgsea, camera and fry, or
-   `as_enrichment()` converts results you already have. Both give one
+2. Get enrichment. `run_enrichment()` runs fgsea, camera and fry.
+   `as_enrichment()` converts results you already have. Both return one
    validated `enrichment` object per test.
-3. `dedup_terms()` (optional) flags redundant terms so figures show each signal
-   once.
-4. Plot: `plot_volcano_ring()` puts the volcano inside a ring of enrichment terms,
-   and `plot_scatter()` compares two contrasts term by term.
-
-## Install
-
-```{r install, eval = FALSE}
-install.packages("remotes")
-remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
-```
+3. Optionally, `dedup_terms()` flags redundant terms so a figure shows each
+   signal once.
+4. Plot. `plot_volcano_ring()` puts the volcano inside a ring of enrichment
+   terms. `plot_scatter()` compares two contrasts term by term.
+5. Write. `write_plot()` saves figures to one PDF; `write_table()` saves
+   results to CSV.
 
 ## Quick start
 
@@ -178,8 +173,8 @@ ex
 ```
 
 It recognised fgsea output from its columns and split the table by its
-`contrast` column. Every tool below ends in the same object. Pass one table per contrast as a
-named list, or one table with a `contrast` column.
+`contrast` column. Every tool below ends in the same object. Pass one table
+per contrast as a named list, or one table with a `contrast` column.
 
 ### fgsea
 
@@ -209,7 +204,7 @@ res <- limma::fry(y, index = gene_sets, design = design, contrast = contrast)
 x <- as_enrichment(list(Aging = res), database = "Hallmark")
 ```
 
-fry and mroast are **self-contained** tests: they ask whether the genes in a
+fry and mroast are self-contained tests: they ask whether the genes in a
 set changed at all, without reference to genes outside it. Neither reports an
 effect size like NES, or a leading edge. The score is therefore
 \(-\log_{10}\)(FDR), signed by the reported direction, and the figure's legend
@@ -246,7 +241,7 @@ res <- limma::camera(y, index = gene_sets, design = design, contrast = contrast)
 x <- as_enrichment(list(Aging = res), enrichment_test = "camera", database = "Hallmark")
 ```
 
-camera and cameraPR are **competitive** tests, like fgsea: they ask whether a
+camera and cameraPR are competitive tests, like fgsea: they ask whether a
 set changed more than the genes outside it. Their default output has
 identical columns, so `as_enrichment()` cannot tell them apart and asks you to
 name the test with `enrichment_test`. camera run with
@@ -395,11 +390,37 @@ The arguments you will reach for most:
 - `label_mode`, `label_n`, `label_genes`: which proteins get text.
 - `show_counts`, `disc_colour`: count badges and a tinted central disc.
 
-Each ring is one ggplot. Combine several with patchwork.
+## Write figures and tables
 
-```{r grid, fig.width = 10, fig.height = 5.5, fig.alt = "Two volcano rings side by side for trained young and trained old"}
-rings <- lapply(c("Training_Young", "Training_Old"), function(k) {
-  plot_volcano_ring(yvo$da, res$fgsea, contrast = k, title = k)
-})
-patchwork::wrap_plots(rings, ncol = 2)
+Every plot function returns one ggplot. `write_plot()` takes a named list of
+them and writes one PDF. Page 1 is a composite lettered A, B, C in list order.
+Each later page holds one panel at full size, headed by its letter and name.
+Fonts are embedded.
+
+```{r panels}
+panels <- list(
+  "Training, young" = plot_volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young"),
+  "Training, old" = plot_volcano_ring(yvo$da, res$fgsea, contrast = "Training_Old"),
+  "Young against old" = plot_scatter(res$fgsea, "Training_Young", "Training_Old")
+)
 ```
+
+```{r write-plot, eval = FALSE}
+write_plot(panels, "training.pdf", design = "AB\nCC", caption = "fgsea, Hallmark and GO slim")
+```
+
+To see a composite on screen, pass the list to `patchwork::wrap_plots()`:
+
+```{r composite, fig.width = 10, fig.height = 5.5, fig.alt = "Two volcano rings side by side for trained young and trained old"}
+patchwork::wrap_plots(panels[1:2], ncol = 2)
+```
+
+`write_table()` writes one enrichment object, or the whole list from
+`run_enrichment()`, to one CSV with an `enrichment_test` column:
+
+```{r write-table, eval = FALSE}
+write_table(res, "yvo_enrichment.csv")
+```
+
+The papers behind each method are listed on the help pages of
+`run_enrichment()`, `load_gene_sets()`, `as_enrichment()` and `dedup_terms()`.

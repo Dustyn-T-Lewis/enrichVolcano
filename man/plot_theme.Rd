@@ -2,7 +2,7 @@
 % Please edit documentation in R/theme.R
 \name{plot_theme}
 \alias{plot_theme}
-\title{Theme + palette for \code{plot_volcano_ring()}}
+\title{Fonts and colours for the plots}
 \usage{
 plot_theme(
   base_size = 11,
@@ -17,41 +17,38 @@ plot_theme(
 )
 }
 \arguments{
-\item{base_size}{Numeric base font size.}
+\item{base_size}{Base font size.}
 
-\item{base_family}{Character base font family; \code{""} defers to ggplot2.}
+\item{base_family}{Base font family. \code{""} uses the ggplot2 default.}
 
-\item{palette}{One of \code{"default"} (red-blue diverging, the YvO 2026 lock),
-\code{"viridis"} (5-stop magma cuts), or \code{"okabe"} (Okabe-Ito CB-safe pair).
-Sets the starting up / down / non-significant colours and NES ramp; any
-of \code{up}, \code{down}, \code{ns}, \code{score_colours} below override it.}
+\item{palette}{\code{"default"} (red and blue), \code{"viridis"} (magma) or
+\code{"okabe"} (Okabe-Ito, safe for colour-blind readers). \code{up}, \code{down}, \code{ns}
+and \code{score_colours} override single parts of it.}
 
-\item{up, down, ns}{Optional single colours overriding the palette's
-up-regulated, down-regulated, and non-significant point colours.}
+\item{up, down, ns}{Colours of up-regulated, down-regulated and
+non-significant points.}
 
-\item{score_colours}{Optional colour vector overriding the diverging NES ramp.
-When supplied without \code{score_stops}, stops spread evenly across
-\code{score_limits} (or \code{c(-3, 3)}).}
+\item{score_colours}{Colours of the score ramp, low to high. Without
+\code{score_stops} they spread evenly across \code{score_limits}, or \code{c(-3, 3)}.}
 
-\item{score_limits}{Optional length-2 numeric. When \code{NULL}, the colour scale
-in \code{plot_volcano_ring()} uses its own default.}
+\item{score_limits}{Length-2 limits of the score scale. \code{NULL} lets each
+plot choose; see \code{score_limits} in \code{\link[=plot_volcano_ring]{plot_volcano_ring()}}.}
 
-\item{score_stops}{Optional numeric vector matching the NES ramp length,
-overriding the palette's \code{nes_values}.}
+\item{score_stops}{Score values at which each ramp colour sits, one per
+colour.}
 }
 \value{
-A list \code{list(base_size, base_family, palette, score_limits)} consumed
-by \code{\link[=plot_volcano_ring]{plot_volcano_ring()}}.
+A list with \code{base_size}, \code{base_family}, \code{palette} and
+\code{score_limits}, passed to the plots as \code{theme}.
 }
 \description{
-Returns a list with a \code{theme} element (ggplot2 theme additions) and a
-\code{palette} element giving the up / down / non-significant point colours and
-the diverging NES ramp.
+Sets the font and the colours that \code{\link[=plot_volcano_ring]{plot_volcano_ring()}} and
+\code{\link[=plot_scatter]{plot_scatter()}} use: the up, down and non-significant point colours and
+the diverging ramp that fills arcs by score.
 }
 \examples{
 th <- plot_theme(base_size = 11)
 th$palette$up
 
-# Custom point and arc colours, no list-poking needed:
 th <- plot_theme(up = "#B2182B", down = "#2166AC", ns = "grey80")
 }
