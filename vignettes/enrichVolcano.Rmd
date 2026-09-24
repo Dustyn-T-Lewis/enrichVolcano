@@ -29,7 +29,8 @@ The steps:
 3. Optionally, `dedup_terms()` flags redundant terms so a figure shows each
    signal once.
 4. Plot. `plot_volcano_ring()` puts the volcano inside a ring of enrichment
-   terms. `plot_scatter()` compares two contrasts term by term.
+   terms. `plot_bias_ring()` rings it with every significant term.
+   `plot_scatter()` compares two contrasts term by term.
 5. Write. `write_plot()` saves figures to one PDF; `write_table()` saves
    results to CSV.
 
@@ -132,6 +133,18 @@ Each result is an `enrichment` object, so every figure reads any of them:
 
 ```{r run-ring, fig.alt = "Volcano of the Aging contrast ringed by gene sets tested with fry"}
 plot_volcano_ring(yvo$da, res$fry, contrast = "Aging", title = "Aging, fry")
+```
+
+## See the whole contrast
+
+The ring above draws the twelve most significant terms. `plot_bias_ring()`
+draws every significant term of a contrast, without names, to show whether
+the contrast leans up or down. Each arc gets the same angle, so the larger
+half holds more terms. Fill and height are each score over the strongest
+score in the contrast.
+
+```{r bias, fig.alt = "Volcano of the Aging contrast ringed by every significant term, more of them up than down, with no term names"}
+plot_bias_ring(yvo$da, res$fgsea, contrast = "Aging", title = "Aging")
 ```
 
 ## Choose gene-set collections

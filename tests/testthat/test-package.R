@@ -1,6 +1,6 @@
 test_that("the public exports are visible", {
   exports <- c(
-    "as_da", "as_enrichment", "clean_label", "dedup_terms", "load_gene_sets", "plot_scatter",
+    "as_da", "as_enrichment", "clean_label", "dedup_terms", "load_gene_sets", "plot_bias_ring", "plot_scatter",
     "plot_theme", "plot_volcano_ring", "read_example", "read_study", "run_enrichment", "write_plot", "write_table"
   )
   expect_setequal(getNamespaceExports("enrichVolcano"), exports)

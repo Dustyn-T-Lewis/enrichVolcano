@@ -11,7 +11,7 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
                              magnitude_col, genes_list, order_by = "padj",
                              gap_intra = 3, gap_split = 8,
                              arc_r0 = ev_ring_r_outer,
-                             min_height = 0.05, max_height = 1.6) {
+                             min_height = 0.05, max_height = 1.6, proportional = FALSE) {
   if (nrow(enrich_df) == 0) {
     return(enrich_df)
   }
@@ -44,6 +44,9 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   scale_h <- function(df) {
     if (nrow(df) == 0) {
       return(numeric(0))
+    }
+    if (proportional) {
+      return(arc_r0 + max_height * df$.ev_magnitude)
     }
     if (nrow(df) == 1) {
       return(arc_r0 + (min_height + max_height) / 2)
@@ -270,9 +273,17 @@ plot_volcano_ring <- function(da, enrichment,
                               label_rank_by = c("significance", "logfc"),
                               label_genes = NULL,
                               theme = plot_theme()) {
-  arc_order <- match.arg(arc_order)
-  label_mode <- match.arg(label_mode)
-  label_rank_by <- match.arg(label_rank_by)
+  draw_ring(as.list(environment()))
+}
+
+# The body of plot_volcano_ring(), shared with plot_bias_ring(). `args` holds
+# every plot_volcano_ring() argument; `normalise` scales fill and arc height to
+# the strongest drawn term.
+draw_ring <- function(args, term_labels = TRUE, normalise = FALSE) {
+  list2env(args, environment())
+  arc_order <- match.arg(arc_order, c("padj", "score"))
+  label_mode <- match.arg(label_mode, c("none", "top_per_direction", "by_significance", "by_genes"))
+  label_rank_by <- match.arg(label_rank_by, c("significance", "logfc"))
   ev_assert_colour(disc_colour)
   validate_ring_geometry(ring_radius, volcano_radius, arc_height_range, label_headroom)
 
@@ -303,6 +314,15 @@ plot_volcano_ring <- function(da, enrichment,
   pal <- theme$palette
   score_limits <- score_limits %||% theme$score_limits %||%
     default_score_limits(score_type, enrichment@results, term_threshold)
+  if (normalise) {
+    subtitle <- subtitle %||% sprintf(
+      "%d up, %d down of %d significant terms",
+      sum(enrich_df$score > 0), sum(enrich_df$score < 0), nrow(enrich_df)
+    )
+    if (nrow(enrich_df) > 0) enrich_df$score <- enrich_df$score / max(abs(enrich_df$score))
+    score_type <- paste(score_type, "/ max")
+    score_limits <- c(-1, 1)
+  }
   vr <- volcano_radius * 0.92
   ring_r0 <- ring_radius
   ring_r1 <- ring_radius + ring_thickness
@@ -340,15 +360,19 @@ plot_volcano_ring <- function(da, enrichment,
     p_threshold = p_threshold, logfc_threshold = logfc_threshold
   )
 
-  mag_vec <- switch(magnitude,
-    neg_log_padj = -log10(pmax(enrich_df$padj, .Machine$double.xmin)),
-    size         = enrich_df$size
-  )
+  mag_vec <- if (normalise) {
+    abs(enrich_df$score)
+  } else {
+    switch(magnitude,
+      neg_log_padj = -log10(pmax(enrich_df$padj, .Machine$double.xmin)),
+      size         = enrich_df$size
+    )
+  }
   ring <- ev_ring_geometry(enrich_df,
     term_col = "term", padj_col = "padj",
     nes_col = "score", magnitude_col = mag_vec,
     genes_list = enrich_df$leading_edge, order_by = arc_order, arc_r0 = ring_r1,
-    min_height = arc_height_range[1], max_height = arc_height_range[2]
+    min_height = arc_height_range[1], max_height = arc_height_range[2], proportional = normalise
   )
   ticks <- ev_tick_data(ring, v,
     gene_col = "gene", logfc_col = "logFC",
@@ -477,7 +501,9 @@ plot_volcano_ring <- function(da, enrichment,
         values = scales::rescale(pal$nes_values),
         limits = score_limits, oob = scales::squish, name = score_type
       )
-
+  }
+  if (nrow(ring) > 0 && !term_labels) max_r <- max(ring$arc_r1_var) + label_headroom
+  if (nrow(ring) > 0 && term_labels) {
     lbl <- ring
     lbl$.ev_label_r <- lbl$arc_r1_var + label_gap
     lbl$.ev_hjust <- (1 - sin(lbl$.ev_mid_rad)) / 2

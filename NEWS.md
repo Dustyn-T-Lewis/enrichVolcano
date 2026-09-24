@@ -33,6 +33,11 @@ To stay on the old API, install 1.1.0:
 
 ## New features
 
+* `plot_bias_ring()` draws every significant term of one contrast, without
+  names, with fill and arc height scaled to the strongest term. It shows at
+  a glance whether a contrast leans up or down.
+* The ring draws the twelve most significant unique terms by default. A term
+  found in two collections counts once.
 * `write_plot()` writes a named list of plots to one PDF: a lettered
   composite on page 1, then one panel per page. Fonts are embedded.
 * `write_table()` writes one enrichment object, or the list from
