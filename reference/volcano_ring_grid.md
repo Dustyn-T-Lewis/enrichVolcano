@@ -29,8 +29,10 @@ volcano_ring_grid(
 
 - volc_dfs:
 
-  Named list of tidy DA tibbles, one per contrast. A single data.frame
-  carrying a `contrast` column is also accepted and is split.
+  DA results from
+  [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
+  covering the contrasts drawn. A named list of plain tables, or one
+  with a `contrast` column, still works but is deprecated.
 
 - enrichment:
 
@@ -109,14 +111,13 @@ An S3 object `c("volcano_ring_grid", "list")` with elements `$plot`
 ## Examples
 
 ``` r
-da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
-  package = "enrichVolcano"
-))
+da <- example_study("yvo")$da
+#> 2103 of 2106 accessions mapped to Homo sapiens symbols.
+#> 2106 of 2106 matrix proteins have DA results.
 ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
   package = "enrichVolcano"
 )))
 #> Reading "fgsea" results.
-names(da)[names(da) == "adj.P.Val"] <- "padj"
 
 g <- volcano_ring_grid(da, ex, contrasts = c("Training_Young", "Training_Old"))
 g$plot

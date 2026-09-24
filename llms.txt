@@ -7,25 +7,33 @@
 ![A volcano plot ringed by enrichment arcs coloured by normalised
 enrichment score](reference/figures/README-hero-1.png)
 
-enrichVolcano draws; it does not run differential abundance or
-enrichment. Every workflow has three steps:
+enrichVolcano starts from differential-abundance results you already
+have and ends in enrichment figures:
 
 ``` r
 
 library(enrichVolcano)
 
-x <- as_enrichment(list(Aging = fgsea_result), database = "Hallmark")
-x <- dedup(x, gene_sets)
-volcano_ring(da_aging, x)
+study <- read_study("my_study.xlsx")
+res <- run_enrichment(study, load_gene_sets(c("Hallmark", "GO Slim")))
+volcano_ring(study$da, res$fgsea, contrast = "Aging")
 ```
 
-1.  [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
-    converts results from any supported tool into one validated
-    `enrichment` object and records which test produced them.
-2.  [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
+1.  [`read_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_study.md)
+    reads your DA results, and optionally the matrix, sample sheet and
+    contrasts, from one workbook;
+    [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
+    reads a single DA table from limma, limpa, proteoDA, MSstats, proDA,
+    msqrob2, prolfQua or ProtRank.
+2.  [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
+    runs fgsea, camera and fry, or
+    [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
+    converts enrichment you computed elsewhere. Either way you get a
+    validated `enrichment` object that records which test produced it.
+3.  [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
     (optional) flags redundant terms so a figure shows each signal once.
     p-values are never changed.
-3.  A plot function draws from the object:
+4.  A plot function draws from the object:
     [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
     for one contrast,
     [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
@@ -74,8 +82,11 @@ gene-set collection.
 
 ## Cite the methods you used
 
-enrichVolcano only draws; the credit belongs to the analysis:
+Cite the methods behind your results, whether enrichVolcano ran them or
+you did:
 
+- limma: Ritchie ME et al. 2015, *Nucleic Acids Res* 43(7),
+  <doi:10.1093/nar/gkv007>
 - fgsea: Korotkevich G et al., bioRxiv, <doi:10.1101/060012>
 - clusterProfiler: Wu T et al. 2021, *The Innovation* 2:100141
 - camera: Wu D, Smyth GK 2012, *Nucleic Acids Res* 40(17),
@@ -85,20 +96,34 @@ enrichVolcano only draws; the credit belongs to the analysis:
 - EnrichmentMap
   ([`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)):
   Merico D et al. 2010, *PLoS ONE* 5(11):e13984
+- Hallmark gene sets: Liberzon A et al. 2015, *Cell Systems* 1(6),
+  <doi:10.1016/j.cels.2015.12.004>
 - Enrichment protocol: Reimand J et al. 2019, *Nat Protoc* 14:482-517
 
 ## Versioning
 
-1.0.0 replaced the column-name arguments with the `enrichment` object;
+1.0.0 replaced the column-name arguments with the `enrichment` object,
+and 1.1.0 added the study readers and
+[`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md);
 see `NEWS.md`. Earlier releases stay installable from their tags.
 
 ## License
 
-MIT. See `LICENSE`.
+MIT for the code; see `LICENSE`. The example data are CC BY 4.0; see
+`inst/extdata/studies/LICENSE.md`.
 
 # Package index
 
 ## Build
+
+- [`read_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_study.md)
+  : Read a study from a workbook or a folder of CSV files
+
+- [`example_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/example_study.md)
+  : Example studies shipped with the package
+
+- [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
+  : Standardise differential-abundance results
 
 - [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
   :
@@ -107,6 +132,12 @@ MIT. See `LICENSE`.
 
 - [`enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrichment.md)
   : Enrichment results in one validated object
+
+- [`load_gene_sets()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/load_gene_sets.md)
+  : Load gene-set collections for enrichment
+
+- [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
+  : Run gene-set enrichment on a study
 
 - [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
   : Flag redundant terms for display

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,24 +58,27 @@
       <img src="../logo.png" class="logo" alt=""><h1>enrichVolcano</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v1.0.0/vignettes/enrichVolcano.Rmd" class="external-link"><code>vignettes/enrichVolcano.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/vignettes/enrichVolcano.Rmd" class="external-link"><code>vignettes/enrichVolcano.Rmd</code></a></small>
       <div class="d-none name"><code>enrichVolcano.Rmd</code></div>
     </div>
 
     
     
-<p>enrichVolcano draws figures from enrichment results you have already
-computed. Every workflow has the same three steps:</p>
+<p>enrichVolcano turns differential-abundance results into enrichment
+figures. Every workflow has the same steps:</p>
 <ol style="list-style-type: decimal">
-<li>
-<code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> converts results from any supported
-tool into one validated <code>enrichment</code> object.</li>
+<li>Read your results: <code><a href="../reference/read_study.html">read_study()</a></code> for a set of study
+files, or <code><a href="../reference/as_da.html">as_da()</a></code> for one DA table from limma, limpa,
+proteoDA, MSstats, proDA, msqrob2, prolfQua or ProtRank.</li>
+<li>Get enrichment: <code><a href="../reference/run_enrichment.html">run_enrichment()</a></code> runs fgsea, camera and
+fry, or <code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> converts results you already have.
+Both give one validated <code>enrichment</code> object per test.</li>
 <li>
 <code><a href="../reference/dedup.html">dedup()</a></code> (optional) flags redundant terms so figures
 show each signal once.</li>
-<li>A plot function draws from the object: <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code>
-puts a differential-abundance volcano inside a ring of enrichment terms,
-and <code><a href="../reference/nes_scatter.html">nes_scatter()</a></code> compares two contrasts term by term.</li>
+<li>Plot: <code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> puts the volcano inside a ring of
+enrichment terms, and <code><a href="../reference/nes_scatter.html">nes_scatter()</a></code> compares two contrasts
+term by term.</li>
 </ol>
 <div class="section level2">
 <h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
@@ -87,49 +90,165 @@ and <code><a href="../reference/nes_scatter.html">nes_scatter()</a></code> compa
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<p>The package ships one example study: fgsea results for four contrasts
-across five gene-set collections, and the matching limma
-differential-abundance table. The collections are MSigDB Hallmark, KEGG
-MEDICUS, Reactome and <a href="GO:BP" class="uri">GO:BP</a> from msigdbr
-26.1.0, and the GO Consortium’s generic GO slim (release
-2026-07-26).</p>
+<p>The <code>yvo</code> example study is human muscle from 32 people,
+young and old, before and after resistance training: 2,106 proteins in
+62 samples, quantified with limpa, with four contrasts. It ships every
+sheet a study can have, so the whole workflow runs on it:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Dustyn-T-Lewis/enrichVolcano" class="external-link">enrichVolcano</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fgsea_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"examples"</span>, <span class="st">"yvo_fgsea.csv.gz"</span>, package <span class="op">=</span> <span class="st">"enrichVolcano"</span><span class="op">)</span></span>
-<span><span class="va">da_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"examples"</span>, <span class="st">"yvo_da.csv.gz"</span>, package <span class="op">=</span> <span class="st">"enrichVolcano"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">fgsea_path</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Reading <span style="color: #0000BB;">"fgsea"</span> results.</span></span>
-<span><span class="va">ex</span></span>
+<span><span class="va">yvo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/example_study.html">example_study</a></span><span class="op">(</span><span class="st">"yvo"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; 2103 of 2106 accessions mapped to Homo sapiens symbols.</span></span>
+<span><span class="co">#&gt; 2106 of 2106 matrix proteins have DA results.</span></span>
+<span><span class="va">sets</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_gene_sets.html">load_gene_sets</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_enrichment.html">run_enrichment</a></span><span class="op">(</span><span class="va">yvo</span>, <span class="va">sets</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Up to 10 of 2103 ranked genes tie; fgsea orders tied genes arbitrarily.</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">fgsea</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;enrichment&gt;</span> fgsea, score: NES</span></span>
-<span><span class="co">#&gt; 4 contrasts: Aging, Training_Young, Training_Old, and Interaction</span></span>
-<span><span class="co">#&gt; 5570 rows: GO Slim (108), GO:BP (3946), Hallmark (144), KEGG (84), and Reactome</span></span>
-<span><span class="co">#&gt; (1288)</span></span>
-<span><span class="co">#&gt; Dedup: precomputed</span></span></code></pre></div>
-<p><code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> recognised fgsea output from its columns
-and split the table by its <code>contrast</code> column. The DA table
-needs one contrast and a <code>padj</code> column:</p>
+<span><span class="co">#&gt; 4 contrasts: Training_Young, Training_Old, Aging, and Interaction</span></span>
+<span><span class="co">#&gt; 252 rows: GO Slim (108) and Hallmark (144)</span></span>
+<span><span class="co">#&gt; Dedup: not deduplicated</span></span></code></pre></div>
+<p><code><a href="../reference/example_study.html">example_study()</a></code> read the study through
+<code><a href="../reference/read_study.html">read_study()</a></code>, which checked that its sheets agree and
+looked up current gene symbols for the UniProt accessions.
+<code><a href="../reference/run_enrichment.html">run_enrichment()</a></code> returned one result per test; here is the
+fgsea one drawn around the volcano:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">da</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">da_path</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">da</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">da</span><span class="op">)</span> <span class="op">==</span> <span class="st">"adj.P.Val"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"padj"</span></span>
-<span><span class="va">young</span> <span class="op">&lt;-</span> <span class="va">da</span><span class="op">[</span><span class="va">da</span><span class="op">$</span><span class="va">contrast</span> <span class="op">==</span> <span class="st">"Training_Young"</span>, <span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">young</span>, <span class="va">ex</span>,</span>
-<span>  contrast <span class="op">=</span> <span class="st">"Training_Young"</span>, databases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span>,</span>
-<span>  title <span class="op">=</span> <span class="st">"Training, young"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Training_Young"</span>, title <span class="op">=</span> <span class="st">"Training, young"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="enrichVolcano_files/figure-html/ring-1.png" class="r-plt" alt="Volcano of Training_Young proteins inside a ring of enriched Hallmark and GO slim terms" width="432"></p>
 <p>Arc fill is NES and arc height is
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>10</mn></msub></mrow><annotation encoding="application/x-tex">-\log_{10}</annotation></semantics></math>(padj).
 Up-regulated terms sit on the upper half, down-regulated ones on the
 lower. Ticks run from each arc to its leading-edge proteins in the
 volcano. The ring takes the twelve most significant terms (padj &lt;
-0.05), in either direction. <code>databases</code> limits them to named
-collections, here Hallmark and GO slim; left at its default,
-<code>NULL</code>, every collection in the object competes.
-<code>term_threshold</code>, <code>n_terms</code> and <code>terms</code>
-change the selection further.</p>
+0.05), in either direction, from every collection in the object;
+<code>databases</code>, <code>term_threshold</code>,
+<code>n_terms</code> and <code>terms</code> change the selection.</p>
+</div>
+<div class="section level2">
+<h2 id="your-data">Your data<a class="anchor" aria-label="anchor" href="#your-data"></a>
+</h2>
+<p>A study is up to five tables, in one Excel workbook (one sheet each)
+or a folder of CSV files:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Sheet</th>
+<th>Columns</th>
+<th>Needed for</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>da_results</code></td>
+<td>
+<code>protein</code>, <code>contrast</code>, <code>logFC</code>,
+<code>t</code> or <code>p</code>, <code>padj</code>, optional
+<code>abundance</code>
+</td>
+<td>everything</td>
+</tr>
+<tr class="even">
+<td><code>matrix</code></td>
+<td>protein IDs, then one column per sample</td>
+<td>camera, fry</td>
+</tr>
+<tr class="odd">
+<td><code>samples</code></td>
+<td>
+<code>sample</code>, <code>group</code>, optional
+<code>subject</code>, optional covariates</td>
+<td>camera, fry</td>
+</tr>
+<tr class="even">
+<td><code>contrasts</code></td>
+<td>
+<code>name</code>, <code>expression</code>,
+e.g. <code>Post - Pre</code>
+</td>
+<td>camera, fry</td>
+</tr>
+<tr class="odd">
+<td><code>weights</code></td>
+<td>shaped like <code>matrix</code>
+</td>
+<td>optional precision weights</td>
+</tr>
+</tbody>
+</table>
+<p><code><a href="../reference/read_study.html">read_study()</a></code> reads either form and checks that the
+sheets agree by name: matrix columns against
+<code>samples$sample</code>, every group in a contrast against
+<code>samples$group</code>, and the contrasts in <code>da_results</code>
+against the <code>contrasts</code> sheet. Group names must be plain
+names (letters, digits, <code>.</code> and <code>_</code>), because
+<code>-</code> inside one would read as subtraction. An interaction is a
+difference of differences:
+<code>(BFR_T2 - BFR_T1) - (HLRT_T2 - HLRT_T1)</code>.</p>
+<p>The <code>da_results</code> sheet can use each tool’s own column
+names; <code><a href="../reference/as_da.html">as_da()</a></code> recognises limma and limpa
+<code>topTable()</code>, proteoDA, MSstats, proDA, msqrob2, prolfQua and
+ProtRank output, and takes column arguments for anything else. Proteins
+are ranked by the moderated t where the table has one, otherwise by the
+signed
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>10</mn></msub></mrow><annotation encoding="application/x-tex">-\log_{10}</annotation></semantics></math>
+p-value.</p>
+<p>The package ships seven studies in this format:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/example_study.html">example_study</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"name"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;           name           species</span></span>
+<span><span class="co">#&gt; 1    bfr_limpa      Homo sapiens</span></span>
+<span><span class="co">#&gt; 2    mouse_pas      Mus musculus</span></span>
+<span><span class="co">#&gt; 3          yvo      Homo sapiens</span></span>
+<span><span class="co">#&gt; 4 bfr_proteoda      Homo sapiens</span></span>
+<span><span class="co">#&gt; 5          cvh      Homo sapiens</span></span>
+<span><span class="co">#&gt; 6        hrvlr      Homo sapiens</span></span>
+<span><span class="co">#&gt; 7         mito Rattus norvegicus</span></span></code></pre></div>
+<p><code>yvo</code>, <code>bfr_limpa</code> and <code>mouse_pas</code>
+include every sheet; the others ship DA results only.</p>
+</div>
+<div class="section level2">
+<h2 id="run-the-enrichment">Run the enrichment<a class="anchor" aria-label="anchor" href="#run-the-enrichment"></a>
+</h2>
+<p><code><a href="../reference/run_enrichment.html">run_enrichment()</a></code> tests each contrast against gene-set
+collections from <code><a href="../reference/load_gene_sets.html">load_gene_sets()</a></code>, which records the
+msigdbr version and GO slim release it used. The quick start ran all
+three tests on <code>yvo</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "fgsea"  "camera" "fry"</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">camera</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;enrichment&gt;</span> cameraPR, score: signed -log10(FDR)</span></span>
+<span><span class="co">#&gt; 4 contrasts: Training_Young, Training_Old, Aging, and Interaction</span></span>
+<span><span class="co">#&gt; 252 rows: GO Slim (108) and Hallmark (144)</span></span>
+<span><span class="co">#&gt; Dedup: not deduplicated</span></span></code></pre></div>
+<p>The three tests answer different questions. fgsea and camera are
+competitive: did a set move more than the other genes? fry is
+self-contained: did it move at all? fgsea ranks proteins by the DA
+results; camera and fry refit limma on the matrix, which must have no
+missing values, using the <code>samples</code> and
+<code>contrasts</code> sheets. When a gene has several proteins, the
+most abundant one represents it.</p>
+<p>A <code>subject</code> column marks repeated measures. By default the
+samples of one subject are treated as correlated
+(<code>subject_effect = "block"</code>); fry handles that directly, and
+camera, which cannot, is replaced by <code>cameraPR()</code> on the
+blocked fit, which is why <code>res$camera</code> above reports
+<code>cameraPR</code>. <code>subject_effect = "fixed"</code> puts
+subject in the design instead. camera assumes a correlation between
+genes in a set; limma’s default is 0.01, and
+<code>inter_gene_cor = NA</code> estimates it from the data (unblocked
+designs only), which can change results substantially.</p>
+<p>Each result is an <code>enrichment</code> object, so every figure
+reads any of them:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fry</span>, contrast <span class="op">=</span> <span class="st">"Aging"</span>, title <span class="op">=</span> <span class="st">"Aging, fry"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="enrichVolcano_files/figure-html/run-ring-1.png" class="r-plt" alt="Volcano of the Aging contrast ringed by gene sets tested with fry" width="432"></p>
 </div>
 <div class="section level2">
 <h2 id="choose-gene-set-collections">Choose gene-set collections<a class="anchor" aria-label="anchor" href="#choose-gene-set-collections"></a>
@@ -140,36 +259,59 @@ GO Consortium’s generic slim keeps a small set of broad GO terms. Both
 are built to avoid overlapping terms, so every arc says something
 different. Larger collections such as <a href="GO:BP" class="uri">GO:BP</a> or Reactome find more specific terms but need
 <code><a href="../reference/dedup.html">dedup()</a></code>.</p>
-<p>Hallmark comes from msigdbr (CRAN). The GO slim is a list of GO IDs;
-mapping it to genes needs AnnotationDbi and org.Hs.eg.db (Bioconductor),
-counting genes annotated to each term or any of its descendants:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">h</span> <span class="op">&lt;-</span> <span class="fu">msigdbr</span><span class="fu">::</span><span class="fu">msigdbr</span><span class="op">(</span>species <span class="op">=</span> <span class="st">"Homo sapiens"</span>, collection <span class="op">=</span> <span class="st">"H"</span><span class="op">)</span></span>
-<span><span class="va">hallmark</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">h</span><span class="op">$</span><span class="va">gene_symbol</span>, <span class="va">h</span><span class="op">$</span><span class="va">gs_name</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">obo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="st">"https://current.geneontology.org/ontology/subsets/goslim_generic.obo"</span><span class="op">)</span></span>
-<span><span class="va">slim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"^id: "</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"^id: GO:"</span>, <span class="va">obo</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">entrez</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu">mget</span><span class="op">(</span><span class="va">slim</span>, <span class="fu">org.Hs.eg.db</span><span class="fu">::</span><span class="va">org.Hs.egGO2ALLEGS</span>, ifnotfound <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
-<span><span class="va">entrez</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/funprog.html" class="external-link">Filter</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">ids</span><span class="op">)</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">ids</span><span class="op">)</span><span class="op">)</span>, <span class="va">entrez</span><span class="op">)</span></span>
-<span><span class="va">go_slim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">entrez</span>, <span class="kw">function</span><span class="op">(</span><span class="va">ids</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu">mapIds</span><span class="op">(</span><span class="fu">org.Hs.eg.db</span><span class="fu">::</span><span class="va">org.Hs.eg.db</span>, <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">ids</span><span class="op">)</span>, <span class="st">"SYMBOL"</span>, <span class="st">"ENTREZID"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<p>The slim spans all three GO namespaces and its terms are broad (a
-median of about 570 human genes), so fgsea’s <code>maxSize</code> drops
-some of them; the example data used sets of 15 to 500 genes. Test each
-collection as its own family, so padj is corrected within it, and record
-<code>packageVersion("msigdbr")</code> and the OBO file’s
-<code>data-version</code> line with your methods.</p>
+<p><code><a href="../reference/load_gene_sets.html">load_gene_sets()</a></code> fetches them for human, mouse or rat.
+Hallmark, Reactome, KEGG MEDICUS and <a href="GO:BP" class="uri">GO:BP</a> come from msigdbr (mouse and rat through
+orthologs). The GO slim is the biological-process part of the GO
+Consortium’s generic slim, pinned in the package, with genes taken from
+the species’ annotation package (org.Hs.eg.db, org.Mm.eg.db or
+org.Rn.eg.db), counting genes annotated to each term or any of its
+descendants:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lengths.html" class="external-link">lengths</a></span><span class="op">(</span><span class="va">sets</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Hallmark  GO Slim </span></span>
+<span><span class="co">#&gt;       50       35</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">sets</span>, <span class="st">"versions"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $species</span></span>
+<span><span class="co">#&gt; [1] "Homo sapiens"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $annotation</span></span>
+<span><span class="co">#&gt; [1] "org.Hs.eg.db 3.23.1"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $msigdbr</span></span>
+<span><span class="co">#&gt; [1] "26.1.1"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $go_slim</span></span>
+<span><span class="co">#&gt; [1] "go/releases/2026-07-26/subsets/goslim_generic.owl"</span></span></code></pre></div>
+<p>Slim terms are broad, so the 15 to 500 gene window drops some of
+them. Each collection is tested as its own family, so padj is corrected
+within it. <code>attr(sets, "versions")</code> records what to cite in
+your methods.</p>
 </div>
 <div class="section level2">
-<h2 id="convert-your-results">Convert your results<a class="anchor" aria-label="anchor" href="#convert-your-results"></a>
+<h2 id="convert-enrichment-you-already-have">Convert enrichment you already have<a class="anchor" aria-label="anchor" href="#convert-enrichment-you-already-have"></a>
 </h2>
-<p>Every tool below ends in the same object. Pass one table per contrast
-as a named list, or one table with a <code>contrast</code> column.</p>
+<p><code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> reads enrichment results you computed
+elsewhere. The package ships YvO’s published fgsea results, from the
+original proteoDA analysis, in the form fgsea wrote them:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"examples"</span>, <span class="st">"yvo_fgsea.csv.gz"</span>, package <span class="op">=</span> <span class="st">"enrichVolcano"</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Reading <span style="color: #0000BB;">"fgsea"</span> results.</span></span>
+<span><span class="va">ex</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;enrichment&gt;</span> fgsea, score: NES</span></span>
+<span><span class="co">#&gt; 4 contrasts: Aging, Training_Young, Training_Old, and Interaction</span></span>
+<span><span class="co">#&gt; 5570 rows: GO Slim (108), GO:BP (3946), Hallmark (144), KEGG (84), and Reactome</span></span>
+<span><span class="co">#&gt; (1288)</span></span>
+<span><span class="co">#&gt; Dedup: precomputed</span></span></code></pre></div>
+<p>It recognised fgsea output from its columns and split the table by
+its <code>contrast</code> column. Every tool below ends in the same
+object. Pass one table per contrast as a named list, or one table with a
+<code>contrast</code> column.</p>
 <div class="section level3">
 <h3 id="fgsea">fgsea<a class="anchor" aria-label="anchor" href="#fgsea"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">fgsea</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/fgsea/man/fgsea.html" class="external-link">fgsea</a></span><span class="op">(</span><span class="va">pathways</span>, stats <span class="op">=</span> <span class="va">ranks</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aging <span class="op">=</span> <span class="va">res</span><span class="op">)</span>, database <span class="op">=</span> <span class="st">"Hallmark"</span><span class="op">)</span></span></code></pre></div>
 <p>The score is the normalised enrichment score (NES): how far the gene
@@ -180,8 +322,8 @@ table has no <code>database</code> column.</p>
 <div class="section level3">
 <h3 id="clusterprofiler">clusterProfiler<a class="anchor" aria-label="anchor" href="#clusterprofiler"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">clusterProfiler</span><span class="fu">::</span><span class="fu">gseGO</span><span class="op">(</span><span class="va">gene_list</span>, ont <span class="op">=</span> <span class="st">"BP"</span>, OrgDb <span class="op">=</span> <span class="fu">org.Hs.eg.db</span><span class="fu">::</span><span class="va">org.Hs.eg.db</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">clusterProfiler</span><span class="fu">::</span><span class="fu">gseGO</span><span class="op">(</span><span class="va">gene_list</span>, ont <span class="op">=</span> <span class="st">"BP"</span>, OrgDb <span class="op">=</span> <span class="fu">org.Hs.eg.db</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/org.Hs.eg.db/man/org.Hs.egBASE.html" class="external-link">org.Hs.eg.db</a></span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aging <span class="op">=</span> <span class="va">res</span><span class="op">)</span>, database <span class="op">=</span> <span class="st">"GO:BP"</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>gseaResult</code> object is read directly. The score is NES
 and the leading edge comes from <code>core_enrichment</code>.</p>
@@ -189,8 +331,8 @@ and the leading edge comes from <code>core_enrichment</code>.</p>
 <div class="section level3">
 <h3 id="limma-fry-and-mroast">limma: fry and mroast<a class="anchor" aria-label="anchor" href="#limma-fry-and-mroast"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">limma</span><span class="fu">::</span><span class="fu">fry</span><span class="op">(</span><span class="va">y</span>, index <span class="op">=</span> <span class="va">gene_sets</span>, design <span class="op">=</span> <span class="va">design</span>, contrast <span class="op">=</span> <span class="va">contrast</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">limma</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/roast.html" class="external-link">fry</a></span><span class="op">(</span><span class="va">y</span>, index <span class="op">=</span> <span class="va">gene_sets</span>, design <span class="op">=</span> <span class="va">design</span>, contrast <span class="op">=</span> <span class="va">contrast</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aging <span class="op">=</span> <span class="va">res</span><span class="op">)</span>, database <span class="op">=</span> <span class="st">"Hallmark"</span><span class="op">)</span></span></code></pre></div>
 <p>fry and mroast are <strong>self-contained</strong> tests: they ask
 whether the genes in a set changed at all, without reference to genes
@@ -200,7 +342,7 @@ The score is therefore
 signed by the reported direction, and the figure’s legend says so. The
 table below has fry’s shape; the numbers are invented to show the
 conversion.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fry_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  NGenes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">200</span>, <span class="fl">150</span>, <span class="fl">180</span>, <span class="fl">160</span><span class="op">)</span>,</span>
 <span>  Direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Up"</span>, <span class="st">"Up"</span>, <span class="st">"Down"</span>, <span class="st">"Down"</span><span class="op">)</span>,</span>
@@ -215,8 +357,8 @@ conversion.</p>
 <span><span class="op">)</span></span>
 <span><span class="va">fry_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Training_Young <span class="op">=</span> <span class="va">fry_res</span><span class="op">)</span>, database <span class="op">=</span> <span class="st">"Hallmark"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Reading <span style="color: #0000BB;">"fry"</span> results.</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">young</span>, <span class="va">fry_x</span>, title <span class="op">=</span> <span class="st">"fry"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">fry_x</span>, contrast <span class="op">=</span> <span class="st">"Training_Young"</span>, title <span class="op">=</span> <span class="st">"fry"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="enrichVolcano_files/figure-html/fry-ring-1.png" class="r-plt" alt="Volcano ring drawn from fry results, with arcs coloured by signed -log10 FDR and no tick lines" width="432"></p>
 <p>With no NES to encode, arc fill carries the signed
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>10</mn></msub></mrow><annotation encoding="application/x-tex">-\log_{10}</annotation></semantics></math>(FDR)
@@ -226,8 +368,8 @@ facts.</p>
 <div class="section level3">
 <h3 id="limma-camera-and-camerapr">limma: camera and cameraPR<a class="anchor" aria-label="anchor" href="#limma-camera-and-camerapr"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">limma</span><span class="fu">::</span><span class="fu">camera</span><span class="op">(</span><span class="va">y</span>, index <span class="op">=</span> <span class="va">gene_sets</span>, design <span class="op">=</span> <span class="va">design</span>, contrast <span class="op">=</span> <span class="va">contrast</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">limma</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/camera.html" class="external-link">camera</a></span><span class="op">(</span><span class="va">y</span>, index <span class="op">=</span> <span class="va">gene_sets</span>, design <span class="op">=</span> <span class="va">design</span>, contrast <span class="op">=</span> <span class="va">contrast</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aging <span class="op">=</span> <span class="va">res</span><span class="op">)</span>, enrichment_test <span class="op">=</span> <span class="st">"camera"</span>, database <span class="op">=</span> <span class="st">"Hallmark"</span><span class="op">)</span></span></code></pre></div>
 <p>camera and cameraPR are <strong>competitive</strong> tests, like
 fgsea: they ask whether a set changed more than the genes outside it.
@@ -240,7 +382,7 @@ and is recognised automatically.</p>
 <div class="section level3">
 <h3 id="over-representation-analysis">Over-representation analysis<a class="anchor" aria-label="anchor" href="#over-representation-analysis"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">up</span> <span class="op">&lt;-</span> <span class="fu">enrichR</span><span class="fu">::</span><span class="fu">enrichr</span><span class="op">(</span><span class="va">up_genes</span>, <span class="st">"GO_Biological_Process_2023"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">down</span> <span class="op">&lt;-</span> <span class="fu">enrichR</span><span class="fu">::</span><span class="fu">enrichr</span><span class="op">(</span><span class="va">down_genes</span>, <span class="st">"GO_Biological_Process_2023"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">up</span><span class="op">$</span><span class="va">direction</span> <span class="op">&lt;-</span> <span class="st">"up"</span></span>
@@ -259,7 +401,7 @@ down-regulated genes separately and stack the two with a
 <div class="section level3">
 <h3 id="anything-else">Anything else<a class="anchor" aria-label="anchor" href="#anything-else"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aging <span class="op">=</span> <span class="va">my_table</span><span class="op">)</span>,</span>
 <span>  enrichment_test <span class="op">=</span> <span class="st">"custom"</span>,</span>
@@ -278,7 +420,7 @@ but one per cluster as <code>"redundant"</code>, and plots hide
 redundant terms by default (<code>collapse = TRUE</code>). No row is
 removed and no p-value changes: the multiple-testing correction already
 covered every term, so redundancy is a display decision.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gene_sets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">msig</span><span class="op">$</span><span class="va">gene_symbol</span>, <span class="va">msig</span><span class="op">$</span><span class="va">gs_name</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup.html">dedup</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">gene_sets</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup.html">dedup</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">gene_sets</span>, similarity <span class="op">=</span> <span class="st">"jaccard"</span><span class="op">)</span></span>
@@ -303,10 +445,10 @@ term are conditioned on. That is a new statistical test, so it needs the
 ranking each contrast was tested on, works only for ranked GSEA results,
 and should be reported as its own analysis. Call <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>
 first; it permutes.</p>
-<p>The example object carries flags computed upstream with the Jaccard
-rule. <code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> keeps them and records the object as
-<code>precomputed</code>:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<p>The published fgsea results carry flags computed upstream with the
+Jaccard rule. <code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> keeps them and records the
+object as <code>precomputed</code>:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">ex</span><span class="op">@</span><span class="va">results</span><span class="op">$</span><span class="va">dedup_status</span>, <span class="va">ex</span><span class="op">@</span><span class="va">results</span><span class="op">$</span><span class="va">database</span>, useNA <span class="op">=</span> <span class="st">"ifany"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            </span></span>
 <span><span class="co">#&gt;             GO Slim GO:BP Hallmark KEGG Reactome</span></span>
@@ -314,21 +456,29 @@ rule. <code><a href="../reference/as_enrichment.html">as_enrichment()</a></code>
 <span><span class="co">#&gt;   redundant       0    79        0   35      261</span></span>
 <span><span class="co">#&gt;   &lt;NA&gt;           74  3694      122   29      735</span></span></code></pre></div>
 <p>Hallmark and GO slim lose nothing because both are built to be
-non-redundant. The flags matter once you draw from <a href="GO:BP" class="uri">GO:BP</a> or Reactome:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">young</span>, <span class="va">ex</span>, contrast <span class="op">=</span> <span class="st">"Training_Young"</span>, databases <span class="op">=</span> <span class="st">"Reactome"</span>, title <span class="op">=</span> <span class="st">"Reactome"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="enrichVolcano_files/figure-html/reactome-1.png" class="r-plt" alt="Volcano ring drawn from Reactome terms with redundant terms hidden" width="432"></p>
+non-redundant. Deduplication matters for large collections such as
+Reactome:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">reactome</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_gene_sets.html">load_gene_sets</a></span><span class="op">(</span><span class="st">"Reactome"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">aging</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_enrichment.html">run_enrichment</a></span><span class="op">(</span><span class="va">yvo</span>, <span class="va">reactome</span>, tests <span class="op">=</span> <span class="st">"fgsea"</span><span class="op">)</span><span class="op">$</span><span class="va">fgsea</span></span>
+<span><span class="co">#&gt; Up to 10 of 2103 ranked genes tie; fgsea orders tied genes arbitrarily.</span></span>
+<span><span class="va">aging</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dedup.html">dedup</a></span><span class="op">(</span><span class="va">aging</span>, <span class="va">reactome</span><span class="op">$</span><span class="va">Reactome</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">aging</span>, contrast <span class="op">=</span> <span class="st">"Aging"</span>, title <span class="op">=</span> <span class="st">"Aging, Reactome"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="enrichVolcano_files/figure-html/reactome-1.png" class="r-plt" alt="Volcano of the Aging contrast ringed by Reactome terms with redundant terms hidden" width="432"></p>
 </div>
 <div class="section level2">
 <h2 id="compare-two-contrasts">Compare two contrasts<a class="anchor" aria-label="anchor" href="#compare-two-contrasts"></a>
 </h2>
 <p><code><a href="../reference/nes_scatter.html">nes_scatter()</a></code> plots every term’s score in one contrast
 against its score in another. It answers two kinds of question, set by
-<code>comparison</code>.</p>
+<code>comparison</code>. The examples below draw from the published
+fgsea results, <code>ex</code>; <code>res$fgsea</code> works the same
+way.</p>
 <p>The default, <code>comparison = "concordance"</code>, asks whether
 two conditions regulate the same pathways. Terms in the shaded top-right
 and bottom-left quadrants move the same way in both.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/nes_scatter.html">nes_scatter</a></span><span class="op">(</span><span class="va">ex</span>, <span class="st">"Training_Young"</span>, <span class="st">"Training_Old"</span>, databases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="enrichVolcano_files/figure-html/concordance-1.png" class="r-plt" alt="Scatter of NES in trained young against trained old, with most significant terms in the concordant quadrants" width="468"></p>
 <p><code>comparison = "reversal"</code> asks whether one condition
@@ -336,7 +486,7 @@ undoes another. The unshaded quadrants hold the answer: a pathway raised
 by aging and lowered by training, or the reverse. The reference line
 becomes
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mi>−</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">y = -x</annotation></semantics></math>.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/nes_scatter.html">nes_scatter</a></span><span class="op">(</span><span class="va">ex</span>, <span class="st">"Aging"</span>, <span class="st">"Training_Old"</span>,</span>
 <span>  comparison <span class="op">=</span> <span class="st">"reversal"</span>, databases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -361,9 +511,9 @@ column, for example <code>color_by = "database"</code>, and
 </h2>
 <p><code><a href="../reference/volcano_ring_theme.html">volcano_ring_theme()</a></code> holds the palette; the plot
 arguments hold the layout.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">young</span>, <span class="va">ex</span>,</span>
-<span>  contrast <span class="op">=</span> <span class="st">"Training_Young"</span>, databases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span>,</span>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>,</span>
+<span>  contrast <span class="op">=</span> <span class="st">"Training_Young"</span>,</span>
 <span>  theme <span class="op">=</span> <span class="fu"><a href="../reference/volcano_ring_theme.html">volcano_ring_theme</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"okabe"</span><span class="op">)</span>,</span>
 <span>  label_mode <span class="op">=</span> <span class="st">"top_per_direction"</span>, label_n <span class="op">=</span> <span class="fl">4</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -389,8 +539,8 @@ a tinted central disc.</li>
 </ul>
 <p><code><a href="../reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> draws one ring per contrast and
 collects a shared legend; extra arguments pass to every ring.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/volcano_ring_grid.html">volcano_ring_grid</a></span><span class="op">(</span><span class="va">da</span>, <span class="va">ex</span>, contrasts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Training_Young"</span>, <span class="st">"Training_Old"</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/volcano_ring_grid.html">volcano_ring_grid</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrasts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Training_Young"</span>, <span class="st">"Training_Old"</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">g</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
 <p><img src="enrichVolcano_files/figure-html/grid-1.png" class="r-plt" alt="Two volcano rings side by side for trained young and trained old" width="720"></p>
 </div>

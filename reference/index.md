@@ -2,6 +2,15 @@
 
 ## Build
 
+- [`read_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_study.md)
+  : Read a study from a workbook or a folder of CSV files
+
+- [`example_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/example_study.md)
+  : Example studies shipped with the package
+
+- [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
+  : Standardise differential-abundance results
+
 - [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
   :
 
@@ -9,6 +18,12 @@
 
 - [`enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/enrichment.md)
   : Enrichment results in one validated object
+
+- [`load_gene_sets()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/load_gene_sets.md)
+  : Load gene-set collections for enrichment
+
+- [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
+  : Run gene-set enrichment on a study
 
 - [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
   : Flag redundant terms for display

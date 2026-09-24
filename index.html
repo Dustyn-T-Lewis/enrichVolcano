@@ -16,8 +16,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Volcano-in-Ring and Concordance Plots from Enrichment Results">
-<meta name="description" content="Draws figures from gene-set enrichment results computed elsewhere. Results from fgsea, clusterProfiler, limmas rotation and competitive gene-set tests, over-representation analysis or custom tables are converted into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or fgsea' conditional collapsing, without changing any p-value.">
-<meta property="og:description" content="Draws figures from gene-set enrichment results computed elsewhere. Results from fgsea, clusterProfiler, limmas rotation and competitive gene-set tests, over-representation analysis or custom tables are converted into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or fgsea' conditional collapsing, without changing any p-value.">
+<meta name="description" content="Turns differential abundance results into gene-set enrichment figures. Reads results from common proteomics tools and study files with a sample sheet and contrasts, runs fgsea and limmas camera and fry tests, or converts enrichment results computed elsewhere, into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or fgsea' conditional collapsing, without changing any p-value. Seven example proteomics studies are included.">
+<meta property="og:description" content="Turns differential abundance results into gene-set enrichment figures. Reads results from common proteomics tools and study files with a sample sheet and contrasts, runs fgsea and limmas camera and fry tests, or converts enrichment results computed elsewhere, into one validated object. From it the package draws a differential abundance volcano inside a ring of enrichment terms, and a scatter comparing two contrasts term by term. Redundant terms can be flagged for display with the EnrichmentMap overlap rule or fgsea' conditional collapsing, without changing any p-value. Seven example proteomics studies are included.">
 <meta property="og:image" content="https://Dustyn-T-Lewis.github.io/enrichVolcano/logo.png">
 </head>
 <body>
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,16 +63,18 @@
 <p>Figures from enrichment results you have already computed: fgsea, clusterProfiler, limma’s fry and camera, over-representation, or your own.</p>
 </blockquote>
 <p><img src="reference/figures/README-hero-1.png" alt="A volcano plot ringed by enrichment arcs coloured by normalised enrichment score"></p>
-<p>enrichVolcano draws; it does not run differential abundance or enrichment. Every workflow has three steps:</p>
+<p>enrichVolcano starts from differential-abundance results you already have and ends in enrichment figures:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Dustyn-T-Lewis/enrichVolcano" class="external-link">enrichVolcano</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aging <span class="op">=</span> <span class="va">fgsea_result</span><span class="op">)</span>, database <span class="op">=</span> <span class="st">"Hallmark"</span><span class="op">)</span></span>
-<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/dedup.html">dedup</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">gene_sets</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">da_aging</span>, <span class="va">x</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">study</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_study.html">read_study</a></span><span class="op">(</span><span class="st">"my_study.xlsx"</span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_enrichment.html">run_enrichment</a></span><span class="op">(</span><span class="va">study</span>, <span class="fu"><a href="reference/load_gene_sets.html">load_gene_sets</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/volcano_ring.html">volcano_ring</a></span><span class="op">(</span><span class="va">study</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Aging"</span><span class="op">)</span></span></code></pre></div>
 <ol style="list-style-type: decimal">
 <li>
-<code><a href="reference/as_enrichment.html">as_enrichment()</a></code> converts results from any supported tool into one validated <code>enrichment</code> object and records which test produced them.</li>
+<code><a href="reference/read_study.html">read_study()</a></code> reads your DA results, and optionally the matrix, sample sheet and contrasts, from one workbook; <code><a href="reference/as_da.html">as_da()</a></code> reads a single DA table from limma, limpa, proteoDA, MSstats, proDA, msqrob2, prolfQua or ProtRank.</li>
+<li>
+<code><a href="reference/run_enrichment.html">run_enrichment()</a></code> runs fgsea, camera and fry, or <code><a href="reference/as_enrichment.html">as_enrichment()</a></code> converts enrichment you computed elsewhere. Either way you get a validated <code>enrichment</code> object that records which test produced it.</li>
 <li>
 <code><a href="reference/dedup.html">dedup()</a></code> (optional) flags redundant terms so a figure shows each signal once. p-values are never changed.</li>
 <li>A plot function draws from the object: <code><a href="reference/volcano_ring.html">volcano_ring()</a></code> for one contrast, <code><a href="reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> for several, <code><a href="reference/nes_scatter.html">nes_scatter()</a></code> to compare two contrasts term by term (concordance or reversal).</li>
@@ -154,8 +156,10 @@
 <div class="section level2">
 <h2 id="cite-the-methods-you-used">Cite the methods you used<a class="anchor" aria-label="anchor" href="#cite-the-methods-you-used"></a>
 </h2>
-<p>enrichVolcano only draws; the credit belongs to the analysis:</p>
+<p>Cite the methods behind your results, whether enrichVolcano ran them or you did:</p>
 <ul>
+<li>limma: Ritchie ME et al. 2015, <em>Nucleic Acids Res</em> 43(7), <a href="doi:10.1093/nar/gkv007" class="uri">doi:10.1093/nar/gkv007</a>
+</li>
 <li>fgsea: Korotkevich G et al., bioRxiv, <a href="doi:10.1101/060012" class="uri">doi:10.1101/060012</a>
 </li>
 <li>clusterProfiler: Wu T et al. 2021, <em>The Innovation</em> 2:100141</li>
@@ -164,18 +168,20 @@
 <li>fry and mroast (ROAST): Wu D et al. 2010, <em>Bioinformatics</em> 26(17), <a href="doi:10.1093/bioinformatics/btq401" class="uri">doi:10.1093/bioinformatics/btq401</a>
 </li>
 <li>EnrichmentMap (<code><a href="reference/dedup.html">dedup()</a></code>): Merico D et al. 2010, <em>PLoS ONE</em> 5(11):e13984</li>
+<li>Hallmark gene sets: Liberzon A et al. 2015, <em>Cell Systems</em> 1(6), <a href="doi:10.1016/j.cels.2015.12.004" class="uri">doi:10.1016/j.cels.2015.12.004</a>
+</li>
 <li>Enrichment protocol: Reimand J et al. 2019, <em>Nat Protoc</em> 14:482-517</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="versioning">Versioning<a class="anchor" aria-label="anchor" href="#versioning"></a>
 </h2>
-<p>1.0.0 replaced the column-name arguments with the <code>enrichment</code> object; see <code>NEWS.md</code>. Earlier releases stay installable from their tags.</p>
+<p>1.0.0 replaced the column-name arguments with the <code>enrichment</code> object, and 1.1.0 added the study readers and <code><a href="reference/run_enrichment.html">run_enrichment()</a></code>; see <code>NEWS.md</code>. Earlier releases stay installable from their tags.</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>MIT. See <code>LICENSE</code>.</p>
+<p>MIT for the code; see <code>LICENSE</code>. The example data are CC BY 4.0; see <code>inst/extdata/studies/LICENSE.md</code>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

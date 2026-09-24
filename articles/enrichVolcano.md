@@ -1,17 +1,25 @@
 # enrichVolcano
 
-enrichVolcano draws figures from enrichment results you have already
-computed. Every workflow has the same three steps:
+enrichVolcano turns differential-abundance results into enrichment
+figures. Every workflow has the same steps:
 
-1.  [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
-    converts results from any supported tool into one validated
-    `enrichment` object.
-2.  [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
+1.  Read your results:
+    [`read_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_study.md)
+    for a set of study files, or
+    [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
+    for one DA table from limma, limpa, proteoDA, MSstats, proDA,
+    msqrob2, prolfQua or ProtRank.
+2.  Get enrichment:
+    [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
+    runs fgsea, camera and fry, or
+    [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
+    converts results you already have. Both give one validated
+    `enrichment` object per test.
+3.  [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md)
     (optional) flags redundant terms so figures show each signal once.
-3.  A plot function draws from the object:
+4.  Plot:
     [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
-    puts a differential-abundance volcano inside a ring of enrichment
-    terms, and
+    puts the volcano inside a ring of enrichment terms, and
     [`nes_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/nes_scatter.md)
     compares two contrasts term by term.
 
@@ -25,46 +33,42 @@ remotes::install_github("Dustyn-T-Lewis/enrichVolcano")
 
 ## Quick start
 
-The package ships one example study: fgsea results for four contrasts
-across five gene-set collections, and the matching limma
-differential-abundance table. The collections are MSigDB Hallmark, KEGG
-MEDICUS, Reactome and <GO:BP> from msigdbr 26.1.0, and the GO
-Consortium’s generic GO slim (release 2026-07-26).
+The `yvo` example study is human muscle from 32 people, young and old,
+before and after resistance training: 2,106 proteins in 62 samples,
+quantified with limpa, with four contrasts. It ships every sheet a study
+can have, so the whole workflow runs on it:
 
 ``` r
 
 library(enrichVolcano)
 
-fgsea_path <- system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano")
-da_path <- system.file("extdata", "examples", "yvo_da.csv.gz", package = "enrichVolcano")
-
-ex <- as_enrichment(read.csv(fgsea_path))
-#> Reading "fgsea" results.
-ex
+yvo <- example_study("yvo")
+#> 
+#> 2103 of 2106 accessions mapped to Homo sapiens symbols.
+#> 2106 of 2106 matrix proteins have DA results.
+sets <- load_gene_sets(c("Hallmark", "GO Slim"))
+set.seed(1)
+res <- run_enrichment(yvo, sets)
+#> Up to 10 of 2103 ranked genes tie; fgsea orders tied genes arbitrarily.
+res$fgsea
 #> <enrichment> fgsea, score: NES
-#> 4 contrasts: Aging, Training_Young, Training_Old, and Interaction
-#> 5570 rows: GO Slim (108), GO:BP (3946), Hallmark (144), KEGG (84), and Reactome
-#> (1288)
-#> Dedup: precomputed
+#> 4 contrasts: Training_Young, Training_Old, Aging, and Interaction
+#> 252 rows: GO Slim (108) and Hallmark (144)
+#> Dedup: not deduplicated
 ```
 
-[`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
-recognised fgsea output from its columns and split the table by its
-`contrast` column. The DA table needs one contrast and a `padj` column:
+[`example_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/example_study.md)
+read the study through
+[`read_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_study.md),
+which checked that its sheets agree and looked up current gene symbols
+for the UniProt accessions.
+[`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
+returned one result per test; here is the fgsea one drawn around the
+volcano:
 
 ``` r
 
-da <- read.csv(da_path)
-names(da)[names(da) == "adj.P.Val"] <- "padj"
-young <- da[da$contrast == "Training_Young", ]
-```
-
-``` r
-
-volcano_ring(young, ex,
-  contrast = "Training_Young", databases = c("Hallmark", "GO Slim"),
-  title = "Training, young"
-)
+volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young", title = "Training, young")
 ```
 
 ![Volcano of Training_Young proteins inside a ring of enriched Hallmark
@@ -74,10 +78,101 @@ Arc fill is NES and arc height is $`-\log_{10}`$(padj). Up-regulated
 terms sit on the upper half, down-regulated ones on the lower. Ticks run
 from each arc to its leading-edge proteins in the volcano. The ring
 takes the twelve most significant terms (padj \< 0.05), in either
-direction. `databases` limits them to named collections, here Hallmark
-and GO slim; left at its default, `NULL`, every collection in the object
-competes. `term_threshold`, `n_terms` and `terms` change the selection
-further.
+direction, from every collection in the object; `databases`,
+`term_threshold`, `n_terms` and `terms` change the selection.
+
+## Your data
+
+A study is up to five tables, in one Excel workbook (one sheet each) or
+a folder of CSV files:
+
+| Sheet | Columns | Needed for |
+|----|----|----|
+| `da_results` | `protein`, `contrast`, `logFC`, `t` or `p`, `padj`, optional `abundance` | everything |
+| `matrix` | protein IDs, then one column per sample | camera, fry |
+| `samples` | `sample`, `group`, optional `subject`, optional covariates | camera, fry |
+| `contrasts` | `name`, `expression`, e.g. `Post - Pre` | camera, fry |
+| `weights` | shaped like `matrix` | optional precision weights |
+
+[`read_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_study.md)
+reads either form and checks that the sheets agree by name: matrix
+columns against `samples$sample`, every group in a contrast against
+`samples$group`, and the contrasts in `da_results` against the
+`contrasts` sheet. Group names must be plain names (letters, digits, `.`
+and `_`), because `-` inside one would read as subtraction. An
+interaction is a difference of differences:
+`(BFR_T2 - BFR_T1) - (HLRT_T2 - HLRT_T1)`.
+
+The `da_results` sheet can use each tool’s own column names;
+[`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
+recognises limma and limpa `topTable()`, proteoDA, MSstats, proDA,
+msqrob2, prolfQua and ProtRank output, and takes column arguments for
+anything else. Proteins are ranked by the moderated t where the table
+has one, otherwise by the signed $`-\log_{10}`$ p-value.
+
+The package ships seven studies in this format:
+
+``` r
+
+example_study()[c("name", "species")]
+#>           name           species
+#> 1    bfr_limpa      Homo sapiens
+#> 2    mouse_pas      Mus musculus
+#> 3          yvo      Homo sapiens
+#> 4 bfr_proteoda      Homo sapiens
+#> 5          cvh      Homo sapiens
+#> 6        hrvlr      Homo sapiens
+#> 7         mito Rattus norvegicus
+```
+
+`yvo`, `bfr_limpa` and `mouse_pas` include every sheet; the others ship
+DA results only.
+
+## Run the enrichment
+
+[`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
+tests each contrast against gene-set collections from
+[`load_gene_sets()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/load_gene_sets.md),
+which records the msigdbr version and GO slim release it used. The quick
+start ran all three tests on `yvo`:
+
+``` r
+
+names(res)
+#> [1] "fgsea"  "camera" "fry"
+res$camera
+#> <enrichment> cameraPR, score: signed -log10(FDR)
+#> 4 contrasts: Training_Young, Training_Old, Aging, and Interaction
+#> 252 rows: GO Slim (108) and Hallmark (144)
+#> Dedup: not deduplicated
+```
+
+The three tests answer different questions. fgsea and camera are
+competitive: did a set move more than the other genes? fry is
+self-contained: did it move at all? fgsea ranks proteins by the DA
+results; camera and fry refit limma on the matrix, which must have no
+missing values, using the `samples` and `contrasts` sheets. When a gene
+has several proteins, the most abundant one represents it.
+
+A `subject` column marks repeated measures. By default the samples of
+one subject are treated as correlated (`subject_effect = "block"`); fry
+handles that directly, and camera, which cannot, is replaced by
+`cameraPR()` on the blocked fit, which is why `res$camera` above reports
+`cameraPR`. `subject_effect = "fixed"` puts subject in the design
+instead. camera assumes a correlation between genes in a set; limma’s
+default is 0.01, and `inter_gene_cor = NA` estimates it from the data
+(unblocked designs only), which can change results substantially.
+
+Each result is an `enrichment` object, so every figure reads any of
+them:
+
+``` r
+
+volcano_ring(yvo$da, res$fry, contrast = "Aging", title = "Aging, fry")
+```
+
+![Volcano of the Aging contrast ringed by gene sets tested with
+fry](enrichVolcano_files/figure-html/run-ring-1.png)
 
 ## Choose gene-set collections
 
@@ -89,35 +184,62 @@ different. Larger collections such as <GO:BP> or Reactome find more
 specific terms but need
 [`dedup()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/dedup.md).
 
-Hallmark comes from msigdbr (CRAN). The GO slim is a list of GO IDs;
-mapping it to genes needs AnnotationDbi and org.Hs.eg.db (Bioconductor),
-counting genes annotated to each term or any of its descendants:
+[`load_gene_sets()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/load_gene_sets.md)
+fetches them for human, mouse or rat. Hallmark, Reactome, KEGG MEDICUS
+and <GO:BP> come from msigdbr (mouse and rat through orthologs). The GO
+slim is the biological-process part of the GO Consortium’s generic slim,
+pinned in the package, with genes taken from the species’ annotation
+package (org.Hs.eg.db, org.Mm.eg.db or org.Rn.eg.db), counting genes
+annotated to each term or any of its descendants:
 
 ``` r
 
-h <- msigdbr::msigdbr(species = "Homo sapiens", collection = "H")
-hallmark <- split(h$gene_symbol, h$gs_name)
-
-obo <- readLines("https://current.geneontology.org/ontology/subsets/goslim_generic.obo")
-slim <- sub("^id: ", "", grep("^id: GO:", obo, value = TRUE))
-entrez <- AnnotationDbi::mget(slim, org.Hs.eg.db::org.Hs.egGO2ALLEGS, ifnotfound = NA)
-entrez <- Filter(function(ids) !all(is.na(ids)), entrez)
-go_slim <- lapply(entrez, function(ids) {
-  unique(AnnotationDbi::mapIds(org.Hs.eg.db::org.Hs.eg.db, unique(ids), "SYMBOL", "ENTREZID"))
-})
+lengths(sets)
+#> Hallmark  GO Slim 
+#>       50       35
+attr(sets, "versions")
+#> $species
+#> [1] "Homo sapiens"
+#> 
+#> $annotation
+#> [1] "org.Hs.eg.db 3.23.1"
+#> 
+#> $msigdbr
+#> [1] "26.1.1"
+#> 
+#> $go_slim
+#> [1] "go/releases/2026-07-26/subsets/goslim_generic.owl"
 ```
 
-The slim spans all three GO namespaces and its terms are broad (a median
-of about 570 human genes), so fgsea’s `maxSize` drops some of them; the
-example data used sets of 15 to 500 genes. Test each collection as its
-own family, so padj is corrected within it, and record
-`packageVersion("msigdbr")` and the OBO file’s `data-version` line with
-your methods.
+Slim terms are broad, so the 15 to 500 gene window drops some of them.
+Each collection is tested as its own family, so padj is corrected within
+it. `attr(sets, "versions")` records what to cite in your methods.
 
-## Convert your results
+## Convert enrichment you already have
 
-Every tool below ends in the same object. Pass one table per contrast as
-a named list, or one table with a `contrast` column.
+[`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
+reads enrichment results you computed elsewhere. The package ships YvO’s
+published fgsea results, from the original proteoDA analysis, in the
+form fgsea wrote them:
+
+``` r
+
+ex <- as_enrichment(read.csv(
+  system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano")
+))
+#> Reading "fgsea" results.
+ex
+#> <enrichment> fgsea, score: NES
+#> 4 contrasts: Aging, Training_Young, Training_Old, and Interaction
+#> 5570 rows: GO Slim (108), GO:BP (3946), Hallmark (144), KEGG (84), and Reactome
+#> (1288)
+#> Dedup: precomputed
+```
+
+It recognised fgsea output from its columns and split the table by its
+`contrast` column. Every tool below ends in the same object. Pass one
+table per contrast as a named list, or one table with a `contrast`
+column.
 
 ### fgsea
 
@@ -178,7 +300,7 @@ fry_x <- as_enrichment(list(Training_Young = fry_res), database = "Hallmark")
 
 ``` r
 
-volcano_ring(young, fry_x, title = "fry")
+volcano_ring(yvo$da, fry_x, contrast = "Training_Young", title = "fry")
 ```
 
 ![Volcano ring drawn from fry results, with arcs coloured by signed
@@ -276,8 +398,8 @@ it needs the ranking each contrast was tested on, works only for ranked
 GSEA results, and should be reported as its own analysis. Call
 [`set.seed()`](https://rdrr.io/r/base/Random.html) first; it permutes.
 
-The example object carries flags computed upstream with the Jaccard
-rule.
+The published fgsea results carry flags computed upstream with the
+Jaccard rule.
 [`as_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_enrichment.md)
 keeps them and records the object as `precomputed`:
 
@@ -292,21 +414,29 @@ table(ex@results$dedup_status, ex@results$database, useNA = "ifany")
 ```
 
 Hallmark and GO slim lose nothing because both are built to be
-non-redundant. The flags matter once you draw from <GO:BP> or Reactome:
+non-redundant. Deduplication matters for large collections such as
+Reactome:
 
 ``` r
 
-volcano_ring(young, ex, contrast = "Training_Young", databases = "Reactome", title = "Reactome")
+reactome <- load_gene_sets("Reactome")
+set.seed(1)
+aging <- run_enrichment(yvo, reactome, tests = "fgsea")$fgsea
+#> Up to 10 of 2103 ranked genes tie; fgsea orders tied genes arbitrarily.
+aging <- dedup(aging, reactome$Reactome)
+volcano_ring(yvo$da, aging, contrast = "Aging", title = "Aging, Reactome")
 ```
 
-![Volcano ring drawn from Reactome terms with redundant terms
-hidden](enrichVolcano_files/figure-html/reactome-1.png)
+![Volcano of the Aging contrast ringed by Reactome terms with redundant
+terms hidden](enrichVolcano_files/figure-html/reactome-1.png)
 
 ## Compare two contrasts
 
 [`nes_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/nes_scatter.md)
 plots every term’s score in one contrast against its score in another.
-It answers two kinds of question, set by `comparison`.
+It answers two kinds of question, set by `comparison`. The examples
+below draw from the published fgsea results, `ex`; `res$fgsea` works the
+same way.
 
 The default, `comparison = "concordance"`, asks whether two conditions
 regulate the same pathways. Terms in the shaded top-right and
@@ -356,8 +486,8 @@ holds the palette; the plot arguments hold the layout.
 
 ``` r
 
-volcano_ring(young, ex,
-  contrast = "Training_Young", databases = c("Hallmark", "GO Slim"),
+volcano_ring(yvo$da, res$fgsea,
+  contrast = "Training_Young",
   theme = volcano_ring_theme(palette = "okabe"),
   label_mode = "top_per_direction", label_n = 4
 )
@@ -379,7 +509,7 @@ arguments pass to every ring.
 
 ``` r
 
-g <- volcano_ring_grid(da, ex, contrasts = c("Training_Young", "Training_Old"), ncol = 2)
+g <- volcano_ring_grid(yvo$da, res$fgsea, contrasts = c("Training_Young", "Training_Old"), ncol = 2)
 g$plot
 ```
 

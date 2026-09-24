@@ -1,5 +1,53 @@
 # Changelog
 
+## enrichVolcano 1.1.0
+
+### New features
+
+- [`read_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/read_study.md)
+  reads a study from one Excel workbook or a folder of CSV files:
+  `da_results`, plus optionally `matrix`, `samples`, `contrasts` and
+  `weights`. Every link between sheets is checked by name.
+- [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
+  gives DA results from limma, limpa, proteoDA, MSstats, proDA, msqrob2,
+  prolfQua and ProtRank one set of column names, ranks proteins by the
+  moderated t (else the signed -log10 p-value) and looks up current gene
+  symbols for UniProt accessions in `org.Hs.eg.db`, `org.Mm.eg.db` or
+  `org.Rn.eg.db`.
+- [`load_gene_sets()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/load_gene_sets.md)
+  loads Hallmark, Reactome, KEGG MEDICUS and <GO:BP> from msigdbr, and
+  the GO Consortium generic slim (pinned, release 2026-07-26), for
+  human, mouse or rat, and records the versions used.
+- [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
+  runs fgsea, camera and fry on a study and returns one `enrichment`
+  object per test. camera and fry refit limma from the sample sheet and
+  contrasts, with subjects blocked or fixed, optional covariates and
+  precision weights; a blocked camera runs as `cameraPR()`.
+  `inter_gene_cor` sets camera’s inter-gene correlation or estimates it.
+- [`example_study()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/example_study.md)
+  loads seven example studies; three include the full sample-level data.
+
+### Deprecated
+
+- [`volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring.md)
+  and
+  [`volcano_ring_grid()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/volcano_ring_grid.md)
+  take
+  [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
+  output. Plain tables and the `gene_col`, `logfc_col`, `pval_col` and
+  `padj_col` arguments still work with a warning and will be removed in
+  2.0.0.
+
+### Other changes
+
+- `yvo_da.csv.gz` is replaced by `example_study("yvo")`, a full study
+  (matrix, weights, samples, contrasts and DA results) quantified with
+  limpa.
+- GO slim sets are biological-process terms only and are named like
+  `GOSLIM_PROTEIN_FOLDING`.
+- The example data are licensed CC BY 4.0
+  (`inst/extdata/studies/LICENSE.md`); the code stays MIT.
+
 ## enrichVolcano 1.0.0
 
 ### Breaking changes

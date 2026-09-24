@@ -59,7 +59,10 @@ volcano_ring(
 
 - volc_df:
 
-  Tidy DA table for the contrast being drawn.
+  DA results from
+  [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md);
+  the rows for `contrast` are drawn. A plain table still works through
+  the column arguments but is deprecated and will be refused in 2.0.0.
 
 - enrichment:
 
@@ -98,7 +101,9 @@ volcano_ring(
 
 - gene_col, logfc_col, pval_col, padj_col:
 
-  Column names in `volc_df`.
+  Column names in a plain `volc_df`; ignored for
+  [`as_da()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/as_da.md)
+  output. Deprecated.
 
 - volc_sig_col:
 
@@ -245,17 +250,13 @@ a hand-picked set.
 ## Examples
 
 ``` r
-da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
-  package = "enrichVolcano"
-))
+da <- example_study("yvo")$da
+#> 2103 of 2106 accessions mapped to Homo sapiens symbols.
+#> 2106 of 2106 matrix proteins have DA results.
 ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
   package = "enrichVolcano"
 )))
 #> Reading "fgsea" results.
 
-ctr <- "Training_Young"
-da1 <- da[da$contrast == ctr, ]
-names(da1)[names(da1) == "adj.P.Val"] <- "padj"
-
-volcano_ring(da1, ex, contrast = ctr, title = ctr)
+volcano_ring(da, ex, contrast = "Training_Young", title = "Training_Young")
 ```

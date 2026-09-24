@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,9 +29,37 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v1.0.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.0" id="enrichvolcano-110">enrichVolcano 1.1.0<a class="anchor" aria-label="anchor" href="#enrichvolcano-110"></a></h2>
+<div class="section level3">
+<h3 id="new-features-1-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/read_study.html">read_study()</a></code> reads a study from one Excel workbook or a folder of CSV files: <code>da_results</code>, plus optionally <code>matrix</code>, <code>samples</code>, <code>contrasts</code> and <code>weights</code>. Every link between sheets is checked by name.</li>
+<li>
+<code><a href="../reference/as_da.html">as_da()</a></code> gives DA results from limma, limpa, proteoDA, MSstats, proDA, msqrob2, prolfQua and ProtRank one set of column names, ranks proteins by the moderated t (else the signed -log10 p-value) and looks up current gene symbols for UniProt accessions in <code>org.Hs.eg.db</code>, <code>org.Mm.eg.db</code> or <code>org.Rn.eg.db</code>.</li>
+<li>
+<code><a href="../reference/load_gene_sets.html">load_gene_sets()</a></code> loads Hallmark, Reactome, KEGG MEDICUS and <a href="GO:BP" class="uri">GO:BP</a> from msigdbr, and the GO Consortium generic slim (pinned, release 2026-07-26), for human, mouse or rat, and records the versions used.</li>
+<li>
+<code><a href="../reference/run_enrichment.html">run_enrichment()</a></code> runs fgsea, camera and fry on a study and returns one <code>enrichment</code> object per test. camera and fry refit limma from the sample sheet and contrasts, with subjects blocked or fixed, optional covariates and precision weights; a blocked camera runs as <code>cameraPR()</code>. <code>inter_gene_cor</code> sets camera’s inter-gene correlation or estimates it.</li>
+<li>
+<code><a href="../reference/example_study.html">example_study()</a></code> loads seven example studies; three include the full sample-level data.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="deprecated-1-1-0">Deprecated<a class="anchor" aria-label="anchor" href="#deprecated-1-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/volcano_ring.html">volcano_ring()</a></code> and <code><a href="../reference/volcano_ring_grid.html">volcano_ring_grid()</a></code> take <code><a href="../reference/as_da.html">as_da()</a></code> output. Plain tables and the <code>gene_col</code>, <code>logfc_col</code>, <code>pval_col</code> and <code>padj_col</code> arguments still work with a warning and will be removed in 2.0.0.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="other-changes-1-1-0">Other changes<a class="anchor" aria-label="anchor" href="#other-changes-1-1-0"></a></h3>
+<ul><li>
+<code>yvo_da.csv.gz</code> is replaced by <code>example_study("yvo")</code>, a full study (matrix, weights, samples, contrasts and DA results) quantified with limpa.</li>
+<li>GO slim sets are biological-process terms only and are named like <code>GOSLIM_PROTEIN_FOLDING</code>.</li>
+<li>The example data are licensed CC BY 4.0 (<code>inst/extdata/studies/LICENSE.md</code>); the code stays MIT.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.0" id="enrichvolcano-100">enrichVolcano 1.0.0<a class="anchor" aria-label="anchor" href="#enrichvolcano-100"></a></h2>
 <div class="section level3">
