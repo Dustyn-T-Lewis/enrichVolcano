@@ -1,8 +1,6 @@
 #' Compose a grid of `volcano_ring()` plots, one per contrast
 #'
-#' @param volc_dfs DA results from [as_da()] covering the contrasts drawn. A
-#'   named list of plain tables, or one with a `contrast` column, still works
-#'   but is deprecated.
+#' @param volc_dfs DA results from [as_da()] covering the contrasts drawn.
 #' @param enrichment An [enrichment] object holding every contrast drawn.
 #' @param contrasts Character vector of contrast names to include and the
 #'   order in which to draw them. Defaults to `names(volc_dfs)`.
@@ -28,7 +26,7 @@
 #'   is horizontal, the key height when vertical; a side legend usually wants a
 #'   larger value (~40).
 #' @param ... Forwarded to each `volcano_ring()` call (e.g. `databases`,
-#'   `n_terms`, `padj_col`, `theme`).
+#'   `n_terms`, `theme`).
 #' @return An S3 object `c("volcano_ring_grid", "list")` with elements
 #'   `$plot` (patchwork) and `$data` (list of `list(volc, enrich)` pairs, where
 #'   `enrich` is that contrast's rows of `enrichment@results`).
@@ -57,18 +55,10 @@ volcano_ring_grid <- function(volc_dfs, enrichment,
   legend_position <- match.arg(legend_position)
   validate_grid_spacing(panel_spacing, panel_margin, legend_width)
   check_enrichment(enrichment)
-  is_da <- inherits(volc_dfs, "enrichVolcano_da")
-  if (!is_da) {
-    ev_warn(
-      "Pass {.fn as_da} output as {.arg volc_dfs}; plain tables and the column arguments go in 2.0.0.",
-      class = "enrichVolcano_deprecated"
-    )
+  if (!inherits(volc_dfs, "enrichVolcano_da")) {
+    ev_abort("{.arg volc_dfs} must be {.fn as_da} output.", class = "enrichVolcano_input_error")
   }
-  volc_list <- if (is_da) {
-    split(volc_dfs, factor(volc_dfs$contrast, unique(volc_dfs$contrast)))
-  } else {
-    split_contrasts(volc_dfs)
-  }
+  volc_list <- split(volc_dfs, factor(volc_dfs$contrast, unique(volc_dfs$contrast)))
   enrich_contrasts <- unique(enrichment@results$contrast)
 
   contrasts <- contrasts %||% names(volc_list)
@@ -93,11 +83,8 @@ volcano_ring_grid <- function(volc_dfs, enrichment,
     } else {
       subtitles[[i]]
     }
-    withCallingHandlers(
-      volcano_ring(volc_list[[cn]], enrichment,
-        contrast = cn, title = cn, subtitle = sub, label_headroom = label_headroom, ...
-      ),
-      enrichVolcano_deprecated = function(w) invokeRestart("muffleWarning")
+    volcano_ring(volc_list[[cn]], enrichment,
+      contrast = cn, title = cn, subtitle = sub, label_headroom = label_headroom, ...
     )
   })
   names(panels) <- contrasts

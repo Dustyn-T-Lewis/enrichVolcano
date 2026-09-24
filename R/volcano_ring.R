@@ -153,8 +153,9 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' all of this with a hand-picked set.
 #'
 #' @param volc_df DA results from [as_da()]; the rows for `contrast` are drawn.
-#'   A plain table still works through the column arguments but is deprecated
-#'   and will be refused in 2.0.0.
+#'   Points are called significant on `padj`, or on `p` when `padj` is empty.
+#'   To colour by another statistic, such as a pi-value, pass it to [as_da()]
+#'   as `padj`.
 #' @param enrichment An [enrichment] object; see [as_enrichment()].
 #' @param contrast Which contrast of `enrichment` to draw. Needed only when it
 #'   holds more than one.
@@ -165,11 +166,6 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' @param term_threshold Terms need `padj` below this to be drawn.
 #' @param n_terms Most terms drawn, counted across both directions.
 #' @param terms Optional character vector of exact term names to draw instead.
-#' @param gene_col,logfc_col,pval_col,padj_col Column names in a plain
-#'   `volc_df`; ignored for [as_da()] output. Deprecated.
-#' @param volc_sig_col Optional column in `volc_df` used to call point
-#'   significance (e.g. a pi-value), decoupled from `padj_col`. `NULL` falls
-#'   back to `padj_col` then `pval_col`. The y-axis stays `-log10(pval_col)`.
 #' @param p_threshold Significance cutoff for volcano points.
 #' @param logfc_threshold Effect-size cutoff; a point is called up/down only
 #'   when `abs(logFC) >= logfc_threshold` as well as significant.
@@ -236,11 +232,6 @@ volcano_ring <- function(volc_df, enrichment,
                          term_threshold = 0.05,
                          n_terms = 12,
                          terms = NULL,
-                         gene_col = "gene",
-                         logfc_col = "logFC",
-                         pval_col = "P.Value",
-                         padj_col = "padj",
-                         volc_sig_col = NULL,
                          p_threshold = 0.05,
                          logfc_threshold = 0,
                          title = NULL,
@@ -281,34 +272,20 @@ volcano_ring <- function(volc_df, enrichment,
   ev_assert_colour(disc_color)
   validate_ring_geometry(ring_radius, volcano_radius, arc_height_range, label_headroom)
 
-  if (!is.data.frame(volc_df)) {
+  if (!inherits(volc_df, "enrichVolcano_da")) {
     ev_abort(
-      "{.arg volc_df} must be a data.frame, not {.cls {class(volc_df)[1]}}.",
+      "{.arg volc_df} must be {.fn as_da} output, not {.cls {class(volc_df)[1]}}.",
       class = "enrichVolcano_input_error"
     )
   }
   check_enrichment(enrichment)
-  if (inherits(volc_df, "enrichVolcano_da")) {
-    volc_df <- contrast_rows(volc_df, contrast)
-    if (all(is.na(volc_df$p)) && all(is.na(volc_df$padj))) {
-      ev_abort("The DA results have no p-values to draw a volcano from.", class = "enrichVolcano_data_error")
-    }
-    gene_col <- "gene"
-    logfc_col <- "logFC"
-    pval_col <- if (all(is.na(volc_df$p))) "padj" else "p"
-    padj_col <- "padj"
-  } else if (is.data.frame(volc_df)) {
-    ev_warn(
-      "Pass {.fn as_da} output as {.arg volc_df}; plain tables and the column arguments go in 2.0.0.",
-      class = "enrichVolcano_deprecated"
-    )
+  require_columns(volc_df, c("gene", "logFC", "p", "padj"))
+  validate_da(volc_df)
+  volc_df <- contrast_rows(volc_df, contrast)
+  if (all(is.na(volc_df$p)) && all(is.na(volc_df$padj))) {
+    ev_abort("The DA results have no p-values to draw a volcano from.", class = "enrichVolcano_data_error")
   }
-
-  vcols <- resolve_volc_cols(volc_df, gene_col, logfc_col, pval_col, padj_col)
-  if (!is.null(volc_sig_col) && !volc_sig_col %in% names(volc_df)) {
-    ev_abort_missing_column(volc_df, volc_sig_col, "volc_sig_col", "volc_df")
-  }
-  validate_volc_df(volc_df, vcols)
+  pval_col <- if (all(is.na(volc_df$p))) "padj" else "p"
   score_type <- enrichment@metadata$score_type
   enrich_df <- contrast_rows(enrichment@results, contrast)
   if (is.null(terms)) enrich_df <- filter_view(enrich_df, databases, collapse)
@@ -317,7 +294,7 @@ volcano_ring <- function(volc_df, enrichment,
   if (nrow(enrich_df) == 0) {
     ev_inform("No terms pass the selection, so the ring is empty.", class = "enrichVolcano_empty_ring")
   }
-  has_padj <- vcols$has_padj && !all(is.na(volc_df[[padj_col]]))
+  has_padj <- !all(is.na(volc_df$padj))
 
   pal <- theme$palette
   nes_limits <- nes_limits %||% theme$nes_limits %||%
@@ -326,21 +303,14 @@ volcano_ring <- function(volc_df, enrichment,
   ring_r0 <- ring_radius
   ring_r1 <- ring_radius + ring_thickness
 
-  v <- volc_df[!is.na(volc_df[[logfc_col]]) & !is.na(volc_df[[pval_col]]), ,
+  v <- volc_df[!is.na(volc_df$logFC) & !is.na(volc_df[[pval_col]]), ,
     drop = FALSE
   ]
   v$.ev_neg_log10p <- -log10(v[[pval_col]])
   v <- v[is.finite(v$.ev_neg_log10p), , drop = FALSE]
 
-  sig_score <- if (!is.null(volc_sig_col)) {
-    v[[volc_sig_col]]
-  } else if (has_padj) {
-    v[[padj_col]]
-  } else {
-    v[[pval_col]]
-  }
-  sig <- sig_score < p_threshold
-  lfc <- v[[logfc_col]]
+  sig <- (if (has_padj) v$padj else v[[pval_col]]) < p_threshold
+  lfc <- v$logFC
   v$.ev_direction <- ifelse(sig & lfc >= logfc_threshold, "up",
     ifelse(sig & lfc <= -logfc_threshold, "down", "ns")
   )
@@ -357,8 +327,6 @@ volcano_ring <- function(volc_df, enrichment,
   v_sig <- v[v$.ev_direction != "ns", , drop = FALSE]
 
   v_labels <- v
-  names(v_labels)[names(v_labels) == gene_col] <- "gene"
-  names(v_labels)[names(v_labels) == logfc_col] <- "logFC"
   v_labels$x_plot <- v$.ev_x_plot
   v_labels$y_plot <- v$.ev_y_plot
   lab_mode_old <- switch(label_mode,
@@ -384,7 +352,7 @@ volcano_ring <- function(volc_df, enrichment,
     min_height = arc_height_range[1], max_height = arc_height_range[2]
   )
   ticks <- ev_tick_data(ring, v,
-    gene_col = gene_col, logfc_col = logfc_col,
+    gene_col = "gene", logfc_col = "logFC",
     tick_r0 = ring_r0, tick_r1 = ring_r1
   )
 

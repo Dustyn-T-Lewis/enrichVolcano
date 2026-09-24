@@ -19,18 +19,6 @@ test_that("volcano_ring builds without leading edges (no ticks)", {
   expect_s3_class(ring(x = x), "ggplot")
 })
 
-test_that("volcano_ring accepts user-supplied volcano column names", {
-  v <- make_toy_volc()
-  names(v) <- sub("^P\\.Value$", "pval", names(v))
-  names(v) <- sub("^logFC$", "lfc", names(v))
-  names(v) <- sub("^gene$", "id", names(v))
-  expect_warning(
-    p <- ring(v, gene_col = "id", logfc_col = "lfc", pval_col = "pval"),
-    class = "enrichVolcano_deprecated"
-  )
-  expect_s3_class(p, "ggplot")
-})
-
 test_that("volcano_ring respects the magnitude = 'size' switch", {
   expect_s3_class(ring(magnitude = "size"), "ggplot")
 })
@@ -98,10 +86,6 @@ test_that("disc_color draws a tinted central disc", {
   expect_s3_class(ring(disc_color = "grey70"), "ggplot")
 })
 
-test_that("volc_sig_col drives point significance independently of padj", {
-  expect_s3_class(ring(volc_sig_col = "pi_eq2"), "ggplot")
-})
-
 test_that("x_scale and y_scale compress the volcano point cloud", {
   point_span <- function(p, axis) {
     pts <- Filter(function(d) "shape" %in% names(d), ggplot2::ggplot_build(p)$data)
@@ -166,15 +150,6 @@ test_that("volcano_ring_grid composes a 2-panel layout from named lists", {
   expect_named(g$data, c("A", "B"))
 })
 
-test_that("volcano_ring_grid splits a single data.frame by contrast", {
-  d <- rbind(
-    transform(make_toy_volc(seed = 1L), contrast = "A"),
-    transform(make_toy_volc(seed = 2L), contrast = "B")
-  )
-  expect_warning(g <- grid(d), class = "enrichVolcano_deprecated")
-  expect_named(g$data, c("A", "B"))
-})
-
 test_that("volcano_ring_grid aborts when a contrast is missing on either side", {
   expect_error(
     grid(make_toy_da("A"), contrasts = c("A", "B")),
@@ -187,19 +162,9 @@ test_that("volcano_ring_grid aborts when a contrast is missing on either side", 
   )
 })
 
-test_that("volcano_ring_grid aborts when contrasts cannot be inferred", {
-  expect_error(suppressWarnings(grid(list(make_toy_volc()))), class = "enrichVolcano_input_error")
-})
-
-test_that("volcano_ring_grid aborts when split-by-contrast has no column", {
-  v <- make_toy_volc()
-  v$contrast <- NULL
-  expect_error(suppressWarnings(grid(v)), class = "enrichVolcano_input_error")
-})
-
 test_that("volcano_ring_grid refuses a plain enrichment table", {
   expect_error(
-    volcano_ring_grid(list(A = make_toy_volc()), make_toy_enrich()),
+    volcano_ring_grid(make_toy_da("A"), make_toy_enrich()),
     class = "enrichVolcano_input_error"
   )
 })
@@ -280,10 +245,11 @@ test_that("volcano_ring reads as_da output for the chosen contrast, without warn
   expect_s3_class(p, "ggplot")
 })
 
-test_that("a plain volcano table still works, with a deprecation warning", {
-  expect_warning(
-    suppressMessages(volcano_ring(as.data.frame(make_toy_volc()), make_toy_ring_enrichment(), databases = NULL)),
-    class = "enrichVolcano_deprecated"
+test_that("a plain volcano table is refused", {
+  expect_error(
+    volcano_ring(as.data.frame(make_toy_volc()), make_toy_ring_enrichment()),
+    "as_da",
+    class = "enrichVolcano_input_error"
   )
 })
 
@@ -291,22 +257,6 @@ test_that("results with no p-values draw the volcano from padj", {
   d <- toy_da("A")
   d$p <- NA_real_
   expect_s3_class(suppressMessages(volcano_ring(d, make_toy_ring_enrichment("A"), databases = NULL)), "ggplot")
-})
-
-test_that("volcano_ring_grid takes as_da output and warns once for plain tables", {
-  x <- make_toy_ring_enrichment(c("A", "B"))
-  expect_no_warning(g <- grid(toy_da(), x))
-  expect_named(g$data, c("A", "B"))
-  plain <- list(A = as.data.frame(make_toy_volc()), B = as.data.frame(make_toy_volc()))
-  n_warnings <- 0
-  withCallingHandlers(
-    grid(plain, x),
-    enrichVolcano_deprecated = function(w) {
-      n_warnings <<- n_warnings + 1
-      invokeRestart("muffleWarning")
-    }
-  )
-  expect_identical(n_warnings, 1)
 })
 
 test_that("results without adjusted p-values colour the volcano by nominal p", {

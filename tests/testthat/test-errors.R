@@ -36,7 +36,7 @@ test_that("ring_radius below volcano_radius warns about overflow", {
 
 test_that("input error class fires when grid input is malformed", {
   expect_error(
-    suppressWarnings(volcano_ring_grid(42, make_toy_ring_enrichment())),
+    volcano_ring_grid(42, make_toy_ring_enrichment()),
     class = "enrichVolcano_input_error"
   )
 })
@@ -46,13 +46,6 @@ test_that("column error class fires for a missing volc column", {
   v$logFC <- NULL
   expect_error(
     volcano_ring(v, make_toy_ring_enrichment()),
-    class = "enrichVolcano_column_error"
-  )
-})
-
-test_that("column error class fires for a missing volc_sig_col", {
-  expect_error(
-    volcano_ring(make_toy_da(), make_toy_ring_enrichment(), volc_sig_col = "no_such_col"),
     class = "enrichVolcano_column_error"
   )
 })

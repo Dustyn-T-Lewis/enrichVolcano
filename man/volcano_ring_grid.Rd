@@ -22,9 +22,7 @@ volcano_ring_grid(
 )
 }
 \arguments{
-\item{volc_dfs}{DA results from \code{\link[=as_da]{as_da()}} covering the contrasts drawn. A
-named list of plain tables, or one with a \code{contrast} column, still works
-but is deprecated.}
+\item{volc_dfs}{DA results from \code{\link[=as_da]{as_da()}} covering the contrasts drawn.}
 
 \item{enrichment}{An \link{enrichment} object holding every contrast drawn.}
 
@@ -62,7 +60,7 @@ is horizontal, the key height when vertical; a side legend usually wants a
 larger value (~40).}
 
 \item{...}{Forwarded to each \code{volcano_ring()} call (e.g. \code{databases},
-\code{n_terms}, \code{padj_col}, \code{theme}).}
+\code{n_terms}, \code{theme}).}
 }
 \value{
 An S3 object \code{c("volcano_ring_grid", "list")} with elements

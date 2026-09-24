@@ -35,8 +35,7 @@ does not find them. \code{logfc} names the fold-change column.}
 \value{
 A data frame of class \code{enrichVolcano_da} with columns \code{protein},
 \code{gene}, \code{contrast}, \code{logFC}, \code{t}, \code{p}, \code{padj}, \code{abundance}, \code{rank} and
-\code{rank_stat}, followed by any input columns it did not use (for example a
-pi-value column for \code{volcano_ring(volc_sig_col = )}).
+\code{rank_stat}, followed by any input columns it did not use.
 }
 \description{
 Reads a DA results table from any common proteomics tool and returns it with

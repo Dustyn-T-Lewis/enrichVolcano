@@ -13,11 +13,6 @@ volcano_ring(
   term_threshold = 0.05,
   n_terms = 12,
   terms = NULL,
-  gene_col = "gene",
-  logfc_col = "logFC",
-  pval_col = "P.Value",
-  padj_col = "padj",
-  volc_sig_col = NULL,
   p_threshold = 0.05,
   logfc_threshold = 0,
   title = NULL,
@@ -53,8 +48,9 @@ volcano_ring(
 }
 \arguments{
 \item{volc_df}{DA results from \code{\link[=as_da]{as_da()}}; the rows for \code{contrast} are drawn.
-A plain table still works through the column arguments but is deprecated
-and will be refused in 2.0.0.}
+Points are called significant on \code{padj}, or on \code{p} when \code{padj} is empty.
+To colour by another statistic, such as a pi-value, pass it to \code{\link[=as_da]{as_da()}}
+as \code{padj}.}
 
 \item{enrichment}{An \link{enrichment} object; see \code{\link[=as_enrichment]{as_enrichment()}}.}
 
@@ -72,13 +68,6 @@ Skipped, with a note, when the object has no database labels.}
 \item{n_terms}{Most terms drawn, counted across both directions.}
 
 \item{terms}{Optional character vector of exact term names to draw instead.}
-
-\item{gene_col, logfc_col, pval_col, padj_col}{Column names in a plain
-\code{volc_df}; ignored for \code{\link[=as_da]{as_da()}} output. Deprecated.}
-
-\item{volc_sig_col}{Optional column in \code{volc_df} used to call point
-significance (e.g. a pi-value), decoupled from \code{padj_col}. \code{NULL} falls
-back to \code{padj_col} then \code{pval_col}. The y-axis stays \code{-log10(pval_col)}.}
 
 \item{p_threshold}{Significance cutoff for volcano points.}
 
