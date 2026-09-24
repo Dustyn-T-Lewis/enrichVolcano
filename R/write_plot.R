@@ -2,8 +2,8 @@
 #'
 #' Page 1 lays every panel out as a composite lettered A, B, C in list order.
 #' Each later page holds one panel at full size, headed by its letter and
-#' name. Fonts are embedded, so the file looks the same on any machine: macOS
-#' writes through the Quartz PDF device, other systems through [grDevices::cairo_pdf()].
+#' name. [grDevices::cairo_pdf()] embeds the fonts, so the file looks the same
+#' on any machine. On macOS, R's cairo needs XQuartz (<https://www.xquartz.org>).
 #'
 #' @param panels A named list of ggplots, such as the output of
 #'   [plot_volcano_ring()] and [plot_scatter()]. Names head the single-panel
@@ -26,15 +26,21 @@
 #'   "Old, trained" = plot_volcano_ring(da, ex, contrast = "Training_Old")
 #' )
 #' file <- tempfile(fileext = ".pdf")
-#' write_plot(panels, file, ncol = 2)
+#' try(write_plot(panels, file, ncol = 2))
 write_plot <- function(panels, file, ncol = NULL, nrow = NULL, design = NULL, caption = NULL,
                        width = 11, height = 8.5) {
   composite <- compose_panels(panels, ncol, nrow, design, caption)
-  if (capabilities("aqua")) {
-    # quartz is not exported on Windows, so look it up only where it exists.
-    getExportedValue("grDevices", "quartz")(type = "pdf", file = file, width = width, height = height)
-  } else {
-    grDevices::cairo_pdf(file, width = width, height = height, onefile = TRUE)
+  before <- grDevices::dev.cur()
+  # A missing cairo library only warns and opens no device, so compare devices.
+  suppressWarnings(grDevices::cairo_pdf(file, width = width, height = height, onefile = TRUE))
+  if (identical(grDevices::dev.cur(), before)) {
+    ev_abort(
+      c(
+        "cairo could not start, so fonts cannot be embedded.",
+        i = "On macOS, install XQuartz: {.url https://www.xquartz.org}."
+      ),
+      class = "enrichVolcano_device_error"
+    )
   }
   on.exit(grDevices::dev.off())
   print(composite)

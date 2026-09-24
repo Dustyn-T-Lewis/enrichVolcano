@@ -7,6 +7,14 @@ toy_panels <- function() {
   )
 }
 
+cairo_works <- function() {
+  before <- grDevices::dev.cur()
+  suppressWarnings(grDevices::cairo_pdf(withr::local_tempfile(fileext = ".pdf")))
+  opened <- !identical(grDevices::dev.cur(), before)
+  if (opened) grDevices::dev.off()
+  opened
+}
+
 pdf_pages <- function(file) {
   bytes <- readBin(file, "raw", file.size(file))
   text <- rawToChar(bytes[bytes != as.raw(0)])
@@ -14,13 +22,20 @@ pdf_pages <- function(file) {
 }
 
 test_that("write_plot writes the composite, then one page per panel", {
-  skip_if_not(capabilities("aqua") || capabilities("cairo"), "no PDF device that embeds fonts")
+  skip_if_not(cairo_works(), "cairo cannot start here")
   file <- withr::local_tempfile(fileext = ".pdf")
   expect_invisible(out <- write_plot(toy_panels(), file))
   expect_identical(out, file)
   expect_identical(pdf_pages(file), 3L)
   write_plot(toy_panels()["Ring"], file)
   expect_identical(pdf_pages(file), 2L)
+})
+
+test_that("without cairo, write_plot stops and says how to get it", {
+  skip_if(cairo_works(), "cairo works here")
+  file <- withr::local_tempfile(fileext = ".pdf")
+  expect_error(write_plot(toy_panels(), file), "XQuartz", class = "enrichVolcano_device_error")
+  expect_false(file.exists(file))
 })
 
 test_that("the composite letters panels in list order, with an optional caption", {

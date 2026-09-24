@@ -37,8 +37,8 @@ and \code{nrow}.}
 \description{
 Page 1 lays every panel out as a composite lettered A, B, C in list order.
 Each later page holds one panel at full size, headed by its letter and
-name. Fonts are embedded, so the file looks the same on any machine: macOS
-writes through the Quartz PDF device, other systems through \code{\link[grDevices:cairo_pdf]{grDevices::cairo_pdf()}}.
+name. \code{\link[grDevices:cairo_pdf]{grDevices::cairo_pdf()}} embeds the fonts, so the file looks the same
+on any machine. On macOS, R's cairo needs XQuartz (\url{https://www.xquartz.org}).
 }
 \examples{
 da <- read_example("yvo")$da
@@ -50,5 +50,5 @@ panels <- list(
   "Old, trained" = plot_volcano_ring(da, ex, contrast = "Training_Old")
 )
 file <- tempfile(fileext = ".pdf")
-write_plot(panels, file, ncol = 2)
+try(write_plot(panels, file, ncol = 2))
 }
