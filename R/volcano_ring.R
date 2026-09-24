@@ -62,29 +62,29 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   if (n_up > 0) up$arc_r1_var <- scale_h(up)
   if (n_dn > 0) dn$arc_r1_var <- scale_h(dn)
 
-  if (n_up > 0 && n_dn > 0) {
-    total_gap <- 2 * gap_split + (n_up - 1) * gap_intra + (n_dn - 1) * gap_intra
-    arc_w <- (360 - total_gap) / (n_up + n_dn)
-    up_span <- n_up * arc_w + (n_up - 1) * gap_intra
-    up$start_deg <- (90 - up_span / 2) + (seq_len(n_up) - 1) * (arc_w + gap_intra)
-    up$end_deg <- up$start_deg + arc_w
-    dn_span <- n_dn * arc_w + (n_dn - 1) * gap_intra
-    dn_offset <- (n_dn - seq_len(n_dn)) * (arc_w + gap_intra)
-    dn$start_deg <- (270 - dn_span / 2) + dn_offset
-    dn$end_deg <- dn$start_deg + arc_w
-  } else {
-    only <- if (n_up > 0) up else dn
-    if (nrow(only) == 1) {
-      center <- if (n_up > 0) 90 else 270
-      only$start_deg <- center - 15
-      only$end_deg <- only$start_deg + 30
-    } else {
-      arc_w <- (360 - nrow(only) * gap_intra) / nrow(only)
-      only$start_deg <- (seq_len(nrow(only)) - 1) * (arc_w + gap_intra)
-      only$end_deg <- only$start_deg + arc_w
+  # Up terms fill the right half from the top, down terms the left half from the top.
+  place <- function(df, centre, span, from_top) {
+    n <- nrow(df)
+    if (n == 0) {
+      return(df)
     }
-    if (n_up > 0) up <- only else dn <- only
+    arc_w <- (span - (n - 1) * gap_intra) / n
+    slot <- if (from_top) seq_len(n) - 1 else n - seq_len(n)
+    df$start_deg <- centre - span / 2 + slot * (arc_w + gap_intra)
+    df$end_deg <- df$start_deg + arc_w
+    df
   }
+  if (n_up > 0 && n_dn > 0) {
+    arc_w <- (360 - 2 * gap_split - (n_up - 1) * gap_intra - (n_dn - 1) * gap_intra) / (n_up + n_dn)
+    up_span <- n_up * arc_w + (n_up - 1) * gap_intra
+    dn_span <- n_dn * arc_w + (n_dn - 1) * gap_intra
+  } else {
+    half <- function(n) if (n == 1) 30 else 180 - gap_split
+    up_span <- half(n_up)
+    dn_span <- half(n_dn)
+  }
+  up <- place(up, 90, up_span, from_top = TRUE)
+  dn <- place(dn, 270, dn_span, from_top = FALSE)
 
   ring <- rbind(up, dn)
   ring$.ev_mid_deg <- (ring$start_deg + ring$end_deg) / 2

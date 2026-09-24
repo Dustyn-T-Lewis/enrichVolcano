@@ -175,6 +175,16 @@ test_that("the default draws from every database", {
   expect_s3_class(suppressMessages(plot_volcano_ring(make_toy_da(), x)), "ggplot")
 })
 
+test_that("a ring whose terms all go one way keeps them in that half", {
+  e <- data.frame(term = paste0("T", 1:4), padj = c(0.01, 0.02, 0.03, 0.04), score = c(-2, -1.5, -1.2, -1))
+  down <- ev_ring_geometry(e, "term", "padj", "score", rep(1, 4), rep(list(character(0)), 4))
+  expect_true(all(down$start_deg > 180 & down$end_deg < 360))
+  e$score <- -e$score
+  up <- ev_ring_geometry(e, "term", "padj", "score", rep(1, 4), rep(list(character(0)), 4))
+  expect_true(all(up$start_deg > 0 & up$end_deg < 180))
+  expect_identical(up$term[order(up$start_deg)], paste0("T", 1:4))
+})
+
 test_that("the default ring takes the n_terms most significant unique terms, whatever their direction", {
   r <- make_toy_ring_enrichment()@results
   twin <- r[r$term == "HALLMARK_TOY_A", ]
