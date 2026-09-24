@@ -82,6 +82,11 @@ read_sheets <- function(path) {
 
 check_samples <- function(samples) {
   require_columns(samples, c("sample", "group"))
+  samples$sample <- as.character(samples$sample)
+  twice <- unique(samples$sample[duplicated(samples$sample)])
+  if (length(twice) > 0) {
+    ev_abort("{.field samples} lists {.val {twice}} twice.", class = "enrichVolcano_input_error")
+  }
   bad <- unique(samples$group[make.names(samples$group) != samples$group])
   if (length(bad) > 0) {
     ev_abort(

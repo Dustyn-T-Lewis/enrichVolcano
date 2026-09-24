@@ -163,3 +163,19 @@ test_that("the YvO study ships its limpa matrix, weights and design", {
 test_that("an unknown example study is refused", {
   expect_error(example_study("nope"), "nope", class = "enrichVolcano_param_error")
 })
+
+test_that("numeric sample IDs select matrix columns by name, not position", {
+  base <- quietly(read_study(toy_dir()))
+  dir <- edited_study("samples", function(s) transform(s, sample = rev(seq_along(sample))), drop = "weights")
+  m <- utils::read.csv(file.path(dir, "matrix.csv"), check.names = FALSE)
+  names(m)[-1] <- rev(seq_len(ncol(m) - 1))
+  utils::write.csv(m, file.path(dir, "matrix.csv"), row.names = FALSE)
+  s <- quietly(read_study(dir))
+  expect_identical(colnames(s$matrix), as.character(rev(seq_len(ncol(m) - 1))))
+  expect_equal(unname(s$matrix), unname(base$matrix))
+})
+
+test_that("a sample listed twice is refused", {
+  dir <- edited_study("samples", function(s) rbind(s, s[1, ]), drop = "weights")
+  expect_error(quietly(read_study(dir)), "twice", class = "enrichVolcano_input_error")
+})
