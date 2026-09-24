@@ -4,8 +4,13 @@ template:
 reference:
   - title: "Build"
     contents:
+      - read_study
+      - example_study
+      - as_da
       - as_enrichment
       - enrichment
+      - load_gene_sets
+      - run_enrichment
       - dedup
   - title: "Plot"
     contents:

@@ -119,3 +119,9 @@ make_toy_scatter_enrichment <- function() {
   tbl <- rbind(one("A", score_a, padj_a), one("B", score_b, padj_b))
   suppressMessages(as_enrichment(tbl, enrichment_test = "custom", score_type = "NES"))
 }
+
+# make_toy_volc() through as_da(), one copy per contrast (seed 1, 2, ...).
+make_toy_da <- function(contrasts = "toy") {
+  tables <- lapply(seq_along(contrasts), function(i) make_toy_volc(seed = i))
+  as_da(stats::setNames(tables, contrasts), species = NULL)
+}

@@ -1,0 +1,8 @@
+"name","species","subject_effect","description"
+"bfr_limpa","Homo sapiens","fixed","Human muscle, one leg blood-flow-restricted and one heavy-load, before and after training; limpa"
+"mouse_pas","Mus musculus",NA,"Mouse muscle mitochondria, treatment by sex; limpa"
+"yvo","Homo sapiens",NA,"Human muscle, young and old, before and after training; limpa"
+"bfr_proteoda","Homo sapiens",NA,"The blood-flow-restriction cohort analysed with proteoDA"
+"cvh","Homo sapiens",NA,"Human muscle, cancer recovery arms against healthy controls; proteoDA"
+"hrvlr","Homo sapiens",NA,"Human muscle, high and low responders across three timepoints; proteoDA"
+"mito","Rattus norvegicus",NA,"Rat cardiomyoblasts, stressor by mitochondrial transplant; proteoDA"

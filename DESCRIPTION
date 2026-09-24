@@ -1,16 +1,18 @@
 Package: enrichVolcano
 Title: Volcano-in-Ring and Concordance Plots from Enrichment Results
-Version: 1.0.0
+Version: 1.1.0
 Authors@R:
     person("Dustyn", "Lewis", , "dtlts14@gmail.com", role = c("aut", "cre"))
-Description: Draws figures from gene-set enrichment results computed
-    elsewhere. Results from fgsea, clusterProfiler, limma's rotation and
-    competitive gene-set tests, over-representation analysis or custom
-    tables are converted into one validated object. From it the package
-    draws a differential abundance volcano inside a ring of enrichment
-    terms, and a scatter comparing two contrasts term by term. Redundant
-    terms can be flagged for display with the EnrichmentMap overlap rule or
-    'fgsea' conditional collapsing, without changing any p-value.
+Description: Turns differential abundance results into gene-set
+    enrichment figures. Reads results from common proteomics tools and
+    study files with a sample sheet and contrasts, runs 'fgsea' and limma's
+    camera and fry tests, or converts enrichment results computed
+    elsewhere, into one validated object. From it the package draws a
+    differential abundance volcano inside a ring of enrichment terms, and a
+    scatter comparing two contrasts term by term. Redundant terms can be
+    flagged for display with the EnrichmentMap overlap rule or 'fgsea'
+    conditional collapsing, without changing any p-value. Seven example
+    proteomics studies are included.
 License: MIT + file LICENSE
 Depends: R (>= 4.2)
 URL: https://github.com/Dustyn-T-Lewis/enrichVolcano,
@@ -30,12 +32,19 @@ Imports:
     scales,
     stringr
 Suggests:
+    AnnotationDbi,
     correlation,
     covr,
     data.table,
     fgsea,
     knitr,
+    limma,
+    msigdbr (>= 10.0.0),
+    org.Hs.eg.db,
+    org.Mm.eg.db,
+    org.Rn.eg.db,
     pkgdown,
+    readxl,
     rmarkdown,
     testthat (>= 3.0.0),
     vdiffr,

@@ -152,7 +152,9 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' direction. `terms` overrides
 #' all of this with a hand-picked set.
 #'
-#' @param volc_df Tidy DA table for the contrast being drawn.
+#' @param volc_df DA results from [as_da()]; the rows for `contrast` are drawn.
+#'   A plain table still works through the column arguments but is deprecated
+#'   and will be refused in 2.0.0.
 #' @param enrichment An [enrichment] object; see [as_enrichment()].
 #' @param contrast Which contrast of `enrichment` to draw. Needed only when it
 #'   holds more than one.
@@ -163,7 +165,8 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' @param term_threshold Terms need `padj` below this to be drawn.
 #' @param n_terms Most terms drawn, counted across both directions.
 #' @param terms Optional character vector of exact term names to draw instead.
-#' @param gene_col,logfc_col,pval_col,padj_col Column names in `volc_df`.
+#' @param gene_col,logfc_col,pval_col,padj_col Column names in a plain
+#'   `volc_df`; ignored for [as_da()] output. Deprecated.
 #' @param volc_sig_col Optional column in `volc_df` used to call point
 #'   significance (e.g. a pi-value), decoupled from `padj_col`. `NULL` falls
 #'   back to `padj_col` then `pval_col`. The y-axis stays `-log10(pval_col)`.
@@ -220,18 +223,12 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' @return A ggplot.
 #' @export
 #' @examples
-#' da <- read.csv(system.file("extdata", "examples", "yvo_da.csv.gz",
-#'   package = "enrichVolcano"
-#' ))
+#' da <- example_study("yvo")$da
 #' ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
 #'   package = "enrichVolcano"
 #' )))
 #'
-#' ctr <- "Training_Young"
-#' da1 <- da[da$contrast == ctr, ]
-#' names(da1)[names(da1) == "adj.P.Val"] <- "padj"
-#'
-#' volcano_ring(da1, ex, contrast = ctr, title = ctr)
+#' volcano_ring(da, ex, contrast = "Training_Young", title = "Training_Young")
 volcano_ring <- function(volc_df, enrichment,
                          contrast = NULL,
                          databases = NULL,
@@ -291,6 +288,21 @@ volcano_ring <- function(volc_df, enrichment,
     )
   }
   check_enrichment(enrichment)
+  if (inherits(volc_df, "enrichVolcano_da")) {
+    volc_df <- contrast_rows(volc_df, contrast)
+    if (all(is.na(volc_df$p)) && all(is.na(volc_df$padj))) {
+      ev_abort("The DA results have no p-values to draw a volcano from.", class = "enrichVolcano_data_error")
+    }
+    gene_col <- "gene"
+    logfc_col <- "logFC"
+    pval_col <- if (all(is.na(volc_df$p))) "padj" else "p"
+    padj_col <- "padj"
+  } else if (is.data.frame(volc_df)) {
+    ev_warn(
+      "Pass {.fn as_da} output as {.arg volc_df}; plain tables and the column arguments go in 2.0.0.",
+      class = "enrichVolcano_deprecated"
+    )
+  }
 
   vcols <- resolve_volc_cols(volc_df, gene_col, logfc_col, pval_col, padj_col)
   if (!is.null(volc_sig_col) && !volc_sig_col %in% names(volc_df)) {
@@ -305,7 +317,7 @@ volcano_ring <- function(volc_df, enrichment,
   if (nrow(enrich_df) == 0) {
     ev_inform("No terms pass the selection, so the ring is empty.", class = "enrichVolcano_empty_ring")
   }
-  has_padj <- vcols$has_padj
+  has_padj <- vcols$has_padj && !all(is.na(volc_df[[padj_col]]))
 
   pal <- theme$palette
   nes_limits <- nes_limits %||% theme$nes_limits %||%
