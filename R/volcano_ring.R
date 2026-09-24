@@ -273,14 +273,19 @@ plot_volcano_ring <- function(da, enrichment,
                               label_rank_by = c("significance", "logfc"),
                               label_genes = NULL,
                               theme = plot_theme()) {
-  draw_ring(as.list(environment()))
+  do.call(draw_ring, as.list(environment()))
 }
 
-# The body of plot_volcano_ring(), shared with plot_bias_ring(). `args` holds
-# every plot_volcano_ring() argument; `normalise` scales fill and arc height to
-# the strongest drawn term.
-draw_ring <- function(args, term_labels = TRUE, normalise = FALSE) {
-  list2env(args, environment())
+# The body of plot_volcano_ring(), shared with plot_bias_ring(). It takes every
+# plot_volcano_ring() argument; `normalise` scales fill and arc height to the
+# strongest drawn term.
+draw_ring <- function(da, enrichment, contrast, databases, collapse, term_threshold, n_terms, terms,
+                      p_threshold, logfc_threshold, title, subtitle, tag, volcano_radius, x_scale,
+                      y_scale, ring_radius, ring_thickness, tick_width, label_headroom, disc_colour,
+                      score_limits, magnitude, arc_order, arc_height_range, show_counts, point_size,
+                      point_alpha, label_size, label_gap, count_size, count_x_mult, count_y_mult,
+                      axis_size, label_mode, label_n, label_rank_by, label_genes, theme,
+                      term_labels = TRUE, normalise = FALSE) {
   arc_order <- match.arg(arc_order, c("padj", "score"))
   label_mode <- match.arg(label_mode, c("none", "top_per_direction", "by_significance", "by_genes"))
   label_rank_by <- match.arg(label_rank_by, c("significance", "logfc"))

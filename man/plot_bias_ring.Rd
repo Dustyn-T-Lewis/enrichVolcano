@@ -36,6 +36,8 @@ Skipped, with a note, when the object has no database labels.}
 
 \item{term_threshold}{Terms need \code{padj} below this to be drawn.}
 
+\item{title}{Title.}
+
 \item{subtitle}{Subtitle. \code{NULL} reports the up and down term counts.}
 
 \item{theme}{Output of \code{\link[=plot_theme]{plot_theme()}}.}

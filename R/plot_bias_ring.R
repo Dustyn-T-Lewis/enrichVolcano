@@ -7,6 +7,7 @@
 #' full height, and every other term is a fraction of it.
 #'
 #' @inheritParams plot_volcano_ring
+#' @param title Title.
 #' @param subtitle Subtitle. `NULL` reports the up and down term counts.
 #' @param ... Other [plot_volcano_ring()] arguments that set the layout, such
 #'   as `ring_radius`, `arc_height_range`, `p_threshold` or `point_size`.
@@ -35,5 +36,5 @@ plot_bias_ring <- function(da, enrichment, contrast = NULL, databases = NULL, co
   )
   args[names(extra)] <- extra
   args[names(given)] <- given
-  draw_ring(args, term_labels = FALSE, normalise = TRUE)
+  do.call(draw_ring, c(args, term_labels = FALSE, normalise = TRUE))
 }
