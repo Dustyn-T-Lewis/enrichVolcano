@@ -172,6 +172,12 @@ test_that("every example study loads, with one DA row per protein and contrast",
   }
 })
 
+test_that("the rat study keeps its pipeline's symbols where the annotation package has none", {
+  skip_if_not_installed("org.Rn.eg.db")
+  d <- quietly(read_example("mito"))$da
+  expect_lt(mean(is.na(unique(d[c("protein", "gene")])$gene)), 0.01)
+})
+
 test_that("an unknown example study is refused", {
   expect_error(read_example("nope"), "nope", class = "enrichVolcano_param_error")
 })
