@@ -1,5 +1,3 @@
-source(test_path("fixtures/make_toy.R"))
-
 flags <- function(x) {
   r <- x@results
   stats::setNames(r$dedup_status, r$term)

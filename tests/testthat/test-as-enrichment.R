@@ -1,5 +1,3 @@
-source(test_path("fixtures/make_toy.R"))
-
 read_fixture <- function(name, ...) {
   utils::read.csv(test_path("fixtures", name), ...)
 }

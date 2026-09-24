@@ -1,5 +1,3 @@
-source(test_path("fixtures/make_toy.R"))
-
 toy_enrichment <- function(results = make_toy_results(),
                            metadata = make_toy_metadata()) {
   enrichment(results = results, metadata = metadata)

@@ -1,5 +1,3 @@
-source(test_path("fixtures/make_toy.R"))
-
 scatter <- function(x = make_toy_scatter_enrichment(), ...) {
   suppressMessages(plot_scatter(x, "A", "B", databases = NULL, ...))
 }

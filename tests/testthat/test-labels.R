@@ -1,5 +1,3 @@
-source(test_path("fixtures/make_toy.R"))
-
 make_lbl_input <- function() {
   data.frame(
     protein = paste0("P", 1:10),

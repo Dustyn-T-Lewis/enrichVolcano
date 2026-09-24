@@ -1,5 +1,3 @@
-source(test_path("fixtures/make_toy.R"))
-
 toy <- function() enrichment(results = make_toy_results(), metadata = make_toy_metadata())
 
 test_that("databases keeps only the named collections", {

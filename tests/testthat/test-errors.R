@@ -1,5 +1,3 @@
-source(test_path("fixtures/make_toy.R"))
-
 test_that("input error class fires for non-data.frame da", {
   expect_error(
     plot_volcano_ring(list(), make_toy_ring_enrichment()),

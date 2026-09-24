@@ -1,5 +1,3 @@
-source(test_path("fixtures/make_toy.R"))
-
 # Every toy term on the ring, no database filter: the pre-1.0 behaviour.
 ring <- function(v = make_toy_da(), x = make_toy_ring_enrichment(), ...) {
   suppressMessages(plot_volcano_ring(v, x, databases = NULL, term_threshold = 1, n_terms = Inf, ...))

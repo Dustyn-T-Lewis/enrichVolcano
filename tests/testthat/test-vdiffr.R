@@ -1,5 +1,3 @@
-source(test_path("fixtures/make_toy.R"))
-
 # Cross-platform font metrics make exact-pixel diffs flaky on CI. Pin these
 # to the local development environment via skip_on_ci(); reviewers can run
 # them locally with `testthat::snapshot_review()`.

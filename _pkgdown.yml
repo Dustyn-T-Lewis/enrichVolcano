@@ -15,6 +15,9 @@ reference:
     contents:
       - plot_volcano_ring
       - plot_scatter
+  - title: "Write"
+    contents:
+      - write_plot
   - title: "Style"
     contents:
       - plot_theme
