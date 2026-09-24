@@ -112,7 +112,12 @@ as_enrichment <- function(x, enrichment_test = NULL, database = NULL,
     out$contrast <- contrast
     stamp_database(out, tbl, database)
   }, tables, names(tables)))
-  results <- drop_unscored(results)
+  unscored <- is.na(results$score)
+  if (any(unscored)) {
+    ev_inform("Dropped {sum(unscored)} row{?s} with no score.", class = "enrichVolcano_dropped_rows")
+  }
+  results <- results[!unscored, , drop = FALSE]
+  rownames(results) <- NULL
 
   core <- names(results_columns)
   enrichment(
@@ -323,16 +328,6 @@ stamp_database <- function(out, tbl, database) {
     out$database <- database %||% NA_character_
   }
   out
-}
-
-drop_unscored <- function(results) {
-  unscored <- is.na(results$score)
-  if (any(unscored)) {
-    ev_inform("Dropped {sum(unscored)} row{?s} with no score.", class = "enrichVolcano_dropped_rows")
-  }
-  results <- results[!unscored, , drop = FALSE]
-  rownames(results) <- NULL
-  results
 }
 
 bind_rows_fill <- function(tables) {

@@ -329,14 +329,9 @@ plot_volcano_ring <- function(da, enrichment,
   v_labels <- v
   v_labels$x_plot <- v$.ev_x_plot
   v_labels$y_plot <- v$.ev_y_plot
-  lab_mode_old <- switch(label_mode,
-    by_significance = "top_total",
-    by_genes        = "explicit",
-    label_mode
-  )
   lab_pts <- ev_select_labels(
     v_labels,
-    mode = lab_mode_old, n = label_n, rank_by = label_rank_by,
+    mode = label_mode, n = label_n, rank_by = label_rank_by,
     genes = label_genes, p_col = pval_col,
     p_threshold = p_threshold, logfc_threshold = logfc_threshold
   )

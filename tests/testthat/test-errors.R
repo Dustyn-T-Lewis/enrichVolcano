@@ -62,7 +62,7 @@ test_that("param error class fires for a bad score_stops length", {
 test_that("invalid colour fires its own classed error", {
   expect_error(
     plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(), disc_colour = "not_a_real_colour"),
-    class = "ev_invalid_colour"
+    class = "enrichVolcano_param_error"
   )
 })
 

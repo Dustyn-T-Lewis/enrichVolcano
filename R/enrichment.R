@@ -28,7 +28,7 @@ enrichment_problems <- function(results, metadata) {
     return(paste0("`results` is missing ", paste0("`", missing, "`", collapse = ", "), "."))
   }
   wrong_type <- Filter(
-    function(col) !is_column_type(results[[col]], results_columns[[col]]),
+    function(col) !match.fun(paste0("is.", results_columns[[col]]))(results[[col]]),
     names(results_columns)
   )
   if (length(wrong_type) > 0) {
@@ -48,14 +48,6 @@ enrichment_problems <- function(results, metadata) {
     metadata_problems(metadata)
   )
   if (length(problems) > 0) problems
-}
-
-is_column_type <- function(x, type) {
-  switch(type,
-    character = is.character(x),
-    numeric = is.numeric(x),
-    list = is.list(x)
-  )
 }
 
 in_unit_interval <- function(x) is.na(x) | (x >= 0 & x <= 1)

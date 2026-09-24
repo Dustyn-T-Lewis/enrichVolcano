@@ -2,6 +2,7 @@ source(test_path("fixtures/make_toy.R"))
 
 make_lbl_input <- function() {
   data.frame(
+    protein = paste0("P", 1:10),
     gene = paste0("G", 1:10),
     logFC = c(3, 2, 1, 0.5, 0.1, -0.1, -0.5, -1, -2, -3),
     P.Value = c(1e-5, 1e-4, 1e-3, 0.01, 0.5, 0.5, 0.01, 1e-3, 1e-4, 1e-5),
@@ -32,10 +33,10 @@ test_that("ev_select_labels mode = 'top_per_direction' picks n per side", {
   expect_true(any(out$logFC < 0))
 })
 
-test_that("ev_select_labels mode = 'top_total' returns the top n by significance", {
+test_that("ev_select_labels mode = 'by_significance' returns the top n by significance", {
   out <- ev_select_labels(
     make_lbl_input(),
-    mode = "top_total", n = 3, rank_by = "significance",
+    mode = "by_significance", n = 3, rank_by = "significance",
     genes = NULL, p_col = "P.Value",
     p_threshold = 0.05, logfc_threshold = 0
   )
@@ -45,41 +46,32 @@ test_that("ev_select_labels mode = 'top_total' returns the top n by significance
 test_that("ev_select_labels rank_by = 'logfc' sorts by |logFC|", {
   out <- ev_select_labels(
     make_lbl_input(),
-    mode = "top_total", n = 2, rank_by = "logfc",
+    mode = "by_significance", n = 2, rank_by = "logfc",
     genes = NULL, p_col = "P.Value",
     p_threshold = 0.05, logfc_threshold = 0
   )
   expect_equal(sort(out$gene), c("G1", "G10"))
 })
 
-test_that("ev_select_labels mode = 'all_significant' keeps every sig row", {
+test_that("ev_select_labels mode = 'by_genes' matches symbols and accessions", {
   out <- ev_select_labels(
     make_lbl_input(),
-    mode = "all_significant", n = 0, rank_by = "significance",
-    genes = NULL, p_col = "P.Value",
-    p_threshold = 0.05, logfc_threshold = 0
-  )
-  expect_equal(nrow(out), 8L)
-})
-
-test_that("ev_select_labels mode = 'explicit' matches the genes vector", {
-  out <- ev_select_labels(
-    make_lbl_input(),
-    mode = "explicit", n = 0, rank_by = "significance",
-    genes = c("G2", "G9"), p_col = "P.Value",
+    mode = "by_genes", n = 0, rank_by = "significance",
+    genes = c("G2", "P9"), p_col = "P.Value",
     p_threshold = 0.05, logfc_threshold = 0
   )
   expect_equal(sort(out$gene), c("G2", "G9"))
 })
 
-test_that("ev_label_text prefers symbol, then uniprot, then gene", {
-  d <- data.frame(
-    gene = c("g1", "g2", "g3"),
-    symbol = c("S1", NA, ""),
-    uniprot = c("U1", "U2", NA),
-    stringsAsFactors = FALSE
+test_that("a point without a gene symbol is labelled with its accession", {
+  d <- make_lbl_input()
+  d$gene[1:2] <- c(NA, "")
+  out <- ev_select_labels(
+    d,
+    mode = "by_significance", n = 2, rank_by = "significance",
+    genes = NULL, p_col = "P.Value", p_threshold = 0.05, logfc_threshold = 0
   )
-  expect_equal(ev_label_text(d), c("S1", "U2", "g3"))
+  expect_setequal(out$label_text, c("P1", "G10"))
 })
 
 test_that("clean_label strips canonical database prefixes", {

@@ -34,6 +34,6 @@ test_that("score_stops must match the (possibly overridden) ramp length", {
 test_that("an invalid colour override is caught at the boundary", {
   expect_error(
     plot_theme(up = "not_a_real_colour"),
-    class = "ev_invalid_colour"
+    class = "enrichVolcano_param_error"
   )
 })

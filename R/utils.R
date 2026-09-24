@@ -90,7 +90,7 @@ ev_assert_colour <- function(x, arg = "disc_colour") {
     )
   if (!ok) {
     ev_abort("{.arg {arg}} must be a single colour name or hex code; got {.val {x}}.",
-      class = "ev_invalid_colour"
+      class = "enrichVolcano_param_error"
     )
   }
   invisible(x)
