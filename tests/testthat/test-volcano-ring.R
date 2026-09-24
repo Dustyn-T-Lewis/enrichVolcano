@@ -138,44 +138,6 @@ test_that("show_counts = FALSE drops the up/down count badges", {
   expect_false(n_up %in% without)
 })
 
-grid <- function(volc, x = make_toy_ring_enrichment(c("A", "B")), ...) {
-  suppressMessages(volcano_ring_grid(volc, x, databases = NULL, term_threshold = 1, n_terms = Inf, ...))
-}
-
-test_that("volcano_ring_grid composes a 2-panel layout from named lists", {
-  g <- grid(make_toy_da(c("A", "B")))
-  expect_s3_class(g, "volcano_ring_grid")
-  expect_named(g, c("plot", "data"))
-  expect_s3_class(g$plot, "patchwork")
-  expect_named(g$data, c("A", "B"))
-})
-
-test_that("volcano_ring_grid aborts when a contrast is missing on either side", {
-  expect_error(
-    grid(make_toy_da("A"), contrasts = c("A", "B")),
-    class = "enrichVolcano_input_error"
-  )
-  expect_error(
-    grid(make_toy_da(c("A", "C"))),
-    "C",
-    class = "enrichVolcano_input_error"
-  )
-})
-
-test_that("volcano_ring_grid refuses a plain enrichment table", {
-  expect_error(
-    volcano_ring_grid(make_toy_da("A"), make_toy_enrich()),
-    class = "enrichVolcano_input_error"
-  )
-})
-
-test_that("print.volcano_ring_grid returns the object invisibly", {
-  g <- grid(make_toy_da(c("A", "B")))
-  pdf(NULL)
-  on.exit(dev.off())
-  expect_invisible(print(g))
-})
-
 test_that("a fry ring's fill scale spans its scores instead of squishing at 3", {
   fry <- utils::read.csv(test_path("fixtures", "limma_fry.csv"), row.names = 1)
   x <- suppressMessages(as_enrichment(list(toy = fry)))
@@ -223,13 +185,6 @@ test_that("a hand-picked term found in two databases is drawn once", {
   picked <- ring_terms(x@results, 0.05, 12, terms = r$term[1])
   expect_identical(nrow(picked), 1L)
   expect_identical(picked$padj, r$padj[1])
-})
-
-test_that("grid subtitles can be named by contrast or given in order", {
-  volc <- make_toy_da(c("A", "B"))
-  subtitles_of <- function(g) c(g$plot[[1]]$labels$subtitle, g$plot[[2]]$labels$subtitle)
-  expect_identical(subtitles_of(grid(volc, subtitles = c(B = "second", A = "first"))), c("first", "second"))
-  expect_identical(subtitles_of(grid(volc, subtitles = c("first", "second"))), c("first", "second"))
 })
 
 toy_da <- function(contrasts = c("A", "B")) {

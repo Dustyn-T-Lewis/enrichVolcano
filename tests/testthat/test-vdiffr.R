@@ -34,14 +34,3 @@ test_that("magnitude = 'size' toy snapshot is stable", {
   ))
   vdiffr::expect_doppelganger("toy-magnitude-size", p)
 })
-
-test_that("2-panel grid toy snapshot is stable", {
-  skip_on_ci()
-  skip_if_not_installed("vdiffr")
-  g <- suppressMessages(volcano_ring_grid(
-    make_toy_da(c("A", "B")),
-    make_toy_ring_enrichment(c("A", "B")),
-    databases = NULL, term_threshold = 1, n_terms = Inf
-  ))
-  vdiffr::expect_doppelganger("toy-grid-2x", g$plot)
-})

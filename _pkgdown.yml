@@ -15,7 +15,6 @@ reference:
   - title: "Plot"
     contents:
       - volcano_ring
-      - volcano_ring_grid
       - nes_scatter
   - title: "Style"
     contents:

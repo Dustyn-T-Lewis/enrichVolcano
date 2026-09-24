@@ -34,13 +34,6 @@ test_that("ring_radius below volcano_radius warns about overflow", {
   )
 })
 
-test_that("input error class fires when grid input is malformed", {
-  expect_error(
-    volcano_ring_grid(42, make_toy_ring_enrichment()),
-    class = "enrichVolcano_input_error"
-  )
-})
-
 test_that("column error class fires for a missing volc column", {
   v <- make_toy_da()
   v$logFC <- NULL

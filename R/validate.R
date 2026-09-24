@@ -49,25 +49,3 @@ validate_ring_geometry <- function(ring_radius, volcano_radius, arc_height_range
   }
   invisible(TRUE)
 }
-
-#' Validate the grid spacing knobs at the public boundary
-#'
-#' @keywords internal
-#' @noRd
-validate_grid_spacing <- function(panel_spacing, panel_margin, legend_width) {
-  knobs <- list(
-    panel_spacing = panel_spacing,
-    panel_margin = panel_margin,
-    legend_width = legend_width
-  )
-  for (nm in names(knobs)) {
-    v <- knobs[[nm]]
-    if (!is.numeric(v) || length(v) != 1L || !is.finite(v) || v < 0) {
-      ev_abort(
-        "{.arg {nm}} must be a single non-negative number (mm); got {.val {v}}.",
-        class = "enrichVolcano_param_error"
-      )
-    }
-  }
-  invisible(TRUE)
-}

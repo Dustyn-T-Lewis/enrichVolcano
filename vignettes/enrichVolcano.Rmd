@@ -395,10 +395,11 @@ The arguments you will reach for most:
 - `label_mode`, `label_n`, `label_genes`: which proteins get text.
 - `show_counts`, `disc_color`: count badges and a tinted central disc.
 
-`volcano_ring_grid()` draws one ring per contrast and collects a shared
-legend; extra arguments pass to every ring.
+Each ring is one ggplot. Combine several with patchwork.
 
 ```{r grid, fig.width = 10, fig.height = 5.5, fig.alt = "Two volcano rings side by side for trained young and trained old"}
-g <- volcano_ring_grid(yvo$da, res$fgsea, contrasts = c("Training_Young", "Training_Old"), ncol = 2)
-g$plot
+rings <- lapply(c("Training_Young", "Training_Old"), function(k) {
+  volcano_ring(yvo$da, res$fgsea, contrast = k, title = k)
+})
+patchwork::wrap_plots(rings, ncol = 2)
 ```

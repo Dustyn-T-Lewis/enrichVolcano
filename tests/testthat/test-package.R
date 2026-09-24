@@ -1,10 +1,9 @@
 test_that("the public exports are visible", {
   exports <- c(
     "as_enrichment", "dedup", "enrichment", "ev_clean_label", "nes_scatter",
-    "volcano_ring", "volcano_ring_grid", "volcano_ring_theme"
+    "volcano_ring", "volcano_ring_theme"
   )
   expect_true(all(exports %in% getNamespaceExports("enrichVolcano")))
-  expect_true(!is.null(getS3method("print", "volcano_ring_grid")))
 })
 
 test_that("R code is plain ASCII, so figures print on any device", {

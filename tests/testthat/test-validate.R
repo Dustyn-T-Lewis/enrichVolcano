@@ -8,14 +8,3 @@ test_that("validate_ring_geometry rejects a bad label_headroom", {
     )
   }
 })
-
-test_that("validate_grid_spacing rejects a negative or non-scalar knob", {
-  expect_error(
-    validate_grid_spacing(-1, 2, 26),
-    class = "enrichVolcano_param_error"
-  )
-  expect_error(
-    validate_grid_spacing(1.5, c(2, 3), 26),
-    class = "enrichVolcano_param_error"
-  )
-})

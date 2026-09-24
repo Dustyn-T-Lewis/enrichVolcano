@@ -50,7 +50,7 @@ volcano_ring(study$da, res$fgsea, contrast = "Aging")
 3. `dedup()` (optional) flags redundant terms so a figure shows each
    signal once. p-values are never changed.
 4. A plot function draws from the object: `volcano_ring()` for one contrast,
-   `volcano_ring_grid()` for several, `nes_scatter()` to compare two contrasts
+   `nes_scatter()` to compare two contrasts
    term by term (concordance or reversal).
 
 ## Install
