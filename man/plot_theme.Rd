@@ -11,9 +11,9 @@ plot_theme(
   up = NULL,
   down = NULL,
   ns = NULL,
-  nes_colors = NULL,
-  nes_limits = NULL,
-  nes_stops = NULL
+  score_colours = NULL,
+  score_limits = NULL,
+  score_stops = NULL
 )
 }
 \arguments{
@@ -24,23 +24,23 @@ plot_theme(
 \item{palette}{One of \code{"default"} (red-blue diverging, the YvO 2026 lock),
 \code{"viridis"} (5-stop magma cuts), or \code{"okabe"} (Okabe-Ito CB-safe pair).
 Sets the starting up / down / non-significant colours and NES ramp; any
-of \code{up}, \code{down}, \code{ns}, \code{nes_colors} below override it.}
+of \code{up}, \code{down}, \code{ns}, \code{score_colours} below override it.}
 
 \item{up, down, ns}{Optional single colours overriding the palette's
 up-regulated, down-regulated, and non-significant point colours.}
 
-\item{nes_colors}{Optional colour vector overriding the diverging NES ramp.
-When supplied without \code{nes_stops}, stops spread evenly across
-\code{nes_limits} (or \code{c(-3, 3)}).}
+\item{score_colours}{Optional colour vector overriding the diverging NES ramp.
+When supplied without \code{score_stops}, stops spread evenly across
+\code{score_limits} (or \code{c(-3, 3)}).}
 
-\item{nes_limits}{Optional length-2 numeric. When \code{NULL}, the colour scale
+\item{score_limits}{Optional length-2 numeric. When \code{NULL}, the colour scale
 in \code{plot_volcano_ring()} uses its own default.}
 
-\item{nes_stops}{Optional numeric vector matching the NES ramp length,
+\item{score_stops}{Optional numeric vector matching the NES ramp length,
 overriding the palette's \code{nes_values}.}
 }
 \value{
-A list \code{list(base_size, base_family, palette, nes_limits)} consumed
+A list \code{list(base_size, base_family, palette, score_limits)} consumed
 by \code{\link[=plot_volcano_ring]{plot_volcano_ring()}}.
 }
 \description{

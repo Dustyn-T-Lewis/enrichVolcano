@@ -54,7 +54,7 @@ map_symbols <- function(ids, species) {
 #' Each collection is kept separate so [run_enrichment()] corrects p-values
 #' within it.
 #'
-#' @param collections Any of `"Hallmark"`, `"GO Slim"`, `"Reactome"`, `"KEGG"`,
+#' @param databases Any of `"Hallmark"`, `"GO Slim"`, `"Reactome"`, `"KEGG"`,
 #'   `"GO:BP"`.
 #' @param species `"Homo sapiens"`, `"Mus musculus"` or `"Rattus norvegicus"`.
 #' @param min_size,max_size Keep sets with this many genes.
@@ -62,19 +62,19 @@ map_symbols <- function(ids, species) {
 #'   a `versions` attribute (msigdbr, GO slim release, annotation package,
 #'   species).
 #' @export
-load_gene_sets <- function(collections = c("Hallmark", "GO Slim"), species = "Homo sapiens",
+load_gene_sets <- function(databases = c("Hallmark", "GO Slim"), species = "Homo sapiens",
                            min_size = 15, max_size = 500) {
   known <- c(names(msigdb_collections), "GO Slim")
-  unknown <- setdiff(collections, known)
+  unknown <- setdiff(databases, known)
   if (length(unknown) > 0) {
     ev_abort(
-      c("Unknown collection{?s}: {.val {unknown}}.", i = "Available: {.val {known}}."),
+      c("Unknown database{?s}: {.val {unknown}}.", i = "Available: {.val {known}}."),
       class = "enrichVolcano_param_error"
     )
   }
   pkg <- org_package(species)
   versions <- list(species = species, annotation = paste(pkg, utils::packageVersion(pkg)))
-  sets <- lapply(collections, function(name) {
+  sets <- lapply(databases, function(name) {
     if (name == "GO Slim") {
       slim <- go_slim_sets(pkg)
       versions$go_slim <<- attr(slim, "data_version")
@@ -88,7 +88,7 @@ load_gene_sets <- function(collections = c("Hallmark", "GO Slim"), species = "Ho
     ))
     lapply(split(tbl$gene_symbol, tbl$gs_name), unique)
   })
-  names(sets) <- collections
+  names(sets) <- databases
   sets <- lapply(sets, function(s) s[lengths(s) >= min_size & lengths(s) <= max_size])
   attr(sets, "versions") <- versions
   sets

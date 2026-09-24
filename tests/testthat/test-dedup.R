@@ -32,7 +32,7 @@ test_that("the default combined rule at 0.375 flags B and C under A", {
   expect_equal(r$similarity[r$term == "SET_C"], 0.5 * 4 / 10 + 0.5 * 1)
   expect_identical(
     x@metadata$dedup,
-    list(method = "enrichmentmap", similarity = "combined", cutoff = 0.375, p_threshold = 0.05)
+    list(method = "enrichmentmap", similarity = "combined", cutoff = 0.375, term_threshold = 0.05)
   )
 })
 
@@ -145,7 +145,7 @@ test_that("collapse_pathways reproduces fgsea::collapsePathways", {
   expect_true(all(is.na(r$similarity)))
   expect_identical(
     y@metadata$dedup,
-    list(method = "collapse_pathways", similarity = NULL, cutoff = NULL, p_threshold = 0.05)
+    list(method = "collapse_pathways", similarity = NULL, cutoff = NULL, term_threshold = 0.05)
   )
 })
 

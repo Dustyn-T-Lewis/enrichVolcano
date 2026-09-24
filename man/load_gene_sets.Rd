@@ -5,14 +5,14 @@
 \title{Load gene-set collections for enrichment}
 \usage{
 load_gene_sets(
-  collections = c("Hallmark", "GO Slim"),
+  databases = c("Hallmark", "GO Slim"),
   species = "Homo sapiens",
   min_size = 15,
   max_size = 500
 )
 }
 \arguments{
-\item{collections}{Any of \code{"Hallmark"}, \code{"GO Slim"}, \code{"Reactome"}, \code{"KEGG"},
+\item{databases}{Any of \code{"Hallmark"}, \code{"GO Slim"}, \code{"Reactome"}, \code{"KEGG"},
 \code{"GO:BP"}.}
 
 \item{species}{\code{"Homo sapiens"}, \code{"Mus musculus"} or \code{"Rattus norvegicus"}.}

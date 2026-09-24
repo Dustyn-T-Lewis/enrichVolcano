@@ -76,7 +76,7 @@ ev_abort_missing_column <- function(df, col_name, col_arg, df_name) {
 #' Catch it at the boundary instead.
 #' @keywords internal
 #' @noRd
-ev_assert_colour <- function(x, arg = "disc_color") {
+ev_assert_colour <- function(x, arg = "disc_colour") {
   if (is.null(x)) {
     return(invisible(NULL))
   }

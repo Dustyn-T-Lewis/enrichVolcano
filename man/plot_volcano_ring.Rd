@@ -5,7 +5,7 @@
 \title{Volcano-in-ring composite for one contrast}
 \usage{
 plot_volcano_ring(
-  volc_df,
+  da,
   enrichment,
   contrast = NULL,
   databases = NULL,
@@ -25,10 +25,10 @@ plot_volcano_ring(
   ring_thickness = 0.55,
   tick_width = 0.3,
   label_headroom = 0.5,
-  disc_color = NULL,
-  nes_limits = NULL,
+  disc_colour = NULL,
+  score_limits = NULL,
   magnitude = NULL,
-  arc_order = c("padj", "nes"),
+  arc_order = c("padj", "score"),
   arc_height_range = c(0.4, 1.6),
   show_counts = TRUE,
   point_size = 1.1,
@@ -47,7 +47,7 @@ plot_volcano_ring(
 )
 }
 \arguments{
-\item{volc_df}{DA results from \code{\link[=as_da]{as_da()}}; the rows for \code{contrast} are drawn.
+\item{da}{DA results from \code{\link[=as_da]{as_da()}}; the rows for \code{contrast} are drawn.
 Points are called significant on \code{padj}, or on \code{p} when \code{padj} is empty.
 To colour by another statistic, such as a pi-value, pass it to \code{\link[=as_da]{as_da()}}
 as \code{padj}.}
@@ -102,9 +102,9 @@ beyond the outermost pathway label so its box stays enclosed within the
 square panel rather than clipping or spilling into a neighbour. Raise it
 when wide label boxes are clipped; lower it to pack the ring tighter.}
 
-\item{disc_color}{Optional fill for a tinted central disc.}
+\item{disc_colour}{Optional fill for a tinted central disc.}
 
-\item{nes_limits}{Length-2 numeric or \code{NULL}; limits of the arc fill scale.
+\item{score_limits}{Length-2 numeric or \code{NULL}; limits of the arc fill scale.
 \code{NULL} uses \code{c(-3, 3)} for NES, and otherwise spans the largest absolute
 significant score in the whole object, so every contrast shares a scale.}
 
@@ -114,7 +114,7 @@ height never repeat the same number for fry or camera results; without
 set sizes it falls back to \code{"neg_log_padj"}.}
 
 \item{arc_order}{Angular order of arcs within each up/down half:
-\code{"padj"} (default, lowest FDR first) or \code{"nes"} (strongest absolute score
+\code{"padj"} (default, lowest FDR first) or \code{"score"} (strongest absolute score
 first). The up/down split itself is always by direction.}
 
 \item{arc_height_range}{Length-2 numeric \code{c(min, max)} for the shortest

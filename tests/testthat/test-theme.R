@@ -7,25 +7,25 @@ test_that("plot_theme overrides point colours without touching the rest", {
   expect_equal(th$palette$nes_scale, plot_theme()$palette$nes_scale)
 })
 
-test_that("nes_colors replaces the ramp and spreads stops across the limits", {
+test_that("score_colours replaces the ramp and spreads stops across the limits", {
   th <- plot_theme(
-    nes_colors = c("#053061", "white", "#67001F"),
-    nes_limits = c(-2, 2)
+    score_colours = c("#053061", "white", "#67001F"),
+    score_limits = c(-2, 2)
   )
   expect_equal(th$palette$nes_scale, c("#053061", "white", "#67001F"))
   expect_equal(th$palette$nes_values, c(-2, 0, 2))
 })
 
-test_that("nes_stops of matching length overrides the ramp positions", {
-  th <- plot_theme(nes_stops = c(-3, -1, 0, 1, 3))
+test_that("score_stops of matching length overrides the ramp positions", {
+  th <- plot_theme(score_stops = c(-3, -1, 0, 1, 3))
   expect_equal(th$palette$nes_values, c(-3, -1, 0, 1, 3))
 })
 
-test_that("nes_stops must match the (possibly overridden) ramp length", {
+test_that("score_stops must match the (possibly overridden) ramp length", {
   expect_error(
     plot_theme(
-      nes_colors = c("#053061", "#67001F"),
-      nes_stops = c(-3, 0, 3)
+      score_colours = c("#053061", "#67001F"),
+      score_stops = c(-3, 0, 3)
     ),
     class = "enrichVolcano_param_error"
   )

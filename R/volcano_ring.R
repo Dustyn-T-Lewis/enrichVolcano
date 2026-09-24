@@ -35,7 +35,7 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   ord_key <- function(df) {
     switch(order_by,
       padj = df[[padj_col]],
-      nes  = -abs(df[[nes_col]])
+      score = -abs(df[[nes_col]])
     )
   }
   up <- up[order(ord_key(up)), , drop = FALSE]
@@ -96,12 +96,12 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
 
 #' @keywords internal
 #' @noRd
-ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
+ev_tick_data <- function(ring_data, da, gene_col, logfc_col,
                          tick_r0 = ev_ring_r_inner, tick_r1 = ev_ring_r_outer) {
   if (nrow(ring_data) == 0) {
     return(data.frame())
   }
-  gene_lfc <- volc_df[!is.na(volc_df[[logfc_col]]),
+  gene_lfc <- da[!is.na(da[[logfc_col]]),
     c(gene_col, logfc_col),
     drop = FALSE
   ]
@@ -152,7 +152,7 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' direction. `terms` overrides
 #' all of this with a hand-picked set.
 #'
-#' @param volc_df DA results from [as_da()]; the rows for `contrast` are drawn.
+#' @param da DA results from [as_da()]; the rows for `contrast` are drawn.
 #'   Points are called significant on `padj`, or on `p` when `padj` is empty.
 #'   To colour by another statistic, such as a pi-value, pass it to [as_da()]
 #'   as `padj`.
@@ -189,8 +189,8 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #'   beyond the outermost pathway label so its box stays enclosed within the
 #'   square panel rather than clipping or spilling into a neighbour. Raise it
 #'   when wide label boxes are clipped; lower it to pack the ring tighter.
-#' @param disc_color Optional fill for a tinted central disc.
-#' @param nes_limits Length-2 numeric or `NULL`; limits of the arc fill scale.
+#' @param disc_colour Optional fill for a tinted central disc.
+#' @param score_limits Length-2 numeric or `NULL`; limits of the arc fill scale.
 #'   `NULL` uses `c(-3, 3)` for NES, and otherwise spans the largest absolute
 #'   significant score in the whole object, so every contrast shares a scale.
 #' @param magnitude What arc height encodes: `"neg_log_padj"` or `"size"`.
@@ -198,7 +198,7 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #'   height never repeat the same number for fry or camera results; without
 #'   set sizes it falls back to `"neg_log_padj"`.
 #' @param arc_order Angular order of arcs within each up/down half:
-#'   `"padj"` (default, lowest FDR first) or `"nes"` (strongest absolute score
+#'   `"padj"` (default, lowest FDR first) or `"score"` (strongest absolute score
 #'   first). The up/down split itself is always by direction.
 #' @param arc_height_range Length-2 numeric `c(min, max)` for the shortest
 #'   and tallest arc; widen it to exaggerate the magnitude encoding.
@@ -225,7 +225,7 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' )))
 #'
 #' plot_volcano_ring(da, ex, contrast = "Training_Young", title = "Training_Young")
-plot_volcano_ring <- function(volc_df, enrichment,
+plot_volcano_ring <- function(da, enrichment,
                               contrast = NULL,
                               databases = NULL,
                               collapse = TRUE,
@@ -244,10 +244,10 @@ plot_volcano_ring <- function(volc_df, enrichment,
                               ring_thickness = 0.55,
                               tick_width = 0.3,
                               label_headroom = 0.5,
-                              disc_color = NULL,
-                              nes_limits = NULL,
+                              disc_colour = NULL,
+                              score_limits = NULL,
                               magnitude = NULL,
-                              arc_order = c("padj", "nes"),
+                              arc_order = c("padj", "score"),
                               arc_height_range = c(0.4, 1.6),
                               show_counts = TRUE,
                               point_size = 1.1,
@@ -269,23 +269,23 @@ plot_volcano_ring <- function(volc_df, enrichment,
   arc_order <- match.arg(arc_order)
   label_mode <- match.arg(label_mode)
   label_rank_by <- match.arg(label_rank_by)
-  ev_assert_colour(disc_color)
+  ev_assert_colour(disc_colour)
   validate_ring_geometry(ring_radius, volcano_radius, arc_height_range, label_headroom)
 
-  if (!inherits(volc_df, "enrichVolcano_da")) {
+  if (!inherits(da, "enrichVolcano_da")) {
     ev_abort(
-      "{.arg volc_df} must be {.fn as_da} output, not {.cls {class(volc_df)[1]}}.",
+      "{.arg da} must be {.fn as_da} output, not {.cls {class(da)[1]}}.",
       class = "enrichVolcano_input_error"
     )
   }
   check_enrichment(enrichment)
-  require_columns(volc_df, c("gene", "logFC", "p", "padj"))
-  validate_da(volc_df)
-  volc_df <- contrast_rows(volc_df, contrast)
-  if (all(is.na(volc_df$p)) && all(is.na(volc_df$padj))) {
+  require_columns(da, c("gene", "logFC", "p", "padj"))
+  validate_da(da)
+  da <- contrast_rows(da, contrast)
+  if (all(is.na(da$p)) && all(is.na(da$padj))) {
     ev_abort("The DA results have no p-values to draw a volcano from.", class = "enrichVolcano_data_error")
   }
-  pval_col <- if (all(is.na(volc_df$p))) "padj" else "p"
+  pval_col <- if (all(is.na(da$p))) "padj" else "p"
   score_type <- enrichment@metadata$score_type
   enrich_df <- contrast_rows(enrichment@results, contrast)
   if (is.null(terms)) enrich_df <- filter_view(enrich_df, databases, collapse)
@@ -294,16 +294,16 @@ plot_volcano_ring <- function(volc_df, enrichment,
   if (nrow(enrich_df) == 0) {
     ev_inform("No terms pass the selection, so the ring is empty.", class = "enrichVolcano_empty_ring")
   }
-  has_padj <- !all(is.na(volc_df$padj))
+  has_padj <- !all(is.na(da$padj))
 
   pal <- theme$palette
-  nes_limits <- nes_limits %||% theme$nes_limits %||%
+  score_limits <- score_limits %||% theme$score_limits %||%
     default_score_limits(score_type, enrichment@results, term_threshold)
   vr <- volcano_radius * 0.92
   ring_r0 <- ring_radius
   ring_r1 <- ring_radius + ring_thickness
 
-  v <- volc_df[!is.na(volc_df$logFC) & !is.na(volc_df[[pval_col]]), ,
+  v <- da[!is.na(da$logFC) & !is.na(da[[pval_col]]), ,
     drop = FALSE
   ]
   v$.ev_neg_log10p <- -log10(v[[pval_col]])
@@ -358,14 +358,14 @@ plot_volcano_ring <- function(volc_df, enrichment,
 
   p <- ggplot2::ggplot()
 
-  if (!is.null(disc_color)) {
+  if (!is.null(disc_colour)) {
     disc <- data.frame(
       x = ring_r0 * cos(seq(0, 2 * pi, length.out = 200)),
       y = ring_r0 * sin(seq(0, 2 * pi, length.out = 200))
     )
     p <- p + ggplot2::geom_polygon(
       data = disc, ggplot2::aes(.data$x, .data$y),
-      fill = disc_color, alpha = 0.12, colour = NA, inherit.aes = FALSE
+      fill = disc_colour, alpha = 0.12, colour = NA, inherit.aes = FALSE
     )
   }
 
@@ -476,7 +476,7 @@ plot_volcano_ring <- function(volc_df, enrichment,
       ggplot2::scale_fill_gradientn(
         colours = pal$nes_scale,
         values = scales::rescale(pal$nes_values),
-        limits = nes_limits, oob = scales::squish, name = score_type
+        limits = score_limits, oob = scales::squish, name = score_type
       )
 
     lbl <- ring

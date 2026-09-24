@@ -363,15 +363,15 @@ plot_scatter(ex, "Aging", "Training_Old",
 ```
 
 A term counts as significant in a contrast when its padj is below
-`p_threshold` (0.05); the colour says whether that holds in one contrast or
+`term_threshold` (0.05); the colour says whether that holds in one contrast or
 both. Pathways are judged on the false discovery rate alone. Scores that
 combine effect size with p, such as the \(\pi\)-value, are defined for single
 proteins, not gene sets. The corner counts and the headline share use
 significant terms only; Spearman's \(\rho\) uses every plotted term, with a 95%
 interval when the correlation package is installed.
 
-`color_by` and `shape_by` take any per-term column, for example
-`color_by = "database"`, and `databases`, `collapse` and `label_min_size`
+`colour_by` and `shape_by` take any per-term column, for example
+`colour_by = "database"`, and `databases`, `collapse` and `label_min_size`
 work as they do for the ring.
 
 ## Change the look
@@ -393,7 +393,7 @@ The arguments you will reach for most:
 - `arc_order`: order arcs by `"padj"` or by absolute score within each half.
 - `x_scale`, `y_scale`: compress the volcano when points crowd the ring.
 - `label_mode`, `label_n`, `label_genes`: which proteins get text.
-- `show_counts`, `disc_color`: count badges and a tinted central disc.
+- `show_counts`, `disc_colour`: count badges and a tinted central disc.
 
 Each ring is one ggplot. Combine several with patchwork.
 

@@ -1,6 +1,6 @@
 source(test_path("fixtures/make_toy.R"))
 
-test_that("input error class fires for non-data.frame volc_df", {
+test_that("input error class fires for non-data.frame da", {
   expect_error(
     plot_volcano_ring(list(), make_toy_ring_enrichment()),
     class = "enrichVolcano_input_error"
@@ -52,16 +52,16 @@ test_that("data error class fires for impossible padj", {
   )
 })
 
-test_that("param error class fires for a bad nes_stops length", {
+test_that("param error class fires for a bad score_stops length", {
   expect_error(
-    plot_theme(nes_stops = c(-1, 1)),
+    plot_theme(score_stops = c(-1, 1)),
     class = "enrichVolcano_param_error"
   )
 })
 
 test_that("invalid colour fires its own classed error", {
   expect_error(
-    plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(), disc_color = "not_a_real_colour"),
+    plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(), disc_colour = "not_a_real_colour"),
     class = "ev_invalid_colour"
   )
 })

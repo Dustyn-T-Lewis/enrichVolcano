@@ -96,12 +96,12 @@ test_that("reversal framing flips the reference line, names and headline share",
   expect_error(scatter(comparison = "sideways"), class = "rlang_error")
 })
 
-test_that("only significant terms of at least label_min_size are labelled, up to max_labels", {
+test_that("only significant terms of at least label_min_size are labelled, up to label_n", {
   labs <- layer_labels(scatter())
   expect_true(any(grepl("T01", labs)))
   expect_false(any(grepl("T12", labs)))
   expect_false(any(grepl("T06", labs)))
-  labs_few <- layer_labels(scatter(max_labels = 2))
+  labs_few <- layer_labels(scatter(label_n = 2))
   expect_identical(sum(grepl("^T[0-9]+$", labs_few)), 2L)
 })
 
@@ -135,11 +135,11 @@ test_that("contrasts must be two different ones that exist", {
   expect_error(plot_scatter(make_toy_enrich(), "A", "B"), class = "enrichVolcano_input_error")
 })
 
-test_that("color_by and shape_by take any column, or NULL", {
-  expect_s3_class(scatter(color_by = "database", shape_by = NULL), "ggplot")
-  expect_s3_class(scatter(color_by = NULL), "ggplot")
-  expect_s3_class(scatter(color_by = "size"), "ggplot")
-  expect_error(scatter(color_by = "nope"), class = "enrichVolcano_column_error")
+test_that("colour_by and shape_by take any column, or NULL", {
+  expect_s3_class(scatter(colour_by = "database", shape_by = NULL), "ggplot")
+  expect_s3_class(scatter(colour_by = NULL), "ggplot")
+  expect_s3_class(scatter(colour_by = "size"), "ggplot")
+  expect_error(scatter(colour_by = "nope"), class = "enrichVolcano_column_error")
   expect_error(scatter(shape_by = "nope"), class = "enrichVolcano_column_error")
 })
 
@@ -194,7 +194,7 @@ test_that("more than eight colour groups fall back to the default palette", {
   r <- x@results
   r$group <- rep(sprintf("g%02d", 1:12), 2)
   x@results <- r
-  expect_s3_class(scatter(x, color_by = "group")$scales$get_scales("fill"), "ScaleDiscrete")
+  expect_s3_class(scatter(x, colour_by = "group")$scales$get_scales("fill"), "ScaleDiscrete")
 })
 
 test_that("an unlabelled database column draws one shape and no shape legend", {

@@ -84,8 +84,8 @@ test_that("a ring with no terms left still draws and says why", {
   expect_s3_class(p, "ggplot")
 })
 
-test_that("disc_color draws a tinted central disc", {
-  expect_s3_class(ring(disc_color = "grey70"), "ggplot")
+test_that("disc_colour draws a tinted central disc", {
+  expect_s3_class(ring(disc_colour = "grey70"), "ggplot")
 })
 
 test_that("x_scale and y_scale compress the volcano point cloud", {
@@ -100,7 +100,7 @@ test_that("x_scale and y_scale compress the volcano point cloud", {
   expect_lt(point_span(short, "y"), point_span(full, "y"))
 })
 
-test_that("arc_order = 'nes' reorders arcs by absolute score within a half", {
+test_that("arc_order = 'score' reorders arcs by absolute score within a half", {
   # P: most significant, weakest score; Q: least significant, strongest score.
   e <- data.frame(
     term = c("P", "Q"), score = c(1.2, 3.0),
@@ -110,7 +110,7 @@ test_that("arc_order = 'nes' reorders arcs by absolute score within a half", {
   gl <- replicate(nrow(e), character(0), simplify = FALSE)
   mag <- -log10(e$padj)
   by_padj <- ev_ring_geometry(e, "term", "padj", "score", mag, gl, order_by = "padj")
-  by_nes <- ev_ring_geometry(e, "term", "padj", "score", mag, gl, order_by = "nes")
+  by_nes <- ev_ring_geometry(e, "term", "padj", "score", mag, gl, order_by = "score")
   expect_equal(by_padj$term, c("P", "Q"))
   expect_equal(by_nes$term, c("Q", "P"))
 })

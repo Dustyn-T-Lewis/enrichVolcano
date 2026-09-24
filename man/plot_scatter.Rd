@@ -11,11 +11,11 @@ plot_scatter(
   comparison = c("concordance", "reversal"),
   databases = NULL,
   collapse = TRUE,
-  p_threshold = 0.05,
-  color_by = "significance",
+  term_threshold = 0.05,
+  colour_by = "significance",
   shape_by = "database",
   label_min_size = 15,
-  max_labels = 20,
+  label_n = 20,
   theme = plot_theme()
 )
 }
@@ -33,9 +33,9 @@ no database labels.}
 \item{collapse}{Hide terms that \code{\link[=dedup_terms]{dedup_terms()}} flagged redundant in one contrast
 and kept as a representative in neither.}
 
-\item{p_threshold}{Significance cutoff on \code{padj}.}
+\item{term_threshold}{Significance cutoff on \code{padj}.}
 
-\item{color_by}{Column that fills significant points: \code{"significance"}
+\item{colour_by}{Column that fills significant points: \code{"significance"}
 (significant in \code{x} only, \code{y} only, or both), any per-term column such as
 \code{"database"}, or \code{NULL} for one colour. Per-term columns are read from
 the \code{x} contrast.}
@@ -44,7 +44,7 @@ the \code{x} contrast.}
 
 \item{label_min_size}{Smallest gene set that gets a label.}
 
-\item{max_labels}{Most labels drawn.}
+\item{label_n}{Most labels drawn.}
 
 \item{theme}{Output of \code{\link[=plot_theme]{plot_theme()}}; supplies the base font.}
 }
@@ -74,7 +74,7 @@ reports the share reversed.
 \itemize{
 \item Points: every term scored in both contrasts. Non-significant terms are
 small and grey; significant ones are sized by gene-set size and filled by
-\code{color_by}.
+\code{colour_by}.
 \item Shading: same-direction quadrants are tinted, the others left white.
 \item Corner labels: each quadrant's name and its count of significant terms.
 \item Dashed line: \eqn{y = x}, or \eqn{y = -x} for a reversal.
@@ -85,7 +85,7 @@ share of significant terms that are concordant (or reversed), and the
 term counts.
 }
 
-A term is significant in a contrast when its \code{padj} is below \code{p_threshold}.
+A term is significant in a contrast when its \code{padj} is below \code{term_threshold}.
 If the object has no adjusted p-values at all, nominal p-values are used
 and a note says so.
 }

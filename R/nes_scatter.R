@@ -17,7 +17,7 @@
 #' @section What is drawn:
 #' * Points: every term scored in both contrasts. Non-significant terms are
 #'   small and grey; significant ones are sized by gene-set size and filled by
-#'   `color_by`.
+#'   `colour_by`.
 #' * Shading: same-direction quadrants are tinted, the others left white.
 #' * Corner labels: each quadrant's name and its count of significant terms.
 #' * Dashed line: \eqn{y = x}, or \eqn{y = -x} for a reversal.
@@ -27,7 +27,7 @@
 #'   share of significant terms that are concordant (or reversed), and the
 #'   term counts.
 #'
-#' A term is significant in a contrast when its `padj` is below `p_threshold`.
+#' A term is significant in a contrast when its `padj` is below `term_threshold`.
 #' If the object has no adjusted p-values at all, nominal p-values are used
 #' and a note says so.
 #'
@@ -39,14 +39,14 @@
 #'   no database labels.
 #' @param collapse Hide terms that [dedup_terms()] flagged redundant in one contrast
 #'   and kept as a representative in neither.
-#' @param p_threshold Significance cutoff on `padj`.
-#' @param color_by Column that fills significant points: `"significance"`
+#' @param term_threshold Significance cutoff on `padj`.
+#' @param colour_by Column that fills significant points: `"significance"`
 #'   (significant in `x` only, `y` only, or both), any per-term column such as
 #'   `"database"`, or `NULL` for one colour. Per-term columns are read from
 #'   the `x` contrast.
 #' @param shape_by Column mapped to point shape (up to five values), or `NULL`.
 #' @param label_min_size Smallest gene set that gets a label.
-#' @param max_labels Most labels drawn.
+#' @param label_n Most labels drawn.
 #' @param theme Output of [plot_theme()]; supplies the base font.
 #'
 #' @return A ggplot.
@@ -61,11 +61,11 @@ plot_scatter <- function(enrichment, x, y,
                          comparison = c("concordance", "reversal"),
                          databases = NULL,
                          collapse = TRUE,
-                         p_threshold = 0.05,
-                         color_by = "significance",
+                         term_threshold = 0.05,
+                         colour_by = "significance",
                          shape_by = "database",
                          label_min_size = 15,
-                         max_labels = 20,
+                         label_n = 20,
                          theme = plot_theme()) {
   check_enrichment(enrichment)
   comparison <- rlang::arg_match(comparison)
@@ -90,8 +90,8 @@ plot_scatter <- function(enrichment, x, y,
   if (collapse) wide <- wide[!hidden_by_collapse(wide$dedup_status_x, wide$dedup_status_y), , drop = FALSE]
   wide$sig_x <- wide[[paste0(sig_col, "_x")]]
   wide$sig_y <- wide[[paste0(sig_col, "_y")]]
-  wide$significance <- scatter_significance(wide$sig_x, wide$sig_y, p_threshold, x, y)
-  for (arg in c("color_by", "shape_by")) {
+  wide$significance <- scatter_significance(wide$sig_x, wide$sig_y, term_threshold, x, y)
+  for (arg in c("colour_by", "shape_by")) {
     col <- get(arg)
     if (!is.null(col) && !col %in% names(wide)) ev_abort_missing_column(wide, col, arg, "enrichment")
   }
@@ -107,7 +107,7 @@ plot_scatter <- function(enrichment, x, y,
   )
   score_type <- enrichment@metadata$score_type
 
-  draw_scatter(wide, sig, counts, comparison, color_by, shape_by, label_min_size, max_labels, theme) +
+  draw_scatter(wide, sig, counts, comparison, colour_by, shape_by, label_min_size, label_n, theme) +
     ggplot2::labs(
       x = sprintf("%s (%s)", score_type, x),
       y = sprintf("%s (%s)", score_type, y),
@@ -157,9 +157,9 @@ hidden_by_collapse <- function(status_x, status_y) {
   redundant & !kept
 }
 
-scatter_significance <- function(padj_x, padj_y, p_threshold, x_name, y_name) {
-  in_x <- !is.na(padj_x) & padj_x < p_threshold
-  in_y <- !is.na(padj_y) & padj_y < p_threshold
+scatter_significance <- function(padj_x, padj_y, term_threshold, x_name, y_name) {
+  in_x <- !is.na(padj_x) & padj_x < term_threshold
+  in_y <- !is.na(padj_y) & padj_y < term_threshold
   levels <- c(paste(x_name, "only"), paste(y_name, "only"), "Both", "NS")
   class <- ifelse(in_x & in_y, "Both", ifelse(in_x, levels[1], ifelse(in_y, levels[2], "NS")))
   factor(class, levels = levels)
@@ -218,8 +218,8 @@ quadrant_names <- list(
   reversal = c("Exacerbated", "Reversed", "Exacerbated", "Reversed")
 )
 
-draw_scatter <- function(wide, sig, counts, comparison, color_by, shape_by,
-                         label_min_size, max_labels, theme) {
+draw_scatter <- function(wide, sig, counts, comparison, colour_by, shape_by,
+                         label_min_size, label_n, theme) {
   lim <- max(abs(c(wide$score_x, wide$score_y)), 1, na.rm = TRUE) * 1.35
   quad <- data.frame(
     xmin = c(0, -lim, -lim, 0), xmax = c(lim, 0, 0, lim),
@@ -238,12 +238,12 @@ draw_scatter <- function(wide, sig, counts, comparison, color_by, shape_by,
   mapping <- list(x = quote(.data$score_x), y = quote(.data$score_y))
   fixed <- list(colour = "grey20", alpha = 0.85, stroke = 0.3)
   if (sized) mapping$size <- quote(.data$size) else fixed$size <- 2.5
-  if (!is.null(color_by)) mapping$fill <- rlang::expr(.data[[!!color_by]]) else fixed$fill <- "#0072B2"
+  if (!is.null(colour_by)) mapping$fill <- rlang::expr(.data[[!!colour_by]]) else fixed$fill <- "#0072B2"
   if (!is.null(shape_by)) mapping$shape <- rlang::expr(.data[[!!shape_by]]) else fixed$shape <- 21
 
   labelled <- points[is.na(points$size) | points$size >= label_min_size, , drop = FALSE]
   labelled <- labelled[order(pmin(labelled$sig_x, labelled$sig_y, na.rm = TRUE)), , drop = FALSE]
-  labelled <- utils::head(labelled, max_labels)
+  labelled <- utils::head(labelled, label_n)
   labelled$label <- clean_label(labelled$term, width = 20)
 
   p <- ggplot2::ggplot() +
@@ -293,7 +293,7 @@ draw_scatter <- function(wide, sig, counts, comparison, color_by, shape_by,
       guide = ggplot2::guide_legend(order = 2)
     )
   }
-  if (!is.null(color_by)) p <- p + scatter_fill_scale(points[[color_by]], color_by)
+  if (!is.null(colour_by)) p <- p + scatter_fill_scale(points[[colour_by]], colour_by)
   p
 }
 
