@@ -85,3 +85,25 @@ test_that("an accession the org package lacks keeps the table's own symbol", {
   expect_message(d <- as_da(tbl, contrast = "A"), "1 of 2", class = "enrichVolcano_symbol_lookup")
   expect_identical(d$gene, c("MYGENE", "SDHA"))
 })
+
+test_that("a protein group is looked up by its first accession", {
+  skip_if_not_installed("org.Hs.eg.db")
+  tbl <- data.frame(protein = c("P31040;Q9UBK2", "Q9UBK2"), logFC = c(1, -1), p = 0.01)
+  d <- suppressMessages(as_da(tbl, contrast = "A"))
+  expect_identical(d$protein, c("P31040;Q9UBK2", "Q9UBK2"))
+  expect_identical(d$gene, c("SDHA", "PPARGC1A"))
+})
+
+test_that("a blank symbol counts as missing", {
+  skip_if_not_installed("org.Hs.eg.db")
+  tbl <- data.frame(protein = c("A0A999Z999", "P31040"), gene = c("", "SDHA"), logFC = c(1, -1), p = 0.01)
+  d <- suppressMessages(as_da(tbl, contrast = "A"))
+  expect_identical(d$gene, c(NA_character_, "SDHA"))
+})
+
+test_that("the symbol lookup prints no annotation startup message", {
+  skip_if_not_installed("org.Rn.eg.db")
+  if (isNamespaceLoaded("org.Rn.eg.db")) try(unloadNamespace("org.Rn.eg.db"), silent = TRUE)
+  skip_if(isNamespaceLoaded("org.Rn.eg.db"), "org.Rn.eg.db is already loaded")
+  expect_no_condition(map_symbols("P04797", "Rattus norvegicus"), class = "packageStartupMessage")
+})

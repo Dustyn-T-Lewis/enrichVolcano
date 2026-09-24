@@ -21,7 +21,9 @@ org_package <- function(species) {
     )
   }
   pkg <- species_org[[species]]
-  rlang::check_installed(c("AnnotationDbi", pkg), reason = "to map proteins and gene sets to symbols.")
+  suppressPackageStartupMessages(
+    rlang::check_installed(c("AnnotationDbi", pkg), reason = "to map proteins and gene sets to symbols.")
+  )
   pkg
 }
 
