@@ -171,9 +171,10 @@ rank_statistic <- function(res, stat) {
 lookup_genes <- function(d, species) {
   accession <- grepl(uniprot_pattern, d$protein)
   if (!is.null(species) && any(accession)) {
-    d$gene[accession] <- map_symbols(d$protein[accession], species)
+    symbols <- map_symbols(d$protein[accession], species)
     n_ids <- length(unique(d$protein[accession]))
-    n_mapped <- length(unique(d$protein[accession & !is.na(d$gene)]))
+    n_mapped <- length(unique(d$protein[accession][!is.na(symbols)]))
+    d$gene[accession] <- ifelse(is.na(symbols), d$gene[accession], symbols)
     ev_inform("{n_mapped} of {n_ids} accession{?s} mapped to {species} symbols.",
       class = "enrichVolcano_symbol_lookup"
     )

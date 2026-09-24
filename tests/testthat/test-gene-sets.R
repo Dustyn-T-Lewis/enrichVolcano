@@ -78,3 +78,10 @@ test_that("a table with no known accession maps to nothing rather than failing",
   skip_if_not_installed("org.Hs.eg.db")
   expect_identical(unname(map_symbols(c("A0A000", "B1B111"), "Homo sapiens")), c(NA_character_, NA_character_))
 })
+
+test_that("an accession the org package lacks keeps the table's own symbol", {
+  skip_if_not_installed("org.Hs.eg.db")
+  tbl <- data.frame(protein = c("A0A999Z999", "P31040"), gene = c("MYGENE", "SDHA"), logFC = c(1, -1), p = 0.01)
+  expect_message(d <- as_da(tbl, contrast = "A"), "1 of 2", class = "enrichVolcano_symbol_lookup")
+  expect_identical(d$gene, c("MYGENE", "SDHA"))
+})
