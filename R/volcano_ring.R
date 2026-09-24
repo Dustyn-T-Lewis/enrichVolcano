@@ -145,8 +145,9 @@ ev_tick_data <- function(ring_data, da, gene_col, logfc_col,
 #' From the chosen contrast, terms in `databases` are kept, redundant ones are
 #' hidden when `collapse = TRUE` (see [dedup_terms()]), and the `n_terms` terms with
 #' the smallest `padj` below `term_threshold` are drawn, whatever their
-#' direction. `terms` overrides
-#' all of this with a hand-picked set.
+#' direction, so the up and down halves need not match. A term found in two
+#' collections is drawn once. `terms` overrides all of this with a hand-picked
+#' set.
 #'
 #' @param da DA results from [as_da()]; the rows for `contrast` are drawn.
 #'   Points are called significant on `padj`, or on `p` when `padj` is empty.
@@ -160,7 +161,7 @@ ev_tick_data <- function(ring_data, da, gene_col, logfc_col,
 #'   Skipped, with a note, when the object has no database labels.
 #' @param collapse Hide terms flagged `"redundant"` by [dedup_terms()].
 #' @param term_threshold Terms need `padj` below this to be drawn.
-#' @param n_terms Most terms drawn, counted across both directions.
+#' @param n_terms Most unique terms drawn, counted across both directions.
 #' @param terms Optional character vector of exact term names to draw instead.
 #' @param p_threshold Significance cutoff for volcano points.
 #' @param logfc_threshold Effect-size cutoff; a point is called up/down only

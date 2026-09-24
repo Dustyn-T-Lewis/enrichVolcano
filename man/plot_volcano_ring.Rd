@@ -65,7 +65,7 @@ Skipped, with a note, when the object has no database labels.}
 
 \item{term_threshold}{Terms need \code{padj} below this to be drawn.}
 
-\item{n_terms}{Most terms drawn, counted across both directions.}
+\item{n_terms}{Most unique terms drawn, counted across both directions.}
 
 \item{terms}{Optional character vector of exact term names to draw instead.}
 
@@ -166,8 +166,9 @@ arcs to each term's leading-edge genes inside the volcano.
 From the chosen contrast, terms in \code{databases} are kept, redundant ones are
 hidden when \code{collapse = TRUE} (see \code{\link[=dedup_terms]{dedup_terms()}}), and the \code{n_terms} terms with
 the smallest \code{padj} below \code{term_threshold} are drawn, whatever their
-direction. \code{terms} overrides
-all of this with a hand-picked set.
+direction, so the up and down halves need not match. A term found in two
+collections is drawn once. \code{terms} overrides all of this with a hand-picked
+set.
 }
 
 \examples{

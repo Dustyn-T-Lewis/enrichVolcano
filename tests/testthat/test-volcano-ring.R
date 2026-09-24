@@ -175,6 +175,17 @@ test_that("the default draws from every database", {
   expect_s3_class(suppressMessages(plot_volcano_ring(make_toy_da(), x)), "ggplot")
 })
 
+test_that("the default ring takes the n_terms most significant unique terms, whatever their direction", {
+  r <- make_toy_ring_enrichment()@results
+  twin <- r[r$term == "HALLMARK_TOY_A", ]
+  twin$database <- "Other"
+  twin$padj <- 0.0001
+  picked <- ring_terms(rbind(r, twin), 0.05, 3, NULL)
+  expect_identical(picked$term, c("HALLMARK_TOY_A", "HALLMARK_TOY_D", "HALLMARK_TOY_C"))
+  expect_identical(picked$padj[1], 0.0001)
+  expect_identical(sum(picked$score > 0), 1L)
+})
+
 test_that("a hand-picked term found in two databases is drawn once", {
   x <- make_toy_ring_enrichment()
   r <- x@results
