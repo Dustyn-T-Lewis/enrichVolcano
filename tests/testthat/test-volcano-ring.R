@@ -308,3 +308,19 @@ test_that("volcano_ring_grid takes as_da output and warns once for plain tables"
   )
   expect_identical(n_warnings, 1)
 })
+
+test_that("results without adjusted p-values colour the volcano by nominal p", {
+  d <- toy_da("A")
+  d$padj <- NA_real_
+  p <- suppressMessages(volcano_ring(d, make_toy_ring_enrichment("A"), databases = NULL))
+  labels <- unlist(lapply(ggplot2::ggplot_build(p)$data, function(l) if ("label" %in% names(l)) l$label))
+  expect_false(anyNA(labels))
+  expect_true(as.character(sum(d$p < 0.05 & d$logFC > 0)) %in% labels)
+})
+
+test_that("results with neither p nor padj are refused", {
+  d <- toy_da("A")
+  d$p <- NA_real_
+  d$padj <- NA_real_
+  expect_error(volcano_ring(d, make_toy_ring_enrichment("A"), databases = NULL), class = "enrichVolcano_data_error")
+})

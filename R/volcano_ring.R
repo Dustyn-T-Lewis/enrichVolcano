@@ -290,6 +290,9 @@ volcano_ring <- function(volc_df, enrichment,
   check_enrichment(enrichment)
   if (inherits(volc_df, "enrichVolcano_da")) {
     volc_df <- contrast_rows(volc_df, contrast)
+    if (all(is.na(volc_df$p)) && all(is.na(volc_df$padj))) {
+      ev_abort("The DA results have no p-values to draw a volcano from.", class = "enrichVolcano_data_error")
+    }
     gene_col <- "gene"
     logfc_col <- "logFC"
     pval_col <- if (all(is.na(volc_df$p))) "padj" else "p"
@@ -314,7 +317,7 @@ volcano_ring <- function(volc_df, enrichment,
   if (nrow(enrich_df) == 0) {
     ev_inform("No terms pass the selection, so the ring is empty.", class = "enrichVolcano_empty_ring")
   }
-  has_padj <- vcols$has_padj
+  has_padj <- vcols$has_padj && !all(is.na(volc_df[[padj_col]]))
 
   pal <- theme$palette
   nes_limits <- nes_limits %||% theme$nes_limits %||%
