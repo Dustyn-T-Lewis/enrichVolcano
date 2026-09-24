@@ -232,10 +232,14 @@ test_that("tied ranks are reported once as a message, not as fgsea warnings", {
   skip_if_not_installed("org.Hs.eg.db")
   da <- toy_study()$da
   da$rank[1:2] <- da$rank[3]
-  expect_no_warning(expect_message(
-    run_enrichment(da, toy_sets(), tests = "fgsea", min_size = 5),
-    "3 of 20",
-    class = "enrichVolcano_rank_ties"
+  # Older fgsea also warns that tiny toy sets have overestimated p-values.
+  suppressWarnings(expect_no_warning(
+    expect_message(
+      run_enrichment(da, toy_sets(), tests = "fgsea", min_size = 5),
+      "3 of 20",
+      class = "enrichVolcano_rank_ties"
+    ),
+    message = "ties"
   ))
 })
 
