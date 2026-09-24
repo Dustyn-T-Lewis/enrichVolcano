@@ -160,6 +160,18 @@ test_that("the YvO study ships its limpa matrix, weights and design", {
   expect_setequal(s$contrasts$name, c("Training_Young", "Training_Old", "Aging", "Interaction"))
 })
 
+test_that("every example study loads, with one DA row per protein and contrast", {
+  skip_if_not_installed("org.Hs.eg.db")
+  skip_if_not_installed("org.Mm.eg.db")
+  skip_if_not_installed("org.Rn.eg.db")
+  for (name in read_example()$name) {
+    s <- quietly(read_example(name))
+    expect_s3_class(s$da, "enrichVolcano_da")
+    expect_false(anyDuplicated(s$da[c("contrast", "protein")]) > 0, label = name)
+    expect_identical(is.null(s$matrix), is.null(s$samples), label = name)
+  }
+})
+
 test_that("an unknown example study is refused", {
   expect_error(read_example("nope"), "nope", class = "enrichVolcano_param_error")
 })

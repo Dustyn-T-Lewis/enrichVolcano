@@ -9,10 +9,6 @@
 ^doc$
 ^Meta$
 ^pkgdown$
-^lib$
-^coverage-report\.html$
-^cran-comments\.md$
-^revdep$
 ^.*\.tar\.gz$
 ^.*\.Rcheck$
 ^Rplots\.pdf$

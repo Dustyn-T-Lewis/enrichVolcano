@@ -29,3 +29,11 @@ jobs:
         shell: Rscript {0}
         env:
           LINTR_ERROR_ON_LINT: true
+
+      - name: Forbid banned words
+        run: |
+          if grep -rniE 'leverag|robust|comprehensive|seamless|streamline|delve|utili[sz]e|harness|ensure|note that' \
+            R/ man/ vignettes/ README.Rmd README.md NEWS.md DESCRIPTION; then
+            echo "::error::Banned words found. Reword the lines above."
+            exit 1
+          fi
