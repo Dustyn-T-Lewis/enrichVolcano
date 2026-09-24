@@ -175,6 +175,18 @@ test_that("the default draws from every database", {
   expect_s3_class(suppressMessages(plot_volcano_ring(make_toy_da(), x)), "ggplot")
 })
 
+test_that("the panel widens to fit long labels at the sides", {
+  x <- make_toy_ring_enrichment()
+  r <- x@results
+  r$term[r$term == "HALLMARK_TOY_B"] <- "HALLMARK_A_VERY_LONG_PATHWAY_NAME_THAT_SITS_AT_THE_SIDE"
+  x@results <- r
+  ranges <- function(p) ggplot2::ggplot_build(p)$layout$panel_params[[1]][c("x.range", "y.range")]
+  short <- ranges(ring())
+  long <- ranges(ring(x = x))
+  expect_gt(diff(long$x.range), diff(short$x.range))
+  expect_equal(sum(long$x.range), 0)
+})
+
 test_that("a ring whose terms all go one way keeps them in that half", {
   e <- data.frame(term = paste0("T", 1:4), padj = c(0.01, 0.02, 0.03, 0.04), score = c(-2, -1.5, -1.2, -1))
   down <- ev_ring_geometry(e, "term", "padj", "score", rep(1, 4), rep(list(character(0)), 4))

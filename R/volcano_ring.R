@@ -480,6 +480,8 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
   }
 
   max_r <- 5.6
+  x_half <- NULL
+  y_half <- NULL
   if (nrow(ring) > 0) {
     if (nrow(ticks) > 0) {
       p <- p + ggplot2::geom_segment(
@@ -521,6 +523,20 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
     lbl$.ev_lead_ey <- (lbl$.ev_label_r - 0.05) * cos(lbl$.ev_mid_rad)
     lbl$.ev_lab_fill <- ifelse(lbl$.ev_is_up, pal$up, pal$down)
     max_r <- max(lbl$.ev_label_r) + label_headroom
+    # Label boxes grow outward from their anchor; estimate their size (about
+    # 0.05 units per character and 0.1 per line for each point of label_size)
+    # so side labels are not clipped.
+    lines <- strsplit(lbl$.ev_clean_label, "\n", fixed = TRUE)
+    box_w <- vapply(lines, function(l) max(nchar(l)), numeric(1)) * label_size * 0.05
+    box_h <- lengths(lines) * label_size * 0.1
+    x_half <- max(
+      max_r, abs(lbl$.ev_lbl_x - lbl$.ev_hjust * box_w) + label_headroom,
+      abs(lbl$.ev_lbl_x + (1 - lbl$.ev_hjust) * box_w) + label_headroom
+    )
+    y_half <- max(
+      max_r, abs(lbl$.ev_lbl_y - lbl$.ev_vjust * box_h) + label_headroom,
+      abs(lbl$.ev_lbl_y + (1 - lbl$.ev_vjust) * box_h) + label_headroom
+    )
 
     p <- p +
       ggplot2::geom_segment(
@@ -561,8 +577,8 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
       tag = tag %||% NULL
     ) +
     ggplot2::coord_fixed(
-      xlim = c(-(max_r + 0.1), max_r + 0.1),
-      ylim = c(-(max_r + 0.1), max_r + 0.1), clip = "off"
+      xlim = c(-1, 1) * ((x_half %||% max_r) + 0.1),
+      ylim = c(-1, 1) * ((y_half %||% max_r) + 0.1), clip = "off"
     ) +
     ggplot2::theme_void(
       base_size = theme$base_size, base_family = theme$base_family
