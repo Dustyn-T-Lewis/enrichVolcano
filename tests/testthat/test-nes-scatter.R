@@ -1,7 +1,7 @@
 source(test_path("fixtures/make_toy.R"))
 
 scatter <- function(x = make_toy_scatter_enrichment(), ...) {
-  suppressMessages(nes_scatter(x, "A", "B", databases = NULL, ...))
+  suppressMessages(plot_scatter(x, "A", "B", databases = NULL, ...))
 }
 
 layer_labels <- function(p) {
@@ -74,7 +74,7 @@ test_that("the subtitle states rho, CI, p, concordance and counts", {
   expect_false(grepl("concordant", s))
 })
 
-test_that("nes_scatter returns a ggplot labelled with score type and contrasts", {
+test_that("plot_scatter returns a ggplot labelled with score type and contrasts", {
   p <- scatter()
   expect_s3_class(p, "ggplot")
   expect_identical(p$labels$x, "NES (A)")
@@ -109,7 +109,7 @@ test_that("terms missing from one contrast are dropped with a note", {
   x <- make_toy_scatter_enrichment()
   r <- x@results
   x@results <- r[!(r$contrast == "B" & r$term == "T01"), ]
-  expect_message(nes_scatter(x, "A", "B", databases = NULL), "1 term")
+  expect_message(plot_scatter(x, "A", "B", databases = NULL), "1 term")
 })
 
 test_that("collapse hides terms redundant somewhere and representative nowhere", {
@@ -130,9 +130,9 @@ test_that("collapse hides terms redundant somewhere and representative nowhere",
 
 test_that("contrasts must be two different ones that exist", {
   x <- make_toy_scatter_enrichment()
-  expect_error(nes_scatter(x, "A", "A"), class = "enrichVolcano_input_error")
-  expect_error(nes_scatter(x, "A", "Z"), "Z", class = "enrichVolcano_input_error")
-  expect_error(nes_scatter(make_toy_enrich(), "A", "B"), class = "enrichVolcano_input_error")
+  expect_error(plot_scatter(x, "A", "A"), class = "enrichVolcano_input_error")
+  expect_error(plot_scatter(x, "A", "Z"), "Z", class = "enrichVolcano_input_error")
+  expect_error(plot_scatter(make_toy_enrich(), "A", "B"), class = "enrichVolcano_input_error")
 })
 
 test_that("color_by and shape_by take any column, or NULL", {
@@ -149,7 +149,7 @@ test_that("significance falls back to nominal p when padj is absent", {
   r$p <- r$padj
   r$padj <- NA_real_
   x@results <- r
-  expect_message(p <- nes_scatter(x, "A", "B", databases = NULL), "nominal")
+  expect_message(p <- plot_scatter(x, "A", "B", databases = NULL), "nominal")
   expect_true(any(grepl("n = 4", layer_labels(p))))
 })
 
@@ -220,9 +220,9 @@ test_that("contrasts with no shared terms give a clear error", {
   r <- x@results
   r$term[r$contrast == "B"] <- paste0(r$term[r$contrast == "B"], "_b")
   x@results <- r
-  expect_error(suppressMessages(nes_scatter(x, "A", "B")), "no terms", class = "enrichVolcano_input_error")
+  expect_error(suppressMessages(plot_scatter(x, "A", "B")), "no terms", class = "enrichVolcano_input_error")
 })
 
 test_that("the scatter defaults to every database", {
-  expect_null(formals(nes_scatter)$databases)
+  expect_null(formals(plot_scatter)$databases)
 })

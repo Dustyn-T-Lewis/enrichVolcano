@@ -85,10 +85,10 @@ ev_select_labels <- function(df, mode, n, rank_by, genes,
 #' @return Character vector of cleaned, wrapped labels.
 #' @export
 #' @examples
-#' ev_clean_label(c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "REACTOME_TCA_CYCLE"))
-ev_clean_label <- function(name, width = 15) {
+#' clean_label(c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "REACTOME_TCA_CYCLE"))
+clean_label <- function(name, width = 15) {
   if (length(name) > 1) {
-    return(vapply(name, ev_clean_label, character(1), width = width, USE.NAMES = FALSE))
+    return(vapply(name, clean_label, character(1), width = width, USE.NAMES = FALSE))
   }
   if (is.na(name) || !nzchar(name)) {
     return(name)

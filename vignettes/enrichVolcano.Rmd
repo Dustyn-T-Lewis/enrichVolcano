@@ -26,10 +26,10 @@ Every workflow has the same steps:
 2. Get enrichment: `run_enrichment()` runs fgsea, camera and fry, or
    `as_enrichment()` converts results you already have. Both give one
    validated `enrichment` object per test.
-3. `dedup()` (optional) flags redundant terms so figures show each signal
+3. `dedup_terms()` (optional) flags redundant terms so figures show each signal
    once.
-4. Plot: `volcano_ring()` puts the volcano inside a ring of enrichment terms,
-   and `nes_scatter()` compares two contrasts term by term.
+4. Plot: `plot_volcano_ring()` puts the volcano inside a ring of enrichment terms,
+   and `plot_scatter()` compares two contrasts term by term.
 
 ## Install
 
@@ -48,20 +48,20 @@ whole workflow runs on it:
 ```{r read}
 library(enrichVolcano)
 
-yvo <- example_study("yvo")
+yvo <- read_example("yvo")
 sets <- load_gene_sets(c("Hallmark", "GO Slim"))
 set.seed(1)
 res <- run_enrichment(yvo, sets)
 res$fgsea
 ```
 
-`example_study()` read the study through `read_study()`, which checked that its
+`read_example()` read the study through `read_study()`, which checked that its
 sheets agree and looked up current gene symbols for the UniProt accessions.
 `run_enrichment()` returned one result per test; here is the fgsea one drawn
 around the volcano:
 
 ```{r ring, fig.alt = "Volcano of Training_Young proteins inside a ring of enriched Hallmark and GO slim terms"}
-volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young", title = "Training, young")
+plot_volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young", title = "Training, young")
 ```
 
 Arc fill is NES and arc height is \(-\log_{10}\)(padj). Up-regulated terms sit
@@ -100,7 +100,7 @@ the signed \(-\log_{10}\) p-value.
 The package ships seven studies in this format:
 
 ```{r studies}
-example_study()[c("name", "species")]
+read_example()[c("name", "species")]
 ```
 
 `yvo`, `bfr_limpa` and `mouse_pas` include every sheet; the others ship DA
@@ -136,7 +136,7 @@ which can change results substantially.
 Each result is an `enrichment` object, so every figure reads any of them:
 
 ```{r run-ring, fig.alt = "Volcano of the Aging contrast ringed by gene sets tested with fry"}
-volcano_ring(yvo$da, res$fry, contrast = "Aging", title = "Aging, fry")
+plot_volcano_ring(yvo$da, res$fry, contrast = "Aging", title = "Aging, fry")
 ```
 
 ## Choose gene-set collections
@@ -146,7 +146,7 @@ sets each summarise one well-defined biological state, and the GO
 Consortium's generic slim keeps a small set of broad GO terms. Both are built
 to avoid overlapping terms, so every arc says something different. Larger
 collections such as GO:BP or Reactome find more specific terms but need
-`dedup()`.
+`dedup_terms()`.
 
 `load_gene_sets()` fetches them for human, mouse or rat. Hallmark, Reactome,
 KEGG MEDICUS and GO:BP come from msigdbr (mouse and rat through orthologs). The
@@ -233,7 +233,7 @@ fry_x <- as_enrichment(list(Training_Young = fry_res), database = "Hallmark")
 ```
 
 ```{r fry-ring, fig.alt = "Volcano ring drawn from fry results, with arcs coloured by signed -log10 FDR and no tick lines"}
-volcano_ring(yvo$da, fry_x, contrast = "Training_Young", title = "fry")
+plot_volcano_ring(yvo$da, fry_x, contrast = "Training_Young", title = "fry")
 ```
 
 With no NES to encode, arc fill carries the signed \(-\log_{10}\)(FDR) and arc
@@ -288,7 +288,7 @@ legend title.
 ## Deduplicate
 
 Related gene sets often reach significance together. In GO:BP or Reactome,
-one biological signal can light up a dozen overlapping terms. `dedup()` flags
+one biological signal can light up a dozen overlapping terms. `dedup_terms()` flags
 all but one per cluster as `"redundant"`, and plots hide redundant terms by
 default (`collapse = TRUE`). No row is removed and no p-value changes: the
 multiple-testing correction already covered every term, so redundancy is a
@@ -296,9 +296,9 @@ display decision.
 
 ```{r dedup, eval = FALSE}
 gene_sets <- split(msig$gene_symbol, msig$gs_name)
-x <- dedup(x, gene_sets)
-x <- dedup(x, gene_sets, similarity = "jaccard")
-x <- dedup(x, gene_sets, method = "collapse_pathways", stats = list(Aging = ranks))
+x <- dedup_terms(x, gene_sets)
+x <- dedup_terms(x, gene_sets, similarity = "jaccard")
+x <- dedup_terms(x, gene_sets, method = "collapse_pathways", stats = list(Aging = ranks))
 ```
 
 Within each contrast and database, significant terms are walked from the
@@ -333,13 +333,13 @@ Deduplication matters for large collections such as Reactome:
 reactome <- load_gene_sets("Reactome")
 set.seed(1)
 aging <- run_enrichment(yvo, reactome, tests = "fgsea")$fgsea
-aging <- dedup(aging, reactome$Reactome)
-volcano_ring(yvo$da, aging, contrast = "Aging", title = "Aging, Reactome")
+aging <- dedup_terms(aging, reactome$Reactome)
+plot_volcano_ring(yvo$da, aging, contrast = "Aging", title = "Aging, Reactome")
 ```
 
 ## Compare two contrasts
 
-`nes_scatter()` plots every term's score in one contrast against its score in
+`plot_scatter()` plots every term's score in one contrast against its score in
 another. It answers two kinds of question, set by `comparison`. The examples
 below draw from the published fgsea results, `ex`; `res$fgsea` works the same
 way.
@@ -349,7 +349,7 @@ regulate the same pathways. Terms in the shaded top-right and bottom-left
 quadrants move the same way in both.
 
 ```{r concordance, fig.width = 6.5, fig.height = 7.5, fig.alt = "Scatter of NES in trained young against trained old, with most significant terms in the concordant quadrants"}
-nes_scatter(ex, "Training_Young", "Training_Old", databases = c("Hallmark", "GO Slim"))
+plot_scatter(ex, "Training_Young", "Training_Old", databases = c("Hallmark", "GO Slim"))
 ```
 
 `comparison = "reversal"` asks whether one condition undoes another. The
@@ -357,7 +357,7 @@ unshaded quadrants hold the answer: a pathway raised by aging and lowered by
 training, or the reverse. The reference line becomes \(y = -x\).
 
 ```{r reversal, fig.width = 6.5, fig.height = 7.5, fig.alt = "Scatter of NES in aging against trained old, with most significant terms in the reversed quadrants"}
-nes_scatter(ex, "Aging", "Training_Old",
+plot_scatter(ex, "Aging", "Training_Old",
   comparison = "reversal", databases = c("Hallmark", "GO Slim")
 )
 ```
@@ -376,12 +376,12 @@ work as they do for the ring.
 
 ## Change the look
 
-`volcano_ring_theme()` holds the palette; the plot arguments hold the layout.
+`plot_theme()` holds the palette; the plot arguments hold the layout.
 
 ```{r palette, eval = FALSE}
-volcano_ring(yvo$da, res$fgsea,
+plot_volcano_ring(yvo$da, res$fgsea,
   contrast = "Training_Young",
-  theme = volcano_ring_theme(palette = "okabe"),
+  theme = plot_theme(palette = "okabe"),
   label_mode = "top_per_direction", label_n = 4
 )
 ```
@@ -399,7 +399,7 @@ Each ring is one ggplot. Combine several with patchwork.
 
 ```{r grid, fig.width = 10, fig.height = 5.5, fig.alt = "Two volcano rings side by side for trained young and trained old"}
 rings <- lapply(c("Training_Young", "Training_Old"), function(k) {
-  volcano_ring(yvo$da, res$fgsea, contrast = k, title = k)
+  plot_volcano_ring(yvo$da, res$fgsea, contrast = k, title = k)
 })
 patchwork::wrap_plots(rings, ncol = 2)
 ```

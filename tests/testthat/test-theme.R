@@ -1,14 +1,14 @@
-test_that("volcano_ring_theme overrides point colours without touching the rest", {
-  th <- volcano_ring_theme(up = "#B2182B", down = "#2166AC", ns = "grey80")
+test_that("plot_theme overrides point colours without touching the rest", {
+  th <- plot_theme(up = "#B2182B", down = "#2166AC", ns = "grey80")
   expect_equal(th$palette$up, "#B2182B")
   expect_equal(th$palette$down, "#2166AC")
   expect_equal(th$palette$ns, "grey80")
   # untouched palette pieces fall back to the preset
-  expect_equal(th$palette$nes_scale, volcano_ring_theme()$palette$nes_scale)
+  expect_equal(th$palette$nes_scale, plot_theme()$palette$nes_scale)
 })
 
 test_that("nes_colors replaces the ramp and spreads stops across the limits", {
-  th <- volcano_ring_theme(
+  th <- plot_theme(
     nes_colors = c("#053061", "white", "#67001F"),
     nes_limits = c(-2, 2)
   )
@@ -17,13 +17,13 @@ test_that("nes_colors replaces the ramp and spreads stops across the limits", {
 })
 
 test_that("nes_stops of matching length overrides the ramp positions", {
-  th <- volcano_ring_theme(nes_stops = c(-3, -1, 0, 1, 3))
+  th <- plot_theme(nes_stops = c(-3, -1, 0, 1, 3))
   expect_equal(th$palette$nes_values, c(-3, -1, 0, 1, 3))
 })
 
 test_that("nes_stops must match the (possibly overridden) ramp length", {
   expect_error(
-    volcano_ring_theme(
+    plot_theme(
       nes_colors = c("#053061", "#67001F"),
       nes_stops = c(-3, 0, 3)
     ),
@@ -33,7 +33,7 @@ test_that("nes_stops must match the (possibly overridden) ramp length", {
 
 test_that("an invalid colour override is caught at the boundary", {
   expect_error(
-    volcano_ring_theme(up = "not_a_real_colour"),
+    plot_theme(up = "not_a_real_colour"),
     class = "ev_invalid_colour"
   )
 })

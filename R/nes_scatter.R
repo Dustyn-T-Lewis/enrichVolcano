@@ -31,13 +31,13 @@
 #' If the object has no adjusted p-values at all, nominal p-values are used
 #' and a note says so.
 #'
-#' @param enrichment An [enrichment] object holding both contrasts.
+#' @param enrichment An enrichment object from [as_enrichment()] or [run_enrichment()] holding both contrasts.
 #' @param x,y Contrast names for the horizontal and vertical axes.
 #' @param comparison `"concordance"` or `"reversal"`; see Description.
 #' @param databases Collections to draw from, e.g. `c("Hallmark", "GO Slim")`;
 #'   `NULL` (default) draws from all. Skipped, with a note, when the object has
 #'   no database labels.
-#' @param collapse Hide terms that [dedup()] flagged redundant in one contrast
+#' @param collapse Hide terms that [dedup_terms()] flagged redundant in one contrast
 #'   and kept as a representative in neither.
 #' @param p_threshold Significance cutoff on `padj`.
 #' @param color_by Column that fills significant points: `"significance"`
@@ -47,7 +47,7 @@
 #' @param shape_by Column mapped to point shape (up to five values), or `NULL`.
 #' @param label_min_size Smallest gene set that gets a label.
 #' @param max_labels Most labels drawn.
-#' @param theme Output of [volcano_ring_theme()]; supplies the base font.
+#' @param theme Output of [plot_theme()]; supplies the base font.
 #'
 #' @return A ggplot.
 #' @export
@@ -55,18 +55,18 @@
 #' ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
 #'   package = "enrichVolcano"
 #' )))
-#' nes_scatter(ex, "Training_Young", "Training_Old")
-#' nes_scatter(ex, "Aging", "Training_Old", comparison = "reversal")
-nes_scatter <- function(enrichment, x, y,
-                        comparison = c("concordance", "reversal"),
-                        databases = NULL,
-                        collapse = TRUE,
-                        p_threshold = 0.05,
-                        color_by = "significance",
-                        shape_by = "database",
-                        label_min_size = 15,
-                        max_labels = 20,
-                        theme = volcano_ring_theme()) {
+#' plot_scatter(ex, "Training_Young", "Training_Old")
+#' plot_scatter(ex, "Aging", "Training_Old", comparison = "reversal")
+plot_scatter <- function(enrichment, x, y,
+                         comparison = c("concordance", "reversal"),
+                         databases = NULL,
+                         collapse = TRUE,
+                         p_threshold = 0.05,
+                         color_by = "significance",
+                         shape_by = "database",
+                         label_min_size = 15,
+                         max_labels = 20,
+                         theme = plot_theme()) {
   check_enrichment(enrichment)
   comparison <- rlang::arg_match(comparison)
   res <- enrichment@results
@@ -244,7 +244,7 @@ draw_scatter <- function(wide, sig, counts, comparison, color_by, shape_by,
   labelled <- points[is.na(points$size) | points$size >= label_min_size, , drop = FALSE]
   labelled <- labelled[order(pmin(labelled$sig_x, labelled$sig_y, na.rm = TRUE)), , drop = FALSE]
   labelled <- utils::head(labelled, max_labels)
-  labelled$label <- ev_clean_label(labelled$term, width = 20)
+  labelled$label <- clean_label(labelled$term, width = 20)
 
   p <- ggplot2::ggplot() +
     ggplot2::annotate("rect",

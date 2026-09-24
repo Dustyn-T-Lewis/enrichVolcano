@@ -35,12 +35,12 @@ estimate it (unblocked designs only).}
 \item{min_size, max_size}{Sets need this many genes present in the data.}
 }
 \value{
-A named list with one \link{enrichment} object per test. Its metadata
+A named list with one enrichment object (\code{\link[=as_enrichment]{as_enrichment()}}) per test. Its metadata
 records the ranking statistic and the gene-set versions.
 }
 \description{
 Tests each contrast of a study against gene-set collections and returns one
-\link{enrichment} object per test, ready for the plots.
+enrichment object per test, the same object \code{\link[=as_enrichment]{as_enrichment()}} builds.
 }
 \section{fgsea}{
 

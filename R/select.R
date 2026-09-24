@@ -1,5 +1,5 @@
-# Which rows of an enrichment a plot draws. Shared by volcano_ring() and
-# nes_scatter() so both read the same view of one object.
+# Which rows of an enrichment a plot draws. Shared by plot_volcano_ring() and
+# plot_scatter() so both read the same view of one object.
 
 check_enrichment <- function(x, arg = "enrichment") {
   if (!S7::S7_inherits(x, enrichment)) {

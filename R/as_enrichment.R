@@ -1,8 +1,8 @@
 #' Convert enrichment results into an `enrichment` object
 #'
 #' The one entry point for results from any enrichment tool. Hand it one
-#' table per contrast and it returns a validated [enrichment] that every plot
-#' in the package reads.
+#' table per contrast and it returns a validated `enrichment` object that
+#' every plot in the package reads.
 #'
 #' @section Which test produced the table:
 #' The test is recognised from the columns it returns:
@@ -44,7 +44,20 @@
 #'   direction from the score sign.
 #' @param score_type Axis and legend label for a custom score, e.g. `"NES"`.
 #'
-#' @return An [enrichment] object.
+#' @return An S7 `enrichment` object. Every construction and every edit is
+#'   validated. `@results` has one row per term per contrast:
+#'   * `contrast`, `database`, `term`: character. `database` may be `NA`.
+#'   * `score`: numeric. NES for fgsea and clusterProfiler; signed
+#'     \eqn{-\log_{10}}(FDR) for limma rotation/competitive tests and ORA.
+#'   * `p`, `padj`: numeric in \[0, 1\]; `NA` allowed.
+#'   * `size`: numeric set size.
+#'   * `direction`: `"up"` or `"down"`, agreeing with the sign of `score`.
+#'   * `leading_edge`: list of character vectors, empty when the test has none.
+#'
+#'   Extra columns, such as `dedup_status`, are kept. `@metadata` holds
+#'   `enrichment_test`, `score_type` (the axis and legend label for `score`)
+#'   and `dedup` (the settings [dedup_terms()] used, or `list(method =
+#'   "precomputed")` when the input already carried `dedup_status`).
 #' @export
 #' @examples
 #' path <- system.file("extdata", "examples", "yvo_fgsea.csv.gz",

@@ -21,9 +21,9 @@ knitr::opts_chunk$set(
 
 ```{r hero, echo = FALSE, fig.alt = "A volcano plot ringed by enrichment arcs coloured by normalised enrichment score", fig.width = 7, fig.height = 7, dpi = 110}
 library(enrichVolcano)
-da <- example_study("yvo")$da
+da <- read_example("yvo")$da
 ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano")))
-volcano_ring(da, ex,
+plot_volcano_ring(da, ex,
   contrast = "Training_Young", databases = c("Hallmark", "GO Slim"),
   title = "enrichVolcano", subtitle = "one contrast, one figure"
 )
@@ -37,7 +37,7 @@ library(enrichVolcano)
 
 study <- read_study("my_study.xlsx")
 res <- run_enrichment(study, load_gene_sets(c("Hallmark", "GO Slim")))
-volcano_ring(study$da, res$fgsea, contrast = "Aging")
+plot_volcano_ring(study$da, res$fgsea, contrast = "Aging")
 ```
 
 1. `read_study()` reads your DA results, and optionally the matrix, sample
@@ -47,10 +47,10 @@ volcano_ring(study$da, res$fgsea, contrast = "Aging")
 2. `run_enrichment()` runs fgsea, camera and fry, or `as_enrichment()`
    converts enrichment you computed elsewhere. Either way you get a
    validated `enrichment` object that records which test produced it.
-3. `dedup()` (optional) flags redundant terms so a figure shows each
+3. `dedup_terms()` (optional) flags redundant terms so a figure shows each
    signal once. p-values are never changed.
-4. A plot function draws from the object: `volcano_ring()` for one contrast,
-   `nes_scatter()` to compare two contrasts
+4. A plot function draws from the object: `plot_volcano_ring()` for one contrast,
+   `plot_scatter()` to compare two contrasts
    term by term (concordance or reversal).
 
 ## Install
@@ -97,7 +97,7 @@ Cite the methods behind your results, whether enrichVolcano ran them or you did:
 - clusterProfiler: Wu T et al. 2021, *The Innovation* 2:100141
 - camera: Wu D, Smyth GK 2012, *Nucleic Acids Res* 40(17), doi:10.1093/nar/gks461
 - fry and mroast (ROAST): Wu D et al. 2010, *Bioinformatics* 26(17), doi:10.1093/bioinformatics/btq401
-- EnrichmentMap (`dedup()`): Merico D et al. 2010, *PLoS ONE* 5(11):e13984
+- EnrichmentMap (`dedup_terms()`): Merico D et al. 2010, *PLoS ONE* 5(11):e13984
 - Hallmark gene sets: Liberzon A et al. 2015, *Cell Systems* 1(6), doi:10.1016/j.cels.2015.12.004
 - Enrichment protocol: Reimand J et al. 2019, *Nat Protoc* 14:482-517
 

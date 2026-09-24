@@ -25,7 +25,7 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   if (nrow(ring) == 0) {
     return(ring)
   }
-  ring$.ev_clean_label <- ev_clean_label(ring[[term_col]])
+  ring$.ev_clean_label <- clean_label(ring[[term_col]])
   ring$.ev_genes <- genes_list
   ring$.ev_is_up <- ring[[nes_col]] > 0
   ring$.ev_magnitude <- magnitude_col
@@ -147,7 +147,7 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #'
 #' @section Which terms ring the volcano:
 #' From the chosen contrast, terms in `databases` are kept, redundant ones are
-#' hidden when `collapse = TRUE` (see [dedup()]), and the `n_terms` terms with
+#' hidden when `collapse = TRUE` (see [dedup_terms()]), and the `n_terms` terms with
 #' the smallest `padj` below `term_threshold` are drawn, whatever their
 #' direction. `terms` overrides
 #' all of this with a hand-picked set.
@@ -156,13 +156,13 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #'   Points are called significant on `padj`, or on `p` when `padj` is empty.
 #'   To colour by another statistic, such as a pi-value, pass it to [as_da()]
 #'   as `padj`.
-#' @param enrichment An [enrichment] object; see [as_enrichment()].
+#' @param enrichment An enrichment object from [as_enrichment()] or [run_enrichment()].
 #' @param contrast Which contrast of `enrichment` to draw. Needed only when it
 #'   holds more than one.
 #' @param databases Collections to draw from, matched against the `database`
 #'   column, e.g. `c("Hallmark", "GO Slim")`. `NULL` (default) draws from all.
 #'   Skipped, with a note, when the object has no database labels.
-#' @param collapse Hide terms flagged `"redundant"` by [dedup()].
+#' @param collapse Hide terms flagged `"redundant"` by [dedup_terms()].
 #' @param term_threshold Terms need `padj` below this to be drawn.
 #' @param n_terms Most terms drawn, counted across both directions.
 #' @param terms Optional character vector of exact term names to draw instead.
@@ -215,57 +215,57 @@ ev_tick_data <- function(ring_data, volc_df, gene_col, logfc_col,
 #' @param axis_size Text size of the `up`/`down`/`log2 FC`/`-log10 p` axis
 #'   annotations (default 2.2).
 #' @param label_mode,label_n,label_rank_by,label_genes Volcano point labels.
-#' @param theme Output of `volcano_ring_theme()`.
+#' @param theme Output of `plot_theme()`.
 #' @return A ggplot.
 #' @export
 #' @examples
-#' da <- example_study("yvo")$da
+#' da <- read_example("yvo")$da
 #' ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
 #'   package = "enrichVolcano"
 #' )))
 #'
-#' volcano_ring(da, ex, contrast = "Training_Young", title = "Training_Young")
-volcano_ring <- function(volc_df, enrichment,
-                         contrast = NULL,
-                         databases = NULL,
-                         collapse = TRUE,
-                         term_threshold = 0.05,
-                         n_terms = 12,
-                         terms = NULL,
-                         p_threshold = 0.05,
-                         logfc_threshold = 0,
-                         title = NULL,
-                         subtitle = NULL,
-                         tag = NULL,
-                         volcano_radius = 4.0,
-                         x_scale = 1,
-                         y_scale = 1,
-                         ring_radius = 4.8,
-                         ring_thickness = 0.55,
-                         tick_width = 0.3,
-                         label_headroom = 0.5,
-                         disc_color = NULL,
-                         nes_limits = NULL,
-                         magnitude = NULL,
-                         arc_order = c("padj", "nes"),
-                         arc_height_range = c(0.4, 1.6),
-                         show_counts = TRUE,
-                         point_size = 1.1,
-                         point_alpha = 0.85,
-                         label_size = 2.8,
-                         label_gap = 0.6,
-                         count_size = 2.4,
-                         count_x_mult = 0.7,
-                         count_y_mult = 0.7,
-                         axis_size = 2.2,
-                         label_mode = c(
-                           "none", "top_per_direction",
-                           "by_significance", "by_genes"
-                         ),
-                         label_n = 5,
-                         label_rank_by = c("significance", "logfc"),
-                         label_genes = NULL,
-                         theme = volcano_ring_theme()) {
+#' plot_volcano_ring(da, ex, contrast = "Training_Young", title = "Training_Young")
+plot_volcano_ring <- function(volc_df, enrichment,
+                              contrast = NULL,
+                              databases = NULL,
+                              collapse = TRUE,
+                              term_threshold = 0.05,
+                              n_terms = 12,
+                              terms = NULL,
+                              p_threshold = 0.05,
+                              logfc_threshold = 0,
+                              title = NULL,
+                              subtitle = NULL,
+                              tag = NULL,
+                              volcano_radius = 4.0,
+                              x_scale = 1,
+                              y_scale = 1,
+                              ring_radius = 4.8,
+                              ring_thickness = 0.55,
+                              tick_width = 0.3,
+                              label_headroom = 0.5,
+                              disc_color = NULL,
+                              nes_limits = NULL,
+                              magnitude = NULL,
+                              arc_order = c("padj", "nes"),
+                              arc_height_range = c(0.4, 1.6),
+                              show_counts = TRUE,
+                              point_size = 1.1,
+                              point_alpha = 0.85,
+                              label_size = 2.8,
+                              label_gap = 0.6,
+                              count_size = 2.4,
+                              count_x_mult = 0.7,
+                              count_y_mult = 0.7,
+                              axis_size = 2.2,
+                              label_mode = c(
+                                "none", "top_per_direction",
+                                "by_significance", "by_genes"
+                              ),
+                              label_n = 5,
+                              label_rank_by = c("significance", "logfc"),
+                              label_genes = NULL,
+                              theme = plot_theme()) {
   arc_order <- match.arg(arc_order)
   label_mode <- match.arg(label_mode)
   label_rank_by <- match.arg(label_rank_by)

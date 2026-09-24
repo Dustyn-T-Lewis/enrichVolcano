@@ -1,4 +1,4 @@
-#' Theme + palette for `volcano_ring()`
+#' Theme + palette for `plot_volcano_ring()`
 #'
 #' Returns a list with a `theme` element (ggplot2 theme additions) and a
 #' `palette` element giving the up / down / non-significant point colours and
@@ -16,27 +16,27 @@
 #'   When supplied without `nes_stops`, stops spread evenly across
 #'   `nes_limits` (or `c(-3, 3)`).
 #' @param nes_limits Optional length-2 numeric. When `NULL`, the colour scale
-#'   in `volcano_ring()` uses its own default.
+#'   in `plot_volcano_ring()` uses its own default.
 #' @param nes_stops Optional numeric vector matching the NES ramp length,
 #'   overriding the palette's `nes_values`.
 #' @return A list `list(base_size, base_family, palette, nes_limits)` consumed
-#'   by [volcano_ring()].
+#'   by [plot_volcano_ring()].
 #' @export
 #' @examples
-#' th <- volcano_ring_theme(base_size = 11)
+#' th <- plot_theme(base_size = 11)
 #' th$palette$up
 #'
 #' # Custom point and arc colours, no list-poking needed:
-#' th <- volcano_ring_theme(up = "#B2182B", down = "#2166AC", ns = "grey80")
-volcano_ring_theme <- function(base_size = 11,
-                               base_family = "",
-                               palette = c("default", "viridis", "okabe"),
-                               up = NULL,
-                               down = NULL,
-                               ns = NULL,
-                               nes_colors = NULL,
-                               nes_limits = NULL,
-                               nes_stops = NULL) {
+#' th <- plot_theme(up = "#B2182B", down = "#2166AC", ns = "grey80")
+plot_theme <- function(base_size = 11,
+                       base_family = "",
+                       palette = c("default", "viridis", "okabe"),
+                       up = NULL,
+                       down = NULL,
+                       ns = NULL,
+                       nes_colors = NULL,
+                       nes_limits = NULL,
+                       nes_stops = NULL) {
   palette <- match.arg(palette)
   for (col in list(up, down, ns)) ev_assert_colour(col, "colour override")
   palettes <- list(

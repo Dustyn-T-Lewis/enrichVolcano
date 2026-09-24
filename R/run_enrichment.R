@@ -1,7 +1,7 @@
 #' Run gene-set enrichment on a study
 #'
 #' Tests each contrast of a study against gene-set collections and returns one
-#' [enrichment] object per test, ready for the plots.
+#' enrichment object per test, the same object [as_enrichment()] builds.
 #'
 #' @section fgsea:
 #' Proteins are ranked by the study's `rank` column (see [as_da()]). Where
@@ -37,7 +37,7 @@
 #' @param inter_gene_cor camera's inter-gene correlation: a number, or `NA` to
 #'   estimate it (unblocked designs only).
 #' @param min_size,max_size Sets need this many genes present in the data.
-#' @return A named list with one [enrichment] object per test. Its metadata
+#' @return A named list with one enrichment object ([as_enrichment()]) per test. Its metadata
 #'   records the ranking statistic and the gene-set versions.
 #' @export
 run_enrichment <- function(study, gene_sets, tests = c("fgsea", "camera", "fry"),

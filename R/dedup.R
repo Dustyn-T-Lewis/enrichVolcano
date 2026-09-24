@@ -2,7 +2,7 @@
 #'
 #' Related gene sets often reach significance together: in GO:BP or
 #' Reactome, one biological signal can light up a dozen overlapping terms.
-#' `dedup()` picks one representative per cluster so a figure shows the
+#' `dedup_terms()` picks one representative per cluster so a figure shows the
 #' signal once. It changes what is drawn, not what was tested: no row is
 #' dropped and no p-value is touched, because the multiple-testing correction
 #' already covered every term.
@@ -29,7 +29,7 @@
 #' so call [set.seed()] first for reproducible flags. The p-values it computes
 #' decide redundancy only; the reported `padj` stay those of the original run.
 #'
-#' @param x An [enrichment] object.
+#' @param x An enrichment object from [as_enrichment()] or [run_enrichment()].
 #' @param gene_sets A named list of character vectors, one per term, holding
 #'   the full gene sets that were tested. Terms without a set are kept.
 #' @param method `"enrichmentmap"` (gene-set overlap) or `"collapse_pathways"`
@@ -55,9 +55,9 @@
 #' and visualization of omics data using g:Profiler, GSEA, Cytoscape and
 #' EnrichmentMap. Nature Protocols 14:482-517.
 #' @export
-dedup <- function(x, gene_sets, method = c("enrichmentmap", "collapse_pathways"),
-                  similarity = c("combined", "jaccard"), cutoff = NULL,
-                  p_threshold = 0.05, stats = NULL) {
+dedup_terms <- function(x, gene_sets, method = c("enrichmentmap", "collapse_pathways"),
+                        similarity = c("combined", "jaccard"), cutoff = NULL,
+                        p_threshold = 0.05, stats = NULL) {
   check_enrichment(x, "x")
   if (!is.list(gene_sets) || is.null(names(gene_sets)) || any(!nzchar(names(gene_sets)))) {
     ev_abort("{.arg gene_sets} must be a named list of gene vectors, one per term.",

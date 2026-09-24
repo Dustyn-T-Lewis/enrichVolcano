@@ -82,25 +82,25 @@ test_that("ev_label_text prefers symbol, then uniprot, then gene", {
   expect_equal(ev_label_text(d), c("S1", "U2", "g3"))
 })
 
-test_that("ev_clean_label strips canonical database prefixes", {
+test_that("clean_label strips canonical database prefixes", {
   expect_equal(
-    ev_clean_label("HALLMARK_TCA_CYCLE"),
+    clean_label("HALLMARK_TCA_CYCLE"),
     stringr::str_wrap("TCA Cycle", width = 15)
   )
   expect_equal(
-    ev_clean_label("GOBP_AUTOPHAGY"),
+    clean_label("GOBP_AUTOPHAGY"),
     stringr::str_wrap("Autophagy", width = 15)
   )
 })
 
-test_that("ev_clean_label routes MITOCARTA_ names through the leaf shortener", {
-  out <- ev_clean_label("MITOCARTA_OXPHOS__CI_SUBUNITS")
+test_that("clean_label routes MITOCARTA_ names through the leaf shortener", {
+  out <- clean_label("MITOCARTA_OXPHOS__CI_SUBUNITS")
   expect_true(grepl("Complex I", out))
 })
 
 # A ring arc has room for two lines. A third pushes the label box into its
 # neighbours, so verbose MSigDB names need a phrase entry, not a wider wrap.
-test_that("ev_clean_label keeps verbose MSigDB names within two lines", {
+test_that("clean_label keeps verbose MSigDB names within two lines", {
   verbose <- c(
     "GOBP_STRIATED_MUSCLE_CELL_DIFFERENTIATION",
     "GOBP_MEMBRANELESS_ORGANELLE_ASSEMBLY",
@@ -115,47 +115,47 @@ test_that("ev_clean_label keeps verbose MSigDB names within two lines", {
     "REACTOME_REGULATION_OF_PD_L1_CD274_POST_TRANSLATIONAL_MODIFICATION",
     "REACTOME_ASPARAGINE_N_LINKED_GLYCOSYLATION"
   )
-  lines <- lengths(strsplit(ev_clean_label(verbose), "\n", fixed = TRUE))
+  lines <- lengths(strsplit(clean_label(verbose), "\n", fixed = TRUE))
   expect_equal(lines, rep(2L, length(verbose)))
 })
 
-test_that("ev_clean_label capitalises gene and complex acronyms", {
-  expect_equal(ev_clean_label("REACTOME_RRNA_PROCESSING"), "rRNA Processing")
-  expect_equal(ev_clean_label("REACTOME_UCH_PROTEINASES"), "UCH Proteinases")
-  expect_match(ev_clean_label("REACTOME_ECM_PROTEOGLYCANS"), "^ECM")
-  expect_match(ev_clean_label("REACTOME_CYTOPROTECTION_BY_HMOX1"), "HMOX1")
+test_that("clean_label capitalises gene and complex acronyms", {
+  expect_equal(clean_label("REACTOME_RRNA_PROCESSING"), "rRNA Processing")
+  expect_equal(clean_label("REACTOME_UCH_PROTEINASES"), "UCH Proteinases")
+  expect_match(clean_label("REACTOME_ECM_PROTEOGLYCANS"), "^ECM")
+  expect_match(clean_label("REACTOME_CYTOPROTECTION_BY_HMOX1"), "HMOX1")
   expect_match(
-    ev_clean_label("REACTOME_REGULATION_OF_PD_L1_CD274_POST_TRANSLATIONAL_MODIFICATION"),
+    clean_label("REACTOME_REGULATION_OF_PD_L1_CD274_POST_TRANSLATIONAL_MODIFICATION"),
     "PD-L1"
   )
 })
 
-test_that("ev_clean_label does not repeat a word the acronym already carries", {
-  expect_equal(ev_clean_label("GOBP_ELECTRON_TRANSPORT_CHAIN"), "ETC")
+test_that("clean_label does not repeat a word the acronym already carries", {
+  expect_equal(clean_label("GOBP_ELECTRON_TRANSPORT_CHAIN"), "ETC")
   expect_match(
-    ev_clean_label("REACTOME_MITOTIC_G2_G2_M_PHASES"), "G2/M",
+    clean_label("REACTOME_MITOTIC_G2_G2_M_PHASES"), "G2/M",
     fixed = TRUE
   )
 })
 
-test_that("volcano_ring with label_mode = 'top_per_direction' runs", {
-  p <- suppressMessages(volcano_ring(
+test_that("plot_volcano_ring with label_mode = 'top_per_direction' runs", {
+  p <- suppressMessages(plot_volcano_ring(
     make_toy_da(), make_toy_ring_enrichment(),
     label_mode = "top_per_direction", label_n = 2
   ))
   expect_s3_class(p, "ggplot")
 })
 
-test_that("volcano_ring with label_mode = 'by_significance' runs", {
-  p <- suppressMessages(volcano_ring(
+test_that("plot_volcano_ring with label_mode = 'by_significance' runs", {
+  p <- suppressMessages(plot_volcano_ring(
     make_toy_da(), make_toy_ring_enrichment(),
     label_mode = "by_significance", label_n = 3
   ))
   expect_s3_class(p, "ggplot")
 })
 
-test_that("volcano_ring with label_mode = 'by_genes' runs", {
-  p <- suppressMessages(volcano_ring(
+test_that("plot_volcano_ring with label_mode = 'by_genes' runs", {
+  p <- suppressMessages(plot_volcano_ring(
     make_toy_da(), make_toy_ring_enrichment(),
     label_mode = "by_genes",
     label_genes = c("G1", "G15")
@@ -164,21 +164,21 @@ test_that("volcano_ring with label_mode = 'by_genes' runs", {
 })
 
 test_that("the default width is unchanged, hand-placed breaks included", {
-  expect_identical(ev_clean_label("HALLMARK_HEME_METABOLISM"), "Heme\nMetabolism")
+  expect_identical(clean_label("HALLMARK_HEME_METABOLISM"), "Heme\nMetabolism")
 })
 
 test_that("a wider width wraps less and skips the ring's hand-placed breaks", {
-  expect_identical(ev_clean_label("HALLMARK_HEME_METABOLISM", width = 40), "Heme Metabolism")
+  expect_identical(clean_label("HALLMARK_HEME_METABOLISM", width = 40), "Heme Metabolism")
   long <- "GOBP_REGULATION_OF_CYTOPLASMIC_TRANSLATION_IN_RESPONSE_TO_STRESS"
-  lines <- strsplit(ev_clean_label(long, width = 40), "\n")[[1]]
+  lines <- strsplit(clean_label(long, width = 40), "\n")[[1]]
   expect_true(all(nchar(lines) <= 40))
-  expect_lt(length(lines), length(strsplit(ev_clean_label(long), "\n")[[1]]))
+  expect_lt(length(lines), length(strsplit(clean_label(long), "\n")[[1]]))
 })
 
 test_that("width reaches vectorised and MitoCarta names", {
-  out <- ev_clean_label(c("HALLMARK_HEME_METABOLISM", "HALLMARK_MITOTIC_SPINDLE"), width = 40)
+  out <- clean_label(c("HALLMARK_HEME_METABOLISM", "HALLMARK_MITOTIC_SPINDLE"), width = 40)
   expect_identical(out, c("Heme Metabolism", "Mitotic Spindle"))
   mito <- "MITOCARTA_OXPHOS__OXPHOS_ASSEMBLY_FACTORS"
-  expect_false(grepl("\n", ev_clean_label(mito, width = 40)))
-  expect_true(grepl("\n", ev_clean_label(mito)))
+  expect_false(grepl("\n", clean_label(mito, width = 40)))
+  expect_true(grepl("\n", clean_label(mito)))
 })
