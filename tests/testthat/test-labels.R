@@ -202,3 +202,7 @@ test_that("labels must be a named character vector", {
     )
   }
 })
+
+test_that("clean_label returns an empty vector for no names", {
+  expect_identical(clean_label(character(0)), character(0))
+})

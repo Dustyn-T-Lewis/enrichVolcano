@@ -50,7 +50,7 @@ ev_select_labels <- function(df, mode, n, rank_by, genes,
 #' @examples
 #' clean_label(c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "REACTOME_TCA_CYCLE"))
 clean_label <- function(name, width = 15) {
-  if (length(name) > 1) {
+  if (length(name) != 1) {
     return(vapply(name, clean_label, character(1), width = width, USE.NAMES = FALSE))
   }
   if (is.na(name) || !nzchar(name)) {
