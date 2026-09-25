@@ -106,20 +106,43 @@ ev_expand_acronyms <- function(x) {
   x
 }
 
-# Display names for terms: the user's own where given, clean_label() otherwise.
+# Display names for terms: a shipped style, the user's own table or vector over
+# the short style, or the user's function for every term.
 display_labels <- function(terms, labels, width) {
-  out <- clean_label(terms, width = width)
-  own <- unname(labels[terms])
+  wrap <- function(x) {
+    x <- gsub("\\n", "\n", x, fixed = TRUE)
+    ifelse(is.na(x) | grepl("\n", x, fixed = TRUE), x, stringr::str_wrap(x, width))
+  }
+  if (is.function(labels)) {
+    out <- labels(terms)
+    if (!is.character(out) || length(out) != length(terms)) {
+      ev_abort("A {.arg labels} function must return one character label per term.",
+        class = "enrichVolcano_param_error"
+      )
+    }
+    return(wrap(out))
+  }
+  style <- if (is.character(labels) && is.null(names(labels))) labels else "short"
+  out <- clean_label(terms, width = width, style = style)
+  if (is.data.frame(labels)) labels <- stats::setNames(labels$label, labels$term)
+  own <- if (is.null(names(labels))) rep(NA_character_, length(terms)) else unname(labels[terms])
   hit <- !is.na(own)
-  out[hit] <- ifelse(grepl("\n", own[hit], fixed = TRUE), own[hit], stringr::str_wrap(own[hit], width))
+  out[hit] <- wrap(own[hit])
   out
 }
 
 check_labels <- function(labels) {
-  if (is.null(labels)) {
-    return(invisible(NULL))
-  }
-  if (!is.character(labels) || is.null(names(labels)) || any(!nzchar(names(labels)))) {
-    ev_abort("{.arg labels} must be a character vector named by term.", class = "enrichVolcano_param_error")
+  ok <- is.null(labels) || is.function(labels) ||
+    (is.character(labels) && is.null(names(labels)) && length(labels) == 1 && labels %in% c("short", "clean")) ||
+    (is.character(labels) && !is.null(names(labels)) && all(nzchar(names(labels)))) ||
+    (is.data.frame(labels) && all(c("term", "label") %in% names(labels)))
+  if (!ok) {
+    ev_abort(
+      c(
+        "{.arg labels} must be {.val short}, {.val clean}, a character vector named by term,",
+        " " = "a data frame with {.field term} and {.field label} columns, or a function."
+      ),
+      class = "enrichVolcano_param_error"
+    )
   }
 }

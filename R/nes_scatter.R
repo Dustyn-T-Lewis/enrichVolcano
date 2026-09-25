@@ -49,7 +49,8 @@
 #' @param shape_by Column mapped to point shape (up to five values), or `NULL`.
 #' @param label_min_size Smallest gene set that gets a label.
 #' @param label_n Most term labels drawn.
-#' @param labels Your own display names, as in [plot_volcano_ring()].
+#' @param labels Term labels: a style, your own names or a function, as in
+#'   [plot_volcano_ring()].
 #' @param theme Output of [plot_theme()]; supplies the base font.
 #'
 #' @return A ggplot.
@@ -76,7 +77,7 @@ plot_scatter <- function(enrichment, x, y,
                          shape_by = "database",
                          label_min_size = 15,
                          label_n = 20,
-                         labels = NULL,
+                         labels = "short",
                          theme = plot_theme()) {
   check_enrichment(enrichment)
   check_labels(labels)

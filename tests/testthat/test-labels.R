@@ -160,14 +160,50 @@ test_that("the scatter uses the same labels", {
   expect_true("First term" %in% drawn)
 })
 
-test_that("labels must be a named character vector", {
-  for (bad in list("no names", c(a = 1), stats::setNames("x", ""))) {
+test_that("labels picks the shipped style", {
+  terms <- c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "HALLMARK_TOY_A")
+  expect_identical(display_labels(terms, "short", 40), c("OXPHOS", "Toy A"))
+  expect_identical(display_labels(terms, "clean", 40), c("Oxidative Phosphorylation", "Toy A"))
+  expect_identical(display_labels(terms, NULL, 40), display_labels(terms, "short", 40))
+})
+
+test_that("an edited table renames the terms it lists and leaves the rest short", {
+  terms <- c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "HALLMARK_TOY_A", "HALLMARK_TOY_B")
+  edited <- data.frame(
+    term = c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "HALLMARK_TOY_B"),
+    label = c("Mito\\nrespiration", NA)
+  )
+  expect_identical(display_labels(terms, edited, 40), c("Mito\nrespiration", "Toy A", "Toy B"))
+})
+
+test_that("a function labels every term its own way", {
+  terms <- c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "GOBP_AUTOPHAGY")
+  lower <- function(x) tolower(sub("^[A-Z]+_", "", x))
+  expect_identical(display_labels(terms, lower, 40), c("oxidative_phosphorylation", "autophagy"))
+  expect_error(display_labels(terms, function(x) "one", 40), class = "enrichVolcano_param_error")
+})
+
+test_that("the plots draw a table or function label", {
+  p <- suppressMessages(plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(),
+    databases = NULL, term_threshold = 1, n_terms = Inf,
+    labels = data.frame(term = "HALLMARK_TOY_A", label = "Edited A")
+  ))
+  drawn <- unlist(lapply(ggplot2::ggplot_build(p)$data, function(d) if ("label" %in% names(d)) as.character(d$label)))
+  expect_true("Edited A" %in% drawn)
+  p <- suppressMessages(plot_scatter(make_toy_scatter_enrichment(), "A", "B", labels = function(x) paste("Set", x)))
+  drawn <- unlist(lapply(ggplot2::ggplot_build(p)$data, function(d) if ("label" %in% names(d)) as.character(d$label)))
+  expect_true("Set T01" %in% drawn)
+})
+
+test_that("labels must be a style, a named vector, a term and label table, or a function", {
+  bad <- list("tiny", c(a = 1), stats::setNames("x", ""), data.frame(x = 1), list(a = "b"))
+  for (b in bad) {
     expect_error(
-      plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(), labels = bad),
+      plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(), labels = b),
       class = "enrichVolcano_param_error"
     )
     expect_error(
-      plot_scatter(make_toy_scatter_enrichment(), "A", "B", labels = bad),
+      plot_scatter(make_toy_scatter_enrichment(), "A", "B", labels = b),
       class = "enrichVolcano_param_error"
     )
   }
