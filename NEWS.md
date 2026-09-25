@@ -21,6 +21,9 @@
   clipped or drawn under the legend.
 * An empty size window in `run_enrichment()` fails before the tied-rank note.
 * A scatter correlation that rounds to zero prints as 0.00, not -0.00.
+* `write_plot()` sizes its pages from the layout, about 7 by 7.5 inches per
+  composite cell, so a composite of full-size panels stays readable. `width`
+  and `height` still set the page.
 
 * A protein group such as `P31040;Q9UBK2` is mapped to its gene symbol
   through its first accession.

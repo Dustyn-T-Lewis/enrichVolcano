@@ -11,8 +11,8 @@ write_plot(
   nrow = NULL,
   design = NULL,
   caption = NULL,
-  width = 11,
-  height = 8.5
+  width = NULL,
+  height = NULL
 )
 }
 \arguments{
@@ -29,7 +29,9 @@ and \code{nrow}.}
 
 \item{caption}{Text under the composite. \code{NULL} draws none.}
 
-\item{width, height}{Page size in inches. The default is US Letter landscape.}
+\item{width, height}{Page size in inches. \code{NULL} gives each composite cell
+7 by 7.5 inches, the size the panels are drawn for, and widens the page to
+at least landscape proportions. Every page has this size.}
 }
 \value{
 \code{file}, invisibly.
