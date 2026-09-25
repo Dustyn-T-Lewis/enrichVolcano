@@ -24,7 +24,8 @@ fits two ring lines, \code{"clean"} spells every word out. The package's earlier
 cleaning rules informed the short names. Any other name is cleaned plainly:
 the database prefix and any \code{>} or \verb{__} levels above the last are dropped,
 underscores become spaces, words are title-cased and common acronyms such
-as DNA and mRNA restored.
+as DNA and mRNA restored. \code{\link[=list_labels]{list_labels()}} lists the labels a figure will
+draw, to edit and pass back through \code{labels}.
 }
 \examples{
 clean_label(c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "REACTOME_TCA_CYCLE"))

@@ -42,7 +42,8 @@ ev_select_labels <- function(df, mode, n, rank_by, genes,
 #' cleaning rules informed the short names. Any other name is cleaned plainly:
 #' the database prefix and any `>` or `__` levels above the last are dropped,
 #' underscores become spaces, words are title-cased and common acronyms such
-#' as DNA and mRNA restored.
+#' as DNA and mRNA restored. [list_labels()] lists the labels a figure will
+#' draw, to edit and pass back through `labels`.
 #'
 #' @param name Character vector of term names.
 #' @param width Wrap width in characters. A label that already holds a line
