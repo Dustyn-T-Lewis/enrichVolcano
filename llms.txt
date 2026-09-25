@@ -86,12 +86,18 @@ are on the site: <https://Dustyn-T-Lewis.github.io/enrichVolcano/>.
 - [`write_table()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_table.md)
   : Write enrichment results to a CSV file
 
+## Labels
+
+- [`clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/clean_label.md)
+  : Clean a pathway name for display
+- [`list_labels()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/list_labels.md)
+  [`write_labels()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/list_labels.md)
+  : List the term labels a figure will draw, to review or edit
+
 ## Style
 
 - [`plot_theme()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_theme.md)
   : Fonts and colours for the plots
-- [`clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/clean_label.md)
-  : Clean a pathway name for display
 
 # Articles
 

@@ -532,9 +532,67 @@ The arguments you will reach for most:
   half.
 - `x_scale`, `y_scale`: compress the volcano when points crowd the ring.
 - `label_mode`, `label_n`, `label_genes`: which proteins get text.
-- `labels`: your own names for chosen terms, such as
-  `c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")`.
+- `labels`: the label style, or your own names (see below).
 - `show_counts`, `disc_colour`: count badges and a tinted central disc.
+
+## Name the terms
+
+Hallmark and GO slim terms carry labels written for the package, in two
+styles. `"short"`, the default, fits two lines on the ring; `"clean"`
+spells every word out. Any other term, including one from your own gene
+sets, loses its database prefix and underscores and is title-cased.
+
+[`list_labels()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/list_labels.md)
+picks terms the way the ring does and lists each once, with both styles:
+
+``` r
+
+lbl <- list_labels(res$fgsea)
+head(lbl[, c("term", "clean", "short")])
+#>                                                    term
+#> 1                        GOSLIM_CYTOPLASMIC_TRANSLATION
+#> 2                          GOSLIM_MUSCLE_SYSTEM_PROCESS
+#> 3 GOSLIM_GENERATION_OF_PRECURSOR_METABOLITES_AND_ENERGY
+#> 4                        GOSLIM_LIPID_METABOLIC_PROCESS
+#> 5                    HALLMARK_OXIDATIVE_PHOSPHORYLATION
+#> 6                                GOSLIM_PROTEIN_FOLDING
+#>                                            clean
+#> 1                        Cytoplasmic Translation
+#> 2                          Muscle System Process
+#> 3 Generation of Precursor Metabolites and Energy
+#> 4                        Lipid Metabolic Process
+#> 5                      Oxidative Phosphorylation
+#> 6                                Protein Folding
+#>                              short
+#> 1          Cytoplasmic Translation
+#> 2            Muscle System Process
+#> 3 Precursor Metabolites\\n& Energy
+#> 4                 Lipid Metabolism
+#> 5                           OXPHOS
+#> 6                  Protein Folding
+```
+
+To rename terms, write the list to CSV, edit the `label` column and pass
+the table back. Write a line break as `\n`:
+
+``` r
+
+write_labels(res$fgsea, "labels.csv")
+plot_volcano_ring(yvo$da, res$fgsea, contrast = "Aging", labels = read.csv("labels.csv"))
+```
+
+`labels = "clean"` switches style, a named vector renames a few terms,
+and a function names every term your own way:
+
+``` r
+
+plot_scatter(res$fgsea, "Training_Young", "Training_Old", labels = "clean")
+plot_volcano_ring(yvo$da, res$fgsea,
+  contrast = "Aging",
+  labels = c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "Mito respiration")
+)
+plot_volcano_ring(yvo$da, res$fgsea, contrast = "Aging", labels = function(term) sub("^[A-Z]+_", "", term))
+```
 
 ## Write figures and tables
 

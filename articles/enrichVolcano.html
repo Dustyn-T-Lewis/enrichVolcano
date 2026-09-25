@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>enrichVolcano</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v2.1.0/vignettes/enrichVolcano.Rmd" class="external-link"><code>vignettes/enrichVolcano.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/vignettes/enrichVolcano.Rmd" class="external-link"><code>vignettes/enrichVolcano.Rmd</code></a></small>
       <div class="d-none name"><code>enrichVolcano.Rmd</code></div>
     </div>
 
@@ -552,12 +552,62 @@ when points crowd the ring.</li>
 <code>label_mode</code>, <code>label_n</code>,
 <code>label_genes</code>: which proteins get text.</li>
 <li>
-<code>labels</code>: your own names for chosen terms, such as
-<code>c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")</code>.</li>
+<code>labels</code>: the label style, or your own names (see
+below).</li>
 <li>
 <code>show_counts</code>, <code>disc_colour</code>: count badges and
 a tinted central disc.</li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="name-the-terms">Name the terms<a class="anchor" aria-label="anchor" href="#name-the-terms"></a>
+</h2>
+<p>Hallmark and GO slim terms carry labels written for the package, in
+two styles. <code>"short"</code>, the default, fits two lines on the
+ring; <code>"clean"</code> spells every word out. Any other term,
+including one from your own gene sets, loses its database prefix and
+underscores and is title-cased.</p>
+<p><code><a href="../reference/list_labels.html">list_labels()</a></code> picks terms the way the ring does and
+lists each once, with both styles:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/list_labels.html">list_labels</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">fgsea</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">lbl</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"term"</span>, <span class="st">"clean"</span>, <span class="st">"short"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                                                    term</span></span>
+<span><span class="co">#&gt; 1                        GOSLIM_CYTOPLASMIC_TRANSLATION</span></span>
+<span><span class="co">#&gt; 2                          GOSLIM_MUSCLE_SYSTEM_PROCESS</span></span>
+<span><span class="co">#&gt; 3 GOSLIM_GENERATION_OF_PRECURSOR_METABOLITES_AND_ENERGY</span></span>
+<span><span class="co">#&gt; 4                        GOSLIM_LIPID_METABOLIC_PROCESS</span></span>
+<span><span class="co">#&gt; 5                    HALLMARK_OXIDATIVE_PHOSPHORYLATION</span></span>
+<span><span class="co">#&gt; 6                                GOSLIM_PROTEIN_FOLDING</span></span>
+<span><span class="co">#&gt;                                            clean</span></span>
+<span><span class="co">#&gt; 1                        Cytoplasmic Translation</span></span>
+<span><span class="co">#&gt; 2                          Muscle System Process</span></span>
+<span><span class="co">#&gt; 3 Generation of Precursor Metabolites and Energy</span></span>
+<span><span class="co">#&gt; 4                        Lipid Metabolic Process</span></span>
+<span><span class="co">#&gt; 5                      Oxidative Phosphorylation</span></span>
+<span><span class="co">#&gt; 6                                Protein Folding</span></span>
+<span><span class="co">#&gt;                              short</span></span>
+<span><span class="co">#&gt; 1          Cytoplasmic Translation</span></span>
+<span><span class="co">#&gt; 2            Muscle System Process</span></span>
+<span><span class="co">#&gt; 3 Precursor Metabolites\\n&amp; Energy</span></span>
+<span><span class="co">#&gt; 4                 Lipid Metabolism</span></span>
+<span><span class="co">#&gt; 5                           OXPHOS</span></span>
+<span><span class="co">#&gt; 6                  Protein Folding</span></span></code></pre></div>
+<p>To rename terms, write the list to CSV, edit the <code>label</code>
+column and pass the table back. Write a line break as
+<code>\n</code>:</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/list_labels.html">write_labels</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, <span class="st">"labels.csv"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Aging"</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"labels.csv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><code>labels = "clean"</code> switches style, a named vector renames
+a few terms, and a function names every term your own way:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_scatter.html">plot_scatter</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, <span class="st">"Training_Young"</span>, <span class="st">"Training_Old"</span>, labels <span class="op">=</span> <span class="st">"clean"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>,</span>
+<span>  contrast <span class="op">=</span> <span class="st">"Aging"</span>,</span>
+<span>  labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>HALLMARK_OXIDATIVE_PHOSPHORYLATION <span class="op">=</span> <span class="st">"Mito respiration"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Aging"</span>, labels <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">term</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"^[A-Z]+_"</span>, <span class="st">""</span>, <span class="va">term</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="write-figures-and-tables">Write figures and tables<a class="anchor" aria-label="anchor" href="#write-figures-and-tables"></a>
@@ -566,23 +616,23 @@ a tinted central disc.</li>
 takes a named list of them and writes one PDF. Page 1 is a composite
 lettered A, B, C in list order. Each later page holds one panel at full
 size, headed by its letter and name. Fonts are embedded.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">panels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Training, young"</span> <span class="op">=</span> <span class="fu"><a href="../reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Training_Young"</span><span class="op">)</span>,</span>
 <span>  <span class="st">"Training, old"</span> <span class="op">=</span> <span class="fu"><a href="../reference/plot_volcano_ring.html">plot_volcano_ring</a></span><span class="op">(</span><span class="va">yvo</span><span class="op">$</span><span class="va">da</span>, <span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, contrast <span class="op">=</span> <span class="st">"Training_Old"</span><span class="op">)</span>,</span>
 <span>  <span class="st">"Young against old"</span> <span class="op">=</span> <span class="fu"><a href="../reference/plot_scatter.html">plot_scatter</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">fgsea</span>, <span class="st">"Training_Young"</span>, <span class="st">"Training_Old"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_plot.html">write_plot</a></span><span class="op">(</span><span class="va">panels</span>, <span class="st">"training.pdf"</span>, design <span class="op">=</span> <span class="st">"AB\nCC"</span>, caption <span class="op">=</span> <span class="st">"fgsea, Hallmark and GO slim"</span><span class="op">)</span></span></code></pre></div>
 <p>To see a composite on screen, pass the list to
 <code><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html" class="external-link">patchwork::wrap_plots()</a></code>:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">patchwork</span><span class="fu">::</span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html" class="external-link">wrap_plots</a></span><span class="op">(</span><span class="va">panels</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="enrichVolcano_files/figure-html/composite-1.png" class="r-plt" alt="Two volcano rings side by side for trained young and trained old" width="720"></p>
 <p><code><a href="../reference/write_table.html">write_table()</a></code> writes one enrichment object, or the whole
 list from <code><a href="../reference/run_enrichment.html">run_enrichment()</a></code>, to one CSV with an
 <code>enrichment_test</code> column:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_table.html">write_table</a></span><span class="op">(</span><span class="va">res</span>, <span class="st">"yvo_enrichment.csv"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">

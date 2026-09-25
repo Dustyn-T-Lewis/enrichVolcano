@@ -16,7 +16,7 @@ plot_volcano_ring(
   term_threshold = 0.05,
   n_terms = 12,
   terms = NULL,
-  labels = NULL,
+  labels = "short",
   p_threshold = 0.05,
   logfc_threshold = 0,
   title = NULL,
@@ -100,11 +100,14 @@ plot_volcano_ring(
 
 - labels:
 
-  Your own display names, as a character vector named by term, such as
-  `c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")`. Terms not named
-  keep
+  Term labels. `"short"` (default) or `"clean"` picks the style of
   [`clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/clean_label.md).
-  A name without `\n` is wrapped like the others.
+  Your own names replace it for the terms they name, as a character
+  vector named by term, such as
+  `c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "Mito respiration")`, or as a
+  data frame with `term` and `label` columns. A function takes the term
+  names and returns one label each. A label with a line break (`\n`,
+  typed or written as the two characters in a CSV) is not wrapped again.
 
 - p_threshold:
 

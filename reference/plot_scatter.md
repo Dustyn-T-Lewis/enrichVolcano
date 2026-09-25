@@ -19,7 +19,7 @@ plot_scatter(
   shape_by = "database",
   label_min_size = 15,
   label_n = 20,
-  labels = NULL,
+  labels = "short",
   theme = plot_theme()
 )
 ```
@@ -79,7 +79,7 @@ plot_scatter(
 
 - labels:
 
-  Your own display names, as in
+  Term labels: a style, your own names or a function, as in
   [`plot_volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_volcano_ring.md).
 
 - theme:
