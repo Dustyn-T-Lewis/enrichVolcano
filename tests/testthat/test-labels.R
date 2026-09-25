@@ -72,74 +72,50 @@ test_that("a point without a gene symbol is labelled with its accession", {
   expect_setequal(out$label_text, c("P1", "G10"))
 })
 
-test_that("clean_label strips canonical database prefixes", {
-  expect_equal(
-    clean_label("HALLMARK_TCA_CYCLE"),
-    stringr::str_wrap("TCA Cycle", width = 15)
-  )
-  expect_equal(
-    clean_label("GOBP_AUTOPHAGY"),
-    stringr::str_wrap("Autophagy", width = 15)
-  )
+test_that("clean_label reads the shipped table, short by default", {
+  expect_identical(clean_label("HALLMARK_OXIDATIVE_PHOSPHORYLATION"), "OXPHOS")
+  oxphos <- "HALLMARK_OXIDATIVE_PHOSPHORYLATION"
+  expect_identical(clean_label(oxphos, style = "clean", width = 40), "Oxidative Phosphorylation")
+  expect_identical(clean_label("HALLMARK_OXIDATIVE_PHOSPHORYLATION", style = "clean"), "Oxidative\nPhosphorylation")
+  expect_identical(clean_label("GOSLIM_LIPID_METABOLIC_PROCESS", width = 40), "Lipid Metabolism")
 })
 
-test_that("clean_label routes MITOCARTA_ names through the leaf shortener", {
-  out <- clean_label("MITOCARTA_OXPHOS__CI_SUBUNITS")
-  expect_true(grepl("Complex I", out))
+test_that("a line break written into the table is kept at any width", {
+  term <- "GOSLIM_GENERATION_OF_PRECURSOR_METABOLITES_AND_ENERGY"
+  expect_identical(clean_label(term), "Precursor Metabolites\n& Energy")
+  expect_identical(clean_label(term, width = 40), "Precursor Metabolites\n& Energy")
 })
 
-test_that("a MitoCarta name without a hierarchy keeps all its words", {
-  expect_identical(clean_label("MITOCARTA_Mitochondrial_central_dogma", width = 40), "Mito. Central Dogma")
-  expect_identical(clean_label("MITOCARTA_OXPHOS_SUBUNITS", width = 40), "OXPHOS Subunits")
+test_that("every shipped label is filled and fits two ring lines", {
+  tbl <- utils::read.csv(system.file("extdata", "term_labels.csv", package = "enrichVolcano"))
+  expect_false(anyDuplicated(tbl$term) > 0)
+  expect_true(all(nzchar(tbl$clean) & nzchar(tbl$short)))
+  lines <- lengths(strsplit(clean_label(tbl$term), "\n", fixed = TRUE))
+  expect_true(all(lines <= 2))
 })
 
-test_that("a MitoCarta leaf keeps its complex numeral upper case", {
-  expect_identical(clean_label("MITOCARTA_OXPHOS>Complex_I", width = 40), "Complex I")
-  expect_identical(clean_label("MITOCARTA_OXPHOS__Complex_IV", width = 40), "Complex IV")
+test_that("a term outside the table gets the plain clean", {
+  expect_identical(clean_label("REACTOME_RESPIRATORY_ELECTRON_TRANSPORT", width = 40), "Respiratory Electron Transport")
+  expect_identical(clean_label("GOBP_AUTOPHAGY"), "Autophagy")
+  expect_identical(clean_label("KEGG_MEDICUS_REFERENCE_GLYCOLYSIS", width = 40), "Reference Glycolysis")
+  expect_identical(clean_label("MY_OWN_SET", width = 40), "My Own Set")
+  expect_identical(clean_label("REACTOME_RRNA_PROCESSING"), "rRNA Processing")
+  expect_identical(clean_label("REACTOME_CYTOPROTECTION_BY_HMOX1", width = 40), "Cytoprotection By HMOX1")
+  expect_identical(clean_label("GOBP_AUTOPHAGY", style = "clean"), clean_label("GOBP_AUTOPHAGY"))
+})
+
+test_that("the plain clean keeps the last level of a hierarchy", {
+  expect_identical(clean_label("MITOCARTA_OXPHOS>Complex_IV", width = 40), "Complex IV")
+  expect_identical(clean_label("MITOCARTA_OXPHOS__OXPHOS_SUBUNITS", width = 40), "OXPHOS Subunits")
+  expect_identical(clean_label("MITOCARTA_Mitochondrial_central_dogma", width = 40), "Mitochondrial Central Dogma")
 })
 
 test_that("clean_label passes missing and empty names through", {
   expect_identical(clean_label(c(NA, "", "HALLMARK_APOPTOSIS")), c(NA, "", "Apoptosis"))
 })
 
-# A ring arc has room for two lines. A third pushes the label box into its
-# neighbours, so verbose MSigDB names need a phrase entry, not a wider wrap.
-test_that("clean_label keeps verbose MSigDB names within two lines", {
-  verbose <- c(
-    "GOBP_STRIATED_MUSCLE_CELL_DIFFERENTIATION",
-    "GOBP_MEMBRANELESS_ORGANELLE_ASSEMBLY",
-    "GOBP_CELLULAR_COMPONENT_ASSEMBLY_INVOLVED_IN_MORPHOGENESIS",
-    "GOBP_PROTON_TRANSMEMBRANE_TRANSPORT",
-    "GOBP_NUCLEOSIDE_TRIPHOSPHATE_BIOSYNTHETIC_PROCESS",
-    "GOBP_RIBOSOMAL_SMALL_SUBUNIT_BIOGENESIS",
-    "GOSLIM_PROTEIN_LOCALIZATION_TO_PLASMA_MEMBRANE",
-    "KEGG_MEDICUS_REFERENCE_RAB7_REGULATED_MICROTUBULE_MINUS_END_DIRECTED_TRANSPORT",
-    "REACTOME_SEPARATION_OF_SISTER_CHROMATIDS",
-    "REACTOME_NON_INTEGRIN_MEMBRANE_ECM_INTERACTIONS",
-    "REACTOME_REGULATION_OF_PD_L1_CD274_POST_TRANSLATIONAL_MODIFICATION",
-    "REACTOME_ASPARAGINE_N_LINKED_GLYCOSYLATION"
-  )
-  lines <- lengths(strsplit(clean_label(verbose), "\n", fixed = TRUE))
-  expect_equal(lines, rep(2L, length(verbose)))
-})
-
-test_that("clean_label capitalises gene and complex acronyms", {
-  expect_equal(clean_label("REACTOME_RRNA_PROCESSING"), "rRNA Processing")
-  expect_equal(clean_label("REACTOME_UCH_PROTEINASES"), "UCH Proteinases")
-  expect_match(clean_label("REACTOME_ECM_PROTEOGLYCANS"), "^ECM")
-  expect_match(clean_label("REACTOME_CYTOPROTECTION_BY_HMOX1"), "HMOX1")
-  expect_match(
-    clean_label("REACTOME_REGULATION_OF_PD_L1_CD274_POST_TRANSLATIONAL_MODIFICATION"),
-    "PD-L1"
-  )
-})
-
-test_that("clean_label does not repeat a word the acronym already carries", {
-  expect_equal(clean_label("GOBP_ELECTRON_TRANSPORT_CHAIN"), "ETC")
-  expect_match(
-    clean_label("REACTOME_MITOTIC_G2_G2_M_PHASES"), "G2/M",
-    fixed = TRUE
-  )
+test_that("clean_label refuses an unknown style", {
+  expect_error(clean_label("HALLMARK_APOPTOSIS", style = "tiny"), class = "rlang_error")
 })
 
 test_that("plot_volcano_ring with label_mode = 'top_per_direction' runs", {
@@ -165,26 +141,6 @@ test_that("plot_volcano_ring with label_mode = 'by_genes' runs", {
     label_genes = c("G1", "G15")
   ))
   expect_s3_class(p, "ggplot")
-})
-
-test_that("the default width is unchanged, hand-placed breaks included", {
-  expect_identical(clean_label("HALLMARK_HEME_METABOLISM"), "Heme\nMetabolism")
-})
-
-test_that("a wider width wraps less and skips the ring's hand-placed breaks", {
-  expect_identical(clean_label("HALLMARK_HEME_METABOLISM", width = 40), "Heme Metabolism")
-  long <- "GOBP_REGULATION_OF_CYTOPLASMIC_TRANSLATION_IN_RESPONSE_TO_STRESS"
-  lines <- strsplit(clean_label(long, width = 40), "\n")[[1]]
-  expect_true(all(nchar(lines) <= 40))
-  expect_lt(length(lines), length(strsplit(clean_label(long), "\n")[[1]]))
-})
-
-test_that("width reaches vectorised and MitoCarta names", {
-  out <- clean_label(c("HALLMARK_HEME_METABOLISM", "HALLMARK_MITOTIC_SPINDLE"), width = 40)
-  expect_identical(out, c("Heme Metabolism", "Mitotic Spindle"))
-  mito <- "MITOCARTA_OXPHOS__OXPHOS_ASSEMBLY_FACTORS"
-  expect_false(grepl("\n", clean_label(mito, width = 40)))
-  expect_true(grepl("\n", clean_label(mito)))
 })
 
 test_that("labels replace the cleaned names of the terms they name", {

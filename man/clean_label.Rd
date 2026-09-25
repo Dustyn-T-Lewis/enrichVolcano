@@ -4,21 +4,29 @@
 \alias{clean_label}
 \title{Clean a pathway name for display}
 \usage{
-clean_label(name, width = 15)
+clean_label(name, width = 15, style = c("short", "clean"))
 }
 \arguments{
-\item{name}{Character vector of raw pathway names.}
+\item{name}{Character vector of term names.}
 
-\item{width}{Wrap width in characters. The default suits ring arcs; at 15
-or narrower a few short names also get hand-placed line breaks.}
+\item{width}{Wrap width in characters. A label that already holds a line
+break is not wrapped again.}
+
+\item{style}{\code{"short"} or \code{"clean"}. Only table terms differ between the two.}
 }
 \value{
-Character vector of cleaned, wrapped labels.
+Character vector of labels.
 }
 \description{
-Strips the database prefix, expands common acronyms, title-cases, wraps,
-and applies MitoCarta-hierarchy shortening for \code{MITOCARTA_} pathways.
+Hallmark and GO slim terms take their label from a table written by hand
+and shipped with the package (\code{inst/extdata/term_labels.csv}): \code{"short"}
+fits two ring lines, \code{"clean"} spells every word out. The package's earlier
+cleaning rules informed the short names. Any other name is cleaned plainly:
+the database prefix and any \code{>} or \verb{__} levels above the last are dropped,
+underscores become spaces, words are title-cased and common acronyms such
+as DNA and mRNA restored.
 }
 \examples{
 clean_label(c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "REACTOME_TCA_CYCLE"))
+clean_label("HALLMARK_OXIDATIVE_PHOSPHORYLATION", style = "clean", width = 40)
 }
