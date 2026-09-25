@@ -36,7 +36,7 @@ validate_ring_geometry <- function(ring_radius, volcano_radius, arc_height_range
     )
   }
   if (ring_radius < volcano_radius) {
-    ev_warn(
+    cli::cli_warn(
       c(
         paste(
           "{.arg ring_radius} ({ring_radius}) is below {.arg volcano_radius}",
@@ -44,7 +44,7 @@ validate_ring_geometry <- function(ring_radius, volcano_radius, arc_height_range
         ),
         "i" = "Raise {.arg ring_radius} or lower {.arg volcano_radius}."
       ),
-      class = "enrichVolcano_param_warning"
+      class = c("enrichVolcano_param_warning", "enrichVolcano_warning")
     )
   }
   invisible(TRUE)

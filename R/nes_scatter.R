@@ -110,7 +110,7 @@ plot_scatter <- function(enrichment, x, y,
 
   sig <- wide$significance != "NS"
   counts <- quadrant_counts(wide$score_x, wide$score_y, sig)
-  share <- concordance_fraction(counts)
+  share <- if (sum(counts) > 0) unname((counts[["top_right"]] + counts[["bottom_left"]]) / sum(counts)) else NA_real_
   if (comparison == "reversal") share <- 1 - share
   subtitle <- scatter_subtitle(
     score_correlation(wide$score_x, wide$score_y),
@@ -123,15 +123,8 @@ plot_scatter <- function(enrichment, x, y,
     ggplot2::labs(
       x = sprintf("%s (%s)", score_type, x),
       y = sprintf("%s (%s)", score_type, y),
-      subtitle = subtitle_math(subtitle)
+      subtitle = if (startsWith(subtitle, "rho")) bquote(rho ~ .(trimws(substring(subtitle, 4)))) else subtitle
     )
-}
-
-subtitle_math <- function(text) {
-  if (!startsWith(text, "rho")) {
-    return(text)
-  }
-  bquote(rho ~ .(trimws(substring(text, 4))))
 }
 
 pair_contrasts <- function(res, x, y) {
@@ -184,13 +177,6 @@ quadrant_counts <- function(score_x, score_y, sig) {
     bottom_left = sum(sig & score_x < 0 & score_y < 0),
     bottom_right = sum(sig & score_x > 0 & score_y < 0)
   )
-}
-
-concordance_fraction <- function(counts) {
-  if (sum(counts) == 0) {
-    return(NA_real_)
-  }
-  unname((counts[["top_right"]] + counts[["bottom_left"]]) / sum(counts))
 }
 
 score_correlation <- function(x, y, with_ci = requireNamespace("correlation", quietly = TRUE)) {

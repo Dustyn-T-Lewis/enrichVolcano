@@ -37,19 +37,6 @@ ev_inform <- function(message, ..., class = NULL,
   )
 }
 
-#' Warn with a classed cli warning
-#' @keywords internal
-#' @noRd
-ev_warn <- function(message, ..., class = NULL,
-                    .envir = rlang::caller_env()) {
-  cli::cli_warn(
-    message,
-    ...,
-    class = c(class, "enrichVolcano_warning"),
-    .envir = .envir
-  )
-}
-
 #' Standard abort for a missing column on a user data.frame
 #'
 #' @keywords internal
