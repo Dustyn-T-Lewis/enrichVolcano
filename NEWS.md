@@ -29,6 +29,7 @@
   failing, and `clean_label(character(0))` returns `character(0)`.
 * `clean_label()` keeps every word of a MitoCarta name that has no hierarchy,
   and writes complex numerals upper case: `Complex IV`, not `Complex Iv`.
+* `plot_bias_ring()` refuses an unnamed extra argument instead of ignoring it.
 * `write_plot()` sizes its pages from the layout, about 7 by 7.5 inches per
   composite cell, so a composite of full-size panels stays readable. `width`
   and `height` still set the page.
