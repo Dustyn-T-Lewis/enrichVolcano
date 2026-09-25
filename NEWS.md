@@ -30,7 +30,6 @@
 * `write_plot()` sizes its pages from the layout, about 7 by 7.5 inches per
   composite cell, so a composite of full-size panels stays readable. `width`
   and `height` still set the page.
-
 * A protein group such as `P31040;Q9UBK2` is mapped to its gene symbol
   through its first accession.
 * A blank gene symbol counts as missing.
@@ -38,6 +37,12 @@
 * A wide table without a contrast column gets the wide-table message.
 * The `mito` example study ships the Mito pipeline's gene symbols. The rat
   annotation package lacked 447 of its 4,806 proteins, which fgsea dropped.
+
+## Documentation
+
+* The vignette cites the paper behind each method and ends with a reference
+  list. `citation("enrichVolcano")` gives the package citation. The README
+  shows the workflow as a figure.
 
 # enrichVolcano 2.0.0
 
