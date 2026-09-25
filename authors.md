@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v2.1.0/inst/CITATION)
 
 Lewis D (2026). *enrichVolcano: Volcano-in-Ring and Concordance Plots
 from Enrichment Results*. R package version 2.1.0,
