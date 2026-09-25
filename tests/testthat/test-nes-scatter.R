@@ -224,3 +224,8 @@ test_that("contrasts with no shared terms give a clear error", {
 test_that("the scatter defaults to every database", {
   expect_null(formals(plot_scatter)$databases)
 })
+
+test_that("a correlation that rounds to zero prints without a minus sign", {
+  s <- scatter_subtitle(list(rho = -0.001, ci = c(-0.2204, 0.001), p = 0.97), NA, "concordant", n = 5, n_sig = 0)
+  expect_match(s, "rho = 0.00 [-0.22, 0.00]", fixed = TRUE)
+})

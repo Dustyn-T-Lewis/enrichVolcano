@@ -20,6 +20,7 @@
 * The ring panel widens to fit labels at its sides, so they are no longer
   clipped or drawn under the legend.
 * An empty size window in `run_enrichment()` fails before the tied-rank note.
+* A scatter correlation that rounds to zero prints as 0.00, not -0.00.
 
 * A protein group such as `P31040;Q9UBK2` is mapped to its gene symbol
   through its first accession.

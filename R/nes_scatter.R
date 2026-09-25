@@ -205,10 +205,12 @@ scatter_subtitle <- function(cor, share, share_label, n, n_sig) {
   rho <- NULL
   if (!is.null(cor)) {
     p_text <- if (cor$p < 0.001) "p < 0.001" else sprintf("p = %.2f", cor$p)
+    # Adding 0 turns a rounded -0 into 0, so it prints without a minus sign.
+    two <- function(x) sprintf("%.2f", round(x, 2) + 0)
     rho <- if (is.null(cor$ci)) {
-      sprintf("rho = %.2f, %s", cor$rho, p_text)
+      sprintf("rho = %s, %s", two(cor$rho), p_text)
     } else {
-      sprintf("rho = %.2f [%.2f, %.2f], %s", cor$rho, cor$ci[1], cor$ci[2], p_text)
+      sprintf("rho = %s [%s, %s], %s", two(cor$rho), two(cor$ci[1]), two(cor$ci[2]), p_text)
     }
   }
   paste(c(
