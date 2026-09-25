@@ -37,7 +37,7 @@ write_plot <- function(panels, file, ncol = NULL, nrow = NULL, design = NULL, ca
   height <- height %||% size[2]
   before <- grDevices::dev.cur()
   # A missing cairo library only warns and opens no device, so compare devices.
-  suppressWarnings(grDevices::cairo_pdf(file, width = width, height = height, onefile = TRUE))
+  open_pdf(file, width, height)
   if (identical(grDevices::dev.cur(), before)) {
     ev_abort(
       c(
@@ -83,4 +83,8 @@ page_size <- function(n, ncol = NULL, nrow = NULL, design = NULL) {
   if (is.null(ncol)) ncol <- ceiling(n / nrow)
   height <- 7.5 * nrow
   c(max(7 * ncol, height * 11 / 8.5), height)
+}
+
+open_pdf <- function(file, width, height) {
+  suppressWarnings(grDevices::cairo_pdf(file, width = width, height = height, onefile = TRUE))
 }

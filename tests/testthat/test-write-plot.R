@@ -29,7 +29,7 @@ test_that("write_plot writes the composite, then one page per panel", {
 })
 
 test_that("without cairo, write_plot stops and says how to get it", {
-  skip_if(cairo_works(), "cairo works here")
+  local_mocked_bindings(open_pdf = function(...) invisible(NULL))
   file <- withr::local_tempfile(fileext = ".pdf")
   expect_error(write_plot(toy_panels(), file), "XQuartz", class = "enrichVolcano_device_error")
   expect_false(file.exists(file))
