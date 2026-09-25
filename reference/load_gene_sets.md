@@ -6,12 +6,7 @@ records those versions, so an analysis can state exactly what it tested.
 ## Usage
 
 ``` r
-load_gene_sets(
-  databases = c("Hallmark", "GO Slim"),
-  species = "Homo sapiens",
-  min_size = 15,
-  max_size = 500
-)
+load_gene_sets(databases = c("Hallmark", "GO Slim"), species = "Homo sapiens")
 ```
 
 ## Arguments
@@ -23,10 +18,6 @@ load_gene_sets(
 - species:
 
   `"Homo sapiens"`, `"Mus musculus"` or `"Rattus norvegicus"`.
-
-- min_size, max_size:
-
-  Keep sets with at least `min_size` and at most `max_size` genes.
 
 ## Value
 
@@ -46,13 +37,26 @@ species).
   genes annotated to the term or any of its descendants. Sets are named
   like `GOSLIM_PROTEIN_FOLDING`.
 
-Each collection is kept separate so
+Every set is kept, whatever its size.
 [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
-corrects p-values within it.
+filters on the genes measured in your data, and corrects p-values within
+each collection.
 
 ## References
+
+Liberzon A, Subramanian A, Pinchback R, et al. (2011). Molecular
+signatures database (MSigDB) 3.0. Bioinformatics 27(12):1739-1740.
+[doi:10.1093/bioinformatics/btr260](https://doi.org/10.1093/bioinformatics/btr260)
 
 Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
 Signatures Database hallmark gene set collection. Cell Systems
 1(6):417-425.
 [doi:10.1016/j.cels.2015.12.004](https://doi.org/10.1016/j.cels.2015.12.004)
+
+Ashburner M, Ball CA, Blake JA, et al. (2000). Gene Ontology: tool for
+the unification of biology. Nature Genetics 25(1):25-29.
+[doi:10.1038/75556](https://doi.org/10.1038/75556)
+
+Gene Ontology Consortium (2023). The Gene Ontology knowledgebase in
+2023. Genetics 224(1):iyad031.
+[doi:10.1093/genetics/iyad031](https://doi.org/10.1093/genetics/iyad031)

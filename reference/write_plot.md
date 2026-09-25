@@ -17,8 +17,8 @@ write_plot(
   nrow = NULL,
   design = NULL,
   caption = NULL,
-  width = 11,
-  height = 8.5
+  width = NULL,
+  height = NULL
 )
 ```
 
@@ -52,7 +52,9 @@ write_plot(
 
 - width, height:
 
-  Page size in inches. The default is US Letter landscape.
+  Page size in inches. `NULL` gives each composite cell 7 by 7.5 inches,
+  the size the panels are drawn for, and widens the page to at least
+  landscape proportions. Every page has this size.
 
 ## Value
 

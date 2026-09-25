@@ -16,6 +16,7 @@ plot_volcano_ring(
   term_threshold = 0.05,
   n_terms = 12,
   terms = NULL,
+  labels = NULL,
   p_threshold = 0.05,
   logfc_threshold = 0,
   title = NULL,
@@ -96,6 +97,14 @@ plot_volcano_ring(
 - terms:
 
   Optional character vector of exact term names to draw instead.
+
+- labels:
+
+  Your own display names, as a character vector named by term, such as
+  `c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")`. Terms not named
+  keep
+  [`clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/clean_label.md).
+  A name without `\n` is wrapped like the others.
 
 - p_threshold:
 

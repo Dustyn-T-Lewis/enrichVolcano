@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>enrichVolcano</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v2.0.0/vignettes/enrichVolcano.Rmd" class="external-link"><code>vignettes/enrichVolcano.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/vignettes/enrichVolcano.Rmd" class="external-link"><code>vignettes/enrichVolcano.Rmd</code></a></small>
       <div class="d-none name"><code>enrichVolcano.Rmd</code></div>
     </div>
 
@@ -93,7 +93,6 @@ sheet a study can have, so the whole workflow runs on it:</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Dustyn-T-Lewis/enrichVolcano" class="external-link">enrichVolcano</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">yvo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_example.html">read_example</a></span><span class="op">(</span><span class="st">"yvo"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 2103 of 2106 accessions mapped to Homo sapiens symbols.</span></span>
 <span><span class="co">#&gt; 2106 of 2106 matrix proteins have DA results.</span></span>
 <span><span class="va">sets</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_gene_sets.html">load_gene_sets</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span><span class="op">)</span></span>
@@ -103,7 +102,7 @@ sheet a study can have, so the whole workflow runs on it:</p>
 <span><span class="va">res</span><span class="op">$</span><span class="va">fgsea</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;enrichment&gt;</span> fgsea, score: NES</span></span>
 <span><span class="co">#&gt; 4 contrasts: Training_Young, Training_Old, Aging, and Interaction</span></span>
-<span><span class="co">#&gt; 252 rows: GO Slim (108) and Hallmark (144)</span></span>
+<span><span class="co">#&gt; 376 rows: GO Slim (232) and Hallmark (144)</span></span>
 <span><span class="co">#&gt; Dedup: not deduplicated</span></span></code></pre></div>
 <p><code><a href="../reference/read_example.html">read_example()</a></code> read the study through
 <code><a href="../reference/read_study.html">read_study()</a></code>, which checked that its sheets agree and
@@ -115,12 +114,13 @@ fgsea one drawn around the volcano:</p>
 <p><img src="enrichVolcano_files/figure-html/ring-1.png" class="r-plt" alt="Volcano of Training_Young proteins inside a ring of enriched Hallmark and GO slim terms" width="432"></p>
 <p>Arc fill is NES and arc height is
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>10</mn></msub></mrow><annotation encoding="application/x-tex">-\log_{10}</annotation></semantics></math>(padj).
-Up-regulated terms sit on the upper half, down-regulated ones on the
-lower. Ticks run from each arc to its leading-edge proteins in the
-volcano. The ring takes the twelve most significant terms (padj &lt;
-0.05), in either direction, from every collection in the object;
-<code>databases</code>, <code>term_threshold</code>,
-<code>n_terms</code> and <code>terms</code> change the selection.</p>
+Up-regulated terms sit on the right half and down-regulated ones on the
+left, the most significant at the top. Ticks run from each arc to its
+leading-edge proteins in the volcano. The ring takes the twelve most
+significant unique terms (padj &lt; 0.05), in either direction, from
+every collection in the object; <code>databases</code>,
+<code>term_threshold</code>, <code>n_terms</code> and <code>terms</code>
+change the selection.</p>
 </div>
 <div class="section level2">
 <h2 id="your-data">Your data<a class="anchor" aria-label="anchor" href="#your-data"></a>
@@ -192,7 +192,9 @@ ProtRank output, and takes column arguments for anything else. Proteins
 are ranked by the moderated t where the table has one, otherwise by the
 signed
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>10</mn></msub></mrow><annotation encoding="application/x-tex">-\log_{10}</annotation></semantics></math>
-p-value.</p>
+p-value (Reimand et al. 2019), or by the signed
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>10</mn></msub></mrow><annotation encoding="application/x-tex">-\log_{10}</annotation></semantics></math>
+padj when that is all the table has.</p>
 <p>The package ships seven studies in this format:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/read_example.html">read_example</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"name"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">]</span></span>
@@ -220,25 +222,28 @@ three tests on <code>yvo</code>:</p>
 <span><span class="va">res</span><span class="op">$</span><span class="va">camera</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;enrichment&gt;</span> cameraPR, score: signed -log10(FDR)</span></span>
 <span><span class="co">#&gt; 4 contrasts: Training_Young, Training_Old, Aging, and Interaction</span></span>
-<span><span class="co">#&gt; 252 rows: GO Slim (108) and Hallmark (144)</span></span>
+<span><span class="co">#&gt; 376 rows: GO Slim (232) and Hallmark (144)</span></span>
 <span><span class="co">#&gt; Dedup: not deduplicated</span></span></code></pre></div>
-<p>The three tests answer different questions. fgsea and camera are
-competitive: did a set move more than the other genes? fry is
-self-contained: did it move at all? fgsea ranks proteins by the DA
-results; camera and fry refit limma on the matrix, which must have no
+<p>The three tests answer different questions. fgsea (Korotkevich et
+al. 2019), a fast GSEA (Subramanian et al. 2005), and camera (Wu and
+Smyth 2012) are competitive: did a set move more than the other genes?
+fry, the fast form of roast (Wu et al. 2010), is self-contained: did it
+move at all? fgsea ranks proteins by the DA results; camera and fry
+refit limma (Ritchie et al. 2015) on the matrix, which must have no
 missing values, using the <code>samples</code> and
 <code>contrasts</code> sheets. When a gene has several proteins, the
 most abundant one represents it.</p>
 <p>A <code>subject</code> column marks repeated measures. By default the
 samples of one subject are treated as correlated
-(<code>subject_effect = "block"</code>); fry handles that directly, and
-camera, which cannot, is replaced by <code>cameraPR()</code> on the
-blocked fit, which is why <code>res$camera</code> above reports
-<code>cameraPR</code>. <code>subject_effect = "fixed"</code> puts
-subject in the design instead. camera assumes a correlation between
-genes in a set; limma’s default is 0.01, and
-<code>inter_gene_cor = NA</code> estimates it from the data (unblocked
-designs only), which can change results substantially.</p>
+(<code>subject_effect = "block"</code>; Smyth et al. 2005); fry handles
+that directly, and camera, which cannot, is replaced by
+<code>cameraPR()</code> on the blocked fit, which is why
+<code>res$camera</code> above reports <code>cameraPR</code>.
+<code>subject_effect = "fixed"</code> puts subject in the design
+instead. camera assumes a correlation between genes in a set; limma’s
+default is 0.01, and <code>inter_gene_cor = NA</code> estimates it from
+the data (unblocked designs only), which can change results
+substantially.</p>
 <p>Each result is an <code>enrichment</code> object, so every figure
 reads any of them:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -261,22 +266,23 @@ and height are each score over the strongest score in the contrast.</p>
 <h2 id="choose-gene-set-collections">Choose gene-set collections<a class="anchor" aria-label="anchor" href="#choose-gene-set-collections"></a>
 </h2>
 <p>Hallmark and GO slim make a good default pair for figures. The 50
-Hallmark sets each summarise one well-defined biological state, and the
-GO Consortium’s generic slim keeps a small set of broad GO terms. Both
-are built to avoid overlapping terms, so every arc says something
-different. Larger collections such as <a href="GO:BP" class="uri">GO:BP</a> or Reactome find more specific terms but need
+Hallmark sets each summarise one well-defined biological state (Liberzon
+et al. 2015), and the GO Consortium’s generic slim keeps a small set of
+broad terms from the Gene Ontology (Ashburner et al. 2000; Gene Ontology
+Consortium 2023). Both are built to avoid overlapping terms, so every
+arc says something different. Larger collections such as <a href="GO:BP" class="uri">GO:BP</a> or Reactome find more specific terms but need
 <code><a href="../reference/dedup_terms.html">dedup_terms()</a></code>.</p>
 <p><code><a href="../reference/load_gene_sets.html">load_gene_sets()</a></code> fetches them for human, mouse or rat.
-Hallmark, Reactome, KEGG MEDICUS and <a href="GO:BP" class="uri">GO:BP</a> come from msigdbr (mouse and rat through
-orthologs). The GO slim is the biological-process part of the GO
-Consortium’s generic slim, pinned in the package, with genes taken from
-the species’ annotation package (org.Hs.eg.db, org.Mm.eg.db or
-org.Rn.eg.db), counting genes annotated to each term or any of its
-descendants:</p>
+Hallmark, Reactome, KEGG MEDICUS and <a href="GO:BP" class="uri">GO:BP</a> come from MSigDB (Liberzon et al. 2011) through
+msigdbr, mouse and rat through orthologs. The GO slim is the
+biological-process part of the GO Consortium’s generic slim, pinned in
+the package, with genes taken from the species’ annotation package
+(org.Hs.eg.db, org.Mm.eg.db or org.Rn.eg.db), counting genes annotated
+to each term or any of its descendants:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lengths.html" class="external-link">lengths</a></span><span class="op">(</span><span class="va">sets</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Hallmark  GO Slim </span></span>
-<span><span class="co">#&gt;       50       35</span></span>
+<span><span class="co">#&gt;       50       69</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">sets</span>, <span class="st">"versions"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $species</span></span>
 <span><span class="co">#&gt; [1] "Homo sapiens"</span></span>
@@ -289,10 +295,11 @@ descendants:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $go_slim</span></span>
 <span><span class="co">#&gt; [1] "go/releases/2026-07-26/subsets/goslim_generic.owl"</span></span></code></pre></div>
-<p>Slim terms are broad, so the 15 to 500 gene window drops some of
-them. Each collection is tested as its own family, so padj is corrected
-within it. <code>attr(sets, "versions")</code> records what to cite in
-your methods.</p>
+<p>Every set is kept here. <code><a href="../reference/run_enrichment.html">run_enrichment()</a></code> tests sets with
+15 to 500 of their genes measured in the data (<code>min_size</code>,
+<code>max_size</code>). Each collection is tested as its own family, so
+padj is corrected within it. <code>attr(sets, "versions")</code> records
+what to cite in your methods.</p>
 </div>
 <div class="section level2">
 <h2 id="convert-enrichment-you-already-have">Convert enrichment you already have<a class="anchor" aria-label="anchor" href="#convert-enrichment-you-already-have"></a>
@@ -332,8 +339,9 @@ table has no <code>database</code> column.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">clusterProfiler</span><span class="fu">::</span><span class="fu">gseGO</span><span class="op">(</span><span class="va">gene_list</span>, ont <span class="op">=</span> <span class="st">"BP"</span>, OrgDb <span class="op">=</span> <span class="fu">org.Hs.eg.db</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/org.Hs.eg.db/man/org.Hs.egBASE.html" class="external-link">org.Hs.eg.db</a></span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_enrichment.html">as_enrichment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aging <span class="op">=</span> <span class="va">res</span><span class="op">)</span>, database <span class="op">=</span> <span class="st">"GO:BP"</span><span class="op">)</span></span></code></pre></div>
-<p>The <code>gseaResult</code> object is read directly. The score is NES
-and the leading edge comes from <code>core_enrichment</code>.</p>
+<p>The <code>gseaResult</code> object from clusterProfiler (Wu et
+al. 2021) is read directly. The score is NES and the leading edge comes
+from <code>core_enrichment</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="limma-fry-and-mroast">limma: fry and mroast<a class="anchor" aria-label="anchor" href="#limma-fry-and-mroast"></a>
@@ -438,9 +446,10 @@ enough to a term already kept:</p>
 <ul>
 <li>
 <code>similarity = "combined"</code> (default, cutoff 0.375) is the
-EnrichmentMap coefficient: the mean of the Jaccard index and the overlap
-coefficient. The overlap coefficient catches a small set nested inside a
-large one, which Jaccard alone misses.</li>
+EnrichmentMap coefficient (Merico et al. 2010; Reimand et al. 2019): the
+mean of the Jaccard index and the overlap coefficient. The overlap
+coefficient catches a small set nested inside a large one, which Jaccard
+alone misses.</li>
 <li>
 <code>similarity = "jaccard"</code> (cutoff 0.5) is shared genes
 over all genes in either set.</li>
@@ -502,12 +511,14 @@ becomes
 <code>term_threshold</code> (0.05); the colour says whether that holds
 in one contrast or both. Pathways are judged on the false discovery rate
 alone. Scores that combine effect size with p, such as the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>π</mi><annotation encoding="application/x-tex">\pi</annotation></semantics></math>-value,
-are defined for single proteins, not gene sets. The corner counts and
-the headline share use significant terms only; Spearman’s
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>π</mi><annotation encoding="application/x-tex">\pi</annotation></semantics></math>-value
+(Xiao et al. 2014), are defined for single proteins, not gene sets. The
+corner counts and the headline share use significant terms only;
+Spearman’s
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
-uses every plotted term, with a 95% interval when the correlation
-package is installed.</p>
+uses every plotted term, with a 95% Fieller interval (Fieller et
+al. 1957) when the correlation package (Makowski et al. 2020) is
+installed.</p>
 <p><code>colour_by</code> and <code>shape_by</code> take any per-term
 column, for example <code>colour_by = "database"</code>, and
 <code>databases</code>, <code>collapse</code> and
@@ -541,6 +552,9 @@ when points crowd the ring.</li>
 <code>label_mode</code>, <code>label_n</code>,
 <code>label_genes</code>: which proteins get text.</li>
 <li>
+<code>labels</code>: your own names for chosen terms, such as
+<code>c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")</code>.</li>
+<li>
 <code>show_counts</code>, <code>disc_colour</code>: count badges and
 a tinted central disc.</li>
 </ul>
@@ -570,9 +584,52 @@ list from <code><a href="../reference/run_enrichment.html">run_enrichment()</a><
 <code>enrichment_test</code> column:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_table.html">write_table</a></span><span class="op">(</span><span class="va">res</span>, <span class="st">"yvo_enrichment.csv"</span><span class="op">)</span></span></code></pre></div>
-<p>The papers behind each method are listed on the help pages of
-<code><a href="../reference/run_enrichment.html">run_enrichment()</a></code>, <code><a href="../reference/load_gene_sets.html">load_gene_sets()</a></code>,
-<code><a href="../reference/as_enrichment.html">as_enrichment()</a></code> and <code><a href="../reference/dedup_terms.html">dedup_terms()</a></code>.</p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>Ashburner M, Ball CA, Blake JA, et al. (2000). Gene Ontology: tool
+for the unification of biology. <em>Nature Genetics</em> 25:25-29. <a href="https://doi.org/10.1038/75556" class="external-link uri">https://doi.org/10.1038/75556</a></p>
+<p>Fieller EC, Hartley HO, Pearson ES (1957). Tests for rank correlation
+coefficients. I. <em>Biometrika</em> 44:470-481. <a href="https://doi.org/10.1093/biomet/44.3-4.470" class="external-link uri">https://doi.org/10.1093/biomet/44.3-4.470</a></p>
+<p>Gene Ontology Consortium (2023). The Gene Ontology knowledgebase in
+2023. <em>Genetics</em> 224:iyad031. <a href="https://doi.org/10.1093/genetics/iyad031" class="external-link uri">https://doi.org/10.1093/genetics/iyad031</a></p>
+<p>Korotkevich G, Sukhov V, Sergushichev A (2019). Fast gene set
+enrichment analysis. <em>bioRxiv</em>. <a href="https://doi.org/10.1101/060012" class="external-link uri">https://doi.org/10.1101/060012</a></p>
+<p>Liberzon A, Subramanian A, Pinchback R, et al. (2011). Molecular
+signatures database (MSigDB) 3.0. <em>Bioinformatics</em> 27:1739-1740.
+<a href="https://doi.org/10.1093/bioinformatics/btr260" class="external-link uri">https://doi.org/10.1093/bioinformatics/btr260</a></p>
+<p>Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
+Signatures Database hallmark gene set collection. <em>Cell Systems</em>
+1:417-425. <a href="https://doi.org/10.1016/j.cels.2015.12.004" class="external-link uri">https://doi.org/10.1016/j.cels.2015.12.004</a></p>
+<p>Makowski D, Ben-Shachar MS, Patil I, Lüdecke D (2020). Methods and
+algorithms for correlation analysis in R. <em>Journal of Open Source
+Software</em> 5:2306. <a href="https://doi.org/10.21105/joss.02306" class="external-link uri">https://doi.org/10.21105/joss.02306</a></p>
+<p>Merico D, Isserlin R, Stueker O, Emili A, Bader GD (2010). Enrichment
+Map: a network-based method for gene-set enrichment visualization and
+interpretation. <em>PLoS ONE</em> 5:e13984. <a href="https://doi.org/10.1371/journal.pone.0013984" class="external-link uri">https://doi.org/10.1371/journal.pone.0013984</a></p>
+<p>Reimand J, Isserlin R, Voisin V, et al. (2019). Pathway enrichment
+analysis and visualization of omics data using g:Profiler, GSEA,
+Cytoscape and EnrichmentMap. <em>Nature Protocols</em> 14:482-517. <a href="https://doi.org/10.1038/s41596-018-0103-9" class="external-link uri">https://doi.org/10.1038/s41596-018-0103-9</a></p>
+<p>Ritchie ME, Phipson B, Wu D, et al. (2015). limma powers differential
+expression analyses for RNA-sequencing and microarray studies.
+<em>Nucleic Acids Research</em> 43:e47. <a href="https://doi.org/10.1093/nar/gkv007" class="external-link uri">https://doi.org/10.1093/nar/gkv007</a></p>
+<p>Smyth GK, Michaud J, Scott HS (2005). Use of within-array replicate
+spots for assessing differential expression in microarray experiments.
+<em>Bioinformatics</em> 21:2067-2075. <a href="https://doi.org/10.1093/bioinformatics/bti270" class="external-link uri">https://doi.org/10.1093/bioinformatics/bti270</a></p>
+<p>Subramanian A, Tamayo P, Mootha VK, et al. (2005). Gene set
+enrichment analysis: a knowledge-based approach for interpreting
+genome-wide expression profiles. <em>PNAS</em> 102:15545-15550. <a href="https://doi.org/10.1073/pnas.0506580102" class="external-link uri">https://doi.org/10.1073/pnas.0506580102</a></p>
+<p>Wu D, Lim E, Vaillant F, et al. (2010). ROAST: rotation gene set
+tests for complex microarray experiments. <em>Bioinformatics</em>
+26:2176-2182. <a href="https://doi.org/10.1093/bioinformatics/btq401" class="external-link uri">https://doi.org/10.1093/bioinformatics/btq401</a></p>
+<p>Wu D, Smyth GK (2012). Camera: a competitive gene set test accounting
+for inter-gene correlation. <em>Nucleic Acids Research</em> 40:e133. <a href="https://doi.org/10.1093/nar/gks461" class="external-link uri">https://doi.org/10.1093/nar/gks461</a></p>
+<p>Wu T, Hu E, Xu S, et al. (2021). clusterProfiler 4.0: a universal
+enrichment tool for interpreting omics data. <em>The Innovation</em>
+2:100141. <a href="https://doi.org/10.1016/j.xinn.2021.100141" class="external-link uri">https://doi.org/10.1016/j.xinn.2021.100141</a></p>
+<p>Xiao Y, Hsiao TH, Suresh U, et al. (2014). A novel significance score
+for gene selection and ranking. <em>Bioinformatics</em> 30:801-807. <a href="https://doi.org/10.1093/bioinformatics/btr671" class="external-link uri">https://doi.org/10.1093/bioinformatics/btr671</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

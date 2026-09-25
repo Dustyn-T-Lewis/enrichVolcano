@@ -19,6 +19,7 @@ plot_scatter(
   shape_by = "database",
   label_min_size = 15,
   label_n = 20,
+  labels = NULL,
   theme = plot_theme()
 )
 ```
@@ -76,6 +77,11 @@ plot_scatter(
 
   Most term labels drawn.
 
+- labels:
+
+  Your own display names, as in
+  [`plot_volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_volcano_ring.md).
+
 - theme:
 
   Output of
@@ -117,13 +123,24 @@ A ggplot.
   genes.
 
 - Subtitle: Spearman's \\\rho\\ across all plotted terms, with a 95%
-  interval when the correlation package is installed, its p-value, the
-  share of significant terms that are concordant (or reversed), and the
-  term counts.
+  Fieller interval when the correlation package is installed, its
+  p-value, the share of significant terms that are concordant (or
+  reversed), and the term counts.
 
 A term is significant in a contrast when its `padj` is below
 `term_threshold`. If the object has no adjusted p-values at all, nominal
 p-values are used and a note says so.
+
+## References
+
+Fieller EC, Hartley HO, Pearson ES (1957). Tests for rank correlation
+coefficients. I. Biometrika 44(3-4):470-481.
+[doi:10.1093/biomet/44.3-4.470](https://doi.org/10.1093/biomet/44.3-4.470)
+
+Makowski D, Ben-Shachar MS, Patil I, Luedecke D (2020). Methods and
+algorithms for correlation analysis in R. Journal of Open Source
+Software 5(51):2306.
+[doi:10.21105/joss.02306](https://doi.org/10.21105/joss.02306)
 
 ## Examples
 

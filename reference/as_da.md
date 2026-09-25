@@ -66,7 +66,8 @@ to one row per protein and contrast first.
 
 `rank` is the moderated t when the table has one, else
 `sign(logFC) * -log10(p)`, else `sign(logFC) * -log10(padj)`;
-`rank_stat` says which.
+`rank_stat` says which. The signed p-value ranking is the one Reimand et
+al. (2019) recommend for GSEA.
 
 ## Gene symbols
 
@@ -74,6 +75,13 @@ Gene sets list gene symbols, so each UniProt accession is mapped to its
 current symbol through the species' annotation package (isoform suffixes
 such as `-2` are dropped first). A symbol from the search engine's FASTA
 can be out of date: `O00483` is `COXFA4`, formerly `NDUFA4`.
+
+## References
+
+Reimand J, Isserlin R, Voisin V, et al. (2019). Pathway enrichment
+analysis and visualization of omics data using g:Profiler, GSEA,
+Cytoscape and EnrichmentMap. Nature Protocols 14:482-517.
+[doi:10.1038/s41596-018-0103-9](https://doi.org/10.1038/s41596-018-0103-9)
 
 ## Examples
 
@@ -83,7 +91,6 @@ tbl <- data.frame(
   adj.P.Val = c(1e-3, 0.01), row.names = c("P31040", "Q9UBK2")
 )
 as_da(tbl, contrast = "Aging")
-#> 
 #> 2 of 2 accessions mapped to Homo sapiens symbols.
 #>   protein     gene contrast logFC    t     p  padj abundance rank rank_stat
 #> 1  P31040     SDHA    Aging   1.2  4.1 1e-04 0.001        NA  4.1         t

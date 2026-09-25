@@ -9,7 +9,7 @@ one set of column names, so the plots and run_enrichment() can read it."><meta p
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,7 +31,7 @@ one set of column names, so the plots and run_enrichment() can read it."><meta p
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Standardise differential-abundance results</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v2.0.0/R/as_da.R" class="external-link"><code>R/as_da.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/R/as_da.R" class="external-link"><code>R/as_da.R</code></a></small>
       <div class="d-none name"><code>as_da.Rd</code></div>
     </div>
 
@@ -106,7 +106,8 @@ contrast first.</p>
 
 <p><code>rank</code> is the moderated t when the table has one, else
 <code>sign(logFC) * -log10(p)</code>, else <code>sign(logFC) * -log10(padj)</code>; <code>rank_stat</code>
-says which.</p>
+says which. The signed p-value ranking is the one Reimand et al. (2019)
+recommend for GSEA.</p>
     </div>
     <div class="section level2">
     <h2 id="gene-symbols">Gene symbols<a class="anchor" aria-label="anchor" href="#gene-symbols"></a></h2>
@@ -117,6 +118,12 @@ current symbol through the species' annotation package (isoform suffixes
 such as <code>-2</code> are dropped first). A symbol from the search engine's FASTA can
 be out of date: <code>O00483</code> is <code>COXFA4</code>, formerly <code>NDUFA4</code>.</p>
     </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Reimand J, Isserlin R, Voisin V, et al. (2019). Pathway enrichment analysis
+and visualization of omics data using g:Profiler, GSEA, Cytoscape and
+EnrichmentMap. Nature Protocols 14:482-517. <a href="https://doi.org/10.1038/s41596-018-0103-9" class="external-link">doi:10.1038/s41596-018-0103-9</a></p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -125,7 +132,6 @@ be out of date: <code>O00483</code> is <code>COXFA4</code>, formerly <code>NDUFA
 <span class="r-in"><span>  adj.P.Val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1e-3</span>, <span class="fl">0.01</span><span class="op">)</span>, row.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"P31040"</span>, <span class="st">"Q9UBK2"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">as_da</span><span class="op">(</span><span class="va">tbl</span>, contrast <span class="op">=</span> <span class="st">"Aging"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2 of 2 accessions mapped to Homo sapiens symbols.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   protein     gene contrast logFC    t     p  padj abundance rank rank_stat</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  P31040     SDHA    Aging   1.2  4.1 1e-04 0.001        NA  4.1         t</span>

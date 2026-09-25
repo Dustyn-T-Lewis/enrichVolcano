@@ -11,7 +11,7 @@ arcs to each term's leading-edge genes inside the volcano."><meta property="og:i
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,7 @@ arcs to each term's leading-edge genes inside the volcano."><meta property="og:i
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Volcano-in-ring composite for one contrast</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v2.0.0/R/volcano_ring.R" class="external-link"><code>R/volcano_ring.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/R/volcano_ring.R" class="external-link"><code>R/volcano_ring.R</code></a></small>
       <div class="d-none name"><code>plot_volcano_ring.Rd</code></div>
     </div>
 
@@ -54,6 +54,7 @@ arcs to each term's leading-edge genes inside the volcano.</p>
 <span>  term_threshold <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  n_terms <span class="op">=</span> <span class="fl">12</span>,</span>
 <span>  terms <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  labels <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  p_threshold <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  logfc_threshold <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  title <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -128,6 +129,13 @@ Skipped, with a note, when the object has no database labels.</p></dd>
 
 <dt id="arg-terms">terms<a class="anchor" aria-label="anchor" href="#arg-terms"></a></dt>
 <dd><p>Optional character vector of exact term names to draw instead.</p></dd>
+
+
+<dt id="arg-labels">labels<a class="anchor" aria-label="anchor" href="#arg-labels"></a></dt>
+<dd><p>Your own display names, as a character vector named by term,
+such as <code>c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")</code>. Terms not
+named keep <code><a href="clean_label.html">clean_label()</a></code>. A name without <code>\n</code> is wrapped like the
+others.</p></dd>
 
 
 <dt id="arg-p-threshold">p_threshold<a class="anchor" aria-label="anchor" href="#arg-p-threshold"></a></dt>

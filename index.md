@@ -19,6 +19,11 @@ release:
 remotes::install_github("Dustyn-T-Lewis/enrichVolcano@v1.1.0")
 ```
 
+## Workflow
+
+![Five steps from left to right: read, enrich, dedup, plot and write,
+each listing its functions](reference/figures/workflow.png)
+
 ## Example
 
 ``` r

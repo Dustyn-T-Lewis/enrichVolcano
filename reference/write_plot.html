@@ -13,7 +13,7 @@ on any machine. On macOS, R's cairo needs XQuartz (https://www.xquartz.org)."><m
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@ on any machine. On macOS, R's cairo needs XQuartz (https://www.xquartz.org)."><m
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Write panels to one PDF</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v2.0.0/R/write_plot.R" class="external-link"><code>R/write_plot.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/R/write_plot.R" class="external-link"><code>R/write_plot.R</code></a></small>
       <div class="d-none name"><code>write_plot.Rd</code></div>
     </div>
 
@@ -55,8 +55,8 @@ on any machine. On macOS, R's cairo needs XQuartz (<a href="https://www.xquartz.
 <span>  nrow <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  design <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  caption <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  width <span class="op">=</span> <span class="fl">11</span>,</span>
-<span>  height <span class="op">=</span> <span class="fl">8.5</span></span>
+<span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  height <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -88,7 +88,9 @@ and <code>nrow</code>.</p></dd>
 
 
 <dt id="arg-width-height">width, height<a class="anchor" aria-label="anchor" href="#arg-width-height"></a></dt>
-<dd><p>Page size in inches. The default is US Letter landscape.</p></dd>
+<dd><p>Page size in inches. <code>NULL</code> gives each composite cell
+7 by 7.5 inches, the size the panels are drawn for, and widens the page to
+at least landscape proportions. Every page has this size.</p></dd>
 
 </dl></div>
     <div class="section level2">

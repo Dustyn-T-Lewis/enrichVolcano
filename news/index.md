@@ -1,5 +1,67 @@
 # Changelog
 
+## enrichVolcano 2.1.0
+
+### Breaking changes
+
+- [`load_gene_sets()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/load_gene_sets.md)
+  no longer takes `min_size` or `max_size` and keeps every set. Sets
+  were filtered twice: on genome size here, then on the genes in the
+  data in
+  [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md).
+  The genome filter removed about half the GO slim terms, such as
+  signalling and programmed cell death, that proteomics data measure
+  well below 500 genes. GO slim results now test more terms.
+
+### New features
+
+- [`plot_volcano_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_volcano_ring.md)
+  and
+  [`plot_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_scatter.md)
+  take `labels`, a character vector named by term, to replace the
+  automatic names of chosen terms.
+
+### Bug fixes
+
+- fgsea seeds each contrast and collection separately from your
+  [`set.seed()`](https://rdrr.io/r/base/Random.html). A collection’s
+  results no longer shift when other collections run alongside it. fgsea
+  p-values differ from 2.0.0 by permutation noise.
+- A ring whose terms all go one way keeps them in its own half: down on
+  the left, up on the right.
+- The ring panel widens to fit labels at its sides, so they are no
+  longer clipped or drawn under the legend.
+- An empty size window in
+  [`run_enrichment()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/run_enrichment.md)
+  fails before the tied-rank note.
+- A scatter correlation that rounds to zero prints as 0.00, not -0.00.
+- [`plot_scatter()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_scatter.md)
+  draws contrasts with no significant terms instead of failing, and
+  `clean_label(character(0))` returns `character(0)`.
+- [`clean_label()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/clean_label.md)
+  keeps every word of a MitoCarta name that has no hierarchy, and writes
+  complex numerals upper case: `Complex IV`, not `Complex Iv`.
+- [`plot_bias_ring()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/plot_bias_ring.md)
+  refuses an unnamed extra argument instead of ignoring it.
+- [`write_plot()`](https://Dustyn-T-Lewis.github.io/enrichVolcano/reference/write_plot.md)
+  sizes its pages from the layout, about 7 by 7.5 inches per composite
+  cell, so a composite of full-size panels stays readable. `width` and
+  `height` still set the page.
+- A protein group such as `P31040;Q9UBK2` is mapped to its gene symbol
+  through its first accession.
+- A blank gene symbol counts as missing.
+- The annotation packages no longer print an empty line when loaded.
+- A wide table without a contrast column gets the wide-table message.
+- The `mito` example study ships the Mito pipeline’s gene symbols. The
+  rat annotation package lacked 447 of its 4,806 proteins, which fgsea
+  dropped.
+
+### Documentation
+
+- The vignette cites the paper behind each method and ends with a
+  reference list. `citation("enrichVolcano")` gives the package
+  citation. The README shows the workflow as a figure.
+
 ## enrichVolcano 2.0.0
 
 2.0.0 renames the exports to one rule, verb then noun, and gives

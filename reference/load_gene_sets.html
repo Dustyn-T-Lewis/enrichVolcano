@@ -9,7 +9,7 @@ those versions, so an analysis can state exactly what it tested."><meta property
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,7 +31,7 @@ those versions, so an analysis can state exactly what it tested."><meta property
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Load gene-set collections for enrichment</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v2.0.0/R/gene_sets.R" class="external-link"><code>R/gene_sets.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/R/gene_sets.R" class="external-link"><code>R/gene_sets.R</code></a></small>
       <div class="d-none name"><code>load_gene_sets.Rd</code></div>
     </div>
 
@@ -42,12 +42,7 @@ those versions, so an analysis can state exactly what it tested.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">load_gene_sets</span><span class="op">(</span></span>
-<span>  databases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span>,</span>
-<span>  species <span class="op">=</span> <span class="st">"Homo sapiens"</span>,</span>
-<span>  min_size <span class="op">=</span> <span class="fl">15</span>,</span>
-<span>  max_size <span class="op">=</span> <span class="fl">500</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">load_gene_sets</span><span class="op">(</span>databases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hallmark"</span>, <span class="st">"GO Slim"</span><span class="op">)</span>, species <span class="op">=</span> <span class="st">"Homo sapiens"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -61,11 +56,6 @@ those versions, so an analysis can state exactly what it tested.</p>
 
 <dt id="arg-species">species<a class="anchor" aria-label="anchor" href="#arg-species"></a></dt>
 <dd><p><code>"Homo sapiens"</code>, <code>"Mus musculus"</code> or <code>"Rattus norvegicus"</code>.</p></dd>
-
-
-<dt id="arg-min-size-max-size">min_size, max_size<a class="anchor" aria-label="anchor" href="#arg-min-size-max-size"></a></dt>
-<dd><p>Keep sets with at least <code>min_size</code> and at most
-<code>max_size</code> genes.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -84,14 +74,21 @@ slim, pinned in this package (release 2026-07-26), with each term's genes
 taken from the species' annotation package, counting genes annotated to
 the term or any of its descendants. Sets are named like
 <code>GOSLIM_PROTEIN_FOLDING</code>.</p></li>
-</ul><p>Each collection is kept separate so <code><a href="run_enrichment.html">run_enrichment()</a></code> corrects p-values
-within it.</p>
+</ul><p>Every set is kept, whatever its size. <code><a href="run_enrichment.html">run_enrichment()</a></code> filters on the
+genes measured in your data, and corrects p-values within each collection.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
+    <p>Liberzon A, Subramanian A, Pinchback R, et al. (2011). Molecular signatures
+database (MSigDB) 3.0. Bioinformatics 27(12):1739-1740.
+<a href="https://doi.org/10.1093/bioinformatics/btr260" class="external-link">doi:10.1093/bioinformatics/btr260</a></p>
+<p>Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
 Signatures Database hallmark gene set collection. Cell Systems 1(6):417-425.
 <a href="https://doi.org/10.1016/j.cels.2015.12.004" class="external-link">doi:10.1016/j.cels.2015.12.004</a></p>
+<p>Ashburner M, Ball CA, Blake JA, et al. (2000). Gene Ontology: tool for the
+unification of biology. Nature Genetics 25(1):25-29. <a href="https://doi.org/10.1038/75556" class="external-link">doi:10.1038/75556</a></p>
+<p>Gene Ontology Consortium (2023). The Gene Ontology knowledgebase in 2023.
+Genetics 224(1):iyad031. <a href="https://doi.org/10.1093/genetics/iyad031" class="external-link">doi:10.1093/genetics/iyad031</a></p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

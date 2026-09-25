@@ -101,7 +101,9 @@ reported `padj` stay those of the original run.
 Merico D, Isserlin R, Stueker O, Emili A, Bader GD (2010). Enrichment
 Map: a network-based method for gene-set enrichment visualization and
 interpretation. PLoS ONE 5(11):e13984.
+[doi:10.1371/journal.pone.0013984](https://doi.org/10.1371/journal.pone.0013984)
 
 Reimand J, Isserlin R, Voisin V, et al. (2019). Pathway enrichment
 analysis and visualization of omics data using g:Profiler, GSEA,
 Cytoscape and EnrichmentMap. Nature Protocols 14:482-517.
+[doi:10.1038/s41596-018-0103-9](https://doi.org/10.1038/s41596-018-0103-9)

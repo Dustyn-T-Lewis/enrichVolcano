@@ -9,7 +9,7 @@ enrichment object per test, the same object as_enrichment() builds."><meta prope
 
     <a class="navbar-brand me-2" href="../index.html">enrichVolcano</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,7 +31,7 @@ enrichment object per test, the same object as_enrichment() builds."><meta prope
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Run gene-set enrichment on a study</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/v2.0.0/R/run_enrichment.R" class="external-link"><code>R/run_enrichment.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Dustyn-T-Lewis/enrichVolcano/blob/main/R/run_enrichment.R" class="external-link"><code>R/run_enrichment.R</code></a></small>
       <div class="d-none name"><code>run_enrichment.Rd</code></div>
     </div>
 
@@ -105,7 +105,9 @@ several proteins share a gene symbol, the most abundant one represents the
 gene (the table's average abundance, else the matrix row mean); without any
 abundance, the first accession alphabetically. The choice never looks at
 the results. Each collection is tested and corrected separately. fgsea
-permutes, so call <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> first for reproducible p-values.</p>
+permutes, so call <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> first for reproducible p-values. Each
+contrast and collection draws its own seed from it, so adding or removing a
+collection leaves the others' results unchanged.</p>
     </div>
     <div class="section level2">
     <h2 id="camera-and-fry">camera and fry<a class="anchor" aria-label="anchor" href="#camera-and-fry"></a></h2>
@@ -127,14 +129,20 @@ which can change results substantially and needs an unblocked design.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Korotkevich G, Sukhov V, Budin N, et al. Fast gene set enrichment analysis.
-bioRxiv. <a href="https://doi.org/10.1101/060012" class="external-link">doi:10.1101/060012</a></p>
+    <p>Subramanian A, Tamayo P, Mootha VK, et al. (2005). Gene set enrichment
+analysis: a knowledge-based approach for interpreting genome-wide expression
+profiles. PNAS 102(43):15545-15550. <a href="https://doi.org/10.1073/pnas.0506580102" class="external-link">doi:10.1073/pnas.0506580102</a></p>
+<p>Korotkevich G, Sukhov V, Sergushichev A (2019). Fast gene set enrichment
+analysis. bioRxiv. <a href="https://doi.org/10.1101/060012" class="external-link">doi:10.1101/060012</a></p>
 <p>Wu D, Smyth GK (2012). Camera: a competitive gene set test accounting for
 inter-gene correlation. Nucleic Acids Research 40(17):e133.
 <a href="https://doi.org/10.1093/nar/gks461" class="external-link">doi:10.1093/nar/gks461</a></p>
 <p>Wu D, Lim E, Vaillant F, et al. (2010). ROAST: rotation gene set tests for
 complex microarray experiments. Bioinformatics 26(17):2176-2182.
 <a href="https://doi.org/10.1093/bioinformatics/btq401" class="external-link">doi:10.1093/bioinformatics/btq401</a></p>
+<p>Smyth GK, Michaud J, Scott HS (2005). Use of within-array replicate spots
+for assessing differential expression in microarray experiments.
+Bioinformatics 21(9):2067-2075. <a href="https://doi.org/10.1093/bioinformatics/bti270" class="external-link">doi:10.1093/bioinformatics/bti270</a></p>
 <p>Ritchie ME, Phipson B, Wu D, et al. (2015). limma powers differential
 expression analyses for RNA-sequencing and microarray studies. Nucleic
 Acids Research 43(7):e47. <a href="https://doi.org/10.1093/nar/gkv007" class="external-link">doi:10.1093/nar/gkv007</a></p>
