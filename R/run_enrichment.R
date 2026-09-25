@@ -9,7 +9,9 @@
 #' gene (the table's average abundance, else the matrix row mean); without any
 #' abundance, the first accession alphabetically. The choice never looks at
 #' the results. Each collection is tested and corrected separately. fgsea
-#' permutes, so call [set.seed()] first for reproducible p-values.
+#' permutes, so call [set.seed()] first for reproducible p-values. Each
+#' contrast and collection draws its own seed from it, so adding or removing a
+#' collection leaves the others' results unchanged.
 #'
 #' @section camera and fry:
 #' Both refit limma on the study's matrix, which must have no missing values
@@ -128,12 +130,14 @@ run_fgsea <- function(study, collections, min_size, max_size) {
   da <- fill_abundance(study$da, study$matrix)
   da <- da[!is.na(da$gene) & !is.na(da$rank), , drop = FALSE]
   ties <- 0
+  base <- sample.int(1e6, 1)
   per_contrast <- lapply(split(da, factor(da$contrast, unique(da$contrast))), function(d) {
     d <- one_per_gene(d)
     ranks <- stats::setNames(d$rank, d$gene)
     tied <- duplicated(ranks) | duplicated(ranks, fromLast = TRUE)
     if (sum(tied) > ties) ties <<- sum(tied)
     do.call(rbind, lapply(names(collections), function(db) {
+      set.seed(fgsea_seed(base, d$contrast[1], db))
       res <- withCallingHandlers(
         as.data.frame(fgsea::fgsea(collections[[db]], ranks, minSize = min_size, maxSize = max_size)),
         warning = function(w) {
@@ -160,6 +164,13 @@ run_fgsea <- function(study, collections, min_size, max_size) {
   x@metadata$ranking <- unique(da$rank_stat)
   x@metadata$gene_sets <- attr(collections, "versions")
   x
+}
+
+# fgsea permutes. Seeding each contrast and collection from one draw of the
+# caller's seed keeps a collection's result independent of the others run.
+fgsea_seed <- function(base, contrast, db) {
+  code <- utf8ToInt(paste(contrast, db, sep = "\r"))
+  (base + sum(code * seq_along(code))) %% .Machine$integer.max
 }
 
 one_per_gene <- function(d) {

@@ -26,12 +26,25 @@ test_that("fgsea through run_enrichment equals a direct fgsea call", {
   expect_named(x, "fgsea")
   r <- x$fgsea@results
   stats <- stats::setNames(s$da$rank, s$da$gene)
-  expected <- withr::with_seed(1, fgsea::fgsea(toy_sets()$Hallmark, stats, minSize = 5, maxSize = 500))
+  base <- withr::with_seed(1, sample.int(1e6, 1))
+  expected <- withr::with_seed(
+    fgsea_seed(base, "Training", "Hallmark"),
+    fgsea::fgsea(toy_sets()$Hallmark, stats, minSize = 5, maxSize = 500)
+  )
   got <- r[r$database == "Hallmark", ]
   expect_equal(got$score[match(expected$pathway, got$term)], expected$NES)
   expect_equal(got$p[match(expected$pathway, got$term)], expected$pval)
   expect_identical(x$fgsea@metadata$enrichment_test, "fgsea")
   expect_identical(x$fgsea@metadata$ranking, "t")
+})
+
+test_that("a collection's fgsea result does not depend on the other collections run with it", {
+  skip_if_not_installed("org.Hs.eg.db")
+  alone <- run_fgsea(toy_study(), toy_sets()["Hallmark"])$fgsea@results
+  after <- run_fgsea(toy_study(), toy_sets()[c("Mixed", "Hallmark")])$fgsea@results
+  after <- after[after$database == "Hallmark", ]
+  expect_equal(after$p[match(alone$term, after$term)], alone$p)
+  expect_equal(after$score[match(alone$term, after$term)], alone$score)
 })
 
 test_that("each collection is corrected on its own", {

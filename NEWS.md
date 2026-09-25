@@ -15,6 +15,10 @@
 
 ## Bug fixes
 
+* fgsea seeds each contrast and collection separately from your
+  `set.seed()`. A collection's results no longer shift when other
+  collections run alongside it. fgsea p-values differ from 2.0.0 by
+  permutation noise.
 * A ring whose terms all go one way keeps them in its own half: down on the
   left, up on the right.
 * The ring panel widens to fit labels at its sides, so they are no longer

@@ -50,7 +50,9 @@ several proteins share a gene symbol, the most abundant one represents the
 gene (the table's average abundance, else the matrix row mean); without any
 abundance, the first accession alphabetically. The choice never looks at
 the results. Each collection is tested and corrected separately. fgsea
-permutes, so call \code{\link[=set.seed]{set.seed()}} first for reproducible p-values.
+permutes, so call \code{\link[=set.seed]{set.seed()}} first for reproducible p-values. Each
+contrast and collection draws its own seed from it, so adding or removing a
+collection leaves the others' results unchanged.
 }
 
 \section{camera and fry}{
