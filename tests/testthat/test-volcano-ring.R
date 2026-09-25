@@ -265,3 +265,24 @@ test_that("results with neither p nor padj are refused", {
     class = "enrichVolcano_data_error"
   )
 })
+
+test_that("a volcano with no fold changes and no signal still draws inside the ring", {
+  flat <- make_toy_da()
+  flat$logFC <- 0
+  flat$p <- 1
+  flat$padj <- 1
+  p <- suppressMessages(plot_volcano_ring(flat, make_toy_ring_enrichment(), databases = NULL, term_threshold = 1))
+  pts <- ggplot2::layer_data(p, which(vapply(p$layers, function(l) inherits(l$geom, "GeomPoint"), logical(1)))[1])
+  expect_true(all(is.finite(pts$x)) && all(is.finite(pts$y)))
+  expect_true(all(pts$x == 0))
+})
+
+test_that("ticks on an arc narrower than their padding still fan out inside it", {
+  ring <- data.frame(.ev_start_rad = 1, .ev_end_rad = 1.001)
+  ring$.ev_genes <- list(c("G1", "G2"))
+  da <- data.frame(gene = c("G1", "G2"), logFC = c(1, -1))
+  ticks <- ev_tick_data(ring, da, gene_col = "gene", logfc_col = "logFC", tick_r0 = 1, tick_r1 = 2)
+  expect_identical(ticks$gene, c("G1", "G2"))
+  expect_true(all(is.finite(c(ticks$x0, ticks$y0, ticks$x1, ticks$y1))))
+  expect_gt(ticks$x0[2], ticks$x0[1])
+})

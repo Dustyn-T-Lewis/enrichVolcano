@@ -43,9 +43,6 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   n_dn <- nrow(dn)
 
   scale_h <- function(df) {
-    if (nrow(df) == 0) {
-      return(numeric(0))
-    }
     if (proportional) {
       return(arc_r0 + max_height * df$.ev_magnitude)
     }
