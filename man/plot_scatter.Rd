@@ -106,7 +106,7 @@ plot_scatter(ex, "Aging", "Training_Old", comparison = "reversal")
 Fieller EC, Hartley HO, Pearson ES (1957). Tests for rank correlation
 coefficients. I. Biometrika 44(3-4):470-481. \doi{10.1093/biomet/44.3-4.470}
 
-Makowski D, Ben-Shachar MS, Patil I, Lüdecke D (2020). Methods and
+Makowski D, Ben-Shachar MS, Patil I, Luedecke D (2020). Methods and
 algorithms for correlation analysis in R. Journal of Open Source Software
 5(51):2306. \doi{10.21105/joss.02306}
 }
