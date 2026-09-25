@@ -409,9 +409,43 @@ The arguments you will reach for most:
 - `arc_order`: order arcs by `"padj"` or by absolute score within each half.
 - `x_scale`, `y_scale`: compress the volcano when points crowd the ring.
 - `label_mode`, `label_n`, `label_genes`: which proteins get text.
-- `labels`: your own names for chosen terms, such as
-  `c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")`.
+- `labels`: the label style, or your own names (see below).
 - `show_counts`, `disc_colour`: count badges and a tinted central disc.
+
+## Name the terms
+
+Hallmark and GO slim terms carry labels written for the package, in two
+styles. `"short"`, the default, fits two lines on the ring; `"clean"` spells
+every word out. Any other term, including one from your own gene sets, loses
+its database prefix and underscores and is title-cased.
+
+`list_labels()` picks terms the way the ring does and lists each once, with
+both styles:
+
+```{r labels}
+lbl <- list_labels(res$fgsea)
+head(lbl[, c("term", "clean", "short")])
+```
+
+To rename terms, write the list to CSV, edit the `label` column and pass the
+table back. Write a line break as `\n`:
+
+```{r labels-edit, eval = FALSE}
+write_labels(res$fgsea, "labels.csv")
+plot_volcano_ring(yvo$da, res$fgsea, contrast = "Aging", labels = read.csv("labels.csv"))
+```
+
+`labels = "clean"` switches style, a named vector renames a few terms, and a
+function names every term your own way:
+
+```{r labels-other, eval = FALSE}
+plot_scatter(res$fgsea, "Training_Young", "Training_Old", labels = "clean")
+plot_volcano_ring(yvo$da, res$fgsea,
+  contrast = "Aging",
+  labels = c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "Mito respiration")
+)
+plot_volcano_ring(yvo$da, res$fgsea, contrast = "Aging", labels = function(term) sub("^[A-Z]+_", "", term))
+```
 
 ## Write figures and tables
 

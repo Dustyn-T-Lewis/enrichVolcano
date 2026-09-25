@@ -13,7 +13,7 @@ plot_volcano_ring(
   term_threshold = 0.05,
   n_terms = 12,
   terms = NULL,
-  labels = NULL,
+  labels = "short",
   p_threshold = 0.05,
   logfc_threshold = 0,
   title = NULL,
@@ -70,10 +70,13 @@ Skipped, with a note, when the object has no database labels.}
 
 \item{terms}{Optional character vector of exact term names to draw instead.}
 
-\item{labels}{Your own display names, as a character vector named by term,
-such as \code{c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")}. Terms not
-named keep \code{\link[=clean_label]{clean_label()}}. A name without \verb{\\n} is wrapped like the
-others.}
+\item{labels}{Term labels. \code{"short"} (default) or \code{"clean"} picks the
+style of \code{\link[=clean_label]{clean_label()}}. Your own names replace it for the terms they
+name, as a character vector named by term, such as
+\code{c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "Mito respiration")}, or as a data
+frame with \code{term} and \code{label} columns. A function takes the term names and
+returns one label each. A label with a line break (\verb{\\n}, typed or
+written as the two characters in a CSV) is not wrapped again.}
 
 \item{p_threshold}{Significance cutoff for volcano points.}
 

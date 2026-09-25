@@ -164,10 +164,13 @@ ev_tick_data <- function(ring_data, da, gene_col, logfc_col,
 #' @param term_threshold Terms need `padj` below this to be drawn.
 #' @param n_terms Most unique terms drawn, counted across both directions.
 #' @param terms Optional character vector of exact term names to draw instead.
-#' @param labels Your own display names, as a character vector named by term,
-#'   such as `c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")`. Terms not
-#'   named keep [clean_label()]. A name without `\n` is wrapped like the
-#'   others.
+#' @param labels Term labels. `"short"` (default) or `"clean"` picks the
+#'   style of [clean_label()]. Your own names replace it for the terms they
+#'   name, as a character vector named by term, such as
+#'   `c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "Mito respiration")`, or as a data
+#'   frame with `term` and `label` columns. A function takes the term names and
+#'   returns one label each. A label with a line break (`\n`, typed or
+#'   written as the two characters in a CSV) is not wrapped again.
 #' @param p_threshold Significance cutoff for volcano points.
 #' @param logfc_threshold Effect-size cutoff; a point is called up/down only
 #'   when `abs(logFC) >= logfc_threshold` as well as significant.
@@ -241,7 +244,7 @@ plot_volcano_ring <- function(da, enrichment,
                               term_threshold = 0.05,
                               n_terms = 12,
                               terms = NULL,
-                              labels = NULL,
+                              labels = "short",
                               p_threshold = 0.05,
                               logfc_threshold = 0,
                               title = NULL,

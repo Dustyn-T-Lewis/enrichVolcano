@@ -16,7 +16,7 @@ plot_scatter(
   shape_by = "database",
   label_min_size = 15,
   label_n = 20,
-  labels = NULL,
+  labels = "short",
   theme = plot_theme()
 )
 }
@@ -49,7 +49,8 @@ the \code{x} contrast.}
 
 \item{label_n}{Most term labels drawn.}
 
-\item{labels}{Your own display names, as in \code{\link[=plot_volcano_ring]{plot_volcano_ring()}}.}
+\item{labels}{Term labels: a style, your own names or a function, as in
+\code{\link[=plot_volcano_ring]{plot_volcano_ring()}}.}
 
 \item{theme}{Output of \code{\link[=plot_theme]{plot_theme()}}; supplies the base font.}
 }

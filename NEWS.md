@@ -1,3 +1,23 @@
+# enrichVolcano 2.2.0
+
+## New features
+
+* Hallmark and GO slim terms take their labels from a table written for the
+  package, in two styles: `labels = "short"` (the default) fits two ring
+  lines, and `labels = "clean"` spells every word out.
+* `list_labels()` lists the terms a figure will draw, with both labels, and
+  `write_labels()` saves the list to CSV. Edit its `label` column and pass the
+  table back through `labels`.
+* `labels` also takes a function that names every term.
+
+## Changes
+
+* Terms outside the table lose their prefix and underscores and are
+  title-cased, with common acronyms restored. The phrase shortening and
+  hand-set line breaks of 2.1.0 are gone, so some Reactome, KEGG and GO:BP
+  labels are longer. Shorten them with `write_labels()` or a function.
+* MitoCarta names keep only their last level.
+
 # enrichVolcano 2.1.0
 
 ## Breaking changes
