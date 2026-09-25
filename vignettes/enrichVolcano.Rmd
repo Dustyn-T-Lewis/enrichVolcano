@@ -61,11 +61,11 @@ plot_volcano_ring(yvo$da, res$fgsea, contrast = "Training_Young", title = "Train
 ```
 
 Arc fill is NES and arc height is \(-\log_{10}\)(padj). Up-regulated terms sit
-on the upper half, down-regulated ones on the lower. Ticks run from each arc
-to its leading-edge proteins in the volcano. The ring takes the twelve most
-significant terms (padj < 0.05), in either direction, from every collection in
-the object; `databases`, `term_threshold`, `n_terms` and `terms` change the
-selection.
+on the right half and down-regulated ones on the left, the most significant at
+the top. Ticks run from each arc to its leading-edge proteins in the volcano.
+The ring takes the twelve most significant unique terms (padj < 0.05), in
+either direction, from every collection in the object; `databases`,
+`term_threshold`, `n_terms` and `terms` change the selection.
 
 ## Your data
 
@@ -91,7 +91,8 @@ The `da_results` sheet can use each tool's own column names; `as_da()`
 recognises limma and limpa `topTable()`, proteoDA, MSstats, proDA, msqrob2,
 prolfQua and ProtRank output, and takes column arguments for anything else.
 Proteins are ranked by the moderated t where the table has one, otherwise by
-the signed \(-\log_{10}\) p-value.
+the signed \(-\log_{10}\) p-value (Reimand et al. 2019), or by the signed
+\(-\log_{10}\) padj when that is all the table has.
 
 The package ships seven studies in this format:
 
@@ -113,15 +114,18 @@ names(res)
 res$camera
 ```
 
-The three tests answer different questions. fgsea and camera are competitive:
-did a set move more than the other genes? fry is self-contained: did it move
-at all? fgsea ranks proteins by the DA results; camera and fry refit limma on
+The three tests answer different questions. fgsea (Korotkevich et al. 2019),
+a fast GSEA (Subramanian et al. 2005), and camera (Wu and Smyth 2012) are
+competitive: did a set move more than the other genes? fry, the fast form of
+roast (Wu et al. 2010), is self-contained: did it move at all? fgsea ranks
+proteins by the DA results; camera and fry refit limma (Ritchie et al. 2015) on
 the matrix, which must have no missing values, using the `samples` and
 `contrasts` sheets. When a gene has several proteins, the most abundant one
 represents it.
 
 A `subject` column marks repeated measures. By default the samples of one
-subject are treated as correlated (`subject_effect = "block"`); fry handles
+subject are treated as correlated (`subject_effect = "block"`; Smyth et al.
+2005); fry handles
 that directly, and camera, which cannot, is replaced by `cameraPR()` on the
 blocked fit, which is why `res$camera` above reports `cameraPR`.
 `subject_effect = "fixed"` puts subject in the design instead. camera assumes
@@ -150,14 +154,16 @@ plot_bias_ring(yvo$da, res$fgsea, contrast = "Aging", title = "Aging")
 ## Choose gene-set collections
 
 Hallmark and GO slim make a good default pair for figures. The 50 Hallmark
-sets each summarise one well-defined biological state, and the GO
-Consortium's generic slim keeps a small set of broad GO terms. Both are built
+sets each summarise one well-defined biological state (Liberzon et al. 2015),
+and the GO Consortium's generic slim keeps a small set of broad terms from the
+Gene Ontology (Ashburner et al. 2000; Gene Ontology Consortium 2023). Both are built
 to avoid overlapping terms, so every arc says something different. Larger
 collections such as GO:BP or Reactome find more specific terms but need
 `dedup_terms()`.
 
 `load_gene_sets()` fetches them for human, mouse or rat. Hallmark, Reactome,
-KEGG MEDICUS and GO:BP come from msigdbr (mouse and rat through orthologs). The
+KEGG MEDICUS and GO:BP come from MSigDB (Liberzon et al. 2011) through msigdbr,
+mouse and rat through orthologs. The
 GO slim is the biological-process part of the GO Consortium's generic slim,
 pinned in the package, with genes taken from the species' annotation package
 (org.Hs.eg.db, org.Mm.eg.db or org.Rn.eg.db), counting genes annotated to each
@@ -168,8 +174,9 @@ lengths(sets)
 attr(sets, "versions")
 ```
 
-Slim terms are broad, so the 15 to 500 gene window drops some of them. Each
-collection is tested as its own family, so padj is corrected within it.
+Every set is kept here. `run_enrichment()` tests sets with 15 to 500 of their
+genes measured in the data (`min_size`, `max_size`). Each collection is
+tested as its own family, so padj is corrected within it.
 `attr(sets, "versions")` records what to cite in your methods.
 
 ## Convert enrichment you already have
@@ -207,7 +214,7 @@ res <- clusterProfiler::gseGO(gene_list, ont = "BP", OrgDb = org.Hs.eg.db::org.H
 x <- as_enrichment(list(Aging = res), database = "GO:BP")
 ```
 
-The `gseaResult` object is read directly. The score is NES and the leading
+The `gseaResult` object from clusterProfiler (Wu et al. 2021) is read directly. The score is NES and the leading
 edge comes from `core_enrichment`.
 
 ### limma: fry and mroast
@@ -314,7 +321,7 @@ smallest padj. A term is redundant when its gene set is similar enough to a
 term already kept:
 
 - `similarity = "combined"` (default, cutoff 0.375) is the EnrichmentMap
-  coefficient: the mean of the Jaccard index and the overlap coefficient. The
+  coefficient (Merico et al. 2010; Reimand et al. 2019): the mean of the Jaccard index and the overlap coefficient. The
   overlap coefficient catches a small set nested inside a large one, which
   Jaccard alone misses.
 - `similarity = "jaccard"` (cutoff 0.5) is shared genes over all genes in
@@ -373,10 +380,11 @@ plot_scatter(ex, "Aging", "Training_Old",
 A term counts as significant in a contrast when its padj is below
 `term_threshold` (0.05); the colour says whether that holds in one contrast or
 both. Pathways are judged on the false discovery rate alone. Scores that
-combine effect size with p, such as the \(\pi\)-value, are defined for single
+combine effect size with p, such as the \(\pi\)-value (Xiao et al. 2014), are defined for single
 proteins, not gene sets. The corner counts and the headline share use
 significant terms only; Spearman's \(\rho\) uses every plotted term, with a 95%
-interval when the correlation package is installed.
+Fieller interval (Fieller et al. 1957) when the correlation package (Makowski et
+al. 2020) is installed.
 
 `colour_by` and `shape_by` take any per-term column, for example
 `colour_by = "database"`, and `databases`, `collapse` and `label_min_size`
@@ -401,6 +409,8 @@ The arguments you will reach for most:
 - `arc_order`: order arcs by `"padj"` or by absolute score within each half.
 - `x_scale`, `y_scale`: compress the volcano when points crowd the ring.
 - `label_mode`, `label_n`, `label_genes`: which proteins get text.
+- `labels`: your own names for chosen terms, such as
+  `c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")`.
 - `show_counts`, `disc_colour`: count badges and a tinted central disc.
 
 ## Write figures and tables
@@ -435,5 +445,68 @@ patchwork::wrap_plots(panels[1:2], ncol = 2)
 write_table(res, "yvo_enrichment.csv")
 ```
 
-The papers behind each method are listed on the help pages of
-`run_enrichment()`, `load_gene_sets()`, `as_enrichment()` and `dedup_terms()`.
+## References
+
+Ashburner M, Ball CA, Blake JA, et al. (2000). Gene Ontology: tool for the
+unification of biology. *Nature Genetics* 25:25-29.
+<https://doi.org/10.1038/75556>
+
+Fieller EC, Hartley HO, Pearson ES (1957). Tests for rank correlation
+coefficients. I. *Biometrika* 44:470-481.
+<https://doi.org/10.1093/biomet/44.3-4.470>
+
+Gene Ontology Consortium (2023). The Gene Ontology knowledgebase in 2023.
+*Genetics* 224:iyad031. <https://doi.org/10.1093/genetics/iyad031>
+
+Korotkevich G, Sukhov V, Sergushichev A (2019). Fast gene set enrichment
+analysis. *bioRxiv*. <https://doi.org/10.1101/060012>
+
+Liberzon A, Subramanian A, Pinchback R, et al. (2011). Molecular signatures
+database (MSigDB) 3.0. *Bioinformatics* 27:1739-1740.
+<https://doi.org/10.1093/bioinformatics/btr260>
+
+Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
+Signatures Database hallmark gene set collection. *Cell Systems* 1:417-425.
+<https://doi.org/10.1016/j.cels.2015.12.004>
+
+Makowski D, Ben-Shachar MS, Patil I, Lüdecke D (2020). Methods and algorithms
+for correlation analysis in R. *Journal of Open Source Software* 5:2306.
+<https://doi.org/10.21105/joss.02306>
+
+Merico D, Isserlin R, Stueker O, Emili A, Bader GD (2010). Enrichment Map: a
+network-based method for gene-set enrichment visualization and
+interpretation. *PLoS ONE* 5:e13984.
+<https://doi.org/10.1371/journal.pone.0013984>
+
+Reimand J, Isserlin R, Voisin V, et al. (2019). Pathway enrichment analysis
+and visualization of omics data using g:Profiler, GSEA, Cytoscape and
+EnrichmentMap. *Nature Protocols* 14:482-517.
+<https://doi.org/10.1038/s41596-018-0103-9>
+
+Ritchie ME, Phipson B, Wu D, et al. (2015). limma powers differential
+expression analyses for RNA-sequencing and microarray studies. *Nucleic Acids
+Research* 43:e47. <https://doi.org/10.1093/nar/gkv007>
+
+Smyth GK, Michaud J, Scott HS (2005). Use of within-array replicate spots for
+assessing differential expression in microarray experiments. *Bioinformatics*
+21:2067-2075. <https://doi.org/10.1093/bioinformatics/bti270>
+
+Subramanian A, Tamayo P, Mootha VK, et al. (2005). Gene set enrichment
+analysis: a knowledge-based approach for interpreting genome-wide expression
+profiles. *PNAS* 102:15545-15550. <https://doi.org/10.1073/pnas.0506580102>
+
+Wu D, Lim E, Vaillant F, et al. (2010). ROAST: rotation gene set tests for
+complex microarray experiments. *Bioinformatics* 26:2176-2182.
+<https://doi.org/10.1093/bioinformatics/btq401>
+
+Wu D, Smyth GK (2012). Camera: a competitive gene set test accounting for
+inter-gene correlation. *Nucleic Acids Research* 40:e133.
+<https://doi.org/10.1093/nar/gks461>
+
+Wu T, Hu E, Xu S, et al. (2021). clusterProfiler 4.0: a universal enrichment
+tool for interpreting omics data. *The Innovation* 2:100141.
+<https://doi.org/10.1016/j.xinn.2021.100141>
+
+Xiao Y, Hsiao TH, Suresh U, et al. (2014). A novel significance score for gene
+selection and ranking. *Bioinformatics* 30:801-807.
+<https://doi.org/10.1093/bioinformatics/btr671>

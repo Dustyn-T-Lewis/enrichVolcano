@@ -49,11 +49,11 @@
 #' @references
 #' Merico D, Isserlin R, Stueker O, Emili A, Bader GD (2010). Enrichment Map: a
 #' network-based method for gene-set enrichment visualization and
-#' interpretation. PLoS ONE 5(11):e13984.
+#' interpretation. PLoS ONE 5(11):e13984. \doi{10.1371/journal.pone.0013984}
 #'
 #' Reimand J, Isserlin R, Voisin V, et al. (2019). Pathway enrichment analysis
 #' and visualization of omics data using g:Profiler, GSEA, Cytoscape and
-#' EnrichmentMap. Nature Protocols 14:482-517.
+#' EnrichmentMap. Nature Protocols 14:482-517. \doi{10.1038/s41596-018-0103-9}
 #' @export
 dedup_terms <- function(enrichment, gene_sets, method = c("enrichmentmap", "collapse_pathways"),
                         similarity = c("combined", "jaccard"), cutoff = NULL,
@@ -75,7 +75,7 @@ dedup_terms <- function(enrichment, gene_sets, method = c("enrichmentmap", "coll
       ev_abort("{.arg cutoff} must be a single number in (0, 1].", class = "enrichVolcano_param_error")
     }
     sim <- switch(similarity,
-      combined = combined_similarity,
+      combined = function(a, b) 0.5 * jaccard(a, b) + 0.5 * overlap_coefficient(a, b),
       jaccard = jaccard
     )
     flags <- flag_redundant(res, gene_sets, sim, cutoff, term_threshold)
@@ -193,8 +193,4 @@ overlap_coefficient <- function(a, b) {
     return(0)
   }
   shared / min(length(unique(a)), length(unique(b)))
-}
-
-combined_similarity <- function(a, b) {
-  0.5 * jaccard(a, b) + 0.5 * overlap_coefficient(a, b)
 }

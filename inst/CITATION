@@ -1,0 +1,8 @@
+bibentry(
+  bibtype = "Manual",
+  title = "enrichVolcano: Volcano-in-Ring and Concordance Plots from Enrichment Results",
+  author = person("Dustyn", "Lewis"),
+  year = "2026",
+  note = paste("R package version", meta$Version),
+  url = "https://github.com/Dustyn-T-Lewis/enrichVolcano"
+)

@@ -21,7 +21,9 @@ org_package <- function(species) {
     )
   }
   pkg <- species_org[[species]]
-  rlang::check_installed(c("AnnotationDbi", pkg), reason = "to map proteins and gene sets to symbols.")
+  suppressPackageStartupMessages(
+    rlang::check_installed(c("AnnotationDbi", pkg), reason = "to map proteins and gene sets to symbols.")
+  )
   pkg
 }
 
@@ -51,25 +53,32 @@ map_symbols <- function(ids, species) {
 #'   the term or any of its descendants. Sets are named like
 #'   `GOSLIM_PROTEIN_FOLDING`.
 #'
-#' Each collection is kept separate so [run_enrichment()] corrects p-values
-#' within it.
+#' Every set is kept, whatever its size. [run_enrichment()] filters on the
+#' genes measured in your data, and corrects p-values within each collection.
 #'
 #' @references
+#' Liberzon A, Subramanian A, Pinchback R, et al. (2011). Molecular signatures
+#' database (MSigDB) 3.0. Bioinformatics 27(12):1739-1740.
+#' \doi{10.1093/bioinformatics/btr260}
+#'
 #' Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
 #' Signatures Database hallmark gene set collection. Cell Systems 1(6):417-425.
 #' \doi{10.1016/j.cels.2015.12.004}
 #'
+#' Ashburner M, Ball CA, Blake JA, et al. (2000). Gene Ontology: tool for the
+#' unification of biology. Nature Genetics 25(1):25-29. \doi{10.1038/75556}
+#'
+#' Gene Ontology Consortium (2023). The Gene Ontology knowledgebase in 2023.
+#' Genetics 224(1):iyad031. \doi{10.1093/genetics/iyad031}
+#'
 #' @param databases Any of `"Hallmark"`, `"GO Slim"`, `"Reactome"`, `"KEGG"`,
 #'   `"GO:BP"`.
 #' @param species `"Homo sapiens"`, `"Mus musculus"` or `"Rattus norvegicus"`.
-#' @param min_size,max_size Keep sets with at least `min_size` and at most
-#'   `max_size` genes.
 #' @return A named list of collections, each a named list of gene symbols, with
 #'   a `versions` attribute (msigdbr, GO slim release, annotation package,
 #'   species).
 #' @export
-load_gene_sets <- function(databases = c("Hallmark", "GO Slim"), species = "Homo sapiens",
-                           min_size = 15, max_size = 500) {
+load_gene_sets <- function(databases = c("Hallmark", "GO Slim"), species = "Homo sapiens") {
   known <- c(names(msigdb_collections), "GO Slim")
   unknown <- setdiff(databases, known)
   if (length(unknown) > 0) {
@@ -95,7 +104,6 @@ load_gene_sets <- function(databases = c("Hallmark", "GO Slim"), species = "Homo
     lapply(split(tbl$gene_symbol, tbl$gs_name), unique)
   })
   names(sets) <- databases
-  sets <- lapply(sets, function(s) s[lengths(s) >= min_size & lengths(s) <= max_size])
   attr(sets, "versions") <- versions
   sets
 }

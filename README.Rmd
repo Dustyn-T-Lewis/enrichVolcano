@@ -30,6 +30,10 @@ release:
 remotes::install_github("Dustyn-T-Lewis/enrichVolcano@v1.1.0")
 ```
 
+## Workflow
+
+<img src="man/figures/workflow.png" width="100%" alt="Five steps from left to right: read, enrich, dedup, plot and write, each listing its functions" />
+
 ## Example
 
 ```{r ring, fig.width = 7, fig.height = 7, dpi = 110, fig.alt = "A volcano plot ringed by enrichment arcs coloured by normalised enrichment score"}

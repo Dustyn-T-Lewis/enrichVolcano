@@ -23,7 +23,7 @@
 #' * Dashed line: \eqn{y = x}, or \eqn{y = -x} for a reversal.
 #' * Labels: the most significant terms with at least `label_min_size` genes.
 #' * Subtitle: Spearman's \eqn{\rho} across all plotted terms, with a 95%
-#'   interval when the correlation package is installed, its p-value, the
+#'   Fieller interval when the correlation package is installed, its p-value, the
 #'   share of significant terms that are concordant (or reversed), and the
 #'   term counts.
 #'
@@ -49,9 +49,17 @@
 #' @param shape_by Column mapped to point shape (up to five values), or `NULL`.
 #' @param label_min_size Smallest gene set that gets a label.
 #' @param label_n Most term labels drawn.
+#' @param labels Your own display names, as in [plot_volcano_ring()].
 #' @param theme Output of [plot_theme()]; supplies the base font.
 #'
 #' @return A ggplot.
+#' @references
+#' Fieller EC, Hartley HO, Pearson ES (1957). Tests for rank correlation
+#' coefficients. I. Biometrika 44(3-4):470-481. \doi{10.1093/biomet/44.3-4.470}
+#'
+#' Makowski D, Ben-Shachar MS, Patil I, Luedecke D (2020). Methods and
+#' algorithms for correlation analysis in R. Journal of Open Source Software
+#' 5(51):2306. \doi{10.21105/joss.02306}
 #' @export
 #' @examples
 #' ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
@@ -68,8 +76,10 @@ plot_scatter <- function(enrichment, x, y,
                          shape_by = "database",
                          label_min_size = 15,
                          label_n = 20,
+                         labels = NULL,
                          theme = plot_theme()) {
   check_enrichment(enrichment)
+  check_labels(labels)
   comparison <- rlang::arg_match(comparison)
   res <- enrichment@results
   if (identical(x, y)) {
@@ -100,7 +110,7 @@ plot_scatter <- function(enrichment, x, y,
 
   sig <- wide$significance != "NS"
   counts <- quadrant_counts(wide$score_x, wide$score_y, sig)
-  share <- concordance_fraction(counts)
+  share <- if (sum(counts) > 0) unname((counts[["top_right"]] + counts[["bottom_left"]]) / sum(counts)) else NA_real_
   if (comparison == "reversal") share <- 1 - share
   subtitle <- scatter_subtitle(
     score_correlation(wide$score_x, wide$score_y),
@@ -109,19 +119,12 @@ plot_scatter <- function(enrichment, x, y,
   )
   score_type <- enrichment@metadata$score_type
 
-  draw_scatter(wide, sig, counts, comparison, colour_by, shape_by, label_min_size, label_n, theme) +
+  draw_scatter(wide, sig, counts, comparison, colour_by, shape_by, label_min_size, label_n, labels, theme) +
     ggplot2::labs(
       x = sprintf("%s (%s)", score_type, x),
       y = sprintf("%s (%s)", score_type, y),
-      subtitle = subtitle_math(subtitle)
+      subtitle = if (startsWith(subtitle, "rho")) bquote(rho ~ .(trimws(substring(subtitle, 4)))) else subtitle
     )
-}
-
-subtitle_math <- function(text) {
-  if (!startsWith(text, "rho")) {
-    return(text)
-  }
-  bquote(rho ~ .(trimws(substring(text, 4))))
 }
 
 pair_contrasts <- function(res, x, y) {
@@ -176,13 +179,6 @@ quadrant_counts <- function(score_x, score_y, sig) {
   )
 }
 
-concordance_fraction <- function(counts) {
-  if (sum(counts) == 0) {
-    return(NA_real_)
-  }
-  unname((counts[["top_right"]] + counts[["bottom_left"]]) / sum(counts))
-}
-
 score_correlation <- function(x, y, with_ci = requireNamespace("correlation", quietly = TRUE)) {
   if (length(x) < 3 || stats::sd(x) == 0 || stats::sd(y) == 0) {
     return(NULL)
@@ -202,10 +198,12 @@ scatter_subtitle <- function(cor, share, share_label, n, n_sig) {
   rho <- NULL
   if (!is.null(cor)) {
     p_text <- if (cor$p < 0.001) "p < 0.001" else sprintf("p = %.2f", cor$p)
+    # Adding 0 turns a rounded -0 into 0, so it prints without a minus sign.
+    two <- function(x) sprintf("%.2f", round(x, 2) + 0)
     rho <- if (is.null(cor$ci)) {
-      sprintf("rho = %.2f, %s", cor$rho, p_text)
+      sprintf("rho = %s, %s", two(cor$rho), p_text)
     } else {
-      sprintf("rho = %.2f [%.2f, %.2f], %s", cor$rho, cor$ci[1], cor$ci[2], p_text)
+      sprintf("rho = %s [%s, %s], %s", two(cor$rho), two(cor$ci[1]), two(cor$ci[2]), p_text)
     }
   }
   paste(c(
@@ -221,7 +219,7 @@ quadrant_names <- list(
 )
 
 draw_scatter <- function(wide, sig, counts, comparison, colour_by, shape_by,
-                         label_min_size, label_n, theme) {
+                         label_min_size, label_n, labels, theme) {
   lim <- max(abs(c(wide$score_x, wide$score_y)), 1, na.rm = TRUE) * 1.35
   quad <- data.frame(
     xmin = c(0, -lim, -lim, 0), xmax = c(lim, 0, 0, lim),
@@ -246,7 +244,7 @@ draw_scatter <- function(wide, sig, counts, comparison, colour_by, shape_by,
   labelled <- points[is.na(points$size) | points$size >= label_min_size, , drop = FALSE]
   labelled <- labelled[order(pmin(labelled$sig_x, labelled$sig_y, na.rm = TRUE)), , drop = FALSE]
   labelled <- utils::head(labelled, label_n)
-  labelled$label <- clean_label(labelled$term, width = 20)
+  labelled$label <- display_labels(labelled$term, labels, 20)
 
   p <- ggplot2::ggplot() +
     ggplot2::annotate("rect",

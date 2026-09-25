@@ -25,8 +25,8 @@ plot_bias_ring <- function(da, enrichment, contrast = NULL, databases = NULL, co
   defaults <- formals(plot_volcano_ring)[-(1:2)]
   args <- lapply(defaults, eval, envir = environment(plot_volcano_ring))
   extra <- list(...)
-  unknown <- setdiff(names(extra), names(defaults))
-  if (length(unknown) > 0 || any(!nzchar(names(extra)))) {
+  unknown <- sub("^$", "<unnamed>", setdiff(rlang::names2(extra), names(defaults)))
+  if (length(unknown) > 0) {
     ev_abort("Unknown argument{?s} in {.arg ...}: {.val {unknown}}.", class = "enrichVolcano_param_error")
   }
   given <- list(

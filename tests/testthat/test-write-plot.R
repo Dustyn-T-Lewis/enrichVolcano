@@ -29,7 +29,7 @@ test_that("write_plot writes the composite, then one page per panel", {
 })
 
 test_that("without cairo, write_plot stops and says how to get it", {
-  skip_if(cairo_works(), "cairo works here")
+  local_mocked_bindings(open_pdf = function(...) invisible(NULL))
   file <- withr::local_tempfile(fileext = ".pdf")
   expect_error(write_plot(toy_panels(), file), "XQuartz", class = "enrichVolcano_device_error")
   expect_false(file.exists(file))
@@ -42,6 +42,25 @@ test_that("the composite letters panels in list order, with an optional caption"
   expect_null(composite$patches$annotation$caption)
   expect_identical(compose_panels(toy_panels(), caption = "n = 20")$patches$annotation$caption, "n = 20")
   expect_s3_class(compose_panels(toy_panels(), design = "AB"), "patchwork")
+})
+
+test_that("the page gives each composite cell room for a full-size panel, in landscape", {
+  expect_identical(page_size(3, ncol = 3), c(21, 7.5))
+  expect_equal(page_size(3, design = "AB\nCC"), c(15 * 11 / 8.5, 15))
+  expect_equal(page_size(4), c(15 * 11 / 8.5, 15))
+  expect_identical(page_size(2, nrow = 1), c(14, 7.5))
+  size <- page_size(1)
+  expect_equal(size[1] / size[2], 11 / 8.5)
+})
+
+test_that("write_plot sizes the pages from the layout unless told otherwise", {
+  skip_if_not(cairo_works(), "cairo cannot start here")
+  skip_if_not_installed("pdftools")
+  file <- withr::local_tempfile(fileext = ".pdf")
+  write_plot(toy_panels(), file, ncol = 2)
+  expect_equal(unname(unlist(pdftools::pdf_pagesize(file)[1, c("width", "height")])), c(14, 7.5) * 72, tolerance = 0.01)
+  write_plot(toy_panels(), file, width = 11, height = 8.5)
+  expect_equal(unname(unlist(pdftools::pdf_pagesize(file)[1, c("width", "height")])), c(11, 8.5) * 72, tolerance = 0.01)
 })
 
 test_that("panels must be a named list of ggplots", {

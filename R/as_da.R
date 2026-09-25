@@ -26,7 +26,8 @@ da_candidates <- list(
 #' @section Ranking statistic:
 #' `rank` is the moderated t when the table has one, else
 #' `sign(logFC) * -log10(p)`, else `sign(logFC) * -log10(padj)`; `rank_stat`
-#' says which.
+#' says which. The signed p-value ranking is the one Reimand et al. (2019)
+#' recommend for GSEA.
 #'
 #' @param x A results table with a contrast column (`contrast` or MSstats'
 #'   `Label`), a single-contrast table with `contrast` set, or a named list of
@@ -48,6 +49,10 @@ da_candidates <- list(
 #' @return A data frame of class `enrichVolcano_da` with columns `protein`,
 #'   `gene`, `contrast`, `logFC`, `t`, `p`, `padj`, `abundance`, `rank` and
 #'   `rank_stat`, followed by any input columns it did not use.
+#' @references
+#' Reimand J, Isserlin R, Voisin V, et al. (2019). Pathway enrichment analysis
+#' and visualization of omics data using g:Profiler, GSEA, Cytoscape and
+#' EnrichmentMap. Nature Protocols 14:482-517. \doi{10.1038/s41596-018-0103-9}
 #' @export
 #' @examples
 #' tbl <- data.frame(
@@ -69,6 +74,7 @@ as_da <- function(x, contrast = NULL, species = "Homo sapiens", protein = NULL, 
     } else if (!is.null(contrast)) {
       x$contrast <- contrast
     } else {
+      refuse_shape(x)
       ev_abort(
         c(
           "This table has no contrast column.",
@@ -102,17 +108,7 @@ standardise_da <- function(tbl, cols) {
   }
   logfc_col <- field("logFC")
   if (is.na(logfc_col)) {
-    if (any(c("F", "f_statistic") %in% names(tbl))) {
-      ev_abort("This looks like an F-test table, which has no per-contrast fold change.",
-        class = "enrichVolcano_input_error"
-      )
-    }
-    if (any(grepl("^logFC_", names(tbl)))) {
-      ev_abort(
-        "This looks like a wide table with one column per contrast; reshape it to one row per protein and contrast.",
-        class = "enrichVolcano_input_error"
-      )
-    }
+    refuse_shape(tbl)
     ev_abort_missing_column(tbl, "logFC", "logFC", "x")
   }
   stat <- vapply(c("t", "p", "padj", "abundance", "gene", "protein"), field, character(1))
@@ -129,6 +125,7 @@ standardise_da <- function(tbl, cols) {
     stringsAsFactors = FALSE
   )
   res$gene <- if (is.na(stat[["gene"]])) NA_character_ else unwrap_excel(tbl[[stat[["gene"]]]])
+  res$gene[!nzchar(res$gene)] <- NA
   signed <- function(pv) sign(res$logFC) * -log10(pmax(pv, .Machine$double.xmin))
   has_t <- !is.na(stat[["t"]])
   has_p <- !is.na(stat[["p"]])
@@ -159,9 +156,10 @@ protein_ids <- function(tbl, col, gene_col) {
 }
 
 lookup_genes <- function(d, species) {
-  accession <- grepl(uniprot_pattern, d$protein)
+  lead <- sub(";.*", "", d$protein)
+  accession <- grepl(uniprot_pattern, lead)
   if (!is.null(species) && any(accession)) {
-    symbols <- map_symbols(d$protein[accession], species)
+    symbols <- map_symbols(lead[accession], species)
     n_ids <- length(unique(d$protein[accession]))
     n_mapped <- length(unique(d$protein[accession][!is.na(symbols)]))
     d$gene[accession] <- ifelse(is.na(symbols), d$gene[accession], symbols)
@@ -172,6 +170,21 @@ lookup_genes <- function(d, species) {
   fill <- is.na(d$gene) & !accession
   d$gene[fill] <- d$protein[fill]
   d
+}
+
+# F-test and wide tables have no single fold change per protein and contrast.
+refuse_shape <- function(tbl) {
+  if (any(c("F", "f_statistic") %in% names(tbl))) {
+    ev_abort("This looks like an F-test table, which has no per-contrast fold change.",
+      class = "enrichVolcano_input_error"
+    )
+  }
+  if (any(grepl("^logFC_", names(tbl)))) {
+    ev_abort(
+      "This looks like a wide table with one column per contrast; reshape it to one row per protein and contrast.",
+      class = "enrichVolcano_input_error"
+    )
+  }
 }
 
 unwrap_excel <- function(x) sub('^="(.*)"$', "\\1", as.character(x))

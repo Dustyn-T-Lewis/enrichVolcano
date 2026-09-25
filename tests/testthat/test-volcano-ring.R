@@ -175,6 +175,28 @@ test_that("the default draws from every database", {
   expect_s3_class(suppressMessages(plot_volcano_ring(make_toy_da(), x)), "ggplot")
 })
 
+test_that("the panel widens to fit long labels at the sides", {
+  x <- make_toy_ring_enrichment()
+  r <- x@results
+  r$term[r$term == "HALLMARK_TOY_B"] <- "HALLMARK_A_VERY_LONG_PATHWAY_NAME_THAT_SITS_AT_THE_SIDE"
+  x@results <- r
+  ranges <- function(p) ggplot2::ggplot_build(p)$layout$panel_params[[1]][c("x.range", "y.range")]
+  short <- ranges(ring())
+  long <- ranges(ring(x = x))
+  expect_gt(diff(long$x.range), diff(short$x.range))
+  expect_equal(sum(long$x.range), 0)
+})
+
+test_that("a ring whose terms all go one way keeps them in that half", {
+  e <- data.frame(term = paste0("T", 1:4), padj = c(0.01, 0.02, 0.03, 0.04), score = c(-2, -1.5, -1.2, -1))
+  down <- ev_ring_geometry(e, "term", "padj", "score", rep(1, 4), rep(list(character(0)), 4))
+  expect_true(all(down$start_deg > 180 & down$end_deg < 360))
+  e$score <- -e$score
+  up <- ev_ring_geometry(e, "term", "padj", "score", rep(1, 4), rep(list(character(0)), 4))
+  expect_true(all(up$start_deg > 0 & up$end_deg < 180))
+  expect_identical(up$term[order(up$start_deg)], paste0("T", 1:4))
+})
+
 test_that("the default ring takes the n_terms most significant unique terms, whatever their direction", {
   r <- make_toy_ring_enrichment()@results
   twin <- r[r$term == "HALLMARK_TOY_A", ]
@@ -242,4 +264,25 @@ test_that("results with neither p nor padj are refused", {
     plot_volcano_ring(d, make_toy_ring_enrichment("A"), databases = NULL),
     class = "enrichVolcano_data_error"
   )
+})
+
+test_that("a volcano with no fold changes and no signal still draws inside the ring", {
+  flat <- make_toy_da()
+  flat$logFC <- 0
+  flat$p <- 1
+  flat$padj <- 1
+  p <- suppressMessages(plot_volcano_ring(flat, make_toy_ring_enrichment(), databases = NULL, term_threshold = 1))
+  pts <- ggplot2::layer_data(p, which(vapply(p$layers, function(l) inherits(l$geom, "GeomPoint"), logical(1)))[1])
+  expect_true(all(is.finite(pts$x)) && all(is.finite(pts$y)))
+  expect_true(all(pts$x == 0))
+})
+
+test_that("ticks on an arc narrower than their padding still fan out inside it", {
+  ring <- data.frame(.ev_start_rad = 1, .ev_end_rad = 1.001)
+  ring$.ev_genes <- list(c("G1", "G2"))
+  da <- data.frame(gene = c("G1", "G2"), logFC = c(1, -1))
+  ticks <- ev_tick_data(ring, da, gene_col = "gene", logfc_col = "logFC", tick_r0 = 1, tick_r1 = 2)
+  expect_identical(ticks$gene, c("G1", "G2"))
+  expect_true(all(is.finite(c(ticks$x0, ticks$y0, ticks$x1, ticks$y1))))
+  expect_gt(ticks$x0[2], ticks$x0[1])
 })

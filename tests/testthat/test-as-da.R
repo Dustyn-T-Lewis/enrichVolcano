@@ -105,6 +105,7 @@ test_that("unusable tables are refused with a reason", {
   expect_error(as_da(ftest, contrast = "A"), "F-test", class = "enrichVolcano_input_error")
   wide <- data.frame(uniprot_id = "P1", logFC_A = 1, t_A = 3, P.Value_A = 0.01)
   expect_error(as_da(wide, contrast = "A"), "wide", class = "enrichVolcano_input_error")
+  expect_error(as_da(wide), "wide", class = "enrichVolcano_input_error")
   no_stat <- data.frame(protein = "P1", logFC = 1)
   expect_error(as_da(no_stat, contrast = "A"), "t, p or padj", class = "enrichVolcano_column_error")
   no_fc <- data.frame(protein = "P1", t = 3)

@@ -9,7 +9,9 @@
 #' gene (the table's average abundance, else the matrix row mean); without any
 #' abundance, the first accession alphabetically. The choice never looks at
 #' the results. Each collection is tested and corrected separately. fgsea
-#' permutes, so call [set.seed()] first for reproducible p-values.
+#' permutes, so call [set.seed()] first for reproducible p-values. Each
+#' contrast and collection draws its own seed from it, so adding or removing a
+#' collection leaves the others' results unchanged.
 #'
 #' @section camera and fry:
 #' Both refit limma on the study's matrix, which must have no missing values
@@ -41,8 +43,12 @@
 #' @return A named list with one enrichment object per test. Its metadata
 #'   records the ranking statistic and the gene-set versions.
 #' @references
-#' Korotkevich G, Sukhov V, Budin N, et al. Fast gene set enrichment analysis.
-#' bioRxiv. \doi{10.1101/060012}
+#' Subramanian A, Tamayo P, Mootha VK, et al. (2005). Gene set enrichment
+#' analysis: a knowledge-based approach for interpreting genome-wide expression
+#' profiles. PNAS 102(43):15545-15550. \doi{10.1073/pnas.0506580102}
+#'
+#' Korotkevich G, Sukhov V, Sergushichev A (2019). Fast gene set enrichment
+#' analysis. bioRxiv. \doi{10.1101/060012}
 #'
 #' Wu D, Smyth GK (2012). Camera: a competitive gene set test accounting for
 #' inter-gene correlation. Nucleic Acids Research 40(17):e133.
@@ -51,6 +57,10 @@
 #' Wu D, Lim E, Vaillant F, et al. (2010). ROAST: rotation gene set tests for
 #' complex microarray experiments. Bioinformatics 26(17):2176-2182.
 #' \doi{10.1093/bioinformatics/btq401}
+#'
+#' Smyth GK, Michaud J, Scott HS (2005). Use of within-array replicate spots
+#' for assessing differential expression in microarray experiments.
+#' Bioinformatics 21(9):2067-2075. \doi{10.1093/bioinformatics/bti270}
 #'
 #' Ritchie ME, Phipson B, Wu D, et al. (2015). limma powers differential
 #' expression analyses for RNA-sequencing and microarray studies. Nucleic
@@ -128,12 +138,14 @@ run_fgsea <- function(study, collections, min_size, max_size) {
   da <- fill_abundance(study$da, study$matrix)
   da <- da[!is.na(da$gene) & !is.na(da$rank), , drop = FALSE]
   ties <- 0
+  base <- sample.int(1e6, 1)
   per_contrast <- lapply(split(da, factor(da$contrast, unique(da$contrast))), function(d) {
     d <- one_per_gene(d)
     ranks <- stats::setNames(d$rank, d$gene)
     tied <- duplicated(ranks) | duplicated(ranks, fromLast = TRUE)
     if (sum(tied) > ties) ties <<- sum(tied)
     do.call(rbind, lapply(names(collections), function(db) {
+      set.seed(fgsea_seed(base, d$contrast[1], db))
       res <- withCallingHandlers(
         as.data.frame(fgsea::fgsea(collections[[db]], ranks, minSize = min_size, maxSize = max_size)),
         warning = function(w) {
@@ -144,22 +156,29 @@ run_fgsea <- function(study, collections, min_size, max_size) {
       res
     }))
   })
-  if (ties > 0) {
-    ev_inform(
-      "Up to {ties} of {length(unique(da$gene))} ranked genes tie; fgsea orders tied genes arbitrarily.",
-      class = "enrichVolcano_rank_ties"
-    )
-  }
   if (sum(vapply(per_contrast, nrow, integer(1))) == 0) {
     ev_abort(
       "There is no gene set with {min_size} to {max_size} genes present in the data.",
       class = "enrichVolcano_input_error"
     )
   }
+  if (ties > 0) {
+    ev_inform(
+      "Up to {ties} of {length(unique(da$gene))} ranked genes tie; fgsea orders tied genes arbitrarily.",
+      class = "enrichVolcano_rank_ties"
+    )
+  }
   x <- suppressMessages(as_enrichment(per_contrast, enrichment_test = "fgsea"))
   x@metadata$ranking <- unique(da$rank_stat)
   x@metadata$gene_sets <- attr(collections, "versions")
   x
+}
+
+# fgsea permutes. Seeding each contrast and collection from one draw of the
+# caller's seed keeps a collection's result independent of the others run.
+fgsea_seed <- function(base, contrast, db) {
+  code <- utf8ToInt(paste(contrast, db, sep = "\r"))
+  (base + sum(code * seq_along(code))) %% .Machine$integer.max
 }
 
 one_per_gene <- function(d) {

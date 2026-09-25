@@ -16,6 +16,7 @@ plot_scatter(
   shape_by = "database",
   label_min_size = 15,
   label_n = 20,
+  labels = NULL,
   theme = plot_theme()
 )
 }
@@ -47,6 +48,8 @@ the \code{x} contrast.}
 \item{label_min_size}{Smallest gene set that gets a label.}
 
 \item{label_n}{Most term labels drawn.}
+
+\item{labels}{Your own display names, as in \code{\link[=plot_volcano_ring]{plot_volcano_ring()}}.}
 
 \item{theme}{Output of \code{\link[=plot_theme]{plot_theme()}}; supplies the base font.}
 }
@@ -82,7 +85,7 @@ small and grey; significant ones are sized by gene-set size and filled by
 \item Dashed line: \eqn{y = x}, or \eqn{y = -x} for a reversal.
 \item Labels: the most significant terms with at least \code{label_min_size} genes.
 \item Subtitle: Spearman's \eqn{\rho} across all plotted terms, with a 95\%
-interval when the correlation package is installed, its p-value, the
+Fieller interval when the correlation package is installed, its p-value, the
 share of significant terms that are concordant (or reversed), and the
 term counts.
 }
@@ -98,4 +101,12 @@ ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.g
 )))
 plot_scatter(ex, "Training_Young", "Training_Old")
 plot_scatter(ex, "Aging", "Training_Old", comparison = "reversal")
+}
+\references{
+Fieller EC, Hartley HO, Pearson ES (1957). Tests for rank correlation
+coefficients. I. Biometrika 44(3-4):470-481. \doi{10.1093/biomet/44.3-4.470}
+
+Makowski D, Ben-Shachar MS, Patil I, Luedecke D (2020). Methods and
+algorithms for correlation analysis in R. Journal of Open Source Software
+5(51):2306. \doi{10.21105/joss.02306}
 }

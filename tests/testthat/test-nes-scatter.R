@@ -26,13 +26,20 @@ test_that("quadrant counts and concordance match the hand count", {
   sig <- scatter_significance(a$padj, b$padj, 0.05, "A", "B") != "NS"
   counts <- quadrant_counts(a$score, b$score, sig)
   expect_identical(counts, c(top_right = 4L, top_left = 1L, bottom_left = 2L, bottom_right = 2L))
-  expect_equal(concordance_fraction(counts), 6 / 9)
+  expect_match(paste(deparse(scatter()$labels$subtitle), collapse = ""), "67% concordant", fixed = TRUE)
 })
 
-test_that("points on an axis belong to no quadrant, and no points give NA", {
+test_that("points on an axis belong to no quadrant", {
   counts <- quadrant_counts(c(0, 1), c(1, 0), c(TRUE, TRUE))
   expect_identical(sum(counts), 0L)
-  expect_true(is.na(concordance_fraction(counts)))
+})
+
+test_that("with no significant terms the subtitle reports no share", {
+  x <- make_toy_scatter_enrichment()
+  x@results$padj <- 0.5
+  subtitle <- paste(deparse(scatter(x)$labels$subtitle), collapse = "")
+  expect_no_match(subtitle, "concordant", fixed = TRUE)
+  expect_match(subtitle, "0 significant", fixed = TRUE)
 })
 
 test_that("the correlation carries a CI when the correlation package is there", {
@@ -159,8 +166,10 @@ test_that("the toy scatter looks the same", {
 })
 
 test_that("the subtitle draws rho as a plotmath symbol", {
-  expect_true(is.call(subtitle_math("rho = 0.5, p = 0.1 | 3 terms, 1 significant")))
-  expect_identical(subtitle_math("2 terms, 0 significant"), "2 terms, 0 significant")
+  expect_true(is.call(scatter()$labels$subtitle))
+  x <- make_toy_scatter_enrichment()
+  x@results <- x@results[x@results$term %in% unique(x@results$term)[1:2], ]
+  expect_type(scatter(x)$labels$subtitle, "character")
 })
 
 test_that("the scatter prints on a plain pdf device", {
@@ -223,4 +232,9 @@ test_that("contrasts with no shared terms give a clear error", {
 
 test_that("the scatter defaults to every database", {
   expect_null(formals(plot_scatter)$databases)
+})
+
+test_that("a correlation that rounds to zero prints without a minus sign", {
+  s <- scatter_subtitle(list(rho = -0.001, ci = c(-0.2204, 0.001), p = 0.97), NA, "concordant", n = 5, n_sig = 0)
+  expect_match(s, "rho = 0.00 [-0.22, 0.00]", fixed = TRUE)
 })

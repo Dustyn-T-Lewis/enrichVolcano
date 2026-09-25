@@ -50,7 +50,7 @@ ev_select_labels <- function(df, mode, n, rank_by, genes,
 #' @examples
 #' clean_label(c("HALLMARK_OXIDATIVE_PHOSPHORYLATION", "REACTOME_TCA_CYCLE"))
 clean_label <- function(name, width = 15) {
-  if (length(name) > 1) {
+  if (length(name) != 1) {
     return(vapply(name, clean_label, character(1), width = width, USE.NAMES = FALSE))
   }
   if (is.na(name) || !nzchar(name)) {
@@ -219,7 +219,6 @@ ev_shorten_phrases <- function(x) {
 ev_clean_label_mitocarta <- function(name, width = 15) {
   n <- sub("^MITOCARTA_", "", name)
   parts <- strsplit(n, "__|>", perl = TRUE)[[1]]
-  if (length(parts) == 1) parts <- strsplit(n, "_")[[1]]
   leaf <- utils::tail(parts, 1)
   leaf <- gsub("_", " ", leaf)
   leaf <- tools::toTitleCase(tolower(leaf))
@@ -234,6 +233,25 @@ ev_clean_label_mitocarta <- function(name, width = 15) {
     "\\bFatty Acid\\b" = "FA"
   )
   for (pat in names(reps)) leaf <- gsub(pat, reps[[pat]], leaf, perl = TRUE)
+  leaf <- gsub("\\bComplex ((?i)[iv]+)\\b", "Complex \\U\\1", leaf, perl = TRUE)
   leaf <- trimws(gsub("\\s+", " ", leaf))
   stringr::str_wrap(leaf, width = width)
+}
+
+# Display names for terms: the user's own where given, clean_label() otherwise.
+display_labels <- function(terms, labels, width) {
+  out <- clean_label(terms, width = width)
+  own <- unname(labels[terms])
+  hit <- !is.na(own)
+  out[hit] <- ifelse(grepl("\n", own[hit], fixed = TRUE), own[hit], stringr::str_wrap(own[hit], width))
+  out
+}
+
+check_labels <- function(labels) {
+  if (is.null(labels)) {
+    return(invisible(NULL))
+  }
+  if (!is.character(labels) || is.null(names(labels)) || any(!nzchar(names(labels)))) {
+    ev_abort("{.arg labels} must be a character vector named by term.", class = "enrichVolcano_param_error")
+  }
 }

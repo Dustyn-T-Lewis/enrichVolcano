@@ -88,6 +88,20 @@ test_that("clean_label routes MITOCARTA_ names through the leaf shortener", {
   expect_true(grepl("Complex I", out))
 })
 
+test_that("a MitoCarta name without a hierarchy keeps all its words", {
+  expect_identical(clean_label("MITOCARTA_Mitochondrial_central_dogma", width = 40), "Mito. Central Dogma")
+  expect_identical(clean_label("MITOCARTA_OXPHOS_SUBUNITS", width = 40), "OXPHOS Subunits")
+})
+
+test_that("a MitoCarta leaf keeps its complex numeral upper case", {
+  expect_identical(clean_label("MITOCARTA_OXPHOS>Complex_I", width = 40), "Complex I")
+  expect_identical(clean_label("MITOCARTA_OXPHOS__Complex_IV", width = 40), "Complex IV")
+})
+
+test_that("clean_label passes missing and empty names through", {
+  expect_identical(clean_label(c(NA, "", "HALLMARK_APOPTOSIS")), c(NA, "", "Apoptosis"))
+})
+
 # A ring arc has room for two lines. A third pushes the label box into its
 # neighbours, so verbose MSigDB names need a phrase entry, not a wider wrap.
 test_that("clean_label keeps verbose MSigDB names within two lines", {
@@ -171,4 +185,38 @@ test_that("width reaches vectorised and MitoCarta names", {
   mito <- "MITOCARTA_OXPHOS__OXPHOS_ASSEMBLY_FACTORS"
   expect_false(grepl("\n", clean_label(mito, width = 40)))
   expect_true(grepl("\n", clean_label(mito)))
+})
+
+test_that("labels replace the cleaned names of the terms they name", {
+  p <- suppressMessages(plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(),
+    databases = NULL, term_threshold = 1, n_terms = Inf,
+    labels = c(HALLMARK_TOY_A = "My own name for A", HALLMARK_TOY_C = "Line one\nline two")
+  ))
+  drawn <- unlist(lapply(ggplot2::ggplot_build(p)$data, function(d) if ("label" %in% names(d)) as.character(d$label)))
+  expect_true(stringr::str_wrap("My own name for A", 15) %in% drawn)
+  expect_true("Line one\nline two" %in% drawn)
+  expect_true(clean_label("HALLMARK_TOY_B") %in% drawn)
+})
+
+test_that("the scatter uses the same labels", {
+  p <- suppressMessages(plot_scatter(make_toy_scatter_enrichment(), "A", "B", labels = c(T01 = "First term")))
+  drawn <- unlist(lapply(ggplot2::ggplot_build(p)$data, function(d) if ("label" %in% names(d)) as.character(d$label)))
+  expect_true("First term" %in% drawn)
+})
+
+test_that("labels must be a named character vector", {
+  for (bad in list("no names", c(a = 1), stats::setNames("x", ""))) {
+    expect_error(
+      plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(), labels = bad),
+      class = "enrichVolcano_param_error"
+    )
+    expect_error(
+      plot_scatter(make_toy_scatter_enrichment(), "A", "B", labels = bad),
+      class = "enrichVolcano_param_error"
+    )
+  }
+})
+
+test_that("clean_label returns an empty vector for no names", {
+  expect_identical(clean_label(character(0)), character(0))
 })

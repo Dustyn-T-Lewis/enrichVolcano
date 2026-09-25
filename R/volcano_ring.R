@@ -11,7 +11,8 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
                              magnitude_col, genes_list, order_by = "padj",
                              gap_intra = 3, gap_split = 8,
                              arc_r0 = ev_ring_r_outer,
-                             min_height = 0.05, max_height = 1.6, proportional = FALSE) {
+                             min_height = 0.05, max_height = 1.6, proportional = FALSE,
+                             labels = NULL) {
   if (nrow(enrich_df) == 0) {
     return(enrich_df)
   }
@@ -23,7 +24,7 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   if (nrow(ring) == 0) {
     return(ring)
   }
-  ring$.ev_clean_label <- clean_label(ring[[term_col]])
+  ring$.ev_clean_label <- display_labels(ring[[term_col]], labels, 15)
   ring$.ev_genes <- genes_list
   ring$.ev_is_up <- ring[[nes_col]] > 0
   ring$.ev_magnitude <- magnitude_col
@@ -42,9 +43,6 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   n_dn <- nrow(dn)
 
   scale_h <- function(df) {
-    if (nrow(df) == 0) {
-      return(numeric(0))
-    }
     if (proportional) {
       return(arc_r0 + max_height * df$.ev_magnitude)
     }
@@ -62,29 +60,29 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   if (n_up > 0) up$arc_r1_var <- scale_h(up)
   if (n_dn > 0) dn$arc_r1_var <- scale_h(dn)
 
-  if (n_up > 0 && n_dn > 0) {
-    total_gap <- 2 * gap_split + (n_up - 1) * gap_intra + (n_dn - 1) * gap_intra
-    arc_w <- (360 - total_gap) / (n_up + n_dn)
-    up_span <- n_up * arc_w + (n_up - 1) * gap_intra
-    up$start_deg <- (90 - up_span / 2) + (seq_len(n_up) - 1) * (arc_w + gap_intra)
-    up$end_deg <- up$start_deg + arc_w
-    dn_span <- n_dn * arc_w + (n_dn - 1) * gap_intra
-    dn_offset <- (n_dn - seq_len(n_dn)) * (arc_w + gap_intra)
-    dn$start_deg <- (270 - dn_span / 2) + dn_offset
-    dn$end_deg <- dn$start_deg + arc_w
-  } else {
-    only <- if (n_up > 0) up else dn
-    if (nrow(only) == 1) {
-      center <- if (n_up > 0) 90 else 270
-      only$start_deg <- center - 15
-      only$end_deg <- only$start_deg + 30
-    } else {
-      arc_w <- (360 - nrow(only) * gap_intra) / nrow(only)
-      only$start_deg <- (seq_len(nrow(only)) - 1) * (arc_w + gap_intra)
-      only$end_deg <- only$start_deg + arc_w
+  # Up terms fill the right half from the top, down terms the left half from the top.
+  place <- function(df, centre, span, from_top) {
+    n <- nrow(df)
+    if (n == 0) {
+      return(df)
     }
-    if (n_up > 0) up <- only else dn <- only
+    arc_w <- (span - (n - 1) * gap_intra) / n
+    slot <- if (from_top) seq_len(n) - 1 else n - seq_len(n)
+    df$start_deg <- centre - span / 2 + slot * (arc_w + gap_intra)
+    df$end_deg <- df$start_deg + arc_w
+    df
   }
+  if (n_up > 0 && n_dn > 0) {
+    arc_w <- (360 - 2 * gap_split - (n_up - 1) * gap_intra - (n_dn - 1) * gap_intra) / (n_up + n_dn)
+    up_span <- n_up * arc_w + (n_up - 1) * gap_intra
+    dn_span <- n_dn * arc_w + (n_dn - 1) * gap_intra
+  } else {
+    half <- function(n) if (n == 1) 30 else 180 - gap_split
+    up_span <- half(n_up)
+    dn_span <- half(n_dn)
+  }
+  up <- place(up, 90, up_span, from_top = TRUE)
+  dn <- place(dn, 270, dn_span, from_top = FALSE)
 
   ring <- rbind(up, dn)
   ring$.ev_mid_deg <- (ring$start_deg + ring$end_deg) / 2
@@ -166,6 +164,10 @@ ev_tick_data <- function(ring_data, da, gene_col, logfc_col,
 #' @param term_threshold Terms need `padj` below this to be drawn.
 #' @param n_terms Most unique terms drawn, counted across both directions.
 #' @param terms Optional character vector of exact term names to draw instead.
+#' @param labels Your own display names, as a character vector named by term,
+#'   such as `c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")`. Terms not
+#'   named keep [clean_label()]. A name without `\n` is wrapped like the
+#'   others.
 #' @param p_threshold Significance cutoff for volcano points.
 #' @param logfc_threshold Effect-size cutoff; a point is called up/down only
 #'   when `abs(logFC) >= logfc_threshold` as well as significant.
@@ -239,6 +241,7 @@ plot_volcano_ring <- function(da, enrichment,
                               term_threshold = 0.05,
                               n_terms = 12,
                               terms = NULL,
+                              labels = NULL,
                               p_threshold = 0.05,
                               logfc_threshold = 0,
                               title = NULL,
@@ -279,7 +282,7 @@ plot_volcano_ring <- function(da, enrichment,
 # The body of plot_volcano_ring(), shared with plot_bias_ring(). It takes every
 # plot_volcano_ring() argument; `normalise` scales fill and arc height to the
 # strongest drawn term.
-draw_ring <- function(da, enrichment, contrast, databases, collapse, term_threshold, n_terms, terms,
+draw_ring <- function(da, enrichment, contrast, databases, collapse, term_threshold, n_terms, terms, labels,
                       p_threshold, logfc_threshold, title, subtitle, tag, volcano_radius, x_scale,
                       y_scale, ring_radius, ring_thickness, tick_width, label_headroom, disc_colour,
                       score_limits, magnitude, arc_order, arc_height_range, show_counts, point_size,
@@ -299,6 +302,7 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
     )
   }
   check_enrichment(enrichment)
+  check_labels(labels)
   require_columns(da, c("gene", "logFC", "p", "padj"))
   validate_da(da)
   da <- contrast_rows(da, contrast)
@@ -377,7 +381,8 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
     term_col = "term", padj_col = "padj",
     nes_col = "score", magnitude_col = mag_vec,
     genes_list = enrich_df$leading_edge, order_by = arc_order, arc_r0 = ring_r1,
-    min_height = arc_height_range[1], max_height = arc_height_range[2], proportional = normalise
+    min_height = arc_height_range[1], max_height = arc_height_range[2], proportional = normalise,
+    labels = labels
   )
   ticks <- ev_tick_data(ring, v,
     gene_col = "gene", logfc_col = "logFC",
@@ -480,6 +485,8 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
   }
 
   max_r <- 5.6
+  x_half <- NULL
+  y_half <- NULL
   if (nrow(ring) > 0) {
     if (nrow(ticks) > 0) {
       p <- p + ggplot2::geom_segment(
@@ -521,6 +528,20 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
     lbl$.ev_lead_ey <- (lbl$.ev_label_r - 0.05) * cos(lbl$.ev_mid_rad)
     lbl$.ev_lab_fill <- ifelse(lbl$.ev_is_up, pal$up, pal$down)
     max_r <- max(lbl$.ev_label_r) + label_headroom
+    # Label boxes grow outward from their anchor; estimate their size (about
+    # 0.05 units per character and 0.1 per line for each point of label_size)
+    # so side labels are not clipped.
+    lines <- strsplit(lbl$.ev_clean_label, "\n", fixed = TRUE)
+    box_w <- vapply(lines, function(l) max(nchar(l)), numeric(1)) * label_size * 0.05
+    box_h <- lengths(lines) * label_size * 0.1
+    x_half <- max(
+      max_r, abs(lbl$.ev_lbl_x - lbl$.ev_hjust * box_w) + label_headroom,
+      abs(lbl$.ev_lbl_x + (1 - lbl$.ev_hjust) * box_w) + label_headroom
+    )
+    y_half <- max(
+      max_r, abs(lbl$.ev_lbl_y - lbl$.ev_vjust * box_h) + label_headroom,
+      abs(lbl$.ev_lbl_y + (1 - lbl$.ev_vjust) * box_h) + label_headroom
+    )
 
     p <- p +
       ggplot2::geom_segment(
@@ -561,8 +582,8 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
       tag = tag %||% NULL
     ) +
     ggplot2::coord_fixed(
-      xlim = c(-(max_r + 0.1), max_r + 0.1),
-      ylim = c(-(max_r + 0.1), max_r + 0.1), clip = "off"
+      xlim = c(-1, 1) * ((x_half %||% max_r) + 0.1),
+      ylim = c(-1, 1) * ((y_half %||% max_r) + 0.1), clip = "off"
     ) +
     ggplot2::theme_void(
       base_size = theme$base_size, base_family = theme$base_family

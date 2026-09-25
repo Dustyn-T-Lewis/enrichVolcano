@@ -4,21 +4,13 @@
 \alias{load_gene_sets}
 \title{Load gene-set collections for enrichment}
 \usage{
-load_gene_sets(
-  databases = c("Hallmark", "GO Slim"),
-  species = "Homo sapiens",
-  min_size = 15,
-  max_size = 500
-)
+load_gene_sets(databases = c("Hallmark", "GO Slim"), species = "Homo sapiens")
 }
 \arguments{
 \item{databases}{Any of \code{"Hallmark"}, \code{"GO Slim"}, \code{"Reactome"}, \code{"KEGG"},
 \code{"GO:BP"}.}
 
 \item{species}{\code{"Homo sapiens"}, \code{"Mus musculus"} or \code{"Rattus norvegicus"}.}
-
-\item{min_size, max_size}{Keep sets with at least \code{min_size} and at most
-\code{max_size} genes.}
 }
 \value{
 A named list of collections, each a named list of gene symbols, with
@@ -40,11 +32,21 @@ the term or any of its descendants. Sets are named like
 \code{GOSLIM_PROTEIN_FOLDING}.
 }
 
-Each collection is kept separate so \code{\link[=run_enrichment]{run_enrichment()}} corrects p-values
-within it.
+Every set is kept, whatever its size. \code{\link[=run_enrichment]{run_enrichment()}} filters on the
+genes measured in your data, and corrects p-values within each collection.
 }
 \references{
+Liberzon A, Subramanian A, Pinchback R, et al. (2011). Molecular signatures
+database (MSigDB) 3.0. Bioinformatics 27(12):1739-1740.
+\doi{10.1093/bioinformatics/btr260}
+
 Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
 Signatures Database hallmark gene set collection. Cell Systems 1(6):417-425.
 \doi{10.1016/j.cels.2015.12.004}
+
+Ashburner M, Ball CA, Blake JA, et al. (2000). Gene Ontology: tool for the
+unification of biology. Nature Genetics 25(1):25-29. \doi{10.1038/75556}
+
+Gene Ontology Consortium (2023). The Gene Ontology knowledgebase in 2023.
+Genetics 224(1):iyad031. \doi{10.1093/genetics/iyad031}
 }

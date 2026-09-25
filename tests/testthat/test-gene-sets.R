@@ -36,7 +36,7 @@ test_that("tables keyed by symbols rather than accessions keep them", {
 
 test_that("Hallmark loads 50 sets and records its version", {
   skip_if_not_installed("msigdbr")
-  sets <- load_gene_sets("Hallmark", min_size = 1)
+  sets <- load_gene_sets("Hallmark")
   expect_named(sets, "Hallmark")
   expect_length(sets$Hallmark, 50L)
   expect_true("SDHA" %in% sets$Hallmark$HALLMARK_OXIDATIVE_PHOSPHORYLATION)
@@ -47,7 +47,7 @@ test_that("Hallmark loads 50 sets and records its version", {
 
 test_that("the pinned GO slim maps to genes and records its release", {
   skip_if_not_installed("org.Hs.eg.db")
-  sets <- load_gene_sets("GO Slim", min_size = 1, max_size = Inf)
+  sets <- load_gene_sets("GO Slim")
   slim <- sets$`GO Slim`
   expect_gt(length(slim), 50)
   expect_true(all(grepl("^GOSLIM_[A-Z0-9_]+$", names(slim))))
@@ -56,16 +56,16 @@ test_that("the pinned GO slim maps to genes and records its release", {
   expect_identical(attr(sets, "versions")$go_slim, "go/releases/2026-07-26/subsets/goslim_generic.owl")
 })
 
-test_that("set sizes are filtered to the requested window", {
-  skip_if_not_installed("msigdbr")
-  sets <- load_gene_sets("Hallmark", min_size = 150, max_size = 200)
-  sizes <- lengths(sets$Hallmark)
-  expect_true(all(sizes >= 150 & sizes <= 200))
+test_that("every set is kept whatever its genome size, since run_enrichment filters on the data", {
+  skip_if_not_installed("org.Hs.eg.db")
+  sets <- load_gene_sets("GO Slim")
+  expect_gt(length(sets$`GO Slim`[["GOSLIM_SIGNALING"]]), 500)
+  expect_false(any(c("min_size", "max_size") %in% names(formals(load_gene_sets))))
 })
 
 test_that("mouse gene sets come back in mouse symbols", {
   skip_if_not_installed("msigdbr")
-  sets <- load_gene_sets("Hallmark", species = "Mus musculus", min_size = 1)
+  sets <- load_gene_sets("Hallmark", species = "Mus musculus")
   expect_true("Sdha" %in% sets$Hallmark$HALLMARK_OXIDATIVE_PHOSPHORYLATION)
 })
 
@@ -84,4 +84,26 @@ test_that("an accession the org package lacks keeps the table's own symbol", {
   tbl <- data.frame(protein = c("A0A999Z999", "P31040"), gene = c("MYGENE", "SDHA"), logFC = c(1, -1), p = 0.01)
   expect_message(d <- as_da(tbl, contrast = "A"), "1 of 2", class = "enrichVolcano_symbol_lookup")
   expect_identical(d$gene, c("MYGENE", "SDHA"))
+})
+
+test_that("a protein group is looked up by its first accession", {
+  skip_if_not_installed("org.Hs.eg.db")
+  tbl <- data.frame(protein = c("P31040;Q9UBK2", "Q9UBK2"), logFC = c(1, -1), p = 0.01)
+  d <- suppressMessages(as_da(tbl, contrast = "A"))
+  expect_identical(d$protein, c("P31040;Q9UBK2", "Q9UBK2"))
+  expect_identical(d$gene, c("SDHA", "PPARGC1A"))
+})
+
+test_that("a blank symbol counts as missing", {
+  skip_if_not_installed("org.Hs.eg.db")
+  tbl <- data.frame(protein = c("A0A999Z999", "P31040"), gene = c("", "SDHA"), logFC = c(1, -1), p = 0.01)
+  d <- suppressMessages(as_da(tbl, contrast = "A"))
+  expect_identical(d$gene, c(NA_character_, "SDHA"))
+})
+
+test_that("the symbol lookup prints no annotation startup message", {
+  skip_if_not_installed("org.Rn.eg.db")
+  if (isNamespaceLoaded("org.Rn.eg.db")) try(unloadNamespace("org.Rn.eg.db"), silent = TRUE)
+  skip_if(isNamespaceLoaded("org.Rn.eg.db"), "org.Rn.eg.db is already loaded")
+  expect_no_condition(map_symbols("P04797", "Rattus norvegicus"), class = "packageStartupMessage")
 })

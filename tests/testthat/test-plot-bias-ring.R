@@ -54,6 +54,16 @@ test_that("a contrast with no significant terms still draws and says why", {
   expect_s3_class(p, "ggplot")
 })
 
+test_that("layout arguments pass through and anything else is refused", {
+  expect_s3_class(bias(ring_radius = 5.2, point_size = 0.5), "ggplot")
+  expect_error(bias(colour = "red"), "colour", class = "enrichVolcano_param_error")
+  expect_error(
+    plot_bias_ring(make_toy_da(), uneven_enrichment(), "toy", NULL, TRUE, 0.05, NULL, NULL, plot_theme(), 5),
+    "unnamed",
+    class = "enrichVolcano_param_error"
+  )
+})
+
 test_that("toy bias ring snapshot is stable", {
   skip_on_ci()
   skip_if_not_installed("vdiffr")

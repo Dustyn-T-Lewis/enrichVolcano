@@ -9,7 +9,6 @@ test_that("set similarities match hand-computed values", {
   c4 <- paste0("G", 1:4)
   expect_equal(jaccard(a, b), 8 / 12)
   expect_equal(overlap_coefficient(a, b), 8 / 10)
-  expect_equal(combined_similarity(a, b), 0.5 * 8 / 12 + 0.5 * 8 / 10)
   expect_equal(jaccard(a, c4), 4 / 10)
   expect_equal(overlap_coefficient(a, c4), 1)
   expect_identical(jaccard(a, paste0("X", 1:3)), 0)
