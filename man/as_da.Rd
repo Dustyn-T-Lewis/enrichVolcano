@@ -56,7 +56,8 @@ contrast first.
 
 \code{rank} is the moderated t when the table has one, else
 \code{sign(logFC) * -log10(p)}, else \code{sign(logFC) * -log10(padj)}; \code{rank_stat}
-says which.
+says which. The signed p-value ranking is the one Reimand et al. (2019)
+recommend for GSEA.
 }
 
 \section{Gene symbols}{
@@ -73,4 +74,9 @@ tbl <- data.frame(
   adj.P.Val = c(1e-3, 0.01), row.names = c("P31040", "Q9UBK2")
 )
 as_da(tbl, contrast = "Aging")
+}
+\references{
+Reimand J, Isserlin R, Voisin V, et al. (2019). Pathway enrichment analysis
+and visualization of omics data using g:Profiler, GSEA, Cytoscape and
+EnrichmentMap. Nature Protocols 14:482-517. \doi{10.1038/s41596-018-0103-9}
 }

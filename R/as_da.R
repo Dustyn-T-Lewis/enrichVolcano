@@ -26,7 +26,8 @@ da_candidates <- list(
 #' @section Ranking statistic:
 #' `rank` is the moderated t when the table has one, else
 #' `sign(logFC) * -log10(p)`, else `sign(logFC) * -log10(padj)`; `rank_stat`
-#' says which.
+#' says which. The signed p-value ranking is the one Reimand et al. (2019)
+#' recommend for GSEA.
 #'
 #' @param x A results table with a contrast column (`contrast` or MSstats'
 #'   `Label`), a single-contrast table with `contrast` set, or a named list of
@@ -48,6 +49,10 @@ da_candidates <- list(
 #' @return A data frame of class `enrichVolcano_da` with columns `protein`,
 #'   `gene`, `contrast`, `logFC`, `t`, `p`, `padj`, `abundance`, `rank` and
 #'   `rank_stat`, followed by any input columns it did not use.
+#' @references
+#' Reimand J, Isserlin R, Voisin V, et al. (2019). Pathway enrichment analysis
+#' and visualization of omics data using g:Profiler, GSEA, Cytoscape and
+#' EnrichmentMap. Nature Protocols 14:482-517. \doi{10.1038/s41596-018-0103-9}
 #' @export
 #' @examples
 #' tbl <- data.frame(

@@ -23,7 +23,7 @@
 #' * Dashed line: \eqn{y = x}, or \eqn{y = -x} for a reversal.
 #' * Labels: the most significant terms with at least `label_min_size` genes.
 #' * Subtitle: Spearman's \eqn{\rho} across all plotted terms, with a 95%
-#'   interval when the correlation package is installed, its p-value, the
+#'   Fieller interval when the correlation package is installed, its p-value, the
 #'   share of significant terms that are concordant (or reversed), and the
 #'   term counts.
 #'
@@ -53,6 +53,13 @@
 #' @param theme Output of [plot_theme()]; supplies the base font.
 #'
 #' @return A ggplot.
+#' @references
+#' Fieller EC, Hartley HO, Pearson ES (1957). Tests for rank correlation
+#' coefficients. I. Biometrika 44(3-4):470-481. \doi{10.1093/biomet/44.3-4.470}
+#'
+#' Makowski D, Ben-Shachar MS, Patil I, Lüdecke D (2020). Methods and
+#' algorithms for correlation analysis in R. Journal of Open Source Software
+#' 5(51):2306. \doi{10.21105/joss.02306}
 #' @export
 #' @examples
 #' ex <- as_enrichment(read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",

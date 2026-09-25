@@ -57,9 +57,19 @@ map_symbols <- function(ids, species) {
 #' genes measured in your data, and corrects p-values within each collection.
 #'
 #' @references
+#' Liberzon A, Subramanian A, Pinchback R, et al. (2011). Molecular signatures
+#' database (MSigDB) 3.0. Bioinformatics 27(12):1739-1740.
+#' \doi{10.1093/bioinformatics/btr260}
+#'
 #' Liberzon A, Birger C, Thorvaldsdottir H, et al. (2015). The Molecular
 #' Signatures Database hallmark gene set collection. Cell Systems 1(6):417-425.
 #' \doi{10.1016/j.cels.2015.12.004}
+#'
+#' Ashburner M, Ball CA, Blake JA, et al. (2000). Gene Ontology: tool for the
+#' unification of biology. Nature Genetics 25(1):25-29. \doi{10.1038/75556}
+#'
+#' Gene Ontology Consortium (2023). The Gene Ontology knowledgebase in 2023.
+#' Genetics 224(1):iyad031. \doi{10.1093/genetics/iyad031}
 #'
 #' @param databases Any of `"Hallmark"`, `"GO Slim"`, `"Reactome"`, `"KEGG"`,
 #'   `"GO:BP"`.

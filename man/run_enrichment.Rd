@@ -73,8 +73,12 @@ which can change results substantially and needs an unblocked design.
 }
 
 \references{
-Korotkevich G, Sukhov V, Budin N, et al. Fast gene set enrichment analysis.
-bioRxiv. \doi{10.1101/060012}
+Subramanian A, Tamayo P, Mootha VK, et al. (2005). Gene set enrichment
+analysis: a knowledge-based approach for interpreting genome-wide expression
+profiles. PNAS 102(43):15545-15550. \doi{10.1073/pnas.0506580102}
+
+Korotkevich G, Sukhov V, Sergushichev A (2019). Fast gene set enrichment
+analysis. bioRxiv. \doi{10.1101/060012}
 
 Wu D, Smyth GK (2012). Camera: a competitive gene set test accounting for
 inter-gene correlation. Nucleic Acids Research 40(17):e133.
@@ -83,6 +87,10 @@ inter-gene correlation. Nucleic Acids Research 40(17):e133.
 Wu D, Lim E, Vaillant F, et al. (2010). ROAST: rotation gene set tests for
 complex microarray experiments. Bioinformatics 26(17):2176-2182.
 \doi{10.1093/bioinformatics/btq401}
+
+Smyth GK, Michaud J, Scott HS (2005). Use of within-array replicate spots
+for assessing differential expression in microarray experiments.
+Bioinformatics 21(9):2067-2075. \doi{10.1093/bioinformatics/bti270}
 
 Ritchie ME, Phipson B, Wu D, et al. (2015). limma powers differential
 expression analyses for RNA-sequencing and microarray studies. Nucleic
