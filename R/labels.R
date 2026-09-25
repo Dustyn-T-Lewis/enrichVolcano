@@ -237,3 +237,21 @@ ev_clean_label_mitocarta <- function(name, width = 15) {
   leaf <- trimws(gsub("\\s+", " ", leaf))
   stringr::str_wrap(leaf, width = width)
 }
+
+# Display names for terms: the user's own where given, clean_label() otherwise.
+display_labels <- function(terms, labels, width) {
+  out <- clean_label(terms, width = width)
+  own <- unname(labels[terms])
+  hit <- !is.na(own)
+  out[hit] <- ifelse(grepl("\n", own[hit], fixed = TRUE), own[hit], stringr::str_wrap(own[hit], width))
+  out
+}
+
+check_labels <- function(labels) {
+  if (is.null(labels)) {
+    return(invisible(NULL))
+  }
+  if (!is.character(labels) || is.null(names(labels)) || any(!nzchar(names(labels)))) {
+    ev_abort("{.arg labels} must be a character vector named by term.", class = "enrichVolcano_param_error")
+  }
+}

@@ -402,6 +402,8 @@ The arguments you will reach for most:
 - `arc_order`: order arcs by `"padj"` or by absolute score within each half.
 - `x_scale`, `y_scale`: compress the volcano when points crowd the ring.
 - `label_mode`, `label_n`, `label_genes`: which proteins get text.
+- `labels`: your own names for chosen terms, such as
+  `c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")`.
 - `show_counts`, `disc_colour`: count badges and a tinted central disc.
 
 ## Write figures and tables

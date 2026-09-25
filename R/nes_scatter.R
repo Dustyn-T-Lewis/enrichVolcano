@@ -49,6 +49,7 @@
 #' @param shape_by Column mapped to point shape (up to five values), or `NULL`.
 #' @param label_min_size Smallest gene set that gets a label.
 #' @param label_n Most term labels drawn.
+#' @param labels Your own display names, as in [plot_volcano_ring()].
 #' @param theme Output of [plot_theme()]; supplies the base font.
 #'
 #' @return A ggplot.
@@ -68,8 +69,10 @@ plot_scatter <- function(enrichment, x, y,
                          shape_by = "database",
                          label_min_size = 15,
                          label_n = 20,
+                         labels = NULL,
                          theme = plot_theme()) {
   check_enrichment(enrichment)
+  check_labels(labels)
   comparison <- rlang::arg_match(comparison)
   res <- enrichment@results
   if (identical(x, y)) {
@@ -109,7 +112,7 @@ plot_scatter <- function(enrichment, x, y,
   )
   score_type <- enrichment@metadata$score_type
 
-  draw_scatter(wide, sig, counts, comparison, colour_by, shape_by, label_min_size, label_n, theme) +
+  draw_scatter(wide, sig, counts, comparison, colour_by, shape_by, label_min_size, label_n, labels, theme) +
     ggplot2::labs(
       x = sprintf("%s (%s)", score_type, x),
       y = sprintf("%s (%s)", score_type, y),
@@ -221,7 +224,7 @@ quadrant_names <- list(
 )
 
 draw_scatter <- function(wide, sig, counts, comparison, colour_by, shape_by,
-                         label_min_size, label_n, theme) {
+                         label_min_size, label_n, labels, theme) {
   lim <- max(abs(c(wide$score_x, wide$score_y)), 1, na.rm = TRUE) * 1.35
   quad <- data.frame(
     xmin = c(0, -lim, -lim, 0), xmax = c(lim, 0, 0, lim),
@@ -246,7 +249,7 @@ draw_scatter <- function(wide, sig, counts, comparison, colour_by, shape_by,
   labelled <- points[is.na(points$size) | points$size >= label_min_size, , drop = FALSE]
   labelled <- labelled[order(pmin(labelled$sig_x, labelled$sig_y, na.rm = TRUE)), , drop = FALSE]
   labelled <- utils::head(labelled, label_n)
-  labelled$label <- clean_label(labelled$term, width = 20)
+  labelled$label <- display_labels(labelled$term, labels, 20)
 
   p <- ggplot2::ggplot() +
     ggplot2::annotate("rect",

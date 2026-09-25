@@ -8,7 +8,18 @@
   slim terms, such as signalling and programmed cell death, that proteomics
   data measure well below 500 genes. GO slim results now test more terms.
 
+## New features
+
+* `plot_volcano_ring()` and `plot_scatter()` take `labels`, a character
+  vector named by term, to replace the automatic names of chosen terms.
+
 ## Bug fixes
+
+* A ring whose terms all go one way keeps them in its own half: down on the
+  left, up on the right.
+* The ring panel widens to fit labels at its sides, so they are no longer
+  clipped or drawn under the legend.
+* An empty size window in `run_enrichment()` fails before the tied-rank note.
 
 * A protein group such as `P31040;Q9UBK2` is mapped to its gene symbol
   through its first accession.

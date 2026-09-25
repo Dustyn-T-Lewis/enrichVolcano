@@ -172,3 +172,33 @@ test_that("width reaches vectorised and MitoCarta names", {
   expect_false(grepl("\n", clean_label(mito, width = 40)))
   expect_true(grepl("\n", clean_label(mito)))
 })
+
+test_that("labels replace the cleaned names of the terms they name", {
+  p <- suppressMessages(plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(),
+    databases = NULL, term_threshold = 1, n_terms = Inf,
+    labels = c(HALLMARK_TOY_A = "My own name for A", HALLMARK_TOY_C = "Line one\nline two")
+  ))
+  drawn <- unlist(lapply(ggplot2::ggplot_build(p)$data, function(d) if ("label" %in% names(d)) as.character(d$label)))
+  expect_true(stringr::str_wrap("My own name for A", 15) %in% drawn)
+  expect_true("Line one\nline two" %in% drawn)
+  expect_true(clean_label("HALLMARK_TOY_B") %in% drawn)
+})
+
+test_that("the scatter uses the same labels", {
+  p <- suppressMessages(plot_scatter(make_toy_scatter_enrichment(), "A", "B", labels = c(T01 = "First term")))
+  drawn <- unlist(lapply(ggplot2::ggplot_build(p)$data, function(d) if ("label" %in% names(d)) as.character(d$label)))
+  expect_true("First term" %in% drawn)
+})
+
+test_that("labels must be a named character vector", {
+  for (bad in list("no names", c(a = 1), stats::setNames("x", ""))) {
+    expect_error(
+      plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(), labels = bad),
+      class = "enrichVolcano_param_error"
+    )
+    expect_error(
+      plot_scatter(make_toy_scatter_enrichment(), "A", "B", labels = bad),
+      class = "enrichVolcano_param_error"
+    )
+  }
+})

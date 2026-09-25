@@ -11,7 +11,8 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
                              magnitude_col, genes_list, order_by = "padj",
                              gap_intra = 3, gap_split = 8,
                              arc_r0 = ev_ring_r_outer,
-                             min_height = 0.05, max_height = 1.6, proportional = FALSE) {
+                             min_height = 0.05, max_height = 1.6, proportional = FALSE,
+                             labels = NULL) {
   if (nrow(enrich_df) == 0) {
     return(enrich_df)
   }
@@ -23,7 +24,7 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   if (nrow(ring) == 0) {
     return(ring)
   }
-  ring$.ev_clean_label <- clean_label(ring[[term_col]])
+  ring$.ev_clean_label <- display_labels(ring[[term_col]], labels, 15)
   ring$.ev_genes <- genes_list
   ring$.ev_is_up <- ring[[nes_col]] > 0
   ring$.ev_magnitude <- magnitude_col
@@ -166,6 +167,10 @@ ev_tick_data <- function(ring_data, da, gene_col, logfc_col,
 #' @param term_threshold Terms need `padj` below this to be drawn.
 #' @param n_terms Most unique terms drawn, counted across both directions.
 #' @param terms Optional character vector of exact term names to draw instead.
+#' @param labels Your own display names, as a character vector named by term,
+#'   such as `c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "OXPHOS")`. Terms not
+#'   named keep [clean_label()]. A name without `\n` is wrapped like the
+#'   others.
 #' @param p_threshold Significance cutoff for volcano points.
 #' @param logfc_threshold Effect-size cutoff; a point is called up/down only
 #'   when `abs(logFC) >= logfc_threshold` as well as significant.
@@ -239,6 +244,7 @@ plot_volcano_ring <- function(da, enrichment,
                               term_threshold = 0.05,
                               n_terms = 12,
                               terms = NULL,
+                              labels = NULL,
                               p_threshold = 0.05,
                               logfc_threshold = 0,
                               title = NULL,
@@ -279,7 +285,7 @@ plot_volcano_ring <- function(da, enrichment,
 # The body of plot_volcano_ring(), shared with plot_bias_ring(). It takes every
 # plot_volcano_ring() argument; `normalise` scales fill and arc height to the
 # strongest drawn term.
-draw_ring <- function(da, enrichment, contrast, databases, collapse, term_threshold, n_terms, terms,
+draw_ring <- function(da, enrichment, contrast, databases, collapse, term_threshold, n_terms, terms, labels,
                       p_threshold, logfc_threshold, title, subtitle, tag, volcano_radius, x_scale,
                       y_scale, ring_radius, ring_thickness, tick_width, label_headroom, disc_colour,
                       score_limits, magnitude, arc_order, arc_height_range, show_counts, point_size,
@@ -299,6 +305,7 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
     )
   }
   check_enrichment(enrichment)
+  check_labels(labels)
   require_columns(da, c("gene", "logFC", "p", "padj"))
   validate_da(da)
   da <- contrast_rows(da, contrast)
@@ -377,7 +384,8 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
     term_col = "term", padj_col = "padj",
     nes_col = "score", magnitude_col = mag_vec,
     genes_list = enrich_df$leading_edge, order_by = arc_order, arc_r0 = ring_r1,
-    min_height = arc_height_range[1], max_height = arc_height_range[2], proportional = normalise
+    min_height = arc_height_range[1], max_height = arc_height_range[2], proportional = normalise,
+    labels = labels
   )
   ticks <- ev_tick_data(ring, v,
     gene_col = "gene", logfc_col = "logFC",
