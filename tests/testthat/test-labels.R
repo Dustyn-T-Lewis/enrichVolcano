@@ -88,6 +88,20 @@ test_that("clean_label routes MITOCARTA_ names through the leaf shortener", {
   expect_true(grepl("Complex I", out))
 })
 
+test_that("a MitoCarta name without a hierarchy keeps all its words", {
+  expect_identical(clean_label("MITOCARTA_Mitochondrial_central_dogma", width = 40), "Mito. Central Dogma")
+  expect_identical(clean_label("MITOCARTA_OXPHOS_SUBUNITS", width = 40), "OXPHOS Subunits")
+})
+
+test_that("a MitoCarta leaf keeps its complex numeral upper case", {
+  expect_identical(clean_label("MITOCARTA_OXPHOS>Complex_I", width = 40), "Complex I")
+  expect_identical(clean_label("MITOCARTA_OXPHOS__Complex_IV", width = 40), "Complex IV")
+})
+
+test_that("clean_label passes missing and empty names through", {
+  expect_identical(clean_label(c(NA, "", "HALLMARK_APOPTOSIS")), c(NA, "", "Apoptosis"))
+})
+
 # A ring arc has room for two lines. A third pushes the label box into its
 # neighbours, so verbose MSigDB names need a phrase entry, not a wider wrap.
 test_that("clean_label keeps verbose MSigDB names within two lines", {

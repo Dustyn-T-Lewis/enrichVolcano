@@ -219,7 +219,6 @@ ev_shorten_phrases <- function(x) {
 ev_clean_label_mitocarta <- function(name, width = 15) {
   n <- sub("^MITOCARTA_", "", name)
   parts <- strsplit(n, "__|>", perl = TRUE)[[1]]
-  if (length(parts) == 1) parts <- strsplit(n, "_")[[1]]
   leaf <- utils::tail(parts, 1)
   leaf <- gsub("_", " ", leaf)
   leaf <- tools::toTitleCase(tolower(leaf))
@@ -234,6 +233,7 @@ ev_clean_label_mitocarta <- function(name, width = 15) {
     "\\bFatty Acid\\b" = "FA"
   )
   for (pat in names(reps)) leaf <- gsub(pat, reps[[pat]], leaf, perl = TRUE)
+  leaf <- gsub("\\bComplex ((?i)[iv]+)\\b", "Complex \\U\\1", leaf, perl = TRUE)
   leaf <- trimws(gsub("\\s+", " ", leaf))
   stringr::str_wrap(leaf, width = width)
 }
