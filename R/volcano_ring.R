@@ -56,29 +56,26 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   if (n_up > 0) up$arc_r1_var <- scale_h(up)
   if (n_dn > 0) dn$arc_r1_var <- scale_h(dn)
 
-  # Up terms fill the right half from the top, down terms the left half from the top.
-  place <- function(df, centre, span, from_top) {
+  # Up terms sit in the right half and down terms in the left, both ordered from
+  # the top. Arcs share one width, capped at the width in a full ring of 12.
+  n_all <- n_up + n_dn
+  free <- if (n_up > 0 && n_dn > 0) 360 - 2 * gap_split else 180 - gap_split
+  arc_w <- min(
+    (free - (n_all - if (n_up > 0 && n_dn > 0) 2 else 1) * gap_intra) / n_all,
+    (360 - 2 * gap_split - 10 * gap_intra) / 12
+  )
+  place <- function(df, centre, from_top) {
     n <- nrow(df)
     if (n == 0) {
       return(df)
     }
-    arc_w <- (span - (n - 1) * gap_intra) / n
     slot <- if (from_top) seq_len(n) - 1 else n - seq_len(n)
-    df$start_deg <- centre - span / 2 + slot * (arc_w + gap_intra)
+    df$start_deg <- centre - (n * arc_w + (n - 1) * gap_intra) / 2 + slot * (arc_w + gap_intra)
     df$end_deg <- df$start_deg + arc_w
     df
   }
-  if (n_up > 0 && n_dn > 0) {
-    arc_w <- (360 - 2 * gap_split - (n_up - 1) * gap_intra - (n_dn - 1) * gap_intra) / (n_up + n_dn)
-    up_span <- n_up * arc_w + (n_up - 1) * gap_intra
-    dn_span <- n_dn * arc_w + (n_dn - 1) * gap_intra
-  } else {
-    half <- function(n) if (n == 1) 30 else 180 - gap_split
-    up_span <- half(n_up)
-    dn_span <- half(n_dn)
-  }
-  up <- place(up, 90, up_span, from_top = TRUE)
-  dn <- place(dn, 270, dn_span, from_top = FALSE)
+  up <- place(up, 90, from_top = TRUE)
+  dn <- place(dn, 270, from_top = FALSE)
 
   ring <- rbind(up, dn)
   ring$.ev_mid_deg <- (ring$start_deg + ring$end_deg) / 2
@@ -316,6 +313,7 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
   magnitude <- default_magnitude(magnitude, score_type, enrich_df$size)
   if (nrow(enrich_df) == 0) {
     ev_inform("No terms pass the selection, so the ring is empty.", class = "enrichVolcano_empty_ring")
+    subtitle <- subtitle %||% "No terms pass the selection"
   }
   has_padj <- !all(is.na(da$padj))
 
@@ -483,7 +481,7 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
       count_badge(-vr * count_x_mult, pal$down)
   }
 
-  max_r <- 5.6
+  max_r <- ring_r1 + arc_height_range[2] + label_headroom
   x_half <- NULL
   y_half <- NULL
   if (nrow(ring) > 0) {

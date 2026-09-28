@@ -74,12 +74,14 @@ test_that("default selection drops non-significant terms from the ring", {
   expect_false(any(grepl("Toy E", selected)))
 })
 
-test_that("a ring with no terms left still draws and says why", {
+test_that("a ring with no terms left keeps the volcano's scale and says why", {
   expect_message(
     p <- plot_volcano_ring(make_toy_da(), make_toy_ring_enrichment(), databases = NULL, term_threshold = 1e-9),
     class = "enrichVolcano_empty_ring"
   )
-  expect_s3_class(p, "ggplot")
+  expect_match(p$labels$subtitle, "No terms pass the selection")
+  half <- ggplot2::ggplot_build(p)$layout$panel_params[[1]]$x.range[2]
+  expect_gte(half, 4.8 + 0.55 + 1.6)
 })
 
 test_that("disc_colour draws a tinted central disc", {
@@ -195,6 +197,38 @@ test_that("a ring whose terms all go one way keeps them in that half", {
   up <- ev_ring_geometry(e, "term", "padj", "score", rep(1, 4), rep(list(character(0)), 4))
   expect_true(all(up$start_deg > 0 & up$end_deg < 180))
   expect_identical(up$term[order(up$start_deg)], paste0("T", 1:4))
+})
+
+test_that("each drawing argument changes the ring", {
+  build <- function(p) {
+    b <- ggplot2::ggplot_build(p)
+    list(b$data, b$layout$panel_params[[1]][c("x.range", "y.range")], b$plot$labels)
+  }
+  base <- build(ring())
+  changes <- list(
+    tag = "A", ring_thickness = 0.9, tick_width = 0.6, score_limits = c(-2, 2), point_alpha = 0.3,
+    point_size = 2, label_size = 4, label_gap = 1.2, label_headroom = 1, count_size = 4,
+    count_x_mult = 0.5, count_y_mult = 0.5, axis_size = 4, disc_colour = "grey90",
+    show_counts = FALSE, arc_height_range = c(0.2, 2), volcano_radius = 3, ring_radius = 5,
+    x_scale = 0.8, y_scale = 0.8, logfc_threshold = 2, p_threshold = 0.01, label_mode = "by_significance"
+  )
+  for (arg in names(changes)) {
+    expect_false(identical(build(do.call(ring, changes[arg])), base), info = arg)
+  }
+})
+
+test_that("no arc is wider than in a full ring of 12", {
+  width <- function(score) {
+    e <- data.frame(term = paste0("T", seq_along(score)), padj = 0.01, score = score)
+    g <- ev_ring_geometry(e, "term", "padj", "score", rep(1, nrow(e)), rep(list(character(0)), nrow(e)))
+    g$end_deg - g$start_deg
+  }
+  full <- width(rep(c(2, -2), 6))
+  expect_equal(max(full), min(full))
+  for (score in list(2, -2, c(2, -2), c(2, -1, -2), c(2, 1))) {
+    expect_lte(max(width(score)), full[1] + 1e-9)
+  }
+  expect_equal(width(c(2, -1, -2)), rep(full[1], 3))
 })
 
 test_that("the default ring takes the n_terms most significant unique terms, whatever their direction", {
