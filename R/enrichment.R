@@ -40,7 +40,9 @@ enrichment_problems <- function(results, metadata) {
     }, character(1), USE.NAMES = FALSE))
   }
 
+  blank <- Filter(function(col) anyNA(results[[col]]) || !all(nzchar(results[[col]])), c("contrast", "term"))
   problems <- c(
+    if (length(blank) > 0) sprintf("`%s` has missing or empty values.", blank),
     if (any(!in_unit_interval(results$padj))) "`padj` must lie in [0, 1].",
     if (any(!in_unit_interval(results$p))) "`p` must lie in [0, 1].",
     direction_problem(results$direction, results$score),

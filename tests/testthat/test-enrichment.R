@@ -28,6 +28,16 @@ test_that("leading_edge must be a list column", {
   expect_error(toy_enrichment(results = r), "leading_edge.*list")
 })
 
+test_that("a missing or empty term or contrast is rejected", {
+  for (col in c("term", "contrast")) {
+    for (bad in c(NA, "")) {
+      r <- make_toy_results()
+      r[[col]][2] <- bad
+      expect_error(toy_enrichment(results = r), sprintf("`%s`.*missing or empty", col))
+    }
+  }
+})
+
 test_that("padj and p outside [0, 1] are rejected, NA is allowed", {
   r <- make_toy_results()
   r$padj[1] <- 1.2

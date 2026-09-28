@@ -18,12 +18,8 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   }
 
   ring <- enrich_df
-  ring <- ring[!is.na(ring[[term_col]]), , drop = FALSE]
   ring[[padj_col]][is.na(ring[[padj_col]])] <- 1
   ring[[nes_col]][is.na(ring[[nes_col]])] <- 0
-  if (nrow(ring) == 0) {
-    return(ring)
-  }
   ring$.ev_clean_label <- display_labels(ring[[term_col]], labels, 15)
   ring$.ev_genes <- genes_list
   ring$.ev_is_up <- ring[[nes_col]] > 0
