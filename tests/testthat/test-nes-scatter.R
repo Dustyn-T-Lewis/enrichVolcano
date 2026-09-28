@@ -37,9 +37,9 @@ test_that("points on an axis belong to no quadrant", {
 test_that("with no significant terms the subtitle reports no share", {
   x <- make_toy_scatter_enrichment()
   x@results$padj <- 0.5
-  subtitle <- paste(deparse(scatter(x)$labels$subtitle), collapse = "")
-  expect_no_match(subtitle, "concordant", fixed = TRUE)
-  expect_match(subtitle, "0 significant", fixed = TRUE)
+  p <- scatter(x)
+  expect_no_match(paste(deparse(p$labels$subtitle), collapse = ""), "concordant", fixed = TRUE)
+  expect_identical(p$labels$caption, "12 terms, 0 significant")
 })
 
 test_that("the correlation carries a CI when the correlation package is there", {
@@ -65,16 +65,14 @@ test_that("without the correlation package it reports rho and p only", {
 
 test_that("fewer than three points give no correlation and a shorter subtitle", {
   expect_null(score_correlation(c(1, 2), c(2, 1)))
-  expect_identical(scatter_subtitle(NULL, NA, "concordant", n = 2, n_sig = 0), "2 terms, 0 significant")
+  expect_null(scatter_subtitle(NULL, NA, "concordant"))
 })
 
-test_that("the subtitle states rho, CI, p, concordance and counts", {
-  s <- scatter_subtitle(list(rho = 0.62, ci = c(0.41, 0.77), p = 2e-5), 6 / 9, "concordant", n = 12, n_sig = 9)
-  expect_match(s, "^rho = 0.62 \\[0.41, 0.77\\]")
-  expect_match(s, "p < 0.001")
-  expect_match(s, "67% concordant")
-  expect_match(s, "12 terms, 9 significant")
-  s <- scatter_subtitle(list(rho = 0.1, ci = NULL, p = 0.42), NA, "concordant", n = 5, n_sig = 0)
+test_that("the subtitle states rho, CI, p and concordance, the caption the counts", {
+  s <- scatter_subtitle(list(rho = 0.62, ci = c(0.41, 0.77), p = 2e-5), 6 / 9, "concordant")
+  expect_identical(s, "rho = 0.62 [0.41, 0.77], p < 0.001 | 67% concordant")
+  expect_identical(scatter()$labels$caption, "12 terms, 9 significant")
+  s <- scatter_subtitle(list(rho = 0.1, ci = NULL, p = 0.42), NA, "concordant")
   expect_match(s, "^rho = 0.10, p = 0.42")
   expect_false(grepl("concordant", s))
 })
@@ -276,6 +274,6 @@ test_that("the scatter defaults to every database", {
 })
 
 test_that("a correlation that rounds to zero prints without a minus sign", {
-  s <- scatter_subtitle(list(rho = -0.001, ci = c(-0.2204, 0.001), p = 0.97), NA, "concordant", n = 5, n_sig = 0)
+  s <- scatter_subtitle(list(rho = -0.001, ci = c(-0.2204, 0.001), p = 0.97), NA, "concordant")
   expect_match(s, "rho = 0.00 [-0.22, 0.00]", fixed = TRUE)
 })

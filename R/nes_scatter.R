@@ -28,9 +28,9 @@
 #'   The ten most significant are bold, and leader lines take the colour of
 #'   their point.
 #' * Subtitle: Spearman's \eqn{\rho} across all plotted terms, with a 95%
-#'   Fieller interval when the correlation package is installed, its p-value, the
-#'   share of significant terms that are concordant (or reversed), and the
-#'   term counts.
+#'   Fieller interval when the correlation package is installed, its p-value,
+#'   and the share of significant terms that are concordant (or reversed).
+#' * Caption: the number of plotted terms and how many are significant.
 #'
 #' A term is significant in a contrast when its `padj` is below `term_threshold`.
 #' If the object has no adjusted p-values at all, nominal p-values are used
@@ -120,8 +120,7 @@ plot_scatter <- function(enrichment, x, y,
   if (comparison == "reversal") share <- 1 - share
   subtitle <- scatter_subtitle(
     score_correlation(wide$score_x, wide$score_y),
-    share, c(concordance = "concordant", reversal = "reversed")[[comparison]],
-    nrow(wide), sum(sig)
+    share, c(concordance = "concordant", reversal = "reversed")[[comparison]]
   )
   score_type <- enrichment@metadata$score_type
 
@@ -129,7 +128,8 @@ plot_scatter <- function(enrichment, x, y,
     ggplot2::labs(
       x = sprintf("%s (%s)", score_type, x),
       y = sprintf("%s (%s)", score_type, y),
-      subtitle = if (startsWith(subtitle, "rho")) bquote(rho ~ .(trimws(substring(subtitle, 4)))) else subtitle
+      subtitle = if (startsWith(subtitle %||% "", "rho")) bquote(rho ~ .(trimws(substring(subtitle, 4)))) else subtitle,
+      caption = sprintf("%d terms, %d significant", nrow(wide), sum(sig))
     )
 }
 
@@ -200,7 +200,7 @@ score_correlation <- function(x, y, with_ci = requireNamespace("correlation", qu
   list(rho = unname(r$estimate), ci = NULL, p = r$p.value)
 }
 
-scatter_subtitle <- function(cor, share, share_label, n, n_sig) {
+scatter_subtitle <- function(cor, share, share_label) {
   rho <- NULL
   if (!is.null(cor)) {
     p_text <- if (cor$p < 0.001) "p < 0.001" else sprintf("p = %.2f", cor$p)
@@ -212,11 +212,8 @@ scatter_subtitle <- function(cor, share, share_label, n, n_sig) {
       sprintf("rho = %s [%s, %s], %s", two(cor$rho), two(cor$ci[1]), two(cor$ci[2]), p_text)
     }
   }
-  paste(c(
-    rho,
-    if (!is.na(share)) sprintf("%.0f%% %s", 100 * share, share_label),
-    sprintf("%d terms, %d significant", n, n_sig)
-  ), collapse = " | ")
+  parts <- c(rho, if (!is.na(share)) sprintf("%.0f%% %s", 100 * share, share_label))
+  if (length(parts) > 0) paste(parts, collapse = " | ")
 }
 
 quadrant_names <- list(

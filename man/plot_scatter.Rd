@@ -91,9 +91,9 @@ in the colour of its tint.
 The ten most significant are bold, and leader lines take the colour of
 their point.
 \item Subtitle: Spearman's \eqn{\rho} across all plotted terms, with a 95\%
-Fieller interval when the correlation package is installed, its p-value, the
-share of significant terms that are concordant (or reversed), and the
-term counts.
+Fieller interval when the correlation package is installed, its p-value,
+and the share of significant terms that are concordant (or reversed).
+\item Caption: the number of plotted terms and how many are significant.
 }
 
 A term is significant in a contrast when its \code{padj} is below \code{term_threshold}.
