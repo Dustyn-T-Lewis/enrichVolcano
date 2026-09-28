@@ -80,8 +80,16 @@ test_that("a ring with no terms left keeps the volcano's scale and says why", {
     class = "enrichVolcano_empty_ring"
   )
   expect_match(p$labels$subtitle, "No terms pass the selection")
-  half <- ggplot2::ggplot_build(p)$layout$panel_params[[1]]$x.range[2]
-  expect_gte(half, 4.8 + 0.55 + 1.6)
+  skip_if_not_installed("org.Hs.eg.db")
+  da <- suppressMessages(read_example("yvo"))$da
+  ex <- suppressMessages(as_enrichment(read.csv(
+    system.file("extdata", "examples", "yvo_fgsea.csv.gz", package = "enrichVolcano")
+  )))
+  half <- function(...) {
+    p <- suppressMessages(plot_volcano_ring(da, ex, contrast = "Training_Young", ...))
+    ggplot2::ggplot_build(p)$layout$panel_params[[1]]$x.range[2]
+  }
+  expect_equal(half(term_threshold = 0), half(), tolerance = 0.15)
 })
 
 test_that("disc_colour draws a tinted central disc", {
@@ -215,6 +223,24 @@ test_that("each drawing argument changes the ring", {
   for (arg in names(changes)) {
     expect_false(identical(build(do.call(ring, changes[arg])), base), info = arg)
   }
+})
+
+test_that("labels on a crowded one-sided ring do not overlap", {
+  words <- c(
+    "CHOLESTEROL_HOMEOSTASIS", "PEROXISOME", "LIPID_METABOLISM", "AMINO_ACID_METABOLISM",
+    "DETOXIFICATION", "MODIFIED_AMINO_ACID_METABOLISM", "FATTY_ACID_METABOLISM", "BILE_ACID_METABOLISM",
+    "ADIPOGENESIS", "PROTEIN_MATURATION", "SULFUR_COMPOUND_METABOLISM", "ESTROGEN_RESPONSE_LATE"
+  )
+  up <- data.frame(term = paste0("SET_", words), score = seq(3, 1.5, length.out = 12), padj = 0.001 * 1:12, size = 50)
+  x <- suppressMessages(as_enrichment(list(toy = up), enrichment_test = "custom", score_type = "NES"))
+  p <- suppressMessages(plot_volcano_ring(make_toy_da(), x))
+  arc_labels <- function(d) "label" %in% names(d) && any(grepl("Peroxisome", d$label))
+  d <- Filter(arc_labels, ggplot2::ggplot_build(p)$data)[[1]]
+  b <- label_boxes(d$x, d$y, d$hjust, d$vjust, d$label, d$size[1])
+  pairs <- utils::combn(nrow(b), 2)
+  clash <- b$x0[pairs[1, ]] < b$x1[pairs[2, ]] & b$x0[pairs[2, ]] < b$x1[pairs[1, ]] &
+    b$y0[pairs[1, ]] < b$y1[pairs[2, ]] & b$y0[pairs[2, ]] < b$y1[pairs[1, ]]
+  expect_false(any(clash))
 })
 
 test_that("no arc is wider than in a full ring of 12", {
