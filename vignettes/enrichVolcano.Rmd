@@ -360,7 +360,7 @@ below draw from the published fgsea results, `ex`; `res$fgsea` works the same
 way.
 
 The default, `comparison = "concordance"`, asks whether two conditions
-regulate the same pathways. Terms in the shaded top-right and bottom-left
+regulate the same pathways. Terms in the red top-right and bottom-left
 quadrants move the same way in both.
 
 ```{r concordance, fig.width = 6.5, fig.height = 7.5, fig.alt = "Scatter of NES in trained young against trained old, with most significant terms in the concordant quadrants"}
@@ -368,7 +368,7 @@ plot_scatter(ex, "Training_Young", "Training_Old", databases = c("Hallmark", "GO
 ```
 
 `comparison = "reversal"` asks whether one condition undoes another. The
-unshaded quadrants hold the answer: a pathway raised by aging and lowered by
+blue quadrants hold the answer: a pathway raised by aging and lowered by
 training, or the reverse. The reference line becomes \(y = -x\).
 
 ```{r reversal, fig.width = 6.5, fig.height = 7.5, fig.alt = "Scatter of NES in aging against trained old, with most significant terms in the reversed quadrants"}
@@ -379,7 +379,7 @@ plot_scatter(ex, "Aging", "Training_Old",
 
 A term counts as significant in a contrast when its padj is below
 `term_threshold` (0.05); the colour says whether that holds in one contrast or
-both. Pathways are judged on the false discovery rate alone. Scores that
+both, using the `up`, `down` and `both` colours of `plot_theme()`. Pathways are judged on the false discovery rate alone. Scores that
 combine effect size with p, such as the \(\pi\)-value (Xiao et al. 2014), are defined for single
 proteins, not gene sets. The corner counts and the headline share use
 significant terms only; Spearman's \(\rho\) uses every plotted term, with a 95%

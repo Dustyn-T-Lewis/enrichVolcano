@@ -88,13 +88,52 @@ test_that("plot_scatter returns a ggplot labelled with score type and contrasts"
 
 test_that("corner labels name each quadrant and carry its count", {
   labs <- layer_labels(scatter())
-  expect_true(all(c("Concordant up\nn = 4", "Discordant\nn = 1", "Concordant down\nn = 2") %in% labs))
+  expect_true(all(c("Concordant up  n = 4", "Discordant  n = 1", "Concordant down  n = 2") %in% labs))
+})
+
+layer_with <- function(p, col, pattern = NULL) {
+  match <- function(d) col %in% names(d) && (is.null(pattern) || any(grepl(pattern, d$label)))
+  Filter(match, ggplot2::ggplot_build(p)$data)[[1]]
+}
+
+test_that("significance fills come from the theme", {
+  for (th in list(plot_theme(), plot_theme(palette = "okabe"), plot_theme(up = "#B2182B", both = "#1B7837"))) {
+    fill <- ggplot2::ggplot_build(scatter(theme = th))$plot$scales$get_scales("fill")
+    expect_identical(fill$map(c("A only", "B only", "Both")), unname(unlist(th$palette[c("up", "down", "both")])))
+  }
+})
+
+test_that("same-direction quadrants and corners take the up colour, the others the down colour", {
+  th <- plot_theme()
+  for (comparison in c("concordance", "reversal")) {
+    p <- scatter(comparison = comparison)
+    corners <- layer_with(p, "label", "n = ")
+    expect_identical(corners$colour, rep(c(th$palette$up, th$palette$down), 2))
+    quads <- layer_with(p, "xmin")
+    expect_identical(quads$fill, rep(c(th$palette$up, th$palette$down), 2))
+  }
+})
+
+test_that("the ten most significant labels are bold, the rest plain", {
+  ex <- suppressMessages(as_enrichment(utils::read.csv(system.file("extdata", "examples", "yvo_fgsea.csv.gz",
+    package = "enrichVolcano"
+  ))))
+  p <- suppressMessages(plot_scatter(ex, "Training_Young", "Training_Old", databases = c("Hallmark", "GO Slim")))
+  text <- layer_with(p, "fontface")
+  text <- text[nzchar(text$label), ]
+  expect_gt(nrow(text), 10)
+  r <- ex@results[ex@results$database %in% c("Hallmark", "GO Slim"), ]
+  x <- r[r$contrast == "Training_Young", ]
+  y <- r[r$contrast == "Training_Old", ][match(x$term, r$term[r$contrast == "Training_Old"]), ]
+  best <- pmin(x$padj, y$padj)
+  top <- x$term[best < 0.05 & x$size >= 15][order(best[best < 0.05 & x$size >= 15])][1:10]
+  expect_setequal(text$label[text$fontface == "bold"], clean_label(top, 18))
 })
 
 test_that("reversal framing flips the reference line, names and headline share", {
   p <- scatter(comparison = "reversal")
   labs <- layer_labels(p)
-  expect_true(all(c("Exacerbated\nn = 4", "Reversed\nn = 1") %in% labs))
+  expect_true(all(c("Exacerbated  n = 4", "Reversed  n = 1") %in% labs))
   abline <- Filter(function(d) "slope" %in% names(d), ggplot2::ggplot_build(p)$data)[[1]]
   expect_identical(abline$slope, -1)
   expect_match(paste(deparse(p$labels$subtitle), collapse = ""), "33% reversed")
@@ -163,6 +202,8 @@ test_that("the toy scatter looks the same", {
   skip_if_not_installed("vdiffr")
   skip_if_not_installed("correlation")
   vdiffr::expect_doppelganger("toy-scatter", scatter())
+  vdiffr::expect_doppelganger("toy-scatter-reversal", scatter(comparison = "reversal"))
+  vdiffr::expect_doppelganger("toy-scatter-database", scatter(colour_by = "database"))
 })
 
 test_that("the subtitle draws rho as a plotmath symbol", {

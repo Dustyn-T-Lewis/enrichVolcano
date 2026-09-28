@@ -52,7 +52,7 @@ the \code{x} contrast.}
 \item{labels}{Term labels: a style, your own names or a function, as in
 \code{\link[=plot_volcano_ring]{plot_volcano_ring()}}.}
 
-\item{theme}{Output of \code{\link[=plot_theme]{plot_theme()}}; supplies the base font.}
+\item{theme}{Output of \code{\link[=plot_theme]{plot_theme()}}; supplies the font and colours.}
 }
 \value{
 A ggplot.
@@ -80,11 +80,16 @@ reports the share reversed.
 \itemize{
 \item Points: every term scored in both contrasts. Non-significant terms are
 small and grey; significant ones are sized by gene-set size and filled by
-\code{colour_by}.
-\item Shading: same-direction quadrants are tinted, the others left white.
-\item Corner labels: each quadrant's name and its count of significant terms.
+\code{colour_by}. By significance, the fill is the theme's \code{up} colour for
+terms significant in \code{x} only, \code{down} for \code{y} only and \code{both} for both.
+\item Shading: same-direction quadrants take a tint of the \code{up} colour and
+opposite-direction quadrants a tint of the \code{down} colour.
+\item Corner labels: each quadrant's name and its count of significant terms,
+in the colour of its tint.
 \item Dashed line: \eqn{y = x}, or \eqn{y = -x} for a reversal.
 \item Labels: the most significant terms with at least \code{label_min_size} genes.
+The ten most significant are bold, and leader lines take the colour of
+their point.
 \item Subtitle: Spearman's \eqn{\rho} across all plotted terms, with a 95\%
 Fieller interval when the correlation package is installed, its p-value, the
 share of significant terms that are concordant (or reversed), and the

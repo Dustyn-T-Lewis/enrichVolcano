@@ -1,6 +1,7 @@
 test_that("plot_theme overrides point colours without touching the rest", {
-  th <- plot_theme(up = "#B2182B", down = "#2166AC", ns = "grey80")
+  th <- plot_theme(up = "#B2182B", down = "#2166AC", ns = "grey80", both = "#1B7837")
   expect_equal(th$palette$up, "#B2182B")
+  expect_equal(th$palette$both, "#1B7837")
   expect_equal(th$palette$down, "#2166AC")
   expect_equal(th$palette$ns, "grey80")
   # untouched palette pieces fall back to the preset

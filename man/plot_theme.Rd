@@ -11,6 +11,7 @@ plot_theme(
   up = NULL,
   down = NULL,
   ns = NULL,
+  both = NULL,
   score_colours = NULL,
   score_limits = NULL,
   score_stops = NULL
@@ -22,11 +23,15 @@ plot_theme(
 \item{base_family}{Base font family. \code{""} uses the ggplot2 default.}
 
 \item{palette}{\code{"default"} (red and blue), \code{"viridis"} (magma) or
-\code{"okabe"} (Okabe-Ito, safe for colour-blind readers). \code{up}, \code{down}, \code{ns}
-and \code{score_colours} override single parts of it.}
+\code{"okabe"} (Okabe-Ito, safe for colour-blind readers). \code{up}, \code{down}, \code{ns},
+\code{both} and \code{score_colours} override single parts of it.}
 
 \item{up, down, ns}{Colours of up-regulated, down-regulated and
-non-significant points.}
+non-significant points. On the scatter, \code{up} and \code{down} also mark terms
+significant only in \code{x} or only in \code{y}, and tint the same-direction and
+opposite-direction quadrants.}
+
+\item{both}{Scatter colour of terms significant in both contrasts.}
 
 \item{score_colours}{Colours of the score ramp, low to high. Without
 \code{score_stops} they spread evenly across \code{score_limits}, or \code{c(-3, 3)}.}
@@ -43,8 +48,9 @@ A list with \code{base_size}, \code{base_family}, \code{palette} and
 }
 \description{
 Sets the font and the colours that \code{\link[=plot_volcano_ring]{plot_volcano_ring()}} and
-\code{\link[=plot_scatter]{plot_scatter()}} use: the up, down and non-significant point colours and
-the diverging ramp that fills arcs by score.
+\code{\link[=plot_scatter]{plot_scatter()}} use: the up, down and non-significant point colours, the
+colour of terms significant in both scatter contrasts, and the diverging
+ramp that fills arcs by score.
 }
 \examples{
 th <- plot_theme(base_size = 11)

@@ -1,3 +1,26 @@
+# enrichVolcano 2.3.0
+
+## New features
+
+* `plot_scatter()` follows Figure 4D of the young-versus-old study. Quadrants
+  are tinted red where both contrasts move the same way and blue where they
+  move apart, corner labels take the same colours, and term labels are plain
+  text on a white halo with the ten most significant in bold. Labels keep
+  clear of every significant point.
+* The scatter takes its colours from `plot_theme()`, which gains `both`, the
+  colour of terms significant in both contrasts.
+
+## Changes
+
+* No ring arc is wider than an arc in a full ring of 12, so a ring with one
+  or two terms per side no longer spreads each term over half the circle.
+* A ring with no terms keeps the volcano at its usual size and says so in the
+  subtitle.
+* `as_enrichment()` and the `enrichment` class refuse missing or empty terms
+  and contrasts. Such a row used to crash `plot_volcano_ring()`.
+* Numbers are unchanged: the correlation, the counts and the shares match
+  2.2.0.
+
 # enrichVolcano 2.2.0
 
 ## New features
