@@ -16,6 +16,13 @@
   or two terms per side no longer spreads each term over half the circle.
 * A ring with no terms keeps the volcano at its usual size and says so in the
   subtitle.
+* Ring labels that would overlap, as on a ring whose terms all go one way,
+  step outward until they clear. The room reserved for labels now matches
+  their drawn size, so side labels are no longer cut off in smaller panels.
+* On the scatter, the term counts move from the subtitle to the caption, so
+  the subtitle fits a panel in a composite.
+* The viridis palette marks up in teal instead of yellow, so white label text
+  stays readable. Its `both` colour is green.
 * `as_enrichment()` and the `enrichment` class refuse missing or empty terms
   and contrasts. Such a row used to crash `plot_volcano_ring()`.
 * Numbers are unchanged: the correlation, the counts and the shares match
