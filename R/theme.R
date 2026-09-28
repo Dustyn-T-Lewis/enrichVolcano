@@ -7,7 +7,7 @@
 #'
 #' @param base_size Base font size.
 #' @param base_family Base font family. `""` uses the ggplot2 default.
-#' @param palette `"default"` (red and blue), `"viridis"` (magma) or
+#' @param palette `"default"` (red and blue), `"viridis"` (purple, teal and yellow) or
 #'   `"okabe"` (Okabe-Ito, safe for colour-blind readers). `up`, `down`, `ns`,
 #'   `both` and `score_colours` override single parts of it.
 #' @param up,down,ns Colours of up-regulated, down-regulated and
@@ -48,7 +48,7 @@ plot_theme <- function(base_size = 11,
       nes_values = c(-3, -1.5, 0, 1.5, 3)
     ),
     viridis = list(
-      up = "#FDE725", down = "#440154", ns = "grey70", both = "#21908C",
+      up = "#21908C", down = "#440154", ns = "grey70", both = "#5DC863",
       nes_scale = c("#440154", "#3B528B", "#21908C", "#5DC863", "#FDE725"),
       nes_values = c(-3, -1.5, 0, 1.5, 3)
     ),

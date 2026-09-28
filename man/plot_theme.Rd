@@ -22,7 +22,7 @@ plot_theme(
 
 \item{base_family}{Base font family. \code{""} uses the ggplot2 default.}
 
-\item{palette}{\code{"default"} (red and blue), \code{"viridis"} (magma) or
+\item{palette}{\code{"default"} (red and blue), \code{"viridis"} (purple, teal and yellow) or
 \code{"okabe"} (Okabe-Ito, safe for colour-blind readers). \code{up}, \code{down}, \code{ns},
 \code{both} and \code{score_colours} override single parts of it.}
 
