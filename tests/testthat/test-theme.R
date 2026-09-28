@@ -1,6 +1,7 @@
 test_that("plot_theme overrides point colours without touching the rest", {
-  th <- plot_theme(up = "#B2182B", down = "#2166AC", ns = "grey80")
+  th <- plot_theme(up = "#B2182B", down = "#2166AC", ns = "grey80", both = "#1B7837")
   expect_equal(th$palette$up, "#B2182B")
+  expect_equal(th$palette$both, "#1B7837")
   expect_equal(th$palette$down, "#2166AC")
   expect_equal(th$palette$ns, "grey80")
   # untouched palette pieces fall back to the preset
@@ -36,4 +37,17 @@ test_that("an invalid colour override is caught at the boundary", {
     plot_theme(up = "not_a_real_colour"),
     class = "enrichVolcano_param_error"
   )
+})
+
+test_that("white label text stays readable on every preset's up and down colours", {
+  contrast <- function(col) {
+    v <- grDevices::col2rgb(col)[, 1] / 255
+    v <- ifelse(v <= 0.04045, v / 12.92, ((v + 0.055) / 1.055)^2.4)
+    1.05 / (sum(c(0.2126, 0.7152, 0.0722) * v) + 0.05)
+  }
+  for (palette in c("default", "viridis", "okabe")) {
+    pal <- plot_theme(palette = palette)$palette
+    expect_gte(contrast(pal$up), 3, label = paste(palette, "up"))
+    expect_gte(contrast(pal$down), 3, label = paste(palette, "down"))
+  }
 })

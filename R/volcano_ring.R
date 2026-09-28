@@ -18,12 +18,8 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   }
 
   ring <- enrich_df
-  ring <- ring[!is.na(ring[[term_col]]), , drop = FALSE]
   ring[[padj_col]][is.na(ring[[padj_col]])] <- 1
   ring[[nes_col]][is.na(ring[[nes_col]])] <- 0
-  if (nrow(ring) == 0) {
-    return(ring)
-  }
   ring$.ev_clean_label <- display_labels(ring[[term_col]], labels, 15)
   ring$.ev_genes <- genes_list
   ring$.ev_is_up <- ring[[nes_col]] > 0
@@ -60,29 +56,26 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   if (n_up > 0) up$arc_r1_var <- scale_h(up)
   if (n_dn > 0) dn$arc_r1_var <- scale_h(dn)
 
-  # Up terms fill the right half from the top, down terms the left half from the top.
-  place <- function(df, centre, span, from_top) {
+  # Up terms sit in the right half and down terms in the left, both ordered from
+  # the top. Arcs share one width, capped at the width in a full ring of 12.
+  n_all <- n_up + n_dn
+  free <- if (n_up > 0 && n_dn > 0) 360 - 2 * gap_split else 180 - gap_split
+  arc_w <- min(
+    (free - (n_all - if (n_up > 0 && n_dn > 0) 2 else 1) * gap_intra) / n_all,
+    (360 - 2 * gap_split - 10 * gap_intra) / 12
+  )
+  place <- function(df, centre, from_top) {
     n <- nrow(df)
     if (n == 0) {
       return(df)
     }
-    arc_w <- (span - (n - 1) * gap_intra) / n
     slot <- if (from_top) seq_len(n) - 1 else n - seq_len(n)
-    df$start_deg <- centre - span / 2 + slot * (arc_w + gap_intra)
+    df$start_deg <- centre - (n * arc_w + (n - 1) * gap_intra) / 2 + slot * (arc_w + gap_intra)
     df$end_deg <- df$start_deg + arc_w
     df
   }
-  if (n_up > 0 && n_dn > 0) {
-    arc_w <- (360 - 2 * gap_split - (n_up - 1) * gap_intra - (n_dn - 1) * gap_intra) / (n_up + n_dn)
-    up_span <- n_up * arc_w + (n_up - 1) * gap_intra
-    dn_span <- n_dn * arc_w + (n_dn - 1) * gap_intra
-  } else {
-    half <- function(n) if (n == 1) 30 else 180 - gap_split
-    up_span <- half(n_up)
-    dn_span <- half(n_dn)
-  }
-  up <- place(up, 90, up_span, from_top = TRUE)
-  dn <- place(dn, 270, dn_span, from_top = FALSE)
+  up <- place(up, 90, from_top = TRUE)
+  dn <- place(dn, 270, from_top = FALSE)
 
   ring <- rbind(up, dn)
   ring$.ev_mid_deg <- (ring$start_deg + ring$end_deg) / 2
@@ -91,6 +84,37 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   ring$.ev_mid_rad <- ring$.ev_mid_deg * pi / 180
   ring$.ev_term_idx <- seq_len(nrow(ring))
   ring
+}
+
+# Estimated extent of each ring label box in plot units. Label boxes grow
+# outward from their anchor. Per point of label_size, a bold character is about
+# 0.073 units wide and a line 0.112 units tall, plus 0.18 of padding, as
+# measured on the 7 in panel that write_plot() draws.
+label_boxes <- function(x, y, hjust, vjust, label, label_size) {
+  lines <- strsplit(label, "\n", fixed = TRUE)
+  w <- vapply(lines, function(l) max(nchar(l)), numeric(1)) * label_size * 0.073 + 0.18
+  h <- lengths(lines) * label_size * 0.112 + 0.18
+  data.frame(x0 = x - hjust * w, x1 = x + (1 - hjust) * w, y0 = y - vjust * h, y1 = y + (1 - vjust) * h)
+}
+
+# Walks the labels by angle and pushes each outward, one box height at a time
+# and at most four times, while it overlaps a label placed before it. Boxes are
+# sized 30% up, because a wide legend or a smaller page shrinks the panel by
+# about that much and labels grow in plot units as it does.
+stagger_labels <- function(angle, r, hjust, vjust, label, label_size) {
+  box <- function(i) {
+    label_boxes(r[i] * sin(angle[i]), r[i] * cos(angle[i]), hjust[i], vjust[i], label[i], 1.3 * label_size)
+  }
+  overlaps <- function(a, b) a$x0 < b$x1 & b$x0 < a$x1 & a$y0 < b$y1 & b$y0 < a$y1
+  placed <- integer(0)
+  for (i in order(angle)) {
+    for (step in 1:4) {
+      if (!any(overlaps(box(i), box(placed)))) break
+      r[i] <- r[i] + with(box(i), y1 - y0)
+    }
+    placed <- c(placed, i)
+  }
+  r
 }
 
 #' @keywords internal
@@ -320,6 +344,7 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
   magnitude <- default_magnitude(magnitude, score_type, enrich_df$size)
   if (nrow(enrich_df) == 0) {
     ev_inform("No terms pass the selection, so the ring is empty.", class = "enrichVolcano_empty_ring")
+    subtitle <- subtitle %||% "No terms pass the selection"
   }
   has_padj <- !all(is.na(da$padj))
 
@@ -487,7 +512,10 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
       count_badge(-vr * count_x_mult, pal$down)
   }
 
-  max_r <- 5.6
+  # An empty ring keeps the room its arcs and labels would take, so its volcano
+  # draws at the scale of the others; a label is wrapped at 15 characters.
+  max_r <- ring_r1 + arc_height_range[2] + label_headroom
+  if (term_labels) max_r <- max_r + label_gap + label_boxes(0, 0, 0, 0, strrep("x", 15), label_size)$x1
   x_half <- NULL
   y_half <- NULL
   if (nrow(ring) > 0) {
@@ -523,6 +551,9 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
     lbl$.ev_label_r <- lbl$arc_r1_var + label_gap
     lbl$.ev_hjust <- (1 - sin(lbl$.ev_mid_rad)) / 2
     lbl$.ev_vjust <- (1 - cos(lbl$.ev_mid_rad)) / 2
+    lbl$.ev_label_r <- stagger_labels(
+      lbl$.ev_mid_rad, lbl$.ev_label_r, lbl$.ev_hjust, lbl$.ev_vjust, lbl$.ev_clean_label, label_size
+    )
     lbl$.ev_lbl_x <- lbl$.ev_label_r * sin(lbl$.ev_mid_rad)
     lbl$.ev_lbl_y <- lbl$.ev_label_r * cos(lbl$.ev_mid_rad)
     lbl$.ev_lead_x <- (lbl$arc_r1_var + 0.1) * sin(lbl$.ev_mid_rad)
@@ -531,20 +562,9 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
     lbl$.ev_lead_ey <- (lbl$.ev_label_r - 0.05) * cos(lbl$.ev_mid_rad)
     lbl$.ev_lab_fill <- ifelse(lbl$.ev_is_up, pal$up, pal$down)
     max_r <- max(lbl$.ev_label_r) + label_headroom
-    # Label boxes grow outward from their anchor; estimate their size (about
-    # 0.05 units per character and 0.1 per line for each point of label_size)
-    # so side labels are not clipped.
-    lines <- strsplit(lbl$.ev_clean_label, "\n", fixed = TRUE)
-    box_w <- vapply(lines, function(l) max(nchar(l)), numeric(1)) * label_size * 0.05
-    box_h <- lengths(lines) * label_size * 0.1
-    x_half <- max(
-      max_r, abs(lbl$.ev_lbl_x - lbl$.ev_hjust * box_w) + label_headroom,
-      abs(lbl$.ev_lbl_x + (1 - lbl$.ev_hjust) * box_w) + label_headroom
-    )
-    y_half <- max(
-      max_r, abs(lbl$.ev_lbl_y - lbl$.ev_vjust * box_h) + label_headroom,
-      abs(lbl$.ev_lbl_y + (1 - lbl$.ev_vjust) * box_h) + label_headroom
-    )
+    box <- label_boxes(lbl$.ev_lbl_x, lbl$.ev_lbl_y, lbl$.ev_hjust, lbl$.ev_vjust, lbl$.ev_clean_label, label_size)
+    x_half <- max(max_r, abs(c(box$x0, box$x1)) + label_headroom)
+    y_half <- max(max_r, abs(c(box$y0, box$y1)) + label_headroom)
 
     p <- p +
       ggplot2::geom_segment(

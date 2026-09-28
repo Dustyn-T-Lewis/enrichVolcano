@@ -103,11 +103,38 @@ read_example()[c("name", "species")]
 `yvo`, `bfr_limpa` and `mouse_pas` include every sheet; the others ship DA
 results only.
 
+## Choose gene-set collections
+
+Hallmark and GO slim make a good default pair for figures. The 50 Hallmark
+sets each summarise one well-defined biological state (Liberzon et al. 2015),
+and the GO Consortium's generic slim keeps a small set of broad terms from the
+Gene Ontology (Ashburner et al. 2000; Gene Ontology Consortium 2023). Both are built
+to avoid overlapping terms, so every arc says something different. Larger
+collections such as GO:BP or Reactome find more specific terms but need
+`dedup_terms()`.
+
+`load_gene_sets()` fetches them for human, mouse or rat. Hallmark, Reactome,
+KEGG MEDICUS and GO:BP come from MSigDB (Liberzon et al. 2011) through
+msigdbr, mouse and rat through orthologs. The GO slim is the
+biological-process part of the GO Consortium's generic slim, pinned in the
+package, with genes taken from the species' annotation package (org.Hs.eg.db,
+org.Mm.eg.db or org.Rn.eg.db), counting genes annotated to each term or any of
+its descendants:
+
+```{r collections}
+lengths(sets)
+attr(sets, "versions")
+```
+
+Every set is kept here. `run_enrichment()` tests sets with 15 to 500 of their
+genes measured in the data (`min_size`, `max_size`). Each collection is
+tested as its own family, so padj is corrected within it.
+`attr(sets, "versions")` records what to cite in your methods.
+
 ## Run the enrichment
 
-`run_enrichment()` tests each contrast against gene-set collections from
-`load_gene_sets()`, which records the msigdbr version and GO slim release it
-used. The quick start ran all three tests on `yvo`:
+`run_enrichment()` tests each contrast against those collections. The quick
+start ran all three tests on `yvo`:
 
 ```{r run}
 names(res)
@@ -125,9 +152,8 @@ represents it.
 
 A `subject` column marks repeated measures. By default the samples of one
 subject are treated as correlated (`subject_effect = "block"`; Smyth et al.
-2005); fry handles
-that directly, and camera, which cannot, is replaced by `cameraPR()` on the
-blocked fit, which is why `res$camera` above reports `cameraPR`.
+2005). fry handles that directly. camera cannot, so `cameraPR()` on the
+blocked fit replaces it, which is why `res$camera` above reports `cameraPR`.
 `subject_effect = "fixed"` puts subject in the design instead. camera assumes
 a correlation between genes in a set; limma's default is 0.01, and
 `inter_gene_cor = NA` estimates it from the data (unblocked designs only),
@@ -138,46 +164,6 @@ Each result is an `enrichment` object, so every figure reads any of them:
 ```{r run-ring, fig.alt = "Volcano of the Aging contrast ringed by gene sets tested with fry"}
 plot_volcano_ring(yvo$da, res$fry, contrast = "Aging", title = "Aging, fry")
 ```
-
-## See the whole contrast
-
-The ring above draws the twelve most significant terms. `plot_bias_ring()`
-draws every significant term of a contrast, without names, to show whether
-the contrast leans up or down. Each arc gets the same angle, so the larger
-half holds more terms. Fill and height are each score over the strongest
-score in the contrast.
-
-```{r bias, fig.alt = "Volcano of the Aging contrast ringed by every significant term, more of them up than down, with no term names"}
-plot_bias_ring(yvo$da, res$fgsea, contrast = "Aging", title = "Aging")
-```
-
-## Choose gene-set collections
-
-Hallmark and GO slim make a good default pair for figures. The 50 Hallmark
-sets each summarise one well-defined biological state (Liberzon et al. 2015),
-and the GO Consortium's generic slim keeps a small set of broad terms from the
-Gene Ontology (Ashburner et al. 2000; Gene Ontology Consortium 2023). Both are built
-to avoid overlapping terms, so every arc says something different. Larger
-collections such as GO:BP or Reactome find more specific terms but need
-`dedup_terms()`.
-
-`load_gene_sets()` fetches them for human, mouse or rat. Hallmark, Reactome,
-KEGG MEDICUS and GO:BP come from MSigDB (Liberzon et al. 2011) through msigdbr,
-mouse and rat through orthologs. The
-GO slim is the biological-process part of the GO Consortium's generic slim,
-pinned in the package, with genes taken from the species' annotation package
-(org.Hs.eg.db, org.Mm.eg.db or org.Rn.eg.db), counting genes annotated to each
-term or any of its descendants:
-
-```{r collections}
-lengths(sets)
-attr(sets, "versions")
-```
-
-Every set is kept here. `run_enrichment()` tests sets with 15 to 500 of their
-genes measured in the data (`min_size`, `max_size`). Each collection is
-tested as its own family, so padj is corrected within it.
-`attr(sets, "versions")` records what to cite in your methods.
 
 ## Convert enrichment you already have
 
@@ -352,6 +338,18 @@ aging <- dedup_terms(aging, reactome$Reactome)
 plot_volcano_ring(yvo$da, aging, contrast = "Aging", title = "Aging, Reactome")
 ```
 
+## See the whole contrast
+
+The ring above draws the twelve most significant terms. `plot_bias_ring()`
+draws every significant term of a contrast, without names, to show whether
+the contrast leans up or down. Each arc gets the same angle, so the larger
+half holds more terms. Fill and height are each score over the strongest
+score in the contrast.
+
+```{r bias, fig.alt = "Volcano of the Aging contrast ringed by every significant term, more of them up than down, with no term names"}
+plot_bias_ring(yvo$da, res$fgsea, contrast = "Aging", title = "Aging")
+```
+
 ## Compare two contrasts
 
 `plot_scatter()` plots every term's score in one contrast against its score in
@@ -360,7 +358,7 @@ below draw from the published fgsea results, `ex`; `res$fgsea` works the same
 way.
 
 The default, `comparison = "concordance"`, asks whether two conditions
-regulate the same pathways. Terms in the shaded top-right and bottom-left
+regulate the same pathways. Terms in the red top-right and bottom-left
 quadrants move the same way in both.
 
 ```{r concordance, fig.width = 6.5, fig.height = 7.5, fig.alt = "Scatter of NES in trained young against trained old, with most significant terms in the concordant quadrants"}
@@ -368,7 +366,7 @@ plot_scatter(ex, "Training_Young", "Training_Old", databases = c("Hallmark", "GO
 ```
 
 `comparison = "reversal"` asks whether one condition undoes another. The
-unshaded quadrants hold the answer: a pathway raised by aging and lowered by
+blue quadrants hold the answer: a pathway raised by aging and lowered by
 training, or the reverse. The reference line becomes \(y = -x\).
 
 ```{r reversal, fig.width = 6.5, fig.height = 7.5, fig.alt = "Scatter of NES in aging against trained old, with most significant terms in the reversed quadrants"}
@@ -378,17 +376,20 @@ plot_scatter(ex, "Aging", "Training_Old",
 ```
 
 A term counts as significant in a contrast when its padj is below
-`term_threshold` (0.05); the colour says whether that holds in one contrast or
-both. Pathways are judged on the false discovery rate alone. Scores that
-combine effect size with p, such as the \(\pi\)-value (Xiao et al. 2014), are defined for single
-proteins, not gene sets. The corner counts and the headline share use
-significant terms only; Spearman's \(\rho\) uses every plotted term, with a 95%
-Fieller interval (Fieller et al. 1957) when the correlation package (Makowski et
-al. 2020) is installed.
+`term_threshold` (0.05). The colour says whether that holds in one contrast or
+both, using the `up`, `down` and `both` colours of `plot_theme()`. Pathways
+are judged on the false discovery rate alone: scores that combine effect size
+with p, such as the \(\pi\)-value (Xiao et al. 2014), are defined for single
+proteins, not gene sets.
+
+The corner counts and the share in the subtitle use significant terms only.
+Spearman's \(\rho\) uses every plotted term, with a 95% Fieller interval
+(Fieller et al. 1957) when the correlation package (Makowski et al. 2020) is
+installed. The caption gives the number of plotted and significant terms.
 
 `colour_by` and `shape_by` take any per-term column, for example
-`colour_by = "database"`, and `databases`, `collapse` and `label_min_size`
-work as they do for the ring.
+`colour_by = "database"`. `databases` and `collapse` work as they do for the
+ring, and `label_n` and `label_min_size` set which terms are named.
 
 ## Change the look
 
@@ -424,7 +425,7 @@ both styles:
 
 ```{r labels}
 lbl <- list_labels(res$fgsea)
-head(lbl[, c("term", "clean", "short")])
+knitr::kable(head(lbl[, c("term", "clean", "short")]))
 ```
 
 To rename terms, write the list to CSV, edit the `label` column and pass the
@@ -444,7 +445,10 @@ plot_volcano_ring(yvo$da, res$fgsea,
   contrast = "Aging",
   labels = c(HALLMARK_OXIDATIVE_PHOSPHORYLATION = "Mito respiration")
 )
-plot_volcano_ring(yvo$da, res$fgsea, contrast = "Aging", labels = function(term) sub("^[A-Z]+_", "", term))
+plot_volcano_ring(yvo$da, res$fgsea,
+  contrast = "Aging",
+  labels = function(term) gsub("_", " ", sub("^[A-Z]+_", "", term))
+)
 ```
 
 ## Write figures and tables
