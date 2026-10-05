@@ -207,6 +207,32 @@ test_that("a ring whose terms all go one way keeps them in that half", {
   expect_identical(up$term[order(up$start_deg)], paste0("T", 1:4))
 })
 
+test_that("arc_span = \"auto\" spreads a one-way ring over the whole circle", {
+  e <- data.frame(term = paste0("T", 1:12), padj = seq(0.01, 0.12, 0.01), score = -seq(2, 0.9, length.out = 12))
+  geometry <- function(span) {
+    ev_ring_geometry(e, "term", "padj", "score", rep(1, 12), rep(list(character(0)), 12), arc_span = span)
+  }
+  split <- geometry("split")
+  full <- geometry("auto")
+  expect_true(all(split$start_deg > 180 & split$end_deg < 360))
+  expect_gt(max(full$end_deg) - min(full$start_deg), 300)
+  expect_true(all(full$end_deg - full$start_deg > split$end_deg - split$start_deg))
+  expect_identical(full$term[order(full$start_deg)], paste0("T", 1:12))
+})
+
+test_that("arc_span = \"auto\" leaves a ring with both directions as it was", {
+  e <- data.frame(term = paste0("T", 1:4), padj = 1:4 / 100, score = c(2, -1.5, 1.2, -1))
+  geometry <- function(span) {
+    ev_ring_geometry(e, "term", "padj", "score", rep(1, 4), rep(list(character(0)), 4), arc_span = span)
+  }
+  expect_identical(geometry("auto"), geometry("split"))
+})
+
+test_that("plot_volcano_ring() checks arc_span", {
+  expect_s3_class(ring(arc_span = "auto"), "ggplot")
+  expect_error(ring(arc_span = "round"), "split.*auto")
+})
+
 test_that("each drawing argument changes the ring", {
   build <- function(p) {
     b <- ggplot2::ggplot_build(p)

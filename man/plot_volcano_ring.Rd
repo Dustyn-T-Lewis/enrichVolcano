@@ -30,6 +30,7 @@ plot_volcano_ring(
   score_limits = NULL,
   magnitude = NULL,
   arc_order = c("padj", "score"),
+  arc_span = c("split", "auto"),
   arc_height_range = c(0.4, 1.6),
   show_counts = TRUE,
   point_size = 1.1,
@@ -125,6 +126,11 @@ set sizes it falls back to \code{"neg_log_padj"}.}
 \item{arc_order}{Angular order of arcs within each up/down half:
 \code{"padj"} (default, lowest FDR first) or \code{"score"} (strongest absolute score
 first). The up/down split itself is always by direction.}
+
+\item{arc_span}{How a ring whose terms all go one way is laid out:
+\code{"split"} (default) keeps them in their half, up on the right and down on
+the left; \code{"auto"} spreads them over the whole circle, clockwise from the
+top. A ring with terms in both directions is split either way.}
 
 \item{arc_height_range}{Length-2 numeric \code{c(min, max)} for the shortest
 and tallest arc; widen it to exaggerate the magnitude encoding.}

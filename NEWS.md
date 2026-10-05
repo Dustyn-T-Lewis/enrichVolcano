@@ -12,6 +12,9 @@
 
 ## Changes
 
+* `plot_volcano_ring()` gains `arc_span`. With `"auto"`, a ring whose
+  terms all go one way spreads them over the whole circle rather than one
+  half; `"split"`, the default, keeps the halves as before.
 * No ring arc is wider than an arc in a full ring of 12, so a ring with one
   or two terms per side no longer spreads each term over half the circle.
 * A ring with no terms keeps the volcano at its usual size and says so in the

@@ -12,7 +12,7 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
                              gap_intra = 3, gap_split = 8,
                              arc_r0 = ev_ring_r_outer,
                              min_height = 0.05, max_height = 1.6, proportional = FALSE,
-                             labels = NULL) {
+                             labels = NULL, arc_span = "split") {
   if (nrow(enrich_df) == 0) {
     return(enrich_df)
   }
@@ -57,11 +57,15 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
   if (n_dn > 0) dn$arc_r1_var <- scale_h(dn)
 
   # Up terms sit in the right half and down terms in the left, both ordered from
-  # the top. Arcs share one width, capped at the width in a full ring of 12.
+  # the top. With arc_span = "auto", a ring whose terms all go one way uses the
+  # whole circle instead, clockwise from the top. Arcs share one width, capped
+  # at the width in a full ring of 12.
   n_all <- n_up + n_dn
-  free <- if (n_up > 0 && n_dn > 0) 360 - 2 * gap_split else 180 - gap_split
+  both <- n_up > 0 && n_dn > 0
+  whole <- !both && arc_span == "auto"
+  free <- if (both) 360 - 2 * gap_split else if (whole) 360 - gap_split else 180 - gap_split
   arc_w <- min(
-    (free - (n_all - if (n_up > 0 && n_dn > 0) 2 else 1) * gap_intra) / n_all,
+    (free - (n_all - if (both) 2 else 1) * gap_intra) / n_all,
     (360 - 2 * gap_split - 10 * gap_intra) / 12
   )
   place <- function(df, centre, from_top) {
@@ -74,8 +78,8 @@ ev_ring_geometry <- function(enrich_df, term_col, padj_col, nes_col,
     df$end_deg <- df$start_deg + arc_w
     df
   }
-  up <- place(up, 90, from_top = TRUE)
-  dn <- place(dn, 270, from_top = FALSE)
+  up <- place(up, if (whole) 180 else 90, from_top = TRUE)
+  dn <- place(dn, if (whole) 180 else 270, from_top = !both && whole)
 
   ring <- rbind(up, dn)
   ring$.ev_mid_deg <- (ring$start_deg + ring$end_deg) / 2
@@ -229,6 +233,10 @@ ev_tick_data <- function(ring_data, da, gene_col, logfc_col,
 #' @param arc_order Angular order of arcs within each up/down half:
 #'   `"padj"` (default, lowest FDR first) or `"score"` (strongest absolute score
 #'   first). The up/down split itself is always by direction.
+#' @param arc_span How a ring whose terms all go one way is laid out:
+#'   `"split"` (default) keeps them in their half, up on the right and down on
+#'   the left; `"auto"` spreads them over the whole circle, clockwise from the
+#'   top. A ring with terms in both directions is split either way.
 #' @param arc_height_range Length-2 numeric `c(min, max)` for the shortest
 #'   and tallest arc; widen it to exaggerate the magnitude encoding.
 #' @param show_counts Draw the up/down significant-point count badges.
@@ -285,6 +293,7 @@ plot_volcano_ring <- function(da, enrichment,
                               score_limits = NULL,
                               magnitude = NULL,
                               arc_order = c("padj", "score"),
+                              arc_span = c("split", "auto"),
                               arc_height_range = c(0.4, 1.6),
                               show_counts = TRUE,
                               point_size = 1.1,
@@ -312,11 +321,13 @@ plot_volcano_ring <- function(da, enrichment,
 draw_ring <- function(da, enrichment, contrast, databases, collapse, term_threshold, n_terms, terms, labels,
                       p_threshold, logfc_threshold, title, subtitle, tag, volcano_radius, x_scale,
                       y_scale, ring_radius, ring_thickness, tick_width, label_headroom, disc_colour,
-                      score_limits, magnitude, arc_order, arc_height_range, show_counts, point_size,
+                      score_limits, magnitude, arc_order, arc_span = "split", arc_height_range, show_counts,
+                      point_size,
                       point_alpha, label_size, label_gap, count_size, count_x_mult, count_y_mult,
                       axis_size, label_mode, label_n, label_rank_by, label_genes, theme,
                       term_labels = TRUE, normalise = FALSE) {
   arc_order <- match.arg(arc_order, c("padj", "score"))
+  arc_span <- match.arg(arc_span, c("split", "auto"))
   label_mode <- match.arg(label_mode, c("none", "top_per_direction", "by_significance", "by_genes"))
   label_rank_by <- match.arg(label_rank_by, c("significance", "logfc"))
   ev_assert_colour(disc_colour)
@@ -410,7 +421,7 @@ draw_ring <- function(da, enrichment, contrast, databases, collapse, term_thresh
     nes_col = "score", magnitude_col = mag_vec,
     genes_list = enrich_df$leading_edge, order_by = arc_order, arc_r0 = ring_r1,
     min_height = arc_height_range[1], max_height = arc_height_range[2], proportional = normalise,
-    labels = labels
+    labels = labels, arc_span = arc_span
   )
   ticks <- ev_tick_data(ring, v,
     gene_col = "gene", logfc_col = "logFC",
