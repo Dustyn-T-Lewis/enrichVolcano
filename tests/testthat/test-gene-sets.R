@@ -107,3 +107,39 @@ test_that("the symbol lookup prints no annotation startup message", {
   skip_if(isNamespaceLoaded("org.Rn.eg.db"), "org.Rn.eg.db is already loaded")
   expect_no_condition(map_symbols("P04797", "Rattus norvegicus"), class = "packageStartupMessage")
 })
+
+test_that("mouse collections match a clean msigdbr call whatever order they load in", {
+  skip_on_cran()
+  skip_if_offline()
+  skip_if_not_installed("msigdbr")
+  skip_if_not_installed("callr")
+  skip_if_not_installed("pkgload")
+  # Each load runs in a fresh R session, since msigdbr caches orthologs for the session.
+  root <- normalizePath(test_path("..", ".."))
+  fresh_load <- function(databases) {
+    callr::r(function(root, databases) {
+      if (file.exists(file.path(root, "DESCRIPTION"))) {
+        pkgload::load_all(root, quiet = TRUE)
+      } else {
+        library(enrichVolcano)
+      }
+      unclass(load_gene_sets(databases, species = "Mus musculus"))
+    }, list(root = root, databases = databases))
+  }
+  clean <- function(collection, subcollection) {
+    callr::r(function(collection, subcollection) {
+      tbl <- suppressMessages(msigdbr::msigdbr(
+        species = "Mus musculus", collection = collection, subcollection = subcollection
+      ))
+      lapply(split(tbl$gene_symbol, tbl$gs_name), unique)
+    }, list(collection = collection, subcollection = subcollection))
+  }
+  hallmark_first <- fresh_load(c("Hallmark", "Reactome"))
+  reactome_first <- fresh_load(c("Reactome", "Hallmark"))
+  alone <- list(Hallmark = clean("H", NULL), Reactome = clean("C2", "CP:REACTOME"))
+  for (name in names(alone)) {
+    expect_identical(hallmark_first[[name]], alone[[name]])
+    expect_identical(reactome_first[[name]], alone[[name]])
+  }
+  expect_gt(length(unique(unlist(alone$Reactome))), 2 * length(unique(unlist(alone$Hallmark))))
+})

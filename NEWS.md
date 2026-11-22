@@ -1,3 +1,13 @@
+# enrichVolcano 2.3.1
+
+## Bug fixes
+
+* `load_gene_sets()` needs msigdbr 26.1.1 or later. Earlier msigdbr kept the
+  mouse or rat orthologs of the first collection loaded in a session and
+  reused them for every later one, so `load_gene_sets(c("Hallmark",
+  "Reactome"), species = "Mus musculus")` returned Reactome sets cut down to
+  Hallmark genes (msigdbr issue #62).
+
 # enrichVolcano 2.3.0
 
 ## New features

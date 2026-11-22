@@ -95,7 +95,8 @@ load_gene_sets <- function(databases = c("Hallmark", "GO Slim"), species = "Homo
       versions$go_slim <<- attr(slim, "data_version")
       return(slim)
     }
-    rlang::check_installed("msigdbr", reason = "to load MSigDB collections.")
+    # msigdbr before 26.1.1 kept one session's mouse and rat orthologs for every later collection.
+    rlang::check_installed("msigdbr", version = "26.1.1", reason = "to load MSigDB collections.")
     versions$msigdbr <<- as.character(utils::packageVersion("msigdbr"))
     def <- msigdb_collections[[name]]
     tbl <- suppressMessages(msigdbr::msigdbr(

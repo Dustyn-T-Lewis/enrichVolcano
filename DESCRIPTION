@@ -1,6 +1,6 @@
 Package: enrichVolcano
 Title: Volcano-in-Ring and Concordance Plots from Enrichment Results
-Version: 2.3.0
+Version: 2.3.1
 Date: 2026-09-27
 Authors@R:
     person("Dustyn", "Lewis", , "dtlts14@gmail.com", role = c("aut", "cre"))
@@ -34,18 +34,20 @@ Imports:
     stringr
 Suggests:
     AnnotationDbi,
+    callr,
     correlation,
     covr,
     data.table,
     fgsea,
     knitr,
     limma,
-    msigdbr (>= 10.0.0),
+    msigdbr (>= 26.1.1),
     org.Hs.eg.db,
     org.Mm.eg.db,
     org.Rn.eg.db,
     pdftools,
     pkgdown,
+    pkgload,
     readxl,
     rmarkdown,
     testthat (>= 3.0.0),
